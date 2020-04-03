@@ -1,0 +1,38 @@
+```
+()
+```
+
+ParseResult {
+    node: Node {
+        span: 0..2,
+        names: {
+            SExp,
+            Virtual,
+        },
+        children: [
+            Node {
+                span: 0..2,
+                names: {
+                    Nil,
+                },
+                children: [
+                    Node {
+                        span: 0..1,
+                        names: {
+                            Token,
+                        },
+                        children: [],
+                    },
+                    Node {
+                        span: 1..2,
+                        names: {
+                            Token,
+                        },
+                        children: [],
+                    },
+                ],
+            },
+        ],
+    },
+    errors: [],
+}

@@ -1,8 +1,8 @@
-use std::fmt::Display;
-use std::io::Write;
-use std::path::{PathBuf, Path};
-use std::fs::{File, read_to_string, create_dir_all, remove_file};
 use std::env::{current_dir, set_current_dir};
+use std::fmt::Display;
+use std::fs::{create_dir_all, read_to_string, remove_file, File};
+use std::io::Write;
+use std::path::{Path, PathBuf};
 
 pub fn snap(actual_result: impl Display, file: &str, test_case_name: &str) {
     let actual_result = format!("{}", actual_result);
@@ -59,4 +59,3 @@ fn save_new_snap(snap_dir_path: &Path, new_snap_path: &Path, result: &str) {
         .and_then(|mut file| file.write_all(result.as_bytes()))
         .expect("Couldn't save snap");
 }
-

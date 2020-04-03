@@ -1,0 +1,135 @@
+```
+(add 2 (+++ 4 5))
+```
+
+ParseResult {
+    node: Node {
+        span: 0..17,
+        names: {
+            SExp,
+            Virtual,
+        },
+        children: [
+            Node {
+                span: 0..17,
+                names: {
+                    List,
+                },
+                children: [
+                    Node {
+                        span: 0..1,
+                        names: {
+                            Token,
+                        },
+                        children: [],
+                    },
+                    Node {
+                        span: 1..4,
+                        names: {
+                            Atom,
+                            SExp,
+                            Token,
+                        },
+                        children: [],
+                    },
+                    Node {
+                        span: 4..5,
+                        names: {
+                            Trivia,
+                        },
+                        children: [],
+                    },
+                    Node {
+                        span: 5..6,
+                        names: {
+                            Atom,
+                            SExp,
+                            Token,
+                        },
+                        children: [],
+                    },
+                    Node {
+                        span: 6..7,
+                        names: {
+                            Trivia,
+                        },
+                        children: [],
+                    },
+                    Node {
+                        span: 7..16,
+                        names: {
+                            List,
+                            SExp,
+                        },
+                        children: [
+                            Node {
+                                span: 7..8,
+                                names: {
+                                    Token,
+                                },
+                                children: [],
+                            },
+                            Node {
+                                span: 8..11,
+                                names: {
+                                    Error,
+                                    SExp,
+                                },
+                                children: [],
+                            },
+                            Node {
+                                span: 11..12,
+                                names: {
+                                    Trivia,
+                                },
+                                children: [],
+                            },
+                            Node {
+                                span: 12..13,
+                                names: {
+                                    Atom,
+                                    SExp,
+                                    Token,
+                                },
+                                children: [],
+                            },
+                            Node {
+                                span: 13..14,
+                                names: {
+                                    Trivia,
+                                },
+                                children: [],
+                            },
+                            Node {
+                                span: 14..15,
+                                names: {
+                                    Atom,
+                                    SExp,
+                                    Token,
+                                },
+                                children: [],
+                            },
+                            Node {
+                                span: 15..16,
+                                names: {
+                                    Token,
+                                },
+                                children: [],
+                            },
+                        ],
+                    },
+                    Node {
+                        span: 16..17,
+                        names: {
+                            Token,
+                        },
+                        children: [],
+                    },
+                ],
+            },
+        ],
+    },
+    errors: [
+        "Expected SExp found Error",
+    ],
+}

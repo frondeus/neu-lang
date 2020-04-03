@@ -1,0 +1,24 @@
+```
+京
+```
+
+ParseResult {
+    node: Node {
+        span: 0..3,
+        names: {
+            SExp,
+            Virtual,
+        },
+        children: [
+            Node {
+                span: 0..3,
+                names: {
+                    Atom,
+                    Token,
+                },
+                children: [],
+            },
+        ],
+    },
+    errors: [],
+}

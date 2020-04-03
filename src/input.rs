@@ -1,21 +1,24 @@
-use text_size::{TextRange, TextSize, TextSized};
 use std::convert::TryFrom;
+use text_size::{TextRange, TextSize, TextSized};
 
 #[derive(Debug, Clone)]
 pub struct Input {
     pub(crate) str: Box<str>,
-    pub(crate) cursor: TextSize
+    pub(crate) cursor: TextSize,
 }
 
 impl Input {
     pub fn chomp(&mut self, len: usize) -> TextRange {
         let end = TextSize::of(&*self.str);
 
-        let range = match self.as_ref().char_indices().nth(len - 1)
+        let range = match self
+            .as_ref()
+            .char_indices()
+            .nth(len - 1)
             .and_then(|(last, c)| TextSize::try_from(last + c.len_utf8()).ok())
         {
             Some(last) => TextRange(self.cursor, self.cursor + last),
-            None => TextRange(end, end)
+            None => TextRange(end, end),
         };
         self.cursor = range.end();
 
@@ -26,7 +29,10 @@ impl Input {
 impl From<&'_ str> for Input {
     fn from(input: &str) -> Self {
         let str: Box<str> = Box::from(input);
-        Self { str, cursor: TextSize::zero() }
+        Self {
+            str,
+            cursor: TextSize::zero(),
+        }
     }
 }
 

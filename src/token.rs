@@ -20,13 +20,17 @@ where
     }
 
     pub fn display<'k, 's>(&'k self, str: &'s str) -> DisplayToken<'k, 's, K> {
-        DisplayToken {  str, kind: &self.kind, span: self.span }
+        DisplayToken {
+            str,
+            kind: &self.kind,
+            span: self.span,
+        }
     }
 }
 
 impl<K> Debug for Token<K>
-    where
-        K: TokenKind,
+where
+    K: TokenKind,
 {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
         write!(f, "{:?}@{:?}", self.kind, self.span)
@@ -36,7 +40,7 @@ impl<K> Debug for Token<K>
 pub struct DisplayToken<'k, 's, K: TokenKind> {
     str: &'s str,
     kind: &'k K,
-    span: TextRange
+    span: TextRange,
 }
 
 impl<'k, 's, K> Display for DisplayToken<'k, 's, K>

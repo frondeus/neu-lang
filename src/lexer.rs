@@ -1,6 +1,6 @@
+use crate::input::Input;
 use crate::peekable::PeekableIterator;
 use crate::token::{Token, TokenKind};
-use crate::input::Input;
 use crate::TextRange;
 
 pub trait Lexer<K>
@@ -105,5 +105,30 @@ where
 
     fn set_input(&mut self, input: Input) {
         self.input = input;
+    }
+}
+
+pub trait OptionExt<K>
+where
+    K: TokenKind,
+{
+    fn as_kind(&self) -> Option<&K>;
+}
+
+impl<K> OptionExt<K> for Option<Token<K>>
+where
+    K: TokenKind,
+{
+    fn as_kind(&self) -> Option<&K> {
+        self.as_ref().map(|t| &t.kind)
+    }
+}
+
+impl<K> OptionExt<K> for Option<&Token<K>>
+where
+    K: TokenKind,
+{
+    fn as_kind(&self) -> Option<&K> {
+        self.as_ref().map(|t| &t.kind)
     }
 }
