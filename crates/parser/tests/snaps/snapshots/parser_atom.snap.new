@@ -1,0 +1,11 @@
+```
+a
+```
+
+ROOT @ 0..1 = `a`
+    ATOM, SEXP, TOKEN @ 0..1 = `a`
+    TOKEN @ 1..1 = ``
+
+
+### Errors ###
+[]
