@@ -26,7 +26,8 @@ impl NodeBuilder {
     }
 
     pub fn error(&mut self, error: Error) -> &mut Self {
-        self
+        self.error = Some(error);
+        self.name(Nodes::Error)
     }
 
     pub fn parse(&mut self, state: &mut State, ctx: &Context, parser: impl Parser) {
@@ -60,11 +61,13 @@ impl NodeBuilder {
             self.children.extend(children);
         } else {
             let id = state.nodes().add(node);
+            state.commit_errors(id);
             self.children.push(id);
         }
     }
 
-    pub fn build(self, lexer: &Lexer) -> Node {
+    pub fn build(self, state: &mut State) -> Node {
+        let lexer = state.lexer();
         let NodeBuilder {
             from,
             names,
@@ -73,6 +76,9 @@ impl NodeBuilder {
         } = self;
         let to = lexer.input().cursor;
         let span = TextRange(from, to);
+        if let Some(error) = error {
+            state.error(error);
+        }
         Node {
             span,
             names,

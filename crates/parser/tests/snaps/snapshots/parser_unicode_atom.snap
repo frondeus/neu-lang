@@ -4,7 +4,7 @@
 
 ROOT @ 0..3 = `京`
     ATOM, SEXP, TOKEN @ 0..3 = `京`
+    TOKEN @ 3..3 = ``
 
 
-### Errors ###
-[]
+### No Errors ###

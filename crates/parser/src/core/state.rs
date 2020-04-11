@@ -3,7 +3,7 @@ use crate::core::{Context, Error, Lexer, Node, Parser};
 use std::borrow::Borrow;
 
 #[derive(Clone, Copy)]
-pub struct NodeId(usize);
+pub struct NodeId(pub(crate) usize);
 
 impl fmt::Debug for NodeId {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -51,6 +51,7 @@ impl Arena {
 pub struct State {
     lexer: Lexer,
     errors: Vec<(NodeId, Error)>,
+    new_errors: Vec<Error>,
     nodes: Arena
 }
 
@@ -59,6 +60,7 @@ impl State {
         Self {
             lexer,
             errors: Default::default(),
+            new_errors: Default::default(),
             nodes: Default::default(),
         }
     }
@@ -75,8 +77,12 @@ impl State {
         &mut self.lexer
     }
 
-    pub fn error(&mut self, node_id: NodeId, e: Error) {
-        self.errors.push((node_id, e));
+    pub fn error(&mut self, e: Error) {
+        self.new_errors.push(e);
+    }
+
+    pub fn commit_errors(&mut self, id: NodeId) {
+        self.errors.extend(self.new_errors.drain(..).map(|e| (id, e)));
     }
 
     pub fn parse(lexer: Lexer, parser: impl Parser) -> ParseResult {
@@ -118,8 +124,15 @@ impl <'s, 'n> fmt::Display for DisplayParseResult<'s, 'n> {
         let arena = &self.result.nodes;
         let node = arena.get(self.result.root).display(self.str, arena);
         node.fmt(f)?;
-        writeln!(f, "\n\n### Errors ###")?;
-        write!(f, "{:#?}", self.result.errors)
-        //write!(f, "{:#?}", self.result)
+        if self.result.errors.is_empty() {
+            writeln!(f, "\n\n### No Errors ###")?;
+        } else {
+            writeln!(f, "\n\n### Errors ###")?;
+        }
+
+        for (node_id, error) in self.result.errors.iter() {
+            writeln!(f, "{} @ {:?}", error.display(self.str), node_id)?;
+        }
+        Ok(())
     }
 }

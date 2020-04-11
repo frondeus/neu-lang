@@ -11,7 +11,7 @@ ROOT @ 0..9 = `(add 2 3)`
         TRIVIA @ 6..7 = ` `
         ATOM, SEXP, TOKEN @ 7..8 = `3`
         TOKEN @ 8..9 = `)`
+    TOKEN @ 9..9 = ``
 
 
-### Errors ###
-[]
+### No Errors ###

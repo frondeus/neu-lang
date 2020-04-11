@@ -2,7 +2,7 @@ use crate::Token;
 use std::fmt::{Debug, Display, Formatter, Result};
 use text_size::TextRange;
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Clone)]
 pub struct Spanned<K> {
     pub kind: K,
     pub span: TextRange,
@@ -13,11 +13,12 @@ impl Spanned<Token> {
         Self { kind, span }
     }
 
-    pub fn display<'k, 's>(&'k self, str: &'s str) -> DisplaySpanned<'k, 's, Token> {
+    pub fn display<'k, 's>(&'k self, str: &'s str, display_kind: bool) -> DisplaySpanned<'k, 's, Token> {
         DisplaySpanned {
             str,
             kind: &self.kind,
             span: self.span,
+            display_kind
         }
     }
 }
@@ -35,13 +36,17 @@ pub struct DisplaySpanned<'k, 's, K> {
     str: &'s str,
     kind: &'k K,
     span: TextRange,
+    display_kind: bool
 }
 
 impl<'k, 's, K> Display for DisplaySpanned<'k, 's, K>
 where
-    K: Debug,
+    K: Debug + Display,
 {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-        write!(f, "{:?} `{}`", self.kind, &self.str[self.span])
+        if self.display_kind {
+            write!(f, "{:?} ", self.kind)?
+        }
+        write!(f, "`{}`", &self.str[self.span])
     }
 }

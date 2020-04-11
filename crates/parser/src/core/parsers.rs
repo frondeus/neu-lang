@@ -5,15 +5,15 @@ pub fn node(f: impl Fn(&mut NodeBuilder, &mut State, &Context)) -> impl Parser {
     move |state: &mut State, ctx: &Context| {
         let mut builder = Node::builder(state.lexer());
         f(&mut builder, state, ctx);
-        builder.build(state.lexer())
+        builder.build(state)
     }
 }
 
 pub fn error(error: Error) -> impl Parser {
-    move |state: &mut State, ctx: &Context| {
+    move |state: &mut State, _ctx: &Context| {
         let mut builder = Node::builder(state.lexer());
         builder.error(error.clone());
-        builder.build(state.lexer())
+        builder.build(state)
     }
 }
 
@@ -29,12 +29,12 @@ pub fn token(expected: impl Into<Option<Token>>) -> impl Parser {
                     expected: expected.clone(),
                 });
             }
-            (Some(found), true) => {
-                builder.error(Error::ExpectedEOF { found });
+            (Some(_), true) => {
+                builder.error(Error::ExpectedEOF { found: token.unwrap() });
             }
             (Some(found), false) if !expected.contains(&found) => {
                 builder.error(Error::UnexpectedToken {
-                    found,
+                    found: token.unwrap(),
                     expected: expected.clone(),
                 });
             }

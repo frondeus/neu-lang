@@ -18,9 +18,8 @@ ROOT @ 0..17 = `(add 2 (+++ 4 5))`
             ATOM, SEXP, TOKEN @ 14..15 = `5`
             TOKEN @ 15..16 = `)`
         TOKEN @ 16..17 = `)`
+    TOKEN @ 17..17 = ``
 
 
 ### Errors ###
-[
-    Expected one of Atom, Open but found Error,
-]
+Expected one of atom, `(` but found `+++` @ N6

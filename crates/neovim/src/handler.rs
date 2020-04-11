@@ -10,6 +10,8 @@ use crate::highlight::NodeHighlight;
 use anyhow::{Result, bail};
 use std::future::Future;
 use crate::Neovim;
+use crate::diagnostic::{Diagnostic, DiagnosticType};
+use nvim_rs::rpc::IntoVal;
 
 #[derive(Clone, Default)]
 pub struct NeovimHandler {
@@ -45,6 +47,7 @@ impl NeovimHandler {
             *self.state.write().await = Some(State::new(debug_bf, highlight_ns));
 
             api.command("wincmd h").await?;
+            //api.command("cope").await?;
             api.command(r#"echo "NeuLang Loaded""#).await?;
         }
 
@@ -56,6 +59,9 @@ impl NeovimHandler {
     async fn on_nvim_buf_lines_event(&self, args: Vec<Value>, api: &Neovim) -> Result<()> {
         match &args[..] {
             [_cbf, _tick, _first_line, _last_line, Value::Array(_changed), Value::Boolean(_more)] => {
+                use std::fmt::Write;
+                let mut dbg_buffer = String::new();
+
                 let State {
                     debug_bf,
                     highlight_ns
@@ -72,11 +78,6 @@ impl NeovimHandler {
                     State::parse(Lexer::new(&buf), parser())
                 };
 
-                // Debug window
-                let debug_lines = format!("{}\n\n{:#?}\n\n{:#?}", parse_result.display(&buf), parse_result.nodes, &args)
-                    .lines().map(|l| l.to_string()).collect_vec();
-                debug_bf.set_lines(0, -1, false, debug_lines).await?;
-
                 // Highlighting
                 current_bf.clear_namespace(highlight_ns, 0, -1).await?;
 
@@ -88,6 +89,42 @@ impl NeovimHandler {
                         current_bf.add_highlight(highlight_ns, hl_group, line, col_start as i64, col_end as i64).await?;
                     }
                 }
+
+                // Errors
+                let current_w = api.get_current_win().await?;
+
+                let diagnostics = parse_result.errors.iter().map(|(id, error)| {
+                    let node = parse_result.nodes.get(id);
+                    let line = 1; //TODO, fix me
+                    let col_start: usize = node.span.start().into();
+                    Diagnostic::new(&current_bf, error.display(&buf).to_string(), line, col_start as i64, DiagnosticType::Error)
+                }).collect::<Vec<Diagnostic>>();
+
+                let list = "setloclist";
+
+                api.call_function(list, vec![
+                    current_w.into_val(),
+                    Value::Array(diagnostics.into_iter().map(|d| d.into_val()).collect()),
+                    "r".into_val()
+                ]).await?;
+                api.call_function(list, vec![
+                    current_w.into_val(),
+                    Value::Array(vec![]),
+                    "a".into_val(),
+                    Value::Map(vec![
+                        ("title".into_val(), "NeuLang Diagnostics".into_val())
+                    ])
+                ]).await?;
+
+                api.command("lwindow").await?;
+
+                // Debug window
+                writeln!(&mut dbg_buffer, "{}", parse_result.display(&buf))?;
+                writeln!(&mut dbg_buffer, "\n{:#?}", parse_result.nodes)?;
+
+                let debug_lines = dbg_buffer.lines().map(|l| l.to_string()).collect_vec();
+                debug_bf.set_lines(0, -1, false, debug_lines).await?;
+
 
                 Ok(())
             },

@@ -9,6 +9,7 @@ edition = "2018"
 [dependencies]
 text-size = { version = "0.99.0-dev.2", git = "https://github.com/rust-analyzer/text_unit.git", branch = "master"}
 itertools = "0.9.0"
+derive_more = "0.99.5"
 
 [dev-dependencies]
 test-case = "1.0.0"

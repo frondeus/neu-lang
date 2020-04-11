@@ -1,12 +1,18 @@
 pub mod core;
 
 mod token {
-    #[derive(Debug, PartialEq, Clone, Copy)]
+    use derive_more::Display;
+    #[derive(Debug, PartialEq, Clone, Copy, Display)]
     pub enum Token {
+        #[display(fmt = "error")]
         Error,
+        #[display(fmt = "atom")]
         Atom,
+        #[display(fmt = "` `, `\n`, `\t`")]
         Trivia, // Whitespace
+        #[display(fmt = "`(`")]
         Open,
+        #[display(fmt = "`)`")]
         Close,
     }
 }
@@ -121,7 +127,7 @@ fn parse_sexp() -> impl Parser {
                         let token = state.lexer_mut().next();
                         builder.error(Error::UnexpectedToken {
                              expected: SEXP_TOKENS.to_vec(),
-                             found: token.as_kind().unwrap(),
+                             found: token.unwrap(),
                         });
                     }),
                 );

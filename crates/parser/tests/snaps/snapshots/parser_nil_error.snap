@@ -3,13 +3,12 @@
 ```
 
 ROOT @ 0..1 = `(`
-    SEXP @ 0..1 = `(`
+    ERROR, SEXP @ 0..1 = `(`
         TOKEN @ 0..1 = `(`
         ERROR, TOKEN @ 1..1 = ``
+    TOKEN @ 1..1 = ``
 
 
 ### Errors ###
-[
-    Expected one of Close, Atom but found EOF,
-    Expected Close but found EOF,
-]
+Expected `)` but found EOF @ N1
+Expected one of `)`, atom but found EOF @ N2

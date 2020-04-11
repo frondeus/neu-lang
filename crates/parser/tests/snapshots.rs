@@ -7,7 +7,7 @@ use test_case::test_case;
 fn lexer_tests(input: &str, test_case_name: &str) {
     let lexer = Lexer::new(input);
 
-    let res: Vec<_> = lexer.map(|t| t.display(input).to_string()).collect();
+    let res: Vec<_> = lexer.map(|t| t.display(input, true).to_string()).collect();
     neu_parser::core::testing::snap(
         format!("```\n{}\n```\n\n{:#?}", input, res),
         file!(),
