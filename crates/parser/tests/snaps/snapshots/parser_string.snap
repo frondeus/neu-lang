@@ -1,0 +1,12 @@
+```
+ "foo" 
+```
+
+ROOT @ 0..7 = ` "foo" `
+    TRIVIA @ 0..1 = ` `
+    STRING, TOKEN, VALUE @ 1..6 = `"foo"`
+    TRIVIA @ 6..7 = ` `
+    TOKEN @ 7..7 = ``
+
+
+### No Errors ###

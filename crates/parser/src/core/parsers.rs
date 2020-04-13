@@ -1,11 +1,65 @@
 use crate::core::{Context, Error, Node, NodeBuilder, OptionExt, Parser, State};
 use crate::{Nodes, Token};
 
-pub fn node_trivia(f: impl Fn(&mut NodeBuilder)) -> impl Parser {
-    move |state: &mut State, ctx: &Context| {
-        let mut builder = NodeBuilder::new(state, ctx);
-        f(&mut builder);
-        builder.build()
+pub struct Pratt<N, BP, F> {
+    next: N,
+    bp: BP,
+    f: F,
+    rbp: i32,
+}
+
+impl<N, BP, F> Clone for Pratt<N, BP, F>
+where
+    N: Clone + Parser,
+    BP: Clone + Fn(Option<Token>) -> Option<i32>,
+    F: Clone + Fn(&mut NodeBuilder, Option<Token>)
+{
+    fn clone(&self) -> Self {
+        Self {
+            next: self.next.clone(),
+            bp: self.bp.clone(),
+            f: self.f.clone(),
+            rbp: self.rbp
+        }
+    }
+}
+
+impl<N, BP, F> Pratt<N, BP, F>
+where
+    N: Clone + Parser,
+    BP: Clone + Fn(Option<Token>) -> Option<i32>,
+    F: Clone + Fn(&mut NodeBuilder, Option<Token>)
+{
+    pub fn new(next: N, bp: BP, f: F) -> Self {
+        Self { next, bp, f, rbp: 0 }
+    }
+
+    pub fn rbp(&self, rbp: i32) -> Self {
+        let mut new = self.clone();
+        new.rbp = rbp - 1;
+        new
+    }
+
+    pub fn parser(&self) -> impl Parser {
+        use crate::core::peekable::PeekableIterator;
+        let opt = self.clone();
+
+        move |state: &mut State, ctx: &Context| {
+            let mut left = opt.next.parse(state, ctx);
+            loop {
+                let op_token = state.lexer_mut().peek().as_kind();
+                let op_bp = match (opt.bp)(op_token.as_ref().copied()) {
+                    Some(op) if op > opt.rbp => op,
+                    _ => return left,
+                };
+
+                let mut builder = NodeBuilder::new(state, ctx);
+                builder.add(left);
+                (opt.f)(&mut builder, op_token);
+                builder.parse(opt.rbp(op_bp - 1).parser());
+                left = builder.build();
+            }
+        }
     }
 }
 
@@ -57,11 +111,16 @@ pub fn token(expected: impl Into<Option<Token>>) -> impl Parser {
     tokens(expected)
 }
 
+
 pub trait ParserExt: Parser {
     fn map<F>(self, f: F) -> Map<Self, F>
     where
         F: Fn(Node) -> Node,
         Self: Sized;
+
+    fn boxed(self) -> Box<Self> where Self: Sized {
+        Box::new(self)
+    }
 }
 
 impl<P> ParserExt for P

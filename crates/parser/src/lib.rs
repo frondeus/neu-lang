@@ -24,7 +24,28 @@ mod token {
 
         #[display(fmt = "`!`")]
         OpBang,
-    }
+
+        #[display(fmt = "`+`")]
+        OpPlus,
+
+        #[display(fmt = "`*`")]
+        OpStar,
+
+        #[display(fmt = "`/`")]
+        OpSlash,
+
+        #[display(fmt = "`==`")]
+        OpDEqual,
+
+        #[display(fmt = "string")]
+        String,
+
+        #[display(fmt = "`(`")]
+        OpenP,
+
+        #[display(fmt = "`)`")]
+        CloseP
+}
 }
 
 pub mod lexer {
@@ -45,12 +66,8 @@ pub mod lexer {
             return Some((Token::Number, input.chomp(rest)));
         }
 
-        if peeked == '-' {
-            return Some((Token::OpMinus, input.chomp(1)));
-        }
-
-        if peeked == '!' {
-            return Some((Token::OpBang, input.chomp(1)));
+        if i.starts_with("==") {
+            return Some((Token::OpDEqual, input.chomp(2)));
         }
 
         if i.starts_with("true") {
@@ -59,6 +76,20 @@ pub mod lexer {
 
         if i.starts_with("false") {
             return Some((Token::False, input.chomp(5)));
+        }
+
+        if peeked == '-' { return Some((Token::OpMinus, input.chomp(1))); }
+        if peeked == '!' { return Some((Token::OpBang, input.chomp(1))); }
+        if peeked == '+' { return Some((Token::OpPlus, input.chomp(1))); }
+        if peeked == '*' { return Some((Token::OpStar, input.chomp(1))); }
+        if peeked == '/' { return Some((Token::OpSlash, input.chomp(1))); }
+        if peeked == '(' { return Some((Token::OpenP, input.chomp(1))); }
+        if peeked == ')' { return Some((Token::CloseP, input.chomp(1))); }
+
+        if peeked == '"' {
+            let rest = i.chars().skip(1).take_while(|c| *c != '"').count();
+
+            return Some((Token::String, input.chomp(rest + 2)));
         }
 
         Some((Token::Error, input.chomp(1)))
@@ -71,9 +102,13 @@ pub mod nodes {
 
     nodes! {
         Value,
+        Parens,
         Number,
         Boolean,
+        String,
+
         Unary,
+        Binary,
         Op
     }
 }
@@ -96,9 +131,27 @@ pub fn parser() -> impl Parser {
 }
 
 fn value() -> impl Parser {
+    let next = |state: &mut State, ctx: &Context| left_value().parse(state, ctx);
+    Pratt::new(next, |token| match token {
+        Some(Token::OpStar) => Some(20),
+        Some(Token::OpSlash) => Some(20),
+
+        Some(Token::OpMinus) => Some(10),
+        Some(Token::OpPlus) => Some(10),
+
+        Some(Token::OpDEqual) => Some(1),
+        _ => None
+    }, |builder, op_token| {
+        builder.name(Nodes::Binary);
+        builder.name(Nodes::Value);
+        builder.parse(token(op_token).map(|n| n.with_name(Nodes::Op)));
+    }).parser()
+}
+
+fn left_value() -> impl Parser {
     const VALUE_TOKENS: &[Token] = &[
         Token::Number, Token::True, Token::False,
-        Token::OpMinus, Token::OpBang
+        Token::OpMinus, Token::OpBang, Token::String, Token::OpenP
     ];
 
     node(|builder| {
@@ -110,9 +163,22 @@ fn value() -> impl Parser {
             | Some(Token::False) => builder.parse(boolean()),
             Some(Token::OpMinus)
             | Some(Token::OpBang) => builder.parse(unary()),
+            Some(Token::String) => builder.parse(string()),
+            Some(Token::OpenP) => {
+                builder.parse(node(|builder| {
+                    builder.name(Nodes::Parens);
+                    builder.parse(token(Token::OpenP));
+                    builder.parse(value());
+                    builder.parse(token(Token::CloseP));
+                }))
+            }
             _ => builder.parse( expected( VALUE_TOKENS))
         };
     })
+}
+
+fn string() -> impl Parser {
+    token(Token::String).map(|n| n.with_name(Nodes::String))
 }
 
 fn unary() -> impl Parser {
@@ -134,7 +200,7 @@ fn number() -> impl Parser {
 }
 
 fn trivia() -> impl Parser {
-    node_trivia(|builder| {
+    node(|builder| {
         builder.name(Nodes::Trivia);
         let mut empty = true;
         while let Some(Token::Trivia) = builder.peek_token() {

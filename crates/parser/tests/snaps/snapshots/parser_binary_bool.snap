@@ -1,0 +1,15 @@
+```
+true == false
+```
+
+ROOT @ 0..13 = `true == false`
+    BINARY, VALUE @ 5..13 = `== false`
+        BOOLEAN, TOKEN, VALUE @ 0..4 = `true`
+        TRIVIA @ 4..5 = ` `
+        OP, TOKEN @ 5..7 = `==`
+        TRIVIA @ 7..8 = ` `
+        BOOLEAN, TOKEN, VALUE @ 8..13 = `false`
+    TOKEN @ 13..13 = ``
+
+
+### No Errors ###

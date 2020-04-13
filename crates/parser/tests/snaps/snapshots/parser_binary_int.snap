@@ -1,0 +1,15 @@
+```
+4 + 2
+```
+
+ROOT @ 0..5 = `4 + 2`
+    BINARY, VALUE @ 2..5 = `+ 2`
+        NUMBER, TOKEN, VALUE @ 0..1 = `4`
+        TRIVIA @ 1..2 = ` `
+        OP, TOKEN @ 2..3 = `+`
+        TRIVIA @ 3..4 = ` `
+        NUMBER, TOKEN, VALUE @ 4..5 = `2`
+    TOKEN @ 5..5 = ``
+
+
+### No Errors ###

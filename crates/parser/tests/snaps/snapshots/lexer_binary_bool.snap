@@ -1,0 +1,11 @@
+```
+true == false
+```
+
+[
+    "True `true`",
+    "Trivia ` `",
+    "OpDEqual `==`",
+    "Trivia ` `",
+    "False `false`",
+]

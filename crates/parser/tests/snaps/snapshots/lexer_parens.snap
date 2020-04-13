@@ -1,0 +1,17 @@
+```
+(4 + 2) * 5
+```
+
+[
+    "OpenP `(`",
+    "Number `4`",
+    "Trivia ` `",
+    "OpPlus `+`",
+    "Trivia ` `",
+    "Number `2`",
+    "CloseP `)`",
+    "Trivia ` `",
+    "OpStar `*`",
+    "Trivia ` `",
+    "Number `5`",
+]

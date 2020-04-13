@@ -7,13 +7,18 @@ use test_case::test_case;
        * [x] Integers
        * [x] Immediate Constants
        * [x] Unary primitives
-       * [ ] Binary primitives
+       * [x] Binary primitives
+       * [x] Pratt parsers
+       * [x] ConstStrings
+       * [x] Parens
+       * [x] Eval
+       * [ ] Better snapshots
+       * [ ] Proper pratt span
+       * [ ] Structs
+       * [ ] Arrays
        * [ ] Local variables
        * [ ] Conditional Expressions
        * [ ] Procedure Calls
-       * [ ] Structs
-       * [ ] Arrays
-       * [ ] Strings
        * [ ] References
        * [ ] Closures
        * [ ] Heap Allocation
@@ -24,11 +29,17 @@ use test_case::test_case;
 */
 
 #[test_case("4", "number")]
+#[test_case("    5", "skip_trivia")]
 #[test_case("true", "bool_t")]
 #[test_case("false", "bool_f")]
 #[test_case("-5", "unary_int")]
 #[test_case("!true", "unary_bool")]
-#[test_case("    5", "skip_trivia")]
+#[test_case("4 + 2", "binary_int")]
+#[test_case("true == false", "binary_bool")]
+#[test_case("(4 + 2) * 5", "parens")]
+#[test_case("4 + 2 * 5", "pratt_int")]
+#[test_case("true ==", "binary_error")]
+#[test_case(r#" "foo" "#, "string")]
 #[test_case("???", "error")]
 fn tests(input: &str, test_case_name: &str) {
     {
