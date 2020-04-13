@@ -1,19 +1,7 @@
 ```
-(add 2 (+++ 4 5))
+???
 ```
 
 [
-    "Open `(`",
-    "Atom `add`",
-    "Trivia ` `",
-    "Atom `2`",
-    "Trivia ` `",
-    "Open `(`",
-    "Error `+++`",
-    "Trivia ` `",
-    "Atom `4`",
-    "Trivia ` `",
-    "Atom `5`",
-    "Close `)`",
-    "Close `)`",
+    "Error `???`",
 ]

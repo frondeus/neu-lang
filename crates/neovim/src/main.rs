@@ -1,6 +1,6 @@
 use anyhow::{Error, Result, Context};
 use nvim_rs::create::tokio as create;
-use neulang_nvim::handler::NeovimHandler;
+use neu_nvim::handler::NeovimHandler;
 
 #[tokio::main]
 async fn main() -> Result<()> {

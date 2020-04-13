@@ -1,23 +1,39 @@
-use crate::core::{Context, Lexer, Name, Node, Parser, State, NodeId, Error};
+use crate::core::{Context, Name, Node, Parser, State, NodeId, Error};
 use crate::Nodes;
 use std::collections::BTreeSet;
 use text_size::{TextRange, TextSize};
 
-pub struct NodeBuilder {
+pub struct NodeBuilder<'a> {
+    state: &'a mut State,
+    ctx: &'a Context<'a>,
+
     names: BTreeSet<Name>,
     children: Vec<NodeId>,
     from: TextSize,
     error: Option<Error>
 }
 
-impl NodeBuilder {
-    pub(crate) fn new(lexer: &Lexer) -> Self {
+impl<'a> NodeBuilder<'a> {
+    pub(crate) fn new(state: &'a mut State, ctx: &'a Context<'a>) -> Self {
+        let from = state.lexer().input().cursor;
         Self {
+            state, ctx,
+
             names: Default::default(),
             children: Default::default(),
-            from: lexer.input().cursor,
+            from,
             error: None
         }
+    }
+
+    pub fn peek_token(&mut self) -> Option<crate::Token> {
+        use crate::core::peekable::PeekableIterator;
+        use crate::core::lexer::OptionExt;
+        self.state.lexer_mut().peek().as_kind()
+    }
+
+    pub fn next_token(&mut self) -> Option<crate::core::spanned::Spanned<crate::Token>> {
+        self.state.lexer_mut().next()
     }
 
     pub fn name(&mut self, name: Name) -> &mut Self {
@@ -30,50 +46,56 @@ impl NodeBuilder {
         self.name(Nodes::Error)
     }
 
-    pub fn parse(&mut self, state: &mut State, ctx: &Context, parser: impl Parser) {
+    pub fn parse_ctx<'b>(&mut self, ctx: &'b Context<'b>, parser: impl Parser) {
         if let Some(trivia) = ctx.trivia() {
-            let node = trivia.parse(state, ctx);
-            self.add(state, node);
+            let node = trivia.parse(self.state, ctx);
+            self.add(node);
         }
 
-        let node = parser.parse(state, ctx);
-        self.add(state, node);
+        let node = parser.parse(self.state, ctx);
+        self.add(node);
 
         if let Some(trivia) = ctx.trivia() {
-            let node = trivia.parse(state, ctx);
-            self.add(state, node);
+            let node = trivia.parse(self.state, ctx);
+            self.add(node);
         }
     }
 
-    pub fn add(&mut self, state: &mut State, node: Node) {
+    pub fn parse(&mut self, parser: impl Parser) {
+        self.parse_ctx(self.ctx, parser);
+    }
+
+    pub fn add(&mut self, node: Node) {
         if node.is(Nodes::Virtual) {
             let names: Vec<Name> = node
                 .names
                 .into_iter()
                 .filter(|name| *name != Nodes::Virtual)
                 .collect();
-            let children = node.children.into_iter().map(|child| {
-                if !state.nodes().get(child).is(Nodes::Trivia) {
-                    state.nodes().get_mut(child).names.extend(names.iter());
+            let mut children = node.children.into_iter().map(|child| {
+                if !self.state.nodes().get(child).is(Nodes::Trivia) {
+                    self.state.nodes().get_mut(child).names.extend(names.iter());
                 }
                 child
-            });
-            self.children.extend(children);
+            }).collect::<Vec<_>>();
+            self.children.append(&mut children);
         } else {
-            let id = state.nodes().add(node);
-            state.commit_errors(id);
+            let id = self.state.nodes().add(node);
+            self.state.commit_errors(id);
             self.children.push(id);
         }
     }
 
-    pub fn build(self, state: &mut State) -> Node {
-        let lexer = state.lexer();
+    pub fn build(self) -> Node {
         let NodeBuilder {
             from,
             names,
             children,
-            error
+            error,
+            state,
+            ..
         } = self;
+        let lexer = state.lexer();
         let to = lexer.input().cursor;
         let span = TextRange(from, to);
         if let Some(error) = error {

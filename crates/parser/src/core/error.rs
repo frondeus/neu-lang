@@ -4,8 +4,7 @@ use crate::core::Spanned;
 
 #[derive(Clone)]
 pub enum Error {
-    UnexpectedToken { found: Spanned<Token>, expected: Vec<Token> },
-    UnexpectedEOF { expected: Vec<Token> },
+    Expected { found: Option<Spanned<Token>>, expected: Vec<Token> },
     ExpectedEOF { found: Spanned<Token> },
 }
 
@@ -19,11 +18,11 @@ impl fmt::Debug for Error {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::ExpectedEOF { found } => write!(f, r#""Expected EOF but found {:?}""#, found),
-            Self::UnexpectedEOF { expected } => {
+            Self::Expected { found: None, expected } => {
                 format_expected(&expected, f)?;
                 write!(f, " but found EOF")
             }
-            Self::UnexpectedToken { found, expected } => {
+            Self::Expected { found: Some(found), expected } => {
                 format_expected(&expected, f)?;
                 write!(f, " but found {:?}", found)
             }
@@ -57,11 +56,11 @@ impl<'a, 's> fmt::Display for DisplayError<'a, 's> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.error {
             Error::ExpectedEOF { found } => write!(f, r#"Expected EOF but found {}"#, found.display(self.str, false)),
-            Error::UnexpectedEOF { expected } => {
+            Error::Expected { found: None, expected } => {
                 format_expected(&expected, f)?;
                 write!(f, " but found EOF")
             }
-            Error::UnexpectedToken { found, expected } => {
+            Error::Expected { found: Some(found), expected } => {
                 format_expected(&expected, f)?;
                 write!(f, " but found {}", found.display(self.str, false))
             }

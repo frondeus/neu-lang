@@ -1,0 +1,12 @@
+```
+-5
+```
+
+ROOT @ 0..2 = `-5`
+    UNARY, VALUE @ 0..2 = `-5`
+        OP, TOKEN @ 0..1 = `-`
+        NUMBER, TOKEN, VALUE @ 1..2 = `5`
+    TOKEN @ 2..2 = ``
+
+
+### No Errors ###

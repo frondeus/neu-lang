@@ -8,7 +8,7 @@ pub trait NodeHighlight {
 impl NodeHighlight for Node {
     fn highlight(&self) -> Option<&'static str> {
         if self.is(Nodes::Error) { Some("Error") }
-        else if self.is(Nodes::Atom) { Some("Identifier") }
+        else if self.is(Nodes::Number) { Some("Float") }
         else if self.is(Nodes::Token) { Some("Operator") }
         else { None }
     }

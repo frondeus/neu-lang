@@ -1,4 +1,4 @@
-use crate::core::{Lexer, NodeBuilder, TextRange, NodeId, Arena};
+use crate::core::{TextRange, NodeId, Arena};
 use std::collections::BTreeSet;
 use std::fmt;
 use itertools::Itertools;
@@ -8,6 +8,28 @@ pub struct Name(pub(crate) &'static str);
 impl Name {
     pub const fn new(name: &'static str) -> Self {
         Self(name)
+    }
+}
+
+#[macro_export]
+macro_rules! nodes {
+    () => {
+        pub struct Nodes;
+        #[allow(non_upper_case_globals)]
+        impl Nodes {
+            pub const Virtual: Name = Name::new("Virtual");
+            pub const Root: Name = Name::new("Root");
+            pub const Trivia: Name = Name::new("Trivia");
+            pub const Token: Name = Name::new("Token");
+            pub const Error: Name = Name::new("Error");
+        }
+    };
+    ($($node: ident),*) => {
+        nodes!();
+        #[allow(non_upper_case_globals)]
+        impl Nodes {
+            $( pub const $node: Name = Name::new(stringify!($node)); )*
+        }
     }
 }
 
@@ -31,10 +53,6 @@ pub struct Node {
 }
 
 impl Node {
-    pub fn builder(lexer: &Lexer) -> NodeBuilder {
-        NodeBuilder::new(lexer)
-    }
-
     pub fn is(&self, name: Name) -> bool {
         self.names.contains(&name)
     }

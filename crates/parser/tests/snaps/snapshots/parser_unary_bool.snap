@@ -1,0 +1,12 @@
+```
+!true
+```
+
+ROOT @ 0..5 = `!true`
+    UNARY, VALUE @ 0..5 = `!true`
+        OP, TOKEN @ 0..1 = `!`
+        BOOLEAN, TOKEN, VALUE @ 1..5 = `true`
+    TOKEN @ 5..5 = ``
+
+
+### No Errors ###

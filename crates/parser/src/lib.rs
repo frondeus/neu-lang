@@ -6,14 +6,24 @@ mod token {
     pub enum Token {
         #[display(fmt = "error")]
         Error,
-        #[display(fmt = "atom")]
-        Atom,
+
         #[display(fmt = "` `, `\n`, `\t`")]
         Trivia, // Whitespace
-        #[display(fmt = "`(`")]
-        Open,
-        #[display(fmt = "`)`")]
-        Close,
+
+        #[display(fmt = "number")]
+        Number,
+
+        #[display(fmt = "`true`")]
+        True,
+
+        #[display(fmt = "`false`")]
+        False,
+
+        #[display(fmt = "`-`")]
+        OpMinus,
+
+        #[display(fmt = "`!`")]
+        OpBang,
     }
 }
 
@@ -21,42 +31,50 @@ pub mod lexer {
     use crate::core::{Input, TextRange};
     use crate::Token;
 
-    pub fn lex(i: &mut Input) -> Option<(Token, TextRange)> {
-        Some(match i.as_ref().chars().next()? {
-            c if c.is_whitespace() => {
-                let rest = i.as_ref().chars().take_while(|c| c.is_whitespace()).count();
-                (Token::Trivia, i.chomp(rest))
-            }
-            c if c.is_alphanumeric() => {
-                let rest = i
-                    .as_ref()
-                    .chars()
-                    .take_while(|c| c.is_alphanumeric())
-                    .count();
-                (Token::Atom, i.chomp(rest))
-            }
-            '(' => (Token::Open, i.chomp(1)),
-            ')' => (Token::Close, i.chomp(1)),
-            _ => (Token::Error, i.chomp(1)),
-        })
+    pub fn lex(input: &mut Input) -> Option<(Token, TextRange)> {
+        let i = input.as_ref();
+        let peeked = i.chars().next()?;
+        if peeked.is_whitespace() {
+            let rest = i.chars().take_while(|c| c.is_whitespace()).count();
+
+            return Some((Token::Trivia, input.chomp(rest)));
+        }
+        if peeked.is_ascii_digit() {
+            let rest = i.chars().take_while(|c| c.is_ascii_digit()).count();
+
+            return Some((Token::Number, input.chomp(rest)));
+        }
+
+        if peeked == '-' {
+            return Some((Token::OpMinus, input.chomp(1)));
+        }
+
+        if peeked == '!' {
+            return Some((Token::OpBang, input.chomp(1)));
+        }
+
+        if i.starts_with("true") {
+            return Some((Token::True, input.chomp(4)));
+        }
+
+        if i.starts_with("false") {
+            return Some((Token::False, input.chomp(5)));
+        }
+
+        Some((Token::Error, input.chomp(1)))
     }
 }
 
 pub mod nodes {
     use crate::core::Name;
+    use crate::nodes;
 
-    pub struct Nodes;
-    #[allow(non_upper_case_globals)]
-    impl Nodes {
-        pub const Virtual: Name = Name::new("Virtual");
-        pub const Root: Name = Name::new("Root");
-        pub const Trivia: Name = Name::new("Trivia");
-        pub const Token: Name = Name::new("Token");
-        pub const Error: Name = Name::new("Error");
-        pub const SExp: Name = Name::new("SExp");
-        pub const List: Name = Name::new("List");
-        pub const Nil: Name = Name::new("Nil");
-        pub const Atom: Name = Name::new("Atom");
+    nodes! {
+        Value,
+        Number,
+        Boolean,
+        Unary,
+        Op
     }
 }
 
@@ -64,23 +82,63 @@ pub use crate::lexer::*;
 pub use crate::nodes::*;
 pub use crate::token::*;
 
-pub fn parser() -> impl Parser {
-    node(|builder, state, ctx| {
-        builder.name(Nodes::Root);
-        builder.parse(state, ctx, parse_sexp());
-        builder.parse(state, ctx, token(None));
-    })
-}
-
 use crate::core::*;
 pub use crate::{Nodes, Token};
 
+pub fn parser() -> impl Parser {
+    node(|builder| {
+        builder.name(Nodes::Root);
+        let trivia = trivia();
+        let ctx = Context::new(&trivia);
+        builder.parse_ctx(&ctx, value());
+        builder.parse(token(None));
+    })
+}
+
+fn value() -> impl Parser {
+    const VALUE_TOKENS: &[Token] = &[
+        Token::Number, Token::True, Token::False,
+        Token::OpMinus, Token::OpBang
+    ];
+
+    node(|builder| {
+        builder.name(Nodes::Virtual);
+        builder.name(Nodes::Value);
+        match builder.peek_token() {
+            Some(Token::Number) => builder.parse(number()),
+            Some(Token::True)
+            | Some(Token::False) => builder.parse(boolean()),
+            Some(Token::OpMinus)
+            | Some(Token::OpBang) => builder.parse(unary()),
+            _ => builder.parse( expected( VALUE_TOKENS))
+        };
+    })
+}
+
+fn unary() -> impl Parser {
+    node(|builder| {
+        builder.name(Nodes::Unary);
+        builder.parse( tokens(vec![Token::OpMinus, Token::OpBang])
+                          .map(|n| n.with_name(Nodes::Op))
+        );
+        builder.parse(value());
+    })
+}
+
+fn boolean() -> impl Parser {
+    tokens(vec![Token::True, Token::False]).map(|n| n.with_name(Nodes::Boolean))
+}
+
+fn number() -> impl Parser {
+    token(Token::Number).map(|n| n.with_name(Nodes::Number))
+}
+
 fn trivia() -> impl Parser {
-    node(|builder, state, _| {
+    node_trivia(|builder| {
         builder.name(Nodes::Trivia);
         let mut empty = true;
-        while let Some(Token::Trivia) = state.lexer_mut().peek().as_kind() {
-            state.lexer_mut().next();
+        while let Some(Token::Trivia) = builder.peek_token() {
+            builder.next_token();
             empty = false;
         }
 
@@ -90,78 +148,3 @@ fn trivia() -> impl Parser {
     })
 }
 
-fn parse_sexp() -> impl Parser {
-    const SEXP_TOKENS: &[Token] = &[Token::Atom, Token::Open];
-
-    node(|builder, state, _| {
-        builder.name(Nodes::Virtual);
-        builder.name(Nodes::SExp);
-        let trivia = trivia();
-        let ctx = Context::new(&trivia);
-        let ctx = &ctx;
-        let peeked = state.lexer_mut().peek();
-        match peeked.as_kind() {
-            None => {
-                builder.parse(
-                    state,
-                    ctx,
-                    node(|builder, state, _| {
-                        state.lexer_mut().next();
-                        builder.error(Error::UnexpectedEOF {
-                            expected: SEXP_TOKENS.to_vec(),
-                        });
-                    }),
-                );
-            }
-            Some(Token::Atom) => builder.parse(
-                state,
-                ctx,
-                token(Token::Atom).map(|node| node.with_name(Nodes::Atom)),
-            ),
-            Some(Token::Open) => builder.parse(state, ctx, parse_list()),
-            Some(_) => {
-                builder.parse(
-                    state,
-                    ctx,
-                    node(|builder, state, _| {
-                        let token = state.lexer_mut().next();
-                        builder.error(Error::UnexpectedToken {
-                             expected: SEXP_TOKENS.to_vec(),
-                             found: token.unwrap(),
-                        });
-                    }),
-                );
-            }
-        };
-    })
-}
-
-fn parse_list() -> impl Parser {
-    node(|builder, state, ctx| {
-        builder.parse(state, ctx, token(Token::Open));
-        let peeked = state.lexer_mut().peek();
-        match peeked.as_kind() {
-            None => {
-                builder.error(Error::UnexpectedEOF {
-                    expected: vec![Token::Close, Token::Atom],
-                });
-            }
-            Some(Token::Close) => {
-                builder.name(Nodes::Nil);
-            }
-            _ => loop {
-                builder.name(Nodes::List);
-                builder.parse(state, ctx, parse_sexp());
-                let peeked = state.lexer_mut().peek();
-                match peeked.as_kind() {
-                    None => {
-                        break;
-                    }
-                    Some(Token::Close) => break,
-                    _ => continue,
-                }
-            },
-        }
-        builder.parse(state, ctx, token(Token::Close));
-    })
-}

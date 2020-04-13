@@ -12,6 +12,7 @@ use std::future::Future;
 use crate::Neovim;
 use crate::diagnostic::{Diagnostic, DiagnosticType};
 use nvim_rs::rpc::IntoVal;
+use crate::span_ext::{TextRangeExt, LineCols};
 
 #[derive(Clone, Default)]
 pub struct NeovimHandler {
@@ -73,8 +74,9 @@ impl NeovimHandler {
 
                 let parse_result = {
                     use neu_parser::core::{Lexer, State};
-                    use neu_parser::parser;
+                    use neu_parser::{parser};
 
+                    //let tokens: Vec<_> = Lexer::new(&buf).map(|t| t.display(&buf, true).to_string()).collect();
                     State::parse(Lexer::new(&buf), parser())
                 };
 
@@ -82,22 +84,23 @@ impl NeovimHandler {
                 current_bf.clear_namespace(highlight_ns, 0, -1).await?;
 
                 for node in parse_result.nodes.iter() {
-                    let line = 0; //TODO, fix me
-                    let col_start: usize = node.span.start().into();
-                    let col_end: usize = node.span.end().into();
                     if let Some(hl_group) = node.highlight() {
-                        current_bf.add_highlight(highlight_ns, hl_group, line, col_start as i64, col_end as i64).await?;
+                        for LineCols { line, col_start, col_end } in node.span.lines_cols(&lines) {
+                            current_bf.add_highlight(highlight_ns, hl_group, line, col_start as i64, col_end as i64).await?;
+                        }
                     }
                 }
 
                 // Errors
                 let current_w = api.get_current_win().await?;
 
-                let diagnostics = parse_result.errors.iter().map(|(id, error)| {
+                let diagnostics = parse_result.errors.iter().filter_map(|(id, error)| {
                     let node = parse_result.nodes.get(id);
-                    let line = 1; //TODO, fix me
-                    let col_start: usize = node.span.start().into();
-                    Diagnostic::new(&current_bf, error.display(&buf).to_string(), line, col_start as i64, DiagnosticType::Error)
+                    if let Some(LineCols { line, col_start, .. }) = node.span.lines_cols(&lines).first() {
+                        Some(Diagnostic::new(&current_bf, error.display(&buf).to_string(), *line + 1, *col_start + 1, DiagnosticType::Error))
+                    } else {
+                        None
+                    }
                 }).collect::<Vec<Diagnostic>>();
 
                 let list = "setloclist";
@@ -119,7 +122,11 @@ impl NeovimHandler {
                 api.command("lwindow").await?;
 
                 // Debug window
-                writeln!(&mut dbg_buffer, "{}", parse_result.display(&buf))?;
+                //writeln!(&mut dbg_buffer, "```")?;
+                //writeln!(&mut dbg_buffer, "{}", buf)?;
+                //writeln!(&mut dbg_buffer, "```\n")?;
+                //writeln!(&mut dbg_buffer, "{:#?}\n", tokens)?;
+                writeln!(&mut dbg_buffer, "{}\n", parse_result.display(&buf))?;
                 writeln!(&mut dbg_buffer, "\n{:#?}", parse_result.nodes)?;
 
                 let debug_lines = dbg_buffer.lines().map(|l| l.to_string()).collect_vec();

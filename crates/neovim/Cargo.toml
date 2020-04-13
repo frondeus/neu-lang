@@ -1,5 +1,5 @@
 [package]
-name = "neulang-nvim"
+name = "neu-nvim"
 version = "0.1.0"
 authors = ["Wojciech Polak <frondeus@gmail.com>"]
 edition = "2018"

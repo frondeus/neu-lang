@@ -12,6 +12,7 @@ mod parser;
 mod parsers;
 mod state;
 
+#[macro_use]
 mod node;
 mod node_builder;
 
