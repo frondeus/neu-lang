@@ -115,7 +115,7 @@ impl<'a> Eval<'a> {
     }
 }
 
-fn eval(id: NodeId, nodes: &Arena, input: &str) -> Option<Value> {
+pub fn eval(id: NodeId, nodes: &Arena, input: &str) -> Option<Value> {
     Eval { nodes, input }.eval(id)
 }
 

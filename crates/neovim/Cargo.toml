@@ -8,6 +8,7 @@ edition = "2018"
 
 [dependencies]
 neu-parser = { path = "../parser" }
+neu-eval = { path = "../eval" }
 
 nvim-rs = { git = "https://github.com/frondeus/nvim-rs.git", branch = "wpo_buffer_clone", features = ["use_tokio"] }
 tokio = "0.2.17"
@@ -17,3 +18,4 @@ anyhow = "1.0.28"
 itertools = "0.9.0"
 log = "0.4.8"
 env_logger = "0.7.1"
+derive_more = "0.99.5"

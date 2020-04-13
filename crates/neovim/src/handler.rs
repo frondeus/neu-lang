@@ -1,22 +1,45 @@
-use itertools::Itertools;
-use async_trait::async_trait;
-use rmpv::Value;
-use tokio::io::Stdout;
-use nvim_rs::{compat::tokio::Compat, Handler};
-use std::sync::Arc;
-use tokio::sync::RwLock;
-use crate::state::State;
-use crate::highlight::NodeHighlight;
 use anyhow::{Result, bail};
-use std::future::Future;
+use async_trait::async_trait;
 use crate::Neovim;
 use crate::diagnostic::{Diagnostic, DiagnosticType};
-use nvim_rs::rpc::IntoVal;
+use crate::highlight::NodeHighlight;
 use crate::span_ext::{TextRangeExt, LineCols};
+use crate::state::State;
+use neu_parser::Nodes;
+use itertools::Itertools;
+use nvim_rs::rpc::IntoVal;
+use nvim_rs::{compat::tokio::Compat, Handler};
+use rmpv::Value;
+use std::future::Future;
+use std::sync::Arc;
+use tokio::io::Stdout;
+use tokio::sync::RwLock;
 
 #[derive(Clone, Default)]
 pub struct NeovimHandler {
     state: Arc<RwLock<Option<State>>>
+}
+
+macro_rules! dbg {
+    ($dbg_buffer: expr) => {
+        writeln!($dbg_buffer, "[{}:{}]", $crate::file!(), $crate::line!())?;
+    };
+    ($dbg_buffer: expr, $val:expr) => {
+        // Use of `match` here is intentional because it affects the lifetimes
+        // of temporaries - https://stackoverflow.com/a/48732525/1063961
+        match $val {
+            tmp => {
+                writeln!($dbg_buffer, "[{}:{}] {} = {:#?}",
+                    file!(), line!(), stringify!($val), &tmp)?;
+                tmp
+            }
+        }
+    };
+    // Trailing comma with single argument is ignored
+    ($dbg_buffer: expr, $val:expr,) => { dbg!($dbg_buffer, $val) };
+    ($dbg_buffer: expr, $($val:expr),+ $(,)?) => {
+        ($(dbg!($dbg_buffer, $val)),+,)
+    };
 }
 
 impl NeovimHandler {
@@ -35,8 +58,8 @@ impl NeovimHandler {
 
 
         if self.state.read().await.is_none() {
-            api.command("vsp").await?;
-            api.command("wincmd l").await?;
+            //api.command("vsp").await?;
+            //api.command("wincmd l").await?;
 
             let debug_bf = api.create_buf(true, true).await?;
             debug_bf.set_name("**NeuLang Debug**").await?;
@@ -47,7 +70,7 @@ impl NeovimHandler {
 
             *self.state.write().await = Some(State::new(debug_bf, highlight_ns));
 
-            api.command("wincmd h").await?;
+            api.command("bp").await?;
             //api.command("cope").await?;
             api.command(r#"echo "NeuLang Loaded""#).await?;
         }
@@ -80,8 +103,35 @@ impl NeovimHandler {
                     State::parse(Lexer::new(&buf), parser())
                 };
 
-                // Highlighting
+                // Eval
                 current_bf.clear_namespace(highlight_ns, 0, -1).await?;
+
+                {
+                    for (id, node) in parse_result.nodes.enumerate() {
+                        if !node.is(Nodes::Value) { continue; }
+                        if node.children.is_empty() { continue; }
+                        let value = neu_eval::eval(id, &parse_result.nodes, &buf);
+                        if let Some(value) = value {
+                            if let Some(LineCols { line, .. }) = node.span.lines_cols(&lines).last() {
+                                //dbg!(dbg_buffer, (line, &value));
+                                api.call_function("nvim_buf_set_virtual_text", vec![
+                                    current_bf.into_val(), // buffer
+                                    highlight_ns.into_val(), // ns
+                                    line.into_val(), // line
+                                    Value::Array(vec![
+                                        Value::Array(vec![
+                                            Value::String(format!("= {:?}", &value).into()),
+                                            Value::String("Comment".into()),
+                                        ])
+                                    ]),
+                                    Value::Map(vec![])
+                                ]).await?;
+                            }
+                        }
+                    }
+                }
+
+                // Highlighting
 
                 for node in parse_result.nodes.iter() {
                     if let Some(hl_group) = node.highlight() {
@@ -97,11 +147,26 @@ impl NeovimHandler {
                 let diagnostics = parse_result.errors.iter().filter_map(|(id, error)| {
                     let node = parse_result.nodes.get(id);
                     if let Some(LineCols { line, col_start, .. }) = node.span.lines_cols(&lines).first() {
-                        Some(Diagnostic::new(&current_bf, error.display(&buf).to_string(), *line + 1, *col_start + 1, DiagnosticType::Error))
+                        Some(Diagnostic::new(&current_bf, error.display(&buf).to_string(), *line, *col_start, DiagnosticType::Error))
                     } else {
                         None
                     }
                 }).collect::<Vec<Diagnostic>>();
+
+                for diagnostic in diagnostics.iter() {
+                    api.call_function("nvim_buf_set_virtual_text", vec![
+                        current_bf.into_val(), // buffer
+                        highlight_ns.into_val(), // ns
+                        diagnostic.line().into_val(), // line
+                        Value::Array(vec![
+                            Value::Array(vec![
+                                Value::String(diagnostic.text().into()),
+                                Value::String("Error".into()),
+                            ])
+                        ]),
+                        Value::Map(vec![])
+                    ]).await?;
+                }
 
                 let list = "setloclist";
 
@@ -119,15 +184,15 @@ impl NeovimHandler {
                     ])
                 ]).await?;
 
-                api.command("lwindow").await?;
+                // api.command("lwindow").await?;
 
                 // Debug window
                 //writeln!(&mut dbg_buffer, "```")?;
                 //writeln!(&mut dbg_buffer, "{}", buf)?;
                 //writeln!(&mut dbg_buffer, "```\n")?;
                 //writeln!(&mut dbg_buffer, "{:#?}\n", tokens)?;
-                writeln!(&mut dbg_buffer, "{}\n", parse_result.display(&buf))?;
-                writeln!(&mut dbg_buffer, "\n{:#?}", parse_result.nodes)?;
+                writeln!(&mut dbg_buffer, "{}\n\n", parse_result.display(&buf))?;
+                dbg!(dbg_buffer, parse_result.nodes);
 
                 let debug_lines = dbg_buffer.lines().map(|l| l.to_string()).collect_vec();
                 debug_bf.set_lines(0, -1, false, debug_lines).await?;

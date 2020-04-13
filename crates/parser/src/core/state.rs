@@ -46,6 +46,10 @@ impl Arena {
     pub fn iter(&self) -> impl Iterator<Item = &Node> {
         self.nodes.iter()
     }
+
+    pub fn enumerate(&self) -> impl Iterator<Item = (NodeId, &Node)> {
+        self.nodes.iter().enumerate().map(|(id, n)| (NodeId(id), n))
+    }
 }
 
 pub struct State {
