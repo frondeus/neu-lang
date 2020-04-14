@@ -2,6 +2,13 @@
 !true
 ```
 
+[lexer]
+[
+    "OpBang `!`",
+    "True `true`",
+]
+
+[parser]
 ROOT @ 0..5 = `!true`
     UNARY, VALUE @ 0..5 = `!true`
         OP, TOKEN @ 0..1 = `!`
@@ -10,3 +17,12 @@ ROOT @ 0..5 = `!true`
 
 
 ### No Errors ###
+
+
+[eval]
+Some(
+    Boolean(
+        false,
+    ),
+)
+

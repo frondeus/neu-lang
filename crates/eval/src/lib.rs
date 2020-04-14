@@ -122,34 +122,19 @@ pub fn eval(id: NodeId, nodes: &Arena, input: &str) -> Option<Value> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use test_case::test_case;
     use neu_parser::core::{Lexer, State};
     use neu_parser::parser;
 
-    #[test_case("4", "number")]
-    #[test_case("    5", "skip_trivia")]
-    #[test_case("true", "bool_t")]
-    #[test_case("false", "bool_f")]
-    #[test_case("-5", "unary_int")]
-    #[test_case("!true", "unary_bool")]
-    #[test_case("4 + 2", "binary_int")]
-    #[test_case("true == false", "binary_bool")]
-    #[test_case("4 + 2 * 5", "pratt_int")]
-    #[test_case("(4 + 2) * 5", "parens")]
-    #[test_case("true ==", "binary_error")]
-    #[test_case(r#" "foo" "#, "string")]
-    #[test_case("???", "error")]
-    fn tests(input: &str, test_case_name: &str) {
-        let lexer = Lexer::new(input);
+    #[test]
+    fn eval_tests() {
+        test_runner::test_snapshots("eval", |input| {
+            let lexer = Lexer::new(input);
 
-        let res = State::parse(lexer, parser());
-        let result = eval(res.root, &res.nodes, input);
-        println!("{}", res.display(input));
-        neu_parser::core::testing::snap(
-            format!("```\n{}\n```\n\n{:#?}", input, result),
-            file!(),
-            &format!("eval_{}", test_case_name),
-        );
+            let res = State::parse(lexer, parser());
+            let result = eval(res.root, &res.nodes, input);
+
+            format!("{:#?}", result)
+        }).unwrap();
     }
 
 }

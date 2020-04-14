@@ -1,6 +1,9 @@
 use crate::core::{Context, Error, Node, NodeBuilder, OptionExt, Parser, State};
 use crate::{Nodes, Token};
 
+pub enum Assoc {
+    Right, Left
+}
 pub struct Pratt<N, BP, F> {
     next: N,
     bp: BP,
@@ -11,7 +14,7 @@ pub struct Pratt<N, BP, F> {
 impl<N, BP, F> Clone for Pratt<N, BP, F>
 where
     N: Clone + Parser,
-    BP: Clone + Fn(Option<Token>) -> Option<i32>,
+    BP: Clone + Fn(Option<Token>) -> Option<(Assoc, i32)>,
     F: Clone + Fn(&mut NodeBuilder, Option<Token>)
 {
     fn clone(&self) -> Self {
@@ -27,7 +30,7 @@ where
 impl<N, BP, F> Pratt<N, BP, F>
 where
     N: Clone + Parser,
-    BP: Clone + Fn(Option<Token>) -> Option<i32>,
+    BP: Clone + Fn(Option<Token>) -> Option<(Assoc, i32)>,
     F: Clone + Fn(&mut NodeBuilder, Option<Token>)
 {
     pub fn new(next: N, bp: BP, f: F) -> Self {
@@ -48,15 +51,19 @@ where
             let mut left = opt.next.parse(state, ctx);
             loop {
                 let op_token = state.lexer_mut().peek().as_kind();
-                let op_bp = match (opt.bp)(op_token.as_ref().copied()) {
-                    Some(op) if op > opt.rbp => op,
+                let (op_assoc, op_bp) = match (opt.bp)(op_token.as_ref().copied()) {
+                    Some(op) if op.1 > opt.rbp => op,
                     _ => return left,
                 };
 
                 let mut builder = NodeBuilder::new(state, ctx);
                 builder.add(left);
                 (opt.f)(&mut builder, op_token);
-                builder.parse(opt.rbp(op_bp - 1).parser());
+                let new_op_bp = match op_assoc {
+                    Assoc::Left => op_bp + 1,
+                    Assoc::Right => op_bp - 1,
+                };
+                builder.parse(opt.rbp(new_op_bp).parser());
                 left = builder.build();
             }
         }

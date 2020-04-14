@@ -2,9 +2,24 @@
 4
 ```
 
+[lexer]
+[
+    "Number `4`",
+]
+
+[parser]
 ROOT @ 0..1 = `4`
     NUMBER, TOKEN, VALUE @ 0..1 = `4`
     TOKEN @ 1..1 = ``
 
 
 ### No Errors ###
+
+
+[eval]
+Some(
+    Number(
+        4,
+    ),
+)
+

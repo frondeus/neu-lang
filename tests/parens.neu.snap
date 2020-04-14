@@ -2,6 +2,22 @@
 (4 + 2) * 5
 ```
 
+[lexer]
+[
+    "OpenP `(`",
+    "Number `4`",
+    "Trivia ` `",
+    "OpPlus `+`",
+    "Trivia ` `",
+    "Number `2`",
+    "CloseP `)`",
+    "Trivia ` `",
+    "OpStar `*`",
+    "Trivia ` `",
+    "Number `5`",
+]
+
+[parser]
 ROOT @ 0..11 = `(4 + 2) * 5`
     BINARY, VALUE @ 8..11 = `* 5`
         PARENS, VALUE @ 0..8 = `(4 + 2) `
@@ -21,3 +37,12 @@ ROOT @ 0..11 = `(4 + 2) * 5`
 
 
 ### No Errors ###
+
+
+[eval]
+Some(
+    Number(
+        30,
+    ),
+)
+

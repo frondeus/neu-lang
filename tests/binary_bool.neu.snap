@@ -2,6 +2,16 @@
 true == false
 ```
 
+[lexer]
+[
+    "True `true`",
+    "Trivia ` `",
+    "OpDEqual `==`",
+    "Trivia ` `",
+    "False `false`",
+]
+
+[parser]
 ROOT @ 0..13 = `true == false`
     BINARY, VALUE @ 5..13 = `== false`
         BOOLEAN, TOKEN, VALUE @ 0..4 = `true`
@@ -13,3 +23,12 @@ ROOT @ 0..13 = `true == false`
 
 
 ### No Errors ###
+
+
+[eval]
+Some(
+    Boolean(
+        false,
+    ),
+)
+

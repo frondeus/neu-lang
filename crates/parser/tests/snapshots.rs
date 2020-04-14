@@ -1,6 +1,5 @@
 use neu_parser::core::{Lexer, State};
 use neu_parser::parser;
-use test_case::test_case;
 
 /*
     TODO:
@@ -12,7 +11,7 @@ use test_case::test_case;
        * [x] ConstStrings
        * [x] Parens
        * [x] Eval
-       * [ ] Better snapshots
+       * [x] Better snapshots
        * [ ] Proper pratt span
        * [ ] Structs
        * [ ] Arrays
@@ -28,38 +27,23 @@ use test_case::test_case;
        * [ ] Libraries
 */
 
-#[test_case("4", "number")]
-#[test_case("    5", "skip_trivia")]
-#[test_case("true", "bool_t")]
-#[test_case("false", "bool_f")]
-#[test_case("-5", "unary_int")]
-#[test_case("!true", "unary_bool")]
-#[test_case("4 + 2", "binary_int")]
-#[test_case("true == false", "binary_bool")]
-#[test_case("(4 + 2) * 5", "parens")]
-#[test_case("4 + 2 * 5", "pratt_int")]
-#[test_case("true ==", "binary_error")]
-#[test_case(r#" "foo" "#, "string")]
-#[test_case("???", "error")]
-fn tests(input: &str, test_case_name: &str) {
-    {
+#[test]
+fn lexer_tests() {
+    test_runner::test_snapshots("lexer", |input| {
         let lexer = Lexer::new(input);
 
         let res: Vec<_> = lexer.map(|t| t.display(input, true).to_string()).collect();
-        neu_parser::core::testing::snap(
-            format!("```\n{}\n```\n\n{:#?}", input, res),
-            file!(),
-            &format!("lexer_{}", test_case_name),
-        );
-    }
-    {
+        format!("{:#?}", res)
+    }).unwrap();
+}
+
+#[test]
+fn parser_tests() {
+    test_runner::test_snapshots("parser", |input| {
         let lexer = Lexer::new(input);
 
         let res = State::parse(lexer, parser());
-        neu_parser::core::testing::snap(
-            format!("```\n{}\n```\n\n{}", input, res.display(input)),
-            file!(),
-            &format!("parser_{}", test_case_name),
-        );
-    }
+
+        format!("{}", res.display(input))
+    }).unwrap();
 }

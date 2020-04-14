@@ -3,14 +3,14 @@
 echo ""
 echo ""
 
-for file in $(find . -type f -name "*.new"); do
+for file in $(find ./tests -type f -name "*.new"); do
   ACTUAL="$file"
-  EXPECTED="${file%%.new}"
+  DIR=$(dirname "$file")
 
   echo "Accepting: $ACTUAL";
   echo "-----"
 
-  diff -y -N "$EXPECTED" "$ACTUAL" | colordiff
+  cat "$ACTUAL" | colordiff
 
   echo ""
   echo ""
@@ -20,7 +20,11 @@ for file in $(find . -type f -name "*.new"); do
 
   if [[ $REPLY =~ ^[Aa]$ ]]
   then
-    mv -- "$ACTUAL" "$EXPECTED"
+    cwd=$(pwd)
+    cd "$DIR" || exit
+    filename=$(basename -- "$ACTUAL")
+    patch < "$filename"
+    cd "$cwd" || exit
   elif [[ $REPLY =~ ^[Rr]$ ]]
   then
     rm -- "$ACTUAL"

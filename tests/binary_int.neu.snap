@@ -2,6 +2,16 @@
 4 + 2
 ```
 
+[lexer]
+[
+    "Number `4`",
+    "Trivia ` `",
+    "OpPlus `+`",
+    "Trivia ` `",
+    "Number `2`",
+]
+
+[parser]
 ROOT @ 0..5 = `4 + 2`
     BINARY, VALUE @ 2..5 = `+ 2`
         NUMBER, TOKEN, VALUE @ 0..1 = `4`
@@ -13,3 +23,12 @@ ROOT @ 0..5 = `4 + 2`
 
 
 ### No Errors ###
+
+
+[eval]
+Some(
+    Number(
+        6,
+    ),
+)
+

@@ -1,9 +1,0 @@
-```
-true == false
-```
-
-Some(
-    Boolean(
-        false,
-    ),
-)

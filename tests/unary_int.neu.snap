@@ -2,6 +2,13 @@
 -5
 ```
 
+[lexer]
+[
+    "OpMinus `-`",
+    "Number `5`",
+]
+
+[parser]
 ROOT @ 0..2 = `-5`
     UNARY, VALUE @ 0..2 = `-5`
         OP, TOKEN @ 0..1 = `-`
@@ -10,3 +17,12 @@ ROOT @ 0..2 = `-5`
 
 
 ### No Errors ###
+
+
+[eval]
+Some(
+    Number(
+        -5,
+    ),
+)
+

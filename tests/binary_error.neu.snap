@@ -2,6 +2,14 @@
 true ==
 ```
 
+[lexer]
+[
+    "True `true`",
+    "Trivia ` `",
+    "OpDEqual `==`",
+]
+
+[parser]
 ROOT @ 0..7 = `true ==`
     BINARY, VALUE @ 5..7 = `==`
         BOOLEAN, TOKEN, VALUE @ 0..4 = `true`
@@ -13,3 +21,8 @@ ROOT @ 0..7 = `true ==`
 
 ### Errors ###
 Expected one of number, `true`, `false`, `-`, `!`, string, `(` but found EOF @ N3
+
+
+[eval]
+None
+

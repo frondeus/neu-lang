@@ -133,13 +133,13 @@ pub fn parser() -> impl Parser {
 fn value() -> impl Parser {
     let next = |state: &mut State, ctx: &Context| left_value().parse(state, ctx);
     Pratt::new(next, |token| match token {
-        Some(Token::OpStar) => Some(20),
-        Some(Token::OpSlash) => Some(20),
+        Some(Token::OpStar) => Some((Assoc::Left, 20)),
+        Some(Token::OpSlash) => Some((Assoc::Left, 20)),
 
-        Some(Token::OpMinus) => Some(10),
-        Some(Token::OpPlus) => Some(10),
+        Some(Token::OpMinus) => Some((Assoc::Left, 10)),
+        Some(Token::OpPlus) => Some((Assoc::Left, 10)),
 
-        Some(Token::OpDEqual) => Some(1),
+        Some(Token::OpDEqual) => Some((Assoc::Left, 1)),
         _ => None
     }, |builder, op_token| {
         builder.name(Nodes::Binary);
@@ -159,10 +159,8 @@ fn left_value() -> impl Parser {
         builder.name(Nodes::Value);
         match builder.peek_token() {
             Some(Token::Number) => builder.parse(number()),
-            Some(Token::True)
-            | Some(Token::False) => builder.parse(boolean()),
-            Some(Token::OpMinus)
-            | Some(Token::OpBang) => builder.parse(unary()),
+            Some(Token::True) | Some(Token::False) => builder.parse(boolean()),
+            Some(Token::OpMinus) | Some(Token::OpBang) => builder.parse(unary()),
             Some(Token::String) => builder.parse(string()),
             Some(Token::OpenP) => {
                 builder.parse(node(|builder| {
