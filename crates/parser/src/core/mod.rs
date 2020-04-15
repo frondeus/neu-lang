@@ -1,5 +1,4 @@
 pub use text_size::TextRange;
-pub mod testing;
 
 mod input;
 mod lexer;

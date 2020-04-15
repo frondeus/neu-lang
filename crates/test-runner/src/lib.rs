@@ -3,7 +3,7 @@ mod format_changeset;
 use anyhow::{Result, anyhow, bail};
 use std::path::{PathBuf, Path};
 use regex::Regex;
-use difference::Changeset;
+use difference::{Changeset, Difference};
 use crate::format_changeset::format_changeset;
 use std::fmt;
 use std::io::Write;
@@ -17,6 +17,12 @@ impl fmt::Display for Comparison {
     }
 }
 
+impl Comparison {
+    fn changes(&self) -> &Changeset {
+        &self.0
+    }
+}
+
 fn assert_section(entry: Entry, actual: String) -> Result<()> {
     let mut new_snap_path: PathBuf = entry.entry.into();
     let ext = format!("{}.new", entry.section_name);
@@ -25,9 +31,9 @@ fn assert_section(entry: Entry, actual: String) -> Result<()> {
     let expected = entry.section;
 
     if expected != actual {
-        let changeset = Changeset::new(expected, &actual, "\n");
+        let changeset = Comparison(Changeset::new(expected, &actual, "\n"));
         eprintln!("\n```\n{}\n```", entry.input);
-        eprintln!("\n{}", Comparison(changeset));
+        eprintln!("\n{}", changeset);
 
         std::fs::File::create(&new_snap_path)
             .and_then(|mut file| {
@@ -44,11 +50,15 @@ fn assert_section(entry: Entry, actual: String) -> Result<()> {
                 writeln!(file, "+++ {} {}", snap_basename, dt)?;
                 writeln!(file, "@@ -{},{} +{},{} @@", entry.line, expected.len()+1, entry.line, actual.len()+1)?;
                 writeln!(file, " [{}]", entry.section_name)?;
-                for line in expected {
-                    writeln!(file, "-{}", line)?;
-                }
-                for line in actual {
-                    writeln!(file, "+{}", line)?;
+                for diffs in changeset.changes().diffs.iter() {
+                    let (text, mark) = match diffs {
+                        Difference::Same(text)  => (text, " "),
+                        Difference::Rem(text)  => (text, "-"),
+                        Difference::Add(text)  => (text, "+"),
+                    };
+                    for line in text.lines() {
+                        writeln!(file, "{}{}", mark, line)?;
+                    }
                 }
                 Ok(())
             })

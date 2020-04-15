@@ -15,7 +15,7 @@ for file in $(find ./tests -type f -name "*.new"); do
   echo ""
   echo ""
   echo "-----"
-  read -p "[A]ccept, [R]reject or [S]kip" -n 1 -r
+  read -p "[Aa]ccept, [Rr]reject or [Ss]kip: " -n 1 -r
   echo
 
   if [[ $REPLY =~ ^[Aa]$ ]]
