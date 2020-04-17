@@ -1,6 +1,7 @@
 {
     health = 6 * 10
-    + 4,
+        + 4,
     sanity = 10 + 2,
-    sila = 4 + 2
+    strength = 4 + 
+        2
 }

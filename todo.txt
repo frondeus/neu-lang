@@ -10,8 +10,9 @@ TODO:
    * [x] Better snapshots
    * [x] Proper pratt span
    * [x] Structs
-   * [ ] Structs proper line ending
-   * [ ] Arrays
+   * [x] Structs proper line ending
+   * [x] Arrays
+   * [ ] Eval structs & arrays
    * [ ] Access to fields
    * [ ] Generate json
    * [ ] Local variables

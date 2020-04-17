@@ -54,7 +54,7 @@ ROOT @ 0..44 = `{\n    health = 10 - 2,\n    sanity = 50 + 2\n}`
         TRIVIA @ 33..34 = ` `
         TOKEN @ 34..35 = `=`
         TRIVIA @ 35..36 = ` `
-        BINARY, VALUE @ 36..43 = `50 + 2\n`
+        BINARY, VALUE @ 36..42 = `50 + 2`
             NUMBER, TOKEN, VALUE @ 36..38 = `50`
             TRIVIA @ 38..39 = ` `
             OP, TOKEN @ 39..40 = `+`

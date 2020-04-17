@@ -1,0 +1,36 @@
+```
+[ 10, 50 ]
+```
+
+[lexer]
+[
+    "OpenB `[`",
+    "Trivia ` `",
+    "Number `10`",
+    "Comma `,`",
+    "Trivia ` `",
+    "Number `50`",
+    "Trivia ` `",
+    "CloseB `]`",
+]
+
+[parser]
+ROOT @ 0..10 = `[ 10, 50 ]`
+    ARRAY, VALUE @ 0..10 = `[ 10, 50 ]`
+        TOKEN @ 0..1 = `[`
+        TRIVIA @ 1..2 = ` `
+        NUMBER, TOKEN, VALUE @ 2..4 = `10`
+        TOKEN @ 4..5 = `,`
+        TRIVIA @ 5..6 = ` `
+        NUMBER, TOKEN, VALUE @ 6..8 = `50`
+        TRIVIA @ 8..9 = ` `
+        TOKEN @ 9..10 = `]`
+    TOKEN @ 10..10 = ``
+
+
+### No Errors ###
+
+
+[eval]
+`[10, 50]`
+

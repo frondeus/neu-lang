@@ -58,6 +58,12 @@ mod token {
         #[display(fmt = "`}}`")]
         CloseC,
 
+        #[display(fmt = "`[`")]
+        OpenB,
+
+        #[display(fmt = "`]`")]
+        CloseB,
+
         #[display(fmt = "`,`")]
         Comma
     }
@@ -104,6 +110,8 @@ pub mod lexer {
         if peeked == ')' { return Some((Token::CloseP, input.chomp(1))); }
         if peeked == '{' { return Some((Token::OpenC, input.chomp(1))); }
         if peeked == '}' { return Some((Token::CloseC, input.chomp(1))); }
+        if peeked == '[' { return Some((Token::OpenB, input.chomp(1))); }
+        if peeked == ']' { return Some((Token::CloseB, input.chomp(1))); }
 
         if peeked == '"' {
             let rest = i.chars().skip(1).take_while(|c| *c != '"').count();
@@ -138,7 +146,9 @@ pub mod nodes {
 
         Struct,
         Identifier,
-        Key
+        Key,
+
+        Array
     }
 }
 
@@ -181,7 +191,7 @@ fn left_value() -> impl Parser {
     const VALUE_TOKENS: &[Token] = &[
         Token::Number, Token::True, Token::False,
         Token::OpMinus, Token::OpBang, Token::String, Token::OpenP,
-        Token::OpenC
+        Token::OpenC, Token::OpenB
     ];
 
     node(|builder| {
@@ -193,6 +203,7 @@ fn left_value() -> impl Parser {
             Some(Token::OpMinus) | Some(Token::OpBang) => builder.parse(unary()),
             Some(Token::String) => builder.parse(string()),
             Some(Token::OpenC) => builder.parse(strukt()),
+            Some(Token::OpenB) => builder.parse(array()),
             Some(Token::OpenP) => {
                 builder.parse(node(|builder| {
                     builder.name(Nodes::Parens);
@@ -203,6 +214,35 @@ fn left_value() -> impl Parser {
             }
             _ => builder.parse( expected( VALUE_TOKENS))
         };
+    })
+}
+
+fn array() -> impl Parser {
+    node(|builder| {
+        builder.name(Nodes::Array);
+        builder.parse(token(Token::OpenB));
+        match builder.peek_token() {
+            Some(Token::CloseB) => (),
+            _ => 'outer: loop {
+                builder.parse(value());
+                'inner: loop {
+                    match builder.peek_token() {
+                        None | Some(Token::CloseB) => { break 'outer; },
+                        Some(Token::Comma) => {
+                            builder.parse(token(Token::Comma)); //recover(","));
+                            if let Some(Token::CloseB) = builder.peek_token() { // Trailing comma
+                                break 'outer;
+                            }
+                            break 'inner;
+                        },
+                        _ => {
+                            builder.parse(tokens(vec![Token::Comma, Token::CloseB]));
+                        }
+                    }
+                }
+            }
+        }
+        builder.parse(token(Token::CloseB));
     })
 }
 

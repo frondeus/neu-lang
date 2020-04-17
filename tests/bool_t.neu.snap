@@ -17,9 +17,5 @@ ROOT @ 0..4 = `true`
 
 
 [eval]
-Some(
-    Boolean(
-        true,
-    ),
-)
+`true`
 

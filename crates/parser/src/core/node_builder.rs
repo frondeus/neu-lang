@@ -6,22 +6,21 @@ use text_size::{TextRange, TextSize};
 pub struct NodeBuilder<'a> {
     state: &'a mut State,
     ctx: &'a Context<'a>,
-
+    span: TextRange,
     names: BTreeSet<Name>,
     children: Vec<NodeId>,
-    from: TextSize,
     error: Option<Error>
 }
 
 impl<'a> NodeBuilder<'a> {
     pub(crate) fn new(state: &'a mut State, ctx: &'a Context<'a>) -> Self {
         let from = state.lexer().input().cursor;
+        let span = TextRange(from, from);
         Self {
             state, ctx,
-
+            span,
             names: Default::default(),
             children: Default::default(),
-            from,
             error: None
         }
     }
@@ -33,7 +32,11 @@ impl<'a> NodeBuilder<'a> {
     }
 
     pub fn next_token(&mut self) -> Option<crate::core::spanned::Spanned<crate::Token>> {
-        self.state.lexer_mut().next()
+        let next = self.state.lexer_mut().next();
+        let to = self.state.lexer().input().cursor;
+        let span = TextRange(to, to);
+        self.span = TextRange::covering(self.span, span);
+        next
     }
 
     pub fn name(&mut self, name: Name) -> &mut Self {
@@ -88,20 +91,17 @@ impl<'a> NodeBuilder<'a> {
 
     pub fn build(self) -> Node {
         let NodeBuilder {
-            from,
             names,
             children,
             error,
             state,
+            mut span,
             ..
         } = self;
-        let lexer = state.lexer();
-        let to = lexer.input().cursor;
-
-        let mut span = TextRange(from, to);
         for child in &children {
-            let child_span = &state.nodes().get(*child).span;
-            span = TextRange::covering(span, *child_span);
+            let child_node = &state.nodes().get(*child);
+            if child_node.is(Nodes::Trivia) { continue; }
+            span = TextRange::covering(span, child_node.span);
         }
 
         if let Some(error) = error {

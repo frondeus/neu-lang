@@ -21,9 +21,5 @@ ROOT @ 0..7 = ` \"foo\" `
 
 
 [eval]
-Some(
-    String(
-        "foo",
-    ),
-)
+`"foo"`
 

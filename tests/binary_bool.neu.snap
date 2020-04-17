@@ -26,9 +26,5 @@ ROOT @ 0..13 = `true == false`
 
 
 [eval]
-Some(
-    Boolean(
-        false,
-    ),
-)
+`false`
 

@@ -1,51 +1,11 @@
+mod children;
+mod value;
+
 use neu_parser::core::{NodeId, Arena, Node, Name};
 use neu_parser::Nodes;
+use value::Value;
+use children::Children;
 
-#[derive(Debug)]
-pub enum Value {
-    Number(i64),
-    Boolean(bool),
-    String(String),
-}
-
-struct Children<'a, I> {
-    iter: I,
-    arena: &'a Arena
-}
-
-impl<'a, I> Iterator for Children<'a, I>
-    where I: Iterator<Item = NodeId>
-{
-    type Item = (NodeId, &'a Node);
-
-    fn next(&mut self) -> Option<Self::Item> {
-        let mut id = self.iter.next()?;
-        let mut node = self.arena.get(id);
-        while node.is(Nodes::Trivia) {
-            id = self.iter.next()?;
-            node = self.arena.get(id);
-        }
-
-        Some((id, node))
-    }
-}
-
-
-impl<'a, I> Children<'a, I>
-where I: Iterator<Item = NodeId>
-{
-    fn new(iter: I, arena: &'a Arena) -> Self {
-        Self { iter, arena }
-    }
-
-    fn find_node(&mut self, expected: Name) -> Option<(NodeId, &'a Node)> {
-        let mut next = self.next()?;
-        while !next.1.is(expected) {
-            next = self.next()?;
-        }
-        Some(next)
-    }
-}
 
 struct Eval<'a> {
     pub nodes: &'a Arena,
@@ -106,6 +66,15 @@ impl<'a> Eval<'a> {
             };
         }
 
+        if node.is(Nodes::Array) {
+            let mut values = vec![];
+            while let Some((value, _)) = children.find_node(Nodes::Value) {
+                let value = self.eval(value)?;
+                values.push(value);
+            }
+            return Some(Value::Array(values));
+        }
+
         if node.is(Nodes::Parens) {
             let (value, _) = children.find_node(Nodes::Value)?;
             return self.eval(value);
@@ -133,7 +102,10 @@ mod tests {
             let res = State::parse(lexer, parser());
             let result = eval(res.root, &res.nodes, input);
 
-            format!("{:#?}", result)
+            match result {
+                None => "None".to_string(),
+                Some(r) => format!("`{}`", r)
+            }
         }).unwrap();
     }
 

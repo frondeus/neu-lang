@@ -20,7 +20,7 @@
 [parser]
 ROOT @ 0..11 = `(4 + 2) * 5`
     BINARY, VALUE @ 0..11 = `(4 + 2) * 5`
-        PARENS, VALUE @ 0..8 = `(4 + 2) `
+        PARENS, VALUE @ 0..7 = `(4 + 2)`
             TOKEN @ 0..1 = `(`
             BINARY, VALUE @ 1..6 = `4 + 2`
                 NUMBER, TOKEN, VALUE @ 1..2 = `4`
@@ -40,9 +40,5 @@ ROOT @ 0..11 = `(4 + 2) * 5`
 
 
 [eval]
-Some(
-    Number(
-        30,
-    ),
-)
+`30`
 

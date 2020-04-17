@@ -18,7 +18,7 @@
 [parser]
 ROOT @ 0..9 = `6 - 0 + 4`
     BINARY, VALUE @ 0..9 = `6 - 0 + 4`
-        BINARY, VALUE @ 0..6 = `6 - 0 `
+        BINARY, VALUE @ 0..5 = `6 - 0`
             NUMBER, TOKEN, VALUE @ 0..1 = `6`
             TRIVIA @ 1..2 = ` `
             OP, TOKEN @ 2..3 = `-`
@@ -35,9 +35,5 @@ ROOT @ 0..9 = `6 - 0 + 4`
 
 
 [eval]
-Some(
-    Number(
-        10,
-    ),
-)
+`10`
 
