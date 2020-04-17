@@ -1,7 +1,7 @@
 use crate::core::{Context, Name, Node, Parser, State, NodeId, Error};
 use crate::Nodes;
 use std::collections::BTreeSet;
-use text_size::{TextRange, TextSize};
+use text_size::TextRange;
 
 pub struct NodeBuilder<'a> {
     state: &'a mut State,

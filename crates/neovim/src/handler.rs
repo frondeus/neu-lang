@@ -120,7 +120,7 @@ impl NeovimHandler {
                                     line.into_val(), // line
                                     Value::Array(vec![
                                         Value::Array(vec![
-                                            Value::String(format!("= {:?}", &value).into()),
+                                            Value::String(format!("= {}", &value).into()),
                                             Value::String("Comment".into()),
                                         ])
                                     ]),

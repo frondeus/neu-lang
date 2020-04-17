@@ -1,7 +1,7 @@
 mod children;
 mod value;
 
-use neu_parser::core::{NodeId, Arena, Node, Name};
+use neu_parser::core::{NodeId, Arena};
 use neu_parser::Nodes;
 use value::Value;
 use children::Children;
