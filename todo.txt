@@ -1,0 +1,27 @@
+TODO:
+   * [x] Integers
+   * [x] Immediate Constants
+   * [x] Unary primitives
+   * [x] Binary primitives
+   * [x] Pratt parsers
+   * [x] ConstStrings
+   * [x] Parens
+   * [x] Eval
+   * [x] Better snapshots
+   * [x] Proper pratt span
+   * [x] Structs
+   * [ ] Structs proper line ending
+   * [ ] Arrays
+   * [ ] Access to fields
+   * [ ] Generate json
+   * [ ] Local variables
+   * [ ] Blocks
+   * [ ] Conditional Expressions
+   * [ ] Procedure Calls
+   * [ ] References
+   * [ ] Closures
+   * [ ] Heap Allocation
+   * [ ] Proper tail calls
+   * [ ] Complex constants
+   * [ ] Assignment
+   * [ ] Libraries

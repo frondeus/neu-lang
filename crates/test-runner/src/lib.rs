@@ -17,9 +17,10 @@ fn assert_section(entry: Entry, actual: String) -> Result<()> {
         let expected_lines = expected.lines().collect::<Vec<_>>();
         let actual_lines = actual.lines().collect::<Vec<_>>();
         let comparison = Comparison::new(&expected_lines, &actual_lines);
-        eprintln!("\nFound mismatch in section [{}]\n{}", entry.section_name, comparison.display(DisplayOptions {
-            offset: entry.line
-        }));
+        eprintln!("\nFound mismatch in section [{}] in {}\n{}", entry.section_name, entry.entry.display(),
+                  comparison.display(DisplayOptions {
+                      offset: entry.line
+                  }));
 
         std::fs::File::create(&new_snap_path)
             .and_then(|mut file| {
@@ -42,7 +43,7 @@ fn assert_section(entry: Entry, actual: String) -> Result<()> {
             })
             ?;
 
-        bail!("Not matching");
+        bail!("failed");
     }
     else if new_snap_path.exists() {
         std::fs::remove_file(new_snap_path)?;

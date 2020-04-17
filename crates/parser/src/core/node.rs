@@ -83,7 +83,7 @@ impl <'s, 'n, 'a> fmt::Display for DisplayNode<'s, 'n, 'a> {
         let width = f.width().unwrap_or_default();
         if width > 0 { write!(f, "{:width$}", " ", width = width)?; }
 
-        let span = &self.str[self.node.span];
+        let span = &self.str[self.node.span].escape_default();
         writeln!(f, "{} @ {:?} = `{}`", self.node.names.iter().join(", ").to_uppercase(), self.node.span, span)?;
         let c_width = width + 4;
         for child in self.node.children.iter().map(|child| self.arena.get(child).display(self.str, self.arena)) {
@@ -92,3 +92,4 @@ impl <'s, 'n, 'a> fmt::Display for DisplayNode<'s, 'n, 'a> {
         Ok(())
     }
 }
+

@@ -7,8 +7,8 @@ mod token {
         #[display(fmt = "error")]
         Error,
 
-        #[display(fmt = "` `, `\n`, `\t`")]
-        Trivia, // Whitespace
+        #[display(fmt = "` `, `\t`, `\n`")]
+        Trivia, // whitespace
 
         #[display(fmt = "number")]
         Number,
@@ -137,6 +137,7 @@ pub mod nodes {
         Op,
 
         Struct,
+        Identifier,
         Key
     }
 }
@@ -205,10 +206,43 @@ fn left_value() -> impl Parser {
     })
 }
 
+fn identifier() -> impl Parser {
+    token(Token::Identifier).map(|n| n.with_name(Nodes::Identifier))
+}
+
+fn strukt_key() -> impl Parser {
+    identifier().map(|n| n.with_name(Nodes::Key))
+}
+
 fn strukt() -> impl Parser {
     node(|builder| {
         builder.name(Nodes::Struct);
         builder.parse(token(Token::OpenC));
+        match builder.peek_token() {
+            Some(Token::CloseC) => (),
+            _ => 'outer: loop {
+                builder.parse(strukt_key());
+                builder.parse(token(Token::OpAssign));
+                builder.parse(value());
+                'inner: loop {
+                    match builder.peek_token() {
+                        None | Some(Token::CloseC) => {
+                            break 'outer
+                        },
+                        Some(Token::Comma) => {
+                            builder.parse(token(Token::Comma)); //recover(","));
+                            if let Some(Token::CloseC) = builder.peek_token() { // Trailing comma
+                                break 'outer;
+                            }
+                            break 'inner;
+                        }
+                        _ => {
+                            builder.parse(tokens(vec![Token::Comma, Token::CloseC]));
+                        }
+                    }
+                }
+            }
+        }
         builder.parse(token(Token::CloseC));
     })
 }
@@ -254,32 +288,6 @@ fn trivia() -> impl Parser {
 mod tests {
     use crate::core::{Lexer, State};
     use crate::parser;
-
-    /*
-        TODO:
-           * [x] Integers
-           * [x] Immediate Constants
-           * [x] Unary primitives
-           * [x] Binary primitives
-           * [x] Pratt parsers
-           * [x] ConstStrings
-           * [x] Parens
-           * [x] Eval
-           * [x] Better snapshots
-           * [x] Proper pratt span
-           * [ ] Structs
-           * [ ] Arrays
-           * [ ] Local variables
-           * [ ] Conditional Expressions
-           * [ ] Procedure Calls
-           * [ ] References
-           * [ ] Closures
-           * [ ] Heap Allocation
-           * [ ] Proper tail calls
-           * [ ] Complex constants
-           * [ ] Assignment
-           * [ ] Libraries
-    */
 
     #[test]
     fn lexer_tests() {

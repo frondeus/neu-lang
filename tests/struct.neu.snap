@@ -26,3 +26,30 @@
 ]
 
 [parser]
+ROOT @ 0..36 = `{\n    health = 10,\n    sanity = 50\n}`
+    STRUCT, VALUE @ 0..36 = `{\n    health = 10,\n    sanity = 50\n}`
+        TOKEN @ 0..1 = `{`
+        TRIVIA @ 1..6 = `\n    `
+        IDENTIFIER, KEY, TOKEN @ 6..12 = `health`
+        TRIVIA @ 12..13 = ` `
+        TOKEN @ 13..14 = `=`
+        TRIVIA @ 14..15 = ` `
+        NUMBER, TOKEN, VALUE @ 15..17 = `10`
+        TOKEN @ 17..18 = `,`
+        TRIVIA @ 18..23 = `\n    `
+        IDENTIFIER, KEY, TOKEN @ 23..29 = `sanity`
+        TRIVIA @ 29..30 = ` `
+        TOKEN @ 30..31 = `=`
+        TRIVIA @ 31..32 = ` `
+        NUMBER, TOKEN, VALUE @ 32..34 = `50`
+        TRIVIA @ 34..35 = `\n`
+        TOKEN @ 35..36 = `}`
+    TOKEN @ 36..36 = ``
+
+
+### No Errors ###
+
+
+[eval]
+None
+
