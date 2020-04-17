@@ -12,7 +12,7 @@ TODO:
    * [x] Structs
    * [x] Structs proper line ending
    * [x] Arrays
-   * [ ] Eval structs & arrays
+   * [x] Eval structs & arrays
    * [ ] Access to fields
    * [ ] Generate json
    * [ ] Local variables

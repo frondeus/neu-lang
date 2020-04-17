@@ -5,6 +5,7 @@ use neu_parser::core::{NodeId, Arena, Node, Name};
 use neu_parser::Nodes;
 use value::Value;
 use children::Children;
+use std::collections::BTreeMap;
 
 
 struct Eval<'a> {
@@ -73,6 +74,17 @@ impl<'a> Eval<'a> {
                 values.push(value);
             }
             return Some(Value::Array(values));
+        }
+
+        if node.is(Nodes::Struct) {
+            let mut map = BTreeMap::default();
+            while let Some((_, key)) = children.find_node(Nodes::Key) {
+                let key = self.input[key.span].to_string();
+                let (value, _) = children.find_node(Nodes::Value)?;
+                let value = self.eval(value)?;
+                map.insert(key, value);
+            }
+            return Some(Value::Struct(map));
         }
 
         if node.is(Nodes::Parens) {

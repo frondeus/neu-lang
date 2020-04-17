@@ -70,5 +70,8 @@ ROOT @ 0..48 = `{\n    health = 10\n    - 2,\n    sanity = 50 + 2\n}`
 
 
 [eval]
-None
+`{
+    health = 8,
+    sanity = 52,
+ }`
 

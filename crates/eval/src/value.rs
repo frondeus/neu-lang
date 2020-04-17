@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 use std::fmt;
 use itertools::Itertools;
 
@@ -8,11 +8,13 @@ pub enum Value {
     Boolean(bool),
     String(String),
     Array(Vec<Value>),
-    Struct(HashMap<String, Value>)
+    Struct(BTreeMap<String, Value>)
 }
 
 impl fmt::Display for Value {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let width = f.width().unwrap_or_default();
+        //if width > 0 { write!(f, "{:width$}", " ", width = width)?; }
         match self {
             Self::Number(n) => write!(f, "{}", n),
             Self::Boolean(b) => write!(f, "{}", b),
@@ -20,10 +22,11 @@ impl fmt::Display for Value {
             Self::Array(a) => write!(f, "[{}]", a.iter().map(|v| v.to_string()).join(", ")),
             Self::Struct(s) => {
                 writeln!(f, "{{")?;
+                let c_width = width + 4;
                 for (k, v) in s.iter() {
-                    writeln!(f, "{} = {},", k, v)?;
+                    writeln!(f, "{:width$}{} = {:width$},", " ", k, v, width = c_width)?;
                 }
-                writeln!(f, "}}")
+                write!(f, "{:width$}}}", " ", width = width)
             }
         }
     }
