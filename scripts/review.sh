@@ -23,7 +23,7 @@ for file in $(find ./tests -type f -name "*.new"); do
     cwd=$(pwd)
     cd "$DIR" || exit
     filename=$(basename -- "$ACTUAL")
-    patch < "$filename"
+    patch --ignore-whitespace --verbose < "$filename" || exit
     cd "$cwd" || exit
   elif [[ $REPLY =~ ^[Rr]$ ]]
   then

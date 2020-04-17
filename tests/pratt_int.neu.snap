@@ -17,12 +17,12 @@
 
 [parser]
 ROOT @ 0..9 = `4 + 2 * 5`
-    BINARY, VALUE @ 2..9 = `+ 2 * 5`
+    BINARY, VALUE @ 0..9 = `4 + 2 * 5`
         NUMBER, TOKEN, VALUE @ 0..1 = `4`
         TRIVIA @ 1..2 = ` `
         OP, TOKEN @ 2..3 = `+`
         TRIVIA @ 3..4 = ` `
-        BINARY, VALUE @ 6..9 = `* 5`
+        BINARY, VALUE @ 4..9 = `2 * 5`
             NUMBER, TOKEN, VALUE @ 4..5 = `2`
             TRIVIA @ 5..6 = ` `
             OP, TOKEN @ 6..7 = `*`

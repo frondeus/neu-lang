@@ -1,0 +1,17 @@
+--- left.txt	2020-04-16 17:33:31.643000000 +0200
++++ right.txt	2020-04-17 12:11:21.693017772 +0200
+@@ -36,10 +36,10 @@
+         ERROR, TOKEN @ 6..12 = `health`
+         TRIVIA @ 12..13 = ` `
+     ERROR, TOKEN @ 13..14 = `=`
+-.
+-.
++
++
+ ### Errors ###
+ Expected `}` but found `health` @ N2
+ Expected EOF but found `=` @ N5
+-.
+-.
++
++

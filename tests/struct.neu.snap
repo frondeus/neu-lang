@@ -1,0 +1,28 @@
+```
+{
+    health = 10,
+    sanity = 50
+}
+```
+
+[lexer]
+[
+    "OpenC `{`",
+    "Trivia `\n    `",
+    "Identifier `health`",
+    "Trivia ` `",
+    "OpAssign `=`",
+    "Trivia ` `",
+    "Number `10`",
+    "Comma `,`",
+    "Trivia `\n    `",
+    "Identifier `sanity`",
+    "Trivia ` `",
+    "OpAssign `=`",
+    "Trivia ` `",
+    "Number `50`",
+    "Trivia `\n`",
+    "CloseC `}`",
+]
+
+[parser]

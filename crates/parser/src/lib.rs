@@ -37,6 +37,12 @@ mod token {
         #[display(fmt = "`==`")]
         OpDEqual,
 
+        #[display(fmt = "`=`")]
+        OpAssign,
+
+        #[display(fmt = "identifier")]
+        Identifier,
+
         #[display(fmt = "string")]
         String,
 
@@ -44,8 +50,17 @@ mod token {
         OpenP,
 
         #[display(fmt = "`)`")]
-        CloseP
-}
+        CloseP,
+
+        #[display(fmt = "`{{`")]
+        OpenC,
+
+        #[display(fmt = "`}}`")]
+        CloseC,
+
+        #[display(fmt = "`,`")]
+        Comma
+    }
 }
 
 pub mod lexer {
@@ -83,13 +98,23 @@ pub mod lexer {
         if peeked == '+' { return Some((Token::OpPlus, input.chomp(1))); }
         if peeked == '*' { return Some((Token::OpStar, input.chomp(1))); }
         if peeked == '/' { return Some((Token::OpSlash, input.chomp(1))); }
+        if peeked == '=' { return Some((Token::OpAssign, input.chomp(1))); }
+        if peeked == ',' { return Some((Token::Comma, input.chomp(1))); }
         if peeked == '(' { return Some((Token::OpenP, input.chomp(1))); }
         if peeked == ')' { return Some((Token::CloseP, input.chomp(1))); }
+        if peeked == '{' { return Some((Token::OpenC, input.chomp(1))); }
+        if peeked == '}' { return Some((Token::CloseC, input.chomp(1))); }
 
         if peeked == '"' {
             let rest = i.chars().skip(1).take_while(|c| *c != '"').count();
 
             return Some((Token::String, input.chomp(rest + 2)));
+        }
+
+        if peeked.is_ascii_alphabetic() {
+            let rest = i.chars()
+                .take_while(|c| c.is_ascii_alphanumeric() || *c == '_').count();
+            return Some((Token::Identifier, input.chomp(rest)));
         }
 
         Some((Token::Error, input.chomp(1)))
@@ -109,7 +134,10 @@ pub mod nodes {
 
         Unary,
         Binary,
-        Op
+        Op,
+
+        Struct,
+        Key
     }
 }
 
@@ -151,7 +179,8 @@ fn value() -> impl Parser {
 fn left_value() -> impl Parser {
     const VALUE_TOKENS: &[Token] = &[
         Token::Number, Token::True, Token::False,
-        Token::OpMinus, Token::OpBang, Token::String, Token::OpenP
+        Token::OpMinus, Token::OpBang, Token::String, Token::OpenP,
+        Token::OpenC
     ];
 
     node(|builder| {
@@ -162,6 +191,7 @@ fn left_value() -> impl Parser {
             Some(Token::True) | Some(Token::False) => builder.parse(boolean()),
             Some(Token::OpMinus) | Some(Token::OpBang) => builder.parse(unary()),
             Some(Token::String) => builder.parse(string()),
+            Some(Token::OpenC) => builder.parse(strukt()),
             Some(Token::OpenP) => {
                 builder.parse(node(|builder| {
                     builder.name(Nodes::Parens);
@@ -172,6 +202,14 @@ fn left_value() -> impl Parser {
             }
             _ => builder.parse( expected( VALUE_TOKENS))
         };
+    })
+}
+
+fn strukt() -> impl Parser {
+    node(|builder| {
+        builder.name(Nodes::Struct);
+        builder.parse(token(Token::OpenC));
+        builder.parse(token(Token::CloseC));
     })
 }
 
@@ -228,7 +266,7 @@ mod tests {
            * [x] Parens
            * [x] Eval
            * [x] Better snapshots
-           * [ ] Proper pratt span
+           * [x] Proper pratt span
            * [ ] Structs
            * [ ] Arrays
            * [ ] Local variables

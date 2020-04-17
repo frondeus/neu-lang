@@ -19,10 +19,10 @@
 
 [parser]
 ROOT @ 0..11 = `(4 + 2) * 5`
-    BINARY, VALUE @ 8..11 = `* 5`
+    BINARY, VALUE @ 0..11 = `(4 + 2) * 5`
         PARENS, VALUE @ 0..8 = `(4 + 2) `
             TOKEN @ 0..1 = `(`
-            BINARY, VALUE @ 3..6 = `+ 2`
+            BINARY, VALUE @ 1..6 = `4 + 2`
                 NUMBER, TOKEN, VALUE @ 1..2 = `4`
                 TRIVIA @ 2..3 = ` `
                 OP, TOKEN @ 3..4 = `+`

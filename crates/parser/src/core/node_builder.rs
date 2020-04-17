@@ -97,7 +97,13 @@ impl<'a> NodeBuilder<'a> {
         } = self;
         let lexer = state.lexer();
         let to = lexer.input().cursor;
-        let span = TextRange(from, to);
+
+        let mut span = TextRange(from, to);
+        for child in &children {
+            let child_span = &state.nodes().get(*child).span;
+            span = TextRange::covering(span, *child_span);
+        }
+
         if let Some(error) = error {
             state.error(error);
         }

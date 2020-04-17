@@ -11,7 +11,7 @@ true ==
 
 [parser]
 ROOT @ 0..7 = `true ==`
-    BINARY, VALUE @ 5..7 = `==`
+    BINARY, VALUE @ 0..7 = `true ==`
         BOOLEAN, TOKEN, VALUE @ 0..4 = `true`
         TRIVIA @ 4..5 = ` `
         OP, TOKEN @ 5..7 = `==`
@@ -20,7 +20,7 @@ ROOT @ 0..7 = `true ==`
 
 
 ### Errors ###
-Expected one of number, `true`, `false`, `-`, `!`, string, `(` but found EOF @ N3
+Expected one of number, `true`, `false`, `-`, `!`, string, `(`, `{` but found EOF @ N3
 
 
 [eval]

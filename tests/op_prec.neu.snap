@@ -17,8 +17,8 @@
 
 [parser]
 ROOT @ 0..9 = `6 - 0 + 4`
-    BINARY, VALUE @ 6..9 = `+ 4`
-        BINARY, VALUE @ 2..6 = `- 0 `
+    BINARY, VALUE @ 0..9 = `6 - 0 + 4`
+        BINARY, VALUE @ 0..6 = `6 - 0 `
             NUMBER, TOKEN, VALUE @ 0..1 = `6`
             TRIVIA @ 1..2 = ` `
             OP, TOKEN @ 2..3 = `-`

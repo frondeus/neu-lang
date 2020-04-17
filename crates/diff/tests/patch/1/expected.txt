@@ -1,0 +1,17 @@
+--- left.txt	2020-04-17 11:46:59.133698243 +0200
++++ right.txt	2020-04-17 11:47:10.341616016 +0200
+@@ -11,11 +11,11 @@
+ ROOT @ 0..3 = `???`
+     ERROR, VALUE @ 0..3 = `???`
+     TOKEN @ 3..3 = ``
+-.
+-.
++
++
+ ### Errors ###
+ Expected one of number, `true`, `false`, `-`, `!`, string, `(`, `{` but found `???` @ N0
+-.
+-.
++
++
+ [eval]

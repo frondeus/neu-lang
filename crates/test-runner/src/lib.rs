@@ -1,27 +1,10 @@
-mod format_changeset;
-
 use anyhow::{Result, anyhow, bail};
 use std::path::{PathBuf, Path};
 use regex::Regex;
-use difference::{Changeset, Difference};
-use crate::format_changeset::format_changeset;
-use std::fmt;
 use std::io::Write;
 use std::time::SystemTime;
 use chrono::{DateTime, Local};
-
-struct Comparison(Changeset);
-impl fmt::Display for Comparison {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        format_changeset(f, &self.0)
-    }
-}
-
-impl Comparison {
-    fn changes(&self) -> &Changeset {
-        &self.0
-    }
-}
+use neu_diff::{Comparison, PatchOptions, DisplayOptions};
 
 fn assert_section(entry: Entry, actual: String) -> Result<()> {
     let mut new_snap_path: PathBuf = entry.entry.into();
@@ -31,36 +14,31 @@ fn assert_section(entry: Entry, actual: String) -> Result<()> {
     let expected = entry.section;
 
     if expected != actual {
-        let changeset = Comparison(Changeset::new(expected, &actual, "\n"));
-        eprintln!("\n```\n{}\n```", entry.input);
-        eprintln!("\n{}", changeset);
+        let expected_lines = expected.lines().collect::<Vec<_>>();
+        let actual_lines = actual.lines().collect::<Vec<_>>();
+        let comparison = Comparison::new(&expected_lines, &actual_lines);
+        eprintln!("\nFound mismatch in section [{}]\n{}", entry.section_name, comparison.display(DisplayOptions {
+            offset: entry.line
+        }));
 
         std::fs::File::create(&new_snap_path)
             .and_then(|mut file| {
-                let expected = expected.lines().collect::<Vec<_>>();
-                let actual = actual.lines().collect::<Vec<_>>();
                 let datetime: DateTime<Local> = entry.modified.into();
                 let dt = datetime.format("%F %T %z");
 
                 let entry_basename = entry.entry.file_name().unwrap().to_string_lossy();
                 let snap_basename = new_snap_path.file_name().unwrap().to_string_lossy();
 
+                writeln!(file, "```")?;
                 writeln!(file, "{}", entry.input)?;
-                writeln!(file, "--- {} {}", entry_basename, dt)?;
-                writeln!(file, "+++ {} {}", snap_basename, dt)?;
-                writeln!(file, "@@ -{},{} +{},{} @@", entry.line, expected.len()+1, entry.line, actual.len()+1)?;
-                writeln!(file, " [{}]", entry.section_name)?;
-                for diffs in changeset.changes().diffs.iter() {
-                    let (text, mark) = match diffs {
-                        Difference::Same(text)  => (text, " "),
-                        Difference::Rem(text)  => (text, "-"),
-                        Difference::Add(text)  => (text, "+"),
-                    };
-                    for line in text.lines() {
-                        writeln!(file, "{}{}", mark, line)?;
+                writeln!(file, "```")?;
+                write!(file, "{}", comparison.patch(
+                    entry_basename, &dt,
+                    snap_basename, &dt,
+                    PatchOptions {
+                        offset: entry.line,
                     }
-                }
-                Ok(())
+                ))
             })
             ?;
 
@@ -95,21 +73,20 @@ pub fn test_snapshots(section_name: &str, f: impl Fn(&str) -> String) -> Result<
         let mut section = None;
         let mut from = 0;
         let mut to = snaps.len();
+        let mut last_line = None;
         let input_len = input.lines().count() + 2;
         for (line_idx, line) in snaps.lines().enumerate() {
             if let Some(captures) = section_regex.captures(line) {
                 let offset = offset(snaps, line);
                 if section.is_some() {
-                    to = offset;
+                    to = offset + line.len();
+                    last_line = Some(offset);
                     break;
                 }
                 let name = captures.get(1).unwrap().as_str();
                 if name == section_name {
-                    from = offset + line.len();
-                    if from < snaps.len() {
-                        if &snaps[from..from+1] == "\r" { from += 2; } else { from += 1 }
-                    }
-                    section = Some(input_len + line_idx + 1);
+                    from = offset;
+                    section = Some(input_len + line_idx);
                 }
             }
         }
@@ -123,7 +100,11 @@ pub fn test_snapshots(section_name: &str, f: impl Fn(&str) -> String) -> Result<
                 line,
                 modified: metadata.modified()?
             };
-            let actual = format!("{}\n\n", f(input));
+            let last_line = match last_line {
+                Some(from) => &snaps[from..to],
+                None => &snaps[to..to]
+            };
+            let actual = format!("[{}]\n{}\n\n{}", section_name, f(input), last_line);
             match assert_section(e, actual) {
                 Ok(_) => {
                     successes += 1;
@@ -152,7 +133,7 @@ fn offset(parent: &str, child: &str) -> usize {
     child_ptr - parent_ptr
 }
 
-fn get_source(file: &String) -> Result<(&str, &str)> {
+fn get_source(file: &str) -> Result<(&str, &str)> {
     let splited = file.split("```\n").collect::<Vec<_>>();
     if splited.len() != 3 { bail!("Expected one source wrapped in ```") }
     let input = splited[1].trim_end_matches('\n');//.trim();

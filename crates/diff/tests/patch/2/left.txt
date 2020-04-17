@@ -1,0 +1,45 @@
+```
+{
+    health = 10,
+    sanity = 50
+}
+```
+
+[lexer]
+[
+    "OpenC `{`",
+    "Trivia `\n    `",
+    "Identifier `health`",
+    "Trivia ` `",
+    "OpAssign `=`",
+    "Trivia ` `",
+    "Number `10`",
+    "Comma `,`",
+    "Trivia `\n    `",
+    "Identifier `sanity`",
+    "Trivia ` `",
+    "OpAssign `=`",
+    "Trivia ` `",
+    "Number `50`",
+    "Trivia `\n`",
+    "CloseC `}`",
+]
+
+[parser]
+ROOT @ 0..14 = `{
+    health =`
+    STRUCT, VALUE @ 0..13 = `{
+    health `
+        TOKEN @ 0..1 = `{`
+        TRIVIA @ 1..6 = `
+    `
+        ERROR, TOKEN @ 6..12 = `health`
+        TRIVIA @ 12..13 = ` `
+    ERROR, TOKEN @ 13..14 = `=`
+.
+.
+### Errors ###
+Expected `}` but found `health` @ N2
+Expected EOF but found `=` @ N5
+.
+.

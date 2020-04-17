@@ -13,7 +13,7 @@ true == false
 
 [parser]
 ROOT @ 0..13 = `true == false`
-    BINARY, VALUE @ 5..13 = `== false`
+    BINARY, VALUE @ 0..13 = `true == false`
         BOOLEAN, TOKEN, VALUE @ 0..4 = `true`
         TRIVIA @ 4..5 = ` `
         OP, TOKEN @ 5..7 = `==`
