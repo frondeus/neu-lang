@@ -116,7 +116,7 @@ mod tests {
 
             match result {
                 None => "None".to_string(),
-                Some(r) => format!("`{}`", r)
+                Some(r) => format!("`{:#}`", r)
             }
         }).unwrap();
     }

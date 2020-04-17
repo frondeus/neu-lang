@@ -13,7 +13,7 @@ TODO:
    * [x] Structs proper line ending
    * [x] Arrays
    * [x] Eval structs & arrays
-   * [ ] Better value printing
+   * [x] Better value printing
    * [ ] Access to fields
    * [ ] Generate json
    * [ ] Local variables

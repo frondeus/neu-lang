@@ -1,6 +1,10 @@
 {
-    health = 6 * 10
-        + 4,
+    health = {
+        value = 6 * 10
+            + 4,
+        max = 100
+    },
+    skills = [ 1, 2 ],
     sanity = 10 + 2,
     strength = 4 + 
         2

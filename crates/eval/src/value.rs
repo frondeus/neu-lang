@@ -1,6 +1,5 @@
 use std::collections::BTreeMap;
 use std::fmt;
-use itertools::Itertools;
 
 #[derive(Debug)]
 pub enum Value {
@@ -14,19 +13,36 @@ pub enum Value {
 impl fmt::Display for Value {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let width = f.width().unwrap_or_default();
-        //if width > 0 { write!(f, "{:width$}", " ", width = width)?; }
         match self {
             Self::Number(n) => write!(f, "{}", n),
             Self::Boolean(b) => write!(f, "{}", b),
             Self::String(s) => write!(f, "{:?}", s),
-            Self::Array(a) => write!(f, "[{}]", a.iter().map(|v| v.to_string()).join(", ")),
-            Self::Struct(s) => {
-                writeln!(f, "{{")?;
-                let c_width = width + 4;
-                for (k, v) in s.iter() {
-                    writeln!(f, "{:width$}{} = {:width$},", " ", k, v, width = c_width)?;
+            Self::Array(a) => {
+                write!(f, "[")?;
+                if !a.is_empty() {
+                    if let Some(v) = a.iter().next() { write!(f, " {}", v)?; }
+                    for v in a.iter().skip(1) { write!(f, ", {}", v)?; }
+                    write!(f, " ")?;
                 }
-                write!(f, "{:width$}}}", " ", width = width)
+                write!(f, "]")
+            }
+            Self::Struct(s) => {
+                if f.alternate() {
+                    writeln!(f, "{{")?;
+                    let c_width = width + 4;
+                    for (k, v) in s.iter() {
+                        writeln!(f, "{:width$}{} = {:#width$},", " ", k, v, width = c_width)?;
+                    }
+                    write!(f, "{:width$}}}", " ", width = width)
+                } else {
+                    write!(f, "{{")?;
+                    if !s.is_empty() {
+                        if let Some((k, v)) = s.iter().next() { write!(f, " {} = {}", k, v)?; }
+                        for (k, v) in s.iter().skip(1) { write!(f, ", {} = {}", k, v)?; }
+                        write!(f, " ")?;
+                    }
+                    write!(f, "}}")
+                }
             }
         }
     }
