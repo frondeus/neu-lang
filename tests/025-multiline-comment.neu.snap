@@ -1,0 +1,66 @@
+```
+{
+    health = 4, /* foo }
+    bar */
+    sanity = 10, /* baz
+    */
+}
+```
+
+[lexer]
+[
+    "OpenC `{`",
+    "Whitespace `\n    `",
+    "Identifier `health`",
+    "Whitespace ` `",
+    "OpAssign `=`",
+    "Whitespace ` `",
+    "Number `4`",
+    "Comma `,`",
+    "Whitespace ` `",
+    "Comment `/* foo }\n    bar */`",
+    "Whitespace `\n    `",
+    "Identifier `sanity`",
+    "Whitespace ` `",
+    "OpAssign `=`",
+    "Whitespace ` `",
+    "Number `10`",
+    "Comma `,`",
+    "Whitespace ` `",
+    "Comment `/* baz\n    */`",
+    "Whitespace `\n`",
+    "CloseC `}`",
+]
+
+[parser]
+ROOT @ 0..70 = `{\n    health = 4, /* foo }\n    bar */\n    sanity = 10, /* baz\n    */\n}`
+    STRUCT, VALUE @ 0..70 = `{\n    health = 4, /* foo }\n    bar */\n    sanity = 10, /* baz\n    */\n}`
+        TOKEN @ 0..1 = `{`
+        TRIVIA @ 1..6 = `\n    `
+        IDENTIFIER, KEY, TOKEN @ 6..12 = `health`
+        TRIVIA @ 12..13 = ` `
+        TOKEN @ 13..14 = `=`
+        TRIVIA @ 14..15 = ` `
+        NUMBER, TOKEN, VALUE @ 15..16 = `4`
+        TOKEN @ 16..17 = `,`
+        TRIVIA @ 17..42 = ` /* foo }\n    bar */\n    `
+        IDENTIFIER, KEY, TOKEN @ 42..48 = `sanity`
+        TRIVIA @ 48..49 = ` `
+        TOKEN @ 49..50 = `=`
+        TRIVIA @ 50..51 = ` `
+        NUMBER, TOKEN, VALUE @ 51..53 = `10`
+        TOKEN @ 53..54 = `,`
+        TRIVIA @ 54..69 = ` /* baz\n    */\n`
+        TOKEN @ 69..70 = `}`
+    TOKEN @ 70..70 = ``
+
+
+### No Errors ###
+
+
+[eval]
+`{
+    health = 4,
+    sanity = 10,
+ }`
+

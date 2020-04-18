@@ -8,20 +8,20 @@
 [lexer]
 [
     "OpenC `{`",
-    "Trivia `\n    `",
+    "Whitespace `\n    `",
     "Identifier `health`",
-    "Trivia ` `",
+    "Whitespace ` `",
     "OpAssign `=`",
-    "Trivia ` `",
+    "Whitespace ` `",
     "Number `10`",
     "Comma `,`",
-    "Trivia `\n    `",
+    "Whitespace `\n    `",
     "Identifier `sanity`",
-    "Trivia ` `",
+    "Whitespace ` `",
     "OpAssign `=`",
-    "Trivia ` `",
+    "Whitespace ` `",
     "Number `50`",
-    "Trivia `\n`",
+    "Whitespace `\n`",
     "CloseC `}`",
 ]
 

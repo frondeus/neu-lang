@@ -5,9 +5,9 @@ true == false
 [lexer]
 [
     "True `true`",
-    "Trivia ` `",
+    "Whitespace ` `",
     "OpDEqual `==`",
-    "Trivia ` `",
+    "Whitespace ` `",
     "False `false`",
 ]
 

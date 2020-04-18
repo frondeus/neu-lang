@@ -5,9 +5,9 @@
 [lexer]
 [
     "Number `4`",
-    "Trivia ` `",
+    "Whitespace ` `",
     "OpPlus `+`",
-    "Trivia ` `",
+    "Whitespace ` `",
     "Number `2`",
 ]
 

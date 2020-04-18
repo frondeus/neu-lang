@@ -5,12 +5,12 @@
 [lexer]
 [
     "OpenB `[`",
-    "Trivia ` `",
+    "Whitespace ` `",
     "Number `10`",
     "Comma `,`",
-    "Trivia ` `",
+    "Whitespace ` `",
     "Number `50`",
-    "Trivia ` `",
+    "Whitespace ` `",
     "CloseB `]`",
 ]
 

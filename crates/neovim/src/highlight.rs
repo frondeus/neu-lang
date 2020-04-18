@@ -12,6 +12,8 @@ impl NodeHighlight for Node {
         else if self.is(Nodes::Boolean) { Some("Boolean") }
         else if self.is(Nodes::Op) { Some("Operator") }
         else if self.is(Nodes::String) { Some("String") }
+        else if self.is(Nodes::Identifier) { Some("Identifier") }
+        else if self.is(Nodes::Trivia) { Some("Comment") }
         else { None }
     }
 }

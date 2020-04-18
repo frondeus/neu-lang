@@ -5,13 +5,13 @@
 [lexer]
 [
     "Number `4`",
-    "Trivia ` `",
+    "Whitespace ` `",
     "OpPlus `+`",
-    "Trivia ` `",
+    "Whitespace ` `",
     "Number `2`",
-    "Trivia ` `",
+    "Whitespace ` `",
     "OpStar `*`",
-    "Trivia ` `",
+    "Whitespace ` `",
     "Number `5`",
 ]
 

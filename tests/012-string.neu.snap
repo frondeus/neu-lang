@@ -4,9 +4,9 @@
 
 [lexer]
 [
-    "Trivia ` `",
+    "Whitespace ` `",
     "String `\"foo\"`",
-    "Trivia ` `",
+    "Whitespace ` `",
 ]
 
 [parser]

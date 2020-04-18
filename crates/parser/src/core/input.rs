@@ -18,7 +18,7 @@ impl Input {
             .and_then(|(last, c)| TextSize::try_from(last + c.len_utf8()).ok())
         {
             Some(last) => TextRange(self.cursor, self.cursor + last),
-            None => TextRange(end, end),
+            None => TextRange(self.cursor, end),
         };
         self.cursor = range.end();
 

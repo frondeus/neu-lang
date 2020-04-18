@@ -8,7 +8,10 @@ mod token {
         Error,
 
         #[display(fmt = "` `, `\t`, `\n`")]
-        Trivia, // whitespace
+        Whitespace,
+
+        #[display(fmt = "comment")]
+        Comment,
 
         #[display(fmt = "number")]
         Number,
@@ -82,12 +85,33 @@ pub mod lexer {
         if peeked.is_whitespace() {
             let rest = i.chars().take_while(|c| c.is_whitespace()).count();
 
-            return Some((Token::Trivia, input.chomp(rest)));
+            return Some((Token::Whitespace, input.chomp(rest)));
         }
         if peeked.is_ascii_digit() {
             let rest = i.chars().take_while(|c| c.is_ascii_digit()).count();
 
             return Some((Token::Number, input.chomp(rest)));
+        }
+
+        if i.starts_with("/*") {
+            let mut peeked = peeked;
+            let mut i = &i[2..];
+            let mut rest = 2;
+            while !i.starts_with("*/") {
+                i = &i[peeked.len_utf8()..];
+                rest += 1;
+                peeked = match i.chars().next() {
+                    Some(p) => p,
+                    None => return Some((Token::Error, input.chomp(2)))
+                }
+            }
+            rest += 2;
+            return Some((Token::Comment, input.chomp(rest)));
+        }
+
+        if i.starts_with("//") {
+            let rest = i.chars().take_while(|c| *c != '\n').count();
+            return Some((Token::Comment, input.chomp(rest)));
         }
 
         if i.starts_with("==") {
@@ -333,7 +357,8 @@ fn trivia() -> impl Parser {
     node(|builder| {
         builder.name(Nodes::Trivia);
         let mut empty = true;
-        while let Some(Token::Trivia) = builder.peek_token() {
+        while let Some(Token::Whitespace)
+        | Some(Token::Comment) = builder.peek_token() {
             builder.next_token();
             empty = false;
         }
