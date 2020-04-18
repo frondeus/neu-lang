@@ -9,7 +9,8 @@ use std::collections::BTreeMap;
 
 #[derive(Clone, Copy, Default, Debug)]
 struct Context {
-    top: Option<NodeId>
+    top: Option<NodeId>,
+    current: Option<NodeId>
 }
 
 impl Context {
@@ -17,7 +18,11 @@ impl Context {
         self.top
     }
 
-    pub fn current(self, id: NodeId) -> Self {
+    pub fn current(&self) -> Option<NodeId> {
+        self.current
+    }
+
+    pub fn set_current(self, id: NodeId) -> Self {
         let mut top = self.top;
 
         if top.is_none() {
@@ -25,7 +30,7 @@ impl Context {
         }
 
         Self {
-            top
+            top, current: Some(id)
         }
     }
 }
@@ -39,7 +44,7 @@ impl<'a> Eval<'a> {
     fn to_eager(&self, value: Value, ctx: Context) -> Option<Value> {
         match value {
             Value::Lazy { id, parent } => {
-                let ctx = ctx.current(parent);
+                let ctx = ctx.set_current(parent);
                 let v = self.eval(id, ctx)?;
                 self.to_eager(v, ctx)
             },
@@ -114,9 +119,21 @@ impl<'a> Eval<'a> {
 
         if node.is(Nodes::Unary) {
             let (_, op) = children.find_node(Nodes::Op)?;
-            let (value, _) = children.find_node(Nodes::Value)?;
-            let value = self.eager_eval(value, ctx)?;
             let text_op = &self.input[op.span];
+
+            let (value_id, value) = children.find_node(Nodes::Value)?;
+
+            if text_op == "." {
+                return ctx.current().and_then(|top| {
+                    self.eval(top, ctx)
+                }).and_then(|v| v.as_struct())
+                    .and_then(|mut map| {
+                        let text = &self.input[value.span];
+                        map.remove(text)
+                    });
+            }
+
+            let value = self.eager_eval(value_id, ctx)?;
             return match (text_op, value) {
                 ("-", Value::Number(i))  => Some(Value::Number(-i)),
                 ("!", Value::Boolean(b))  => Some(Value::Boolean(!b)),
@@ -175,7 +192,7 @@ pub fn eval(id: NodeId, nodes: &Arena, input: &str) -> Option<Value> {
     eval.eval(id, Context::default())
         .and_then(|val| {
             let ctx = Context::default();
-            let ctx = ctx.current(id);
+            let ctx = ctx.set_current(id);
             eval.to_eager(val, ctx)
         })
 }

@@ -1,7 +1,10 @@
 {
-    size = 50,
-    constitution = 60,
+    primary = {
+        size = 50,
+        constitution = 60,
+    },
     health = {
-        max = (size + constitution) / 10
+        max = (primary.size + primary.constitution) / 10,
+        value = .max
     }
-}.health.max
+}.health
