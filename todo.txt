@@ -15,7 +15,8 @@ TODO:
    * [x] Eval structs & arrays
    * [x] Better value printing
    * [x] Access to fields
-   * [ ] Access fields inside struct initializers
+   * [x] Access fields inside struct initializers
+   * [ ] Access fields self
    * [ ] Comments
    * [ ] Proper const eval diagnostics (error, warn)
    * [ ] Generate json

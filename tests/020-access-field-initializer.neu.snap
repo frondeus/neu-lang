@@ -6,10 +6,10 @@
     },
     health = {
         max = (primary.con + primary.size) / 10,
-        value = .max,
+        value = 19
     },
     sanity = 50 + 2
-}.health.value
+}.health.max
 ```
 
 [lexer]
@@ -69,9 +69,7 @@
     "Trivia ` `",
     "OpAssign `=`",
     "Trivia ` `",
-    "OpDot `.`",
-    "Identifier `max`",
-    "Comma `,`",
+    "Number `19`",
     "Trivia `\n    `",
     "CloseC `}`",
     "Comma `,`",
@@ -90,14 +88,14 @@
     "OpDot `.`",
     "Identifier `health`",
     "OpDot `.`",
-    "Identifier `value`",
+    "Identifier `max`",
 ]
 
 [parser]
-ROOT @ 0..188 = `{\n    primary = {\n        con = 50,\n        size = 60\n    },\n    health = {\n        max = (primary.con + primary.size) / 10,\n        value = .max,\n    },\n    sanity = 50 + 2\n}.health.value`
-    IDENTPATH, VALUE @ 0..188 = `{\n    primary = {\n        con = 50,\n        size = 60\n    },\n    health = {\n        max = (primary.con + primary.size) / 10,\n        value = .max,\n    },\n    sanity = 50 + 2\n}.health.value`
-        IDENTPATH, VALUE @ 0..182 = `{\n    primary = {\n        con = 50,\n        size = 60\n    },\n    health = {\n        max = (primary.con + primary.size) / 10,\n        value = .max,\n    },\n    sanity = 50 + 2\n}.health`
-            STRUCT, VALUE @ 0..175 = `{\n    primary = {\n        con = 50,\n        size = 60\n    },\n    health = {\n        max = (primary.con + primary.size) / 10,\n        value = .max,\n    },\n    sanity = 50 + 2\n}`
+ROOT @ 0..183 = `{\n    primary = {\n        con = 50,\n        size = 60\n    },\n    health = {\n        max = (primary.con + primary.size) / 10,\n        value = 19\n    },\n    sanity = 50 + 2\n}.health.max`
+    IDENTPATH, VALUE @ 0..183 = `{\n    primary = {\n        con = 50,\n        size = 60\n    },\n    health = {\n        max = (primary.con + primary.size) / 10,\n        value = 19\n    },\n    sanity = 50 + 2\n}.health.max`
+        IDENTPATH, VALUE @ 0..179 = `{\n    primary = {\n        con = 50,\n        size = 60\n    },\n    health = {\n        max = (primary.con + primary.size) / 10,\n        value = 19\n    },\n    sanity = 50 + 2\n}.health`
+            STRUCT, VALUE @ 0..172 = `{\n    primary = {\n        con = 50,\n        size = 60\n    },\n    health = {\n        max = (primary.con + primary.size) / 10,\n        value = 19\n    },\n    sanity = 50 + 2\n}`
                 TOKEN @ 0..1 = `{`
                 TRIVIA @ 1..6 = `\n    `
                 IDENTIFIER, KEY, TOKEN @ 6..13 = `primary`
@@ -127,7 +125,7 @@ ROOT @ 0..188 = `{\n    primary = {\n        con = 50,\n        size = 60\n    }
                 TRIVIA @ 71..72 = ` `
                 TOKEN @ 72..73 = `=`
                 TRIVIA @ 73..74 = ` `
-                STRUCT, VALUE @ 74..152 = `{\n        max = (primary.con + primary.size) / 10,\n        value = .max,\n    }`
+                STRUCT, VALUE @ 74..149 = `{\n        max = (primary.con + primary.size) / 10,\n        value = 19\n    }`
                     TOKEN @ 74..75 = `{`
                     TRIVIA @ 75..84 = `\n        `
                     IDENTIFIER, KEY, TOKEN @ 84..87 = `max`
@@ -160,31 +158,28 @@ ROOT @ 0..188 = `{\n    primary = {\n        con = 50,\n        size = 60\n    }
                     TRIVIA @ 138..139 = ` `
                     TOKEN @ 139..140 = `=`
                     TRIVIA @ 140..141 = ` `
-                    UNARY, VALUE @ 141..145 = `.max`
-                        OP, TOKEN @ 141..142 = `.`
-                        IDENTIFIER, TOKEN, VALUE @ 142..145 = `max`
-                    TOKEN @ 145..146 = `,`
-                    TRIVIA @ 146..151 = `\n    `
-                    TOKEN @ 151..152 = `}`
-                TOKEN @ 152..153 = `,`
-                TRIVIA @ 153..158 = `\n    `
-                IDENTIFIER, KEY, TOKEN @ 158..164 = `sanity`
-                TRIVIA @ 164..165 = ` `
-                TOKEN @ 165..166 = `=`
-                TRIVIA @ 166..167 = ` `
-                BINARY, VALUE @ 167..173 = `50 + 2`
-                    NUMBER, TOKEN, VALUE @ 167..169 = `50`
-                    TRIVIA @ 169..170 = ` `
-                    OP, TOKEN @ 170..171 = `+`
-                    TRIVIA @ 171..172 = ` `
-                    NUMBER, TOKEN, VALUE @ 172..173 = `2`
-                    TRIVIA @ 173..174 = `\n`
-                TOKEN @ 174..175 = `}`
-            OP, TOKEN @ 175..176 = `.`
-            IDENTIFIER, TOKEN, VALUE @ 176..182 = `health`
-        OP, TOKEN @ 182..183 = `.`
-        IDENTIFIER, TOKEN, VALUE @ 183..188 = `value`
-    TOKEN @ 188..188 = ``
+                    NUMBER, TOKEN, VALUE @ 141..143 = `19`
+                    TRIVIA @ 143..148 = `\n    `
+                    TOKEN @ 148..149 = `}`
+                TOKEN @ 149..150 = `,`
+                TRIVIA @ 150..155 = `\n    `
+                IDENTIFIER, KEY, TOKEN @ 155..161 = `sanity`
+                TRIVIA @ 161..162 = ` `
+                TOKEN @ 162..163 = `=`
+                TRIVIA @ 163..164 = ` `
+                BINARY, VALUE @ 164..170 = `50 + 2`
+                    NUMBER, TOKEN, VALUE @ 164..166 = `50`
+                    TRIVIA @ 166..167 = ` `
+                    OP, TOKEN @ 167..168 = `+`
+                    TRIVIA @ 168..169 = ` `
+                    NUMBER, TOKEN, VALUE @ 169..170 = `2`
+                    TRIVIA @ 170..171 = `\n`
+                TOKEN @ 171..172 = `}`
+            OP, TOKEN @ 172..173 = `.`
+            IDENTIFIER, TOKEN, VALUE @ 173..179 = `health`
+        OP, TOKEN @ 179..180 = `.`
+        IDENTIFIER, TOKEN, VALUE @ 180..183 = `max`
+    TOKEN @ 183..183 = ``
 
 
 ### No Errors ###
@@ -192,3 +187,4 @@ ROOT @ 0..188 = `{\n    primary = {\n        con = 50,\n        size = 60\n    }
 
 [eval]
 `11`
+

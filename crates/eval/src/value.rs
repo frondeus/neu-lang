@@ -10,13 +10,20 @@ pub enum Value {
     Array(Vec<Value>),
     Struct(BTreeMap<String, Value>),
 
-    Partial(NodeId)
+    Lazy { id: NodeId, parent: NodeId }
 }
 
 impl Value {
-    pub fn as_struct(&self) -> Option<&BTreeMap<String, Value>> {
+    pub fn is_lazy(&self) -> bool {
         match self {
-            Self::Struct(s) => Some(&s),
+            Self::Lazy{..} => true,
+            _ => false
+        }
+    }
+
+    pub fn as_struct(self) -> Option<BTreeMap<String, Value>> {
+        match self {
+            Self::Struct(s) => Some(s),
             _ => None
         }
     }
@@ -26,6 +33,8 @@ impl fmt::Display for Value {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let width = f.width().unwrap_or_default();
         match self {
+            Self::Lazy { id, .. } => write!(f, "{:?}", id),
+
             Self::Number(n) => write!(f, "{}", n),
             Self::Boolean(b) => write!(f, "{}", b),
             Self::String(s) => write!(f, "{:?}", s),

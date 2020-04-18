@@ -1,4 +1,7 @@
 {
-    budowa_ciala = 50,
-    kondycja = 60,
-}
+    size = 50,
+    constitution = 60,
+    health = {
+        max = (size + constitution) / 10
+    }
+}.health.max

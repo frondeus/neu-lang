@@ -9,29 +9,23 @@ use std::collections::BTreeMap;
 
 #[derive(Clone, Copy, Default, Debug)]
 struct Context {
-    top_struct: Option<NodeId>,
-    current_struct: Option<NodeId>
+    top: Option<NodeId>
 }
 
 impl Context {
-    fn top(self) -> Self {
-        let top_struct = self.top_struct;
-        let current_struct = self.top_struct;
-        Self {
-            top_struct, current_struct
-        }
+    pub fn top(&self) -> Option<NodeId> {
+        self.top
     }
-    fn current(self, id: NodeId) -> Self {
-        let mut top_struct = self.top_struct;
 
-        if top_struct.is_none() {
-            top_struct = Some(id);
+    pub fn current(self, id: NodeId) -> Self {
+        let mut top = self.top;
+
+        if top.is_none() {
+            top = Some(id);
         }
 
-        let current_struct = Some(id);
-
         Self {
-            top_struct, current_struct
+            top
         }
     }
 }
@@ -42,6 +36,37 @@ struct Eval<'a> {
 }
 
 impl<'a> Eval<'a> {
+    fn to_eager(&self, value: Value, ctx: Context) -> Option<Value> {
+        match value {
+            Value::Lazy { id, parent } => {
+                let ctx = ctx.current(parent);
+                let v = self.eval(id, ctx)?;
+                self.to_eager(v, ctx)
+            },
+            Value::Struct(s) => {
+                let s = s.into_iter()
+                    .map(|(k, v)| {
+                        let v = self.to_eager(v, ctx);
+                        v.map(|v| (k, v))
+                    }).collect::<Option<BTreeMap<String, Value>>>()?;
+                Some(Value::Struct(s))
+            },
+            Value::Array(a) => {
+                let a = a.into_iter()
+                    .map(|v| {
+                        self.to_eager(v, ctx)
+                    }).collect::<Option<Vec<Value>>>()?;
+                Some(Value::Array(a))
+            },
+            v => Some(v)
+        }
+    }
+
+    fn eager_eval(&self, id: NodeId, ctx: Context) -> Option<Value> {
+        let v = self.eval(id, ctx)?;
+        self.to_eager(v, ctx)
+    }
+
     fn eval(&self, id: NodeId, ctx: Context) -> Option<Value> {
         let node = self.nodes.get(id);
 
@@ -53,19 +78,29 @@ impl<'a> Eval<'a> {
         if !node.is(Nodes::Value) { return None; }
 
         let mut children = Children::new(node.children.iter().copied(), self.nodes);
+        let text = &self.input[node.span];
+
+        if node.is(Nodes::Identifier) {
+            let top = ctx.top().and_then(|top| {
+                self.eval(top, ctx)
+            }).and_then(|v| v.as_struct())
+            .and_then(|mut map| {
+                map.remove(text)
+            });
+            return top;
+        }
 
         if node.is(Nodes::IdentPath) {
             let (left, _) = children.find_node(Nodes::Value)?;
-            let left = self.eval(left, ctx)?;
+            let left = self.eager_eval(left, ctx)?;
             let _ = children.find_node(Nodes::Op)?;
             let (_, right) = children.find_node(Nodes::Identifier)?;
             let key = &self.input[right.span];
-            let map = left.as_struct()?;
 
-            return map.get(key).cloned();
+            let mut map = left.as_struct()?;
+            return map.remove(key);
         }
 
-        let text = &self.input[node.span];
 
         if node.is(Nodes::Number) { return Some(Value::Number(text.parse().unwrap())); }
 
@@ -80,7 +115,7 @@ impl<'a> Eval<'a> {
         if node.is(Nodes::Unary) {
             let (_, op) = children.find_node(Nodes::Op)?;
             let (value, _) = children.find_node(Nodes::Value)?;
-            let value = self.eval(value, ctx)?;
+            let value = self.eager_eval(value, ctx)?;
             let text_op = &self.input[op.span];
             return match (text_op, value) {
                 ("-", Value::Number(i))  => Some(Value::Number(-i)),
@@ -91,10 +126,10 @@ impl<'a> Eval<'a> {
 
         if node.is(Nodes::Binary) {
             let (left, _) = children.find_node(Nodes::Value)?;
-            let left = self.eval(left, ctx)?;
+            let left = self.eager_eval(left, ctx)?;
             let (_, op) = children.find_node(Nodes::Op)?;
             let (right, _) = children.find_node(Nodes::Value)?;
-            let right = self.eval(right, ctx)?;
+            let right = self.eager_eval(right, ctx)?;
             let text_op = &self.input[op.span];
             return match (left, text_op, right) {
                 (Value::Number(l), "-", Value::Number(r))  => Some(Value::Number(l - r)),
@@ -116,12 +151,11 @@ impl<'a> Eval<'a> {
         }
 
         if node.is(Nodes::Struct) {
-            let ctx = ctx.current(id);
             let mut map = BTreeMap::default();
             while let Some((_, key)) = children.find_node(Nodes::Key) {
                 let key = self.input[key.span].to_string();
                 let (value, _) = children.find_node(Nodes::Value)?;
-                let value = self.eval(value, ctx)?;
+                let value = Value::Lazy { id: value, parent: id };
                 map.insert(key, value);
             }
             return Some(Value::Struct(map));
@@ -137,7 +171,13 @@ impl<'a> Eval<'a> {
 }
 
 pub fn eval(id: NodeId, nodes: &Arena, input: &str) -> Option<Value> {
-    Eval { nodes, input }.eval(id, Context::default())
+    let eval = Eval { nodes, input };
+    eval.eval(id, Context::default())
+        .and_then(|val| {
+            let ctx = Context::default();
+            let ctx = ctx.current(id);
+            eval.to_eager(val, ctx)
+        })
 }
 
 #[cfg(test)]
