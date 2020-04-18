@@ -99,7 +99,6 @@ impl NeovimHandler {
                     use neu_parser::core::{Lexer, State};
                     use neu_parser::{parser};
 
-                    //let tokens: Vec<_> = Lexer::new(&buf).map(|t| t.display(&buf, true).to_string()).collect();
                     State::parse(Lexer::new(&buf), parser())
                 };
 
@@ -110,8 +109,8 @@ impl NeovimHandler {
                     for (id, node) in parse_result.nodes.enumerate() {
                         if !node.is(Nodes::Value) { continue; }
                         if node.children.is_empty() { continue; }
-                        let value = neu_eval::eval(id, &parse_result.nodes, &buf);
-                        if let Some(value) = value {
+                        let eval_result = neu_eval::eval(id, &parse_result.nodes, &buf);
+                        if let Some(value) = eval_result.value {
                             if let Some(LineCols { line, .. }) = node.span.lines_cols(&lines).last() {
                                 //dbg!(dbg_buffer, (line, &value));
                                 api.call_function("nvim_buf_set_virtual_text", vec![
@@ -143,17 +142,33 @@ impl NeovimHandler {
 
                 // Errors
                 let current_w = api.get_current_win().await?;
+                let root = parse_result.root;
 
-                let diagnostics = parse_result.errors.iter().filter_map(|(id, error)| {
+                let mut diagnostics = parse_result.errors.iter().filter_map(|(id, error)| {
                     let node = parse_result.nodes.get(id);
-                    if let Some(LineCols { line, col_start, .. }) = node.span.lines_cols(&lines).first() {
+                    if let Some(LineCols { line, col_start, .. }) = node.span.lines_cols(&lines).last() {
                         Some(Diagnostic::new(&current_bf, error.display(&buf).to_string(), *line, *col_start, DiagnosticType::Error))
                     } else {
                         None
                     }
                 }).collect::<Vec<Diagnostic>>();
 
+                let root_eval_result = neu_eval::eval(root, &parse_result.nodes, &buf);
+                for (id, error) in root_eval_result.errors.iter() {
+                    let node = parse_result.nodes.get(id);
+                    if let Some(LineCols { line, col_start, col_end }) = node.span.lines_cols(&lines).last() {
+                        current_bf.add_highlight(highlight_ns, "Error",
+                                                 *line,
+                                                 *col_start as i64,
+                                                 *col_end as i64).await?;
+
+                        diagnostics.push(Diagnostic::new(&current_bf, error//.display(&buf)
+                            .to_string(), *line, *col_start, DiagnosticType::Error));
+                    }
+                }
+
                 for diagnostic in diagnostics.iter() {
+
                     api.call_function("nvim_buf_set_virtual_text", vec![
                         current_bf.into_val(), // buffer
                         highlight_ns.into_val(), // ns
@@ -192,6 +207,7 @@ impl NeovimHandler {
                 //writeln!(&mut dbg_buffer, "```\n")?;
                 //writeln!(&mut dbg_buffer, "{:#?}\n", tokens)?;
                 writeln!(&mut dbg_buffer, "{}\n\n", parse_result.display(&buf))?;
+                writeln!(&mut dbg_buffer, "{}\n\n", root_eval_result.display(&buf))?;
                 dbg!(dbg_buffer, parse_result.nodes);
 
                 let debug_lines = dbg_buffer.lines().map(|l| l.to_string()).collect_vec();

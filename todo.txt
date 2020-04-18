@@ -18,7 +18,7 @@ TODO:
    * [x] Access fields inside struct initializers
    * [x] Access fields self
    * [x] Comments
-   * [ ] Proper const eval diagnostics (error, warn)
+   * [x] Proper const eval diagnostics (error, warn)
    * [ ] Generate json
    * [ ] Markdown
    * [ ] Prevent field access cycle

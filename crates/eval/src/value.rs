@@ -21,7 +21,7 @@ impl Value {
         }
     }
 
-    pub fn as_struct(self) -> Option<BTreeMap<String, Value>> {
+    pub fn into_struct(self) -> Option<BTreeMap<String, Value>> {
         match self {
             Self::Struct(s) => Some(s),
             _ => None

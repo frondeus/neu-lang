@@ -1,0 +1,29 @@
+```
+4.bar
+```
+
+[lexer]
+[
+    "Number `4`",
+    "OpDot `.`",
+    "Identifier `bar`",
+]
+
+[parser]
+ROOT @ 0..5 = `4.bar`
+    IDENTPATH, VALUE @ 0..5 = `4.bar`
+        NUMBER, TOKEN, VALUE @ 0..1 = `4`
+        OP, TOKEN @ 1..2 = `.`
+        IDENTIFIER, TOKEN, VALUE @ 2..5 = `bar`
+    TOKEN @ 5..5 = ``
+
+
+### No Errors ###
+
+
+[eval]
+None
+
+### Errors ###
+Expression is not a struct @ N0
+

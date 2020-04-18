@@ -1,0 +1,41 @@
+```
+.bar + foo.baz
+```
+
+[lexer]
+[
+    "OpDot `.`",
+    "Identifier `bar`",
+    "Whitespace ` `",
+    "OpPlus `+`",
+    "Whitespace ` `",
+    "Identifier `foo`",
+    "OpDot `.`",
+    "Identifier `baz`",
+]
+
+[parser]
+ROOT @ 0..14 = `.bar + foo.baz`
+    UNARY, VALUE @ 0..14 = `.bar + foo.baz`
+        OP, TOKEN @ 0..1 = `.`
+        BINARY, VALUE @ 1..14 = `bar + foo.baz`
+            IDENTIFIER, TOKEN, VALUE @ 1..4 = `bar`
+            TRIVIA @ 4..5 = ` `
+            OP, TOKEN @ 5..6 = `+`
+            TRIVIA @ 6..7 = ` `
+            IDENTPATH, VALUE @ 7..14 = `foo.baz`
+                IDENTIFIER, TOKEN, VALUE @ 7..10 = `foo`
+                OP, TOKEN @ 10..11 = `.`
+                IDENTIFIER, TOKEN, VALUE @ 11..14 = `baz`
+    TOKEN @ 14..14 = ``
+
+
+### No Errors ###
+
+
+[eval]
+None
+
+### Errors ###
+Couldn't find any structure for field access @ N0
+
