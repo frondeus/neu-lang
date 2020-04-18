@@ -1,0 +1,69 @@
+```
+{
+    health = {
+        value = .value
+    }
+}.health.value
+```
+
+[lexer]
+[
+    "OpenC `{`",
+    "Trivia `\n    `",
+    "Identifier `health`",
+    "Trivia ` `",
+    "OpAssign `=`",
+    "Trivia ` `",
+    "OpenC `{`",
+    "Trivia `\n        `",
+    "Identifier `value`",
+    "Trivia ` `",
+    "OpAssign `=`",
+    "Trivia ` `",
+    "OpDot `.`",
+    "Identifier `value`",
+    "Trivia `\n    `",
+    "CloseC `}`",
+    "Trivia `\n`",
+    "CloseC `}`",
+    "OpDot `.`",
+    "Identifier `health`",
+    "OpDot `.`",
+    "Identifier `value`",
+]
+
+[parser]
+ROOT @ 0..60 = `{\n    health = {\n        value = .value\n    }\n}.health.value`
+    IDENTPATH, VALUE @ 0..60 = `{\n    health = {\n        value = .value\n    }\n}.health.value`
+        IDENTPATH, VALUE @ 0..54 = `{\n    health = {\n        value = .value\n    }\n}.health`
+            STRUCT, VALUE @ 0..47 = `{\n    health = {\n        value = .value\n    }\n}`
+                TOKEN @ 0..1 = `{`
+                TRIVIA @ 1..6 = `\n    `
+                IDENTIFIER, KEY, TOKEN @ 6..12 = `health`
+                TRIVIA @ 12..13 = ` `
+                TOKEN @ 13..14 = `=`
+                TRIVIA @ 14..15 = ` `
+                STRUCT, VALUE @ 15..45 = `{\n        value = .value\n    }`
+                    TOKEN @ 15..16 = `{`
+                    TRIVIA @ 16..25 = `\n        `
+                    IDENTIFIER, KEY, TOKEN @ 25..30 = `value`
+                    TRIVIA @ 30..31 = ` `
+                    TOKEN @ 31..32 = `=`
+                    TRIVIA @ 32..33 = ` `
+                    UNARY, VALUE @ 33..39 = `.value`
+                        OP, TOKEN @ 33..34 = `.`
+                        IDENTIFIER, TOKEN, VALUE @ 34..39 = `value`
+                        TRIVIA @ 39..44 = `\n    `
+                    TOKEN @ 44..45 = `}`
+                    TRIVIA @ 45..46 = `\n`
+                TOKEN @ 46..47 = `}`
+            OP, TOKEN @ 47..48 = `.`
+            IDENTIFIER, TOKEN, VALUE @ 48..54 = `health`
+        OP, TOKEN @ 54..55 = `.`
+        IDENTIFIER, TOKEN, VALUE @ 55..60 = `value`
+    TOKEN @ 60..60 = ``
+
+
+### No Errors ###
+
+

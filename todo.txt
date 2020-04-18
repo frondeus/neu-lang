@@ -16,11 +16,13 @@ TODO:
    * [x] Better value printing
    * [x] Access to fields
    * [x] Access fields inside struct initializers
-   * [ ] Access fields self
+   * [x] Access fields self
    * [ ] Comments
    * [ ] Proper const eval diagnostics (error, warn)
    * [ ] Generate json
    * [ ] Markdown
+   * [ ] Prevent field access cycle
+   * [ ] Memoization of lazy fields
    * [ ] Parse error recovery
    * [ ] Local variables
    * [ ] Blocks
