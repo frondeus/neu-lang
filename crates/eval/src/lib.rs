@@ -7,6 +7,34 @@ use value::Value;
 use children::Children;
 use std::collections::BTreeMap;
 
+#[derive(Clone, Copy, Default, Debug)]
+struct Context {
+    top_struct: Option<NodeId>,
+    current_struct: Option<NodeId>
+}
+
+impl Context {
+    fn top(self) -> Self {
+        let top_struct = self.top_struct;
+        let current_struct = self.top_struct;
+        Self {
+            top_struct, current_struct
+        }
+    }
+    fn current(self, id: NodeId) -> Self {
+        let mut top_struct = self.top_struct;
+
+        if top_struct.is_none() {
+            top_struct = Some(id);
+        }
+
+        let current_struct = Some(id);
+
+        Self {
+            top_struct, current_struct
+        }
+    }
+}
 
 struct Eval<'a> {
     pub nodes: &'a Arena,
@@ -14,17 +42,28 @@ struct Eval<'a> {
 }
 
 impl<'a> Eval<'a> {
-    fn eval(&self, id: NodeId) -> Option<Value> {
+    fn eval(&self, id: NodeId, ctx: Context) -> Option<Value> {
         let node = self.nodes.get(id);
 
         if node.is(Nodes::Root) {
             return node.children.iter()
-                .filter_map(|child| self.eval(*child))
+                .filter_map(|child| self.eval(*child, ctx))
                 .next();
         }
         if !node.is(Nodes::Value) { return None; }
 
         let mut children = Children::new(node.children.iter().copied(), self.nodes);
+
+        if node.is(Nodes::IdentPath) {
+            let (left, _) = children.find_node(Nodes::Value)?;
+            let left = self.eval(left, ctx)?;
+            let _ = children.find_node(Nodes::Op)?;
+            let (_, right) = children.find_node(Nodes::Identifier)?;
+            let key = &self.input[right.span];
+            let map = left.as_struct()?;
+
+            return map.get(key).cloned();
+        }
 
         let text = &self.input[node.span];
 
@@ -41,7 +80,7 @@ impl<'a> Eval<'a> {
         if node.is(Nodes::Unary) {
             let (_, op) = children.find_node(Nodes::Op)?;
             let (value, _) = children.find_node(Nodes::Value)?;
-            let value = self.eval(value)?;
+            let value = self.eval(value, ctx)?;
             let text_op = &self.input[op.span];
             return match (text_op, value) {
                 ("-", Value::Number(i))  => Some(Value::Number(-i)),
@@ -52,10 +91,10 @@ impl<'a> Eval<'a> {
 
         if node.is(Nodes::Binary) {
             let (left, _) = children.find_node(Nodes::Value)?;
-            let left = self.eval(left)?;
+            let left = self.eval(left, ctx)?;
             let (_, op) = children.find_node(Nodes::Op)?;
             let (right, _) = children.find_node(Nodes::Value)?;
-            let right = self.eval(right)?;
+            let right = self.eval(right, ctx)?;
             let text_op = &self.input[op.span];
             return match (left, text_op, right) {
                 (Value::Number(l), "-", Value::Number(r))  => Some(Value::Number(l - r)),
@@ -70,18 +109,19 @@ impl<'a> Eval<'a> {
         if node.is(Nodes::Array) {
             let mut values = vec![];
             while let Some((value, _)) = children.find_node(Nodes::Value) {
-                let value = self.eval(value)?;
+                let value = self.eval(value, ctx)?;
                 values.push(value);
             }
             return Some(Value::Array(values));
         }
 
         if node.is(Nodes::Struct) {
+            let ctx = ctx.current(id);
             let mut map = BTreeMap::default();
             while let Some((_, key)) = children.find_node(Nodes::Key) {
                 let key = self.input[key.span].to_string();
                 let (value, _) = children.find_node(Nodes::Value)?;
-                let value = self.eval(value)?;
+                let value = self.eval(value, ctx)?;
                 map.insert(key, value);
             }
             return Some(Value::Struct(map));
@@ -89,7 +129,7 @@ impl<'a> Eval<'a> {
 
         if node.is(Nodes::Parens) {
             let (value, _) = children.find_node(Nodes::Value)?;
-            return self.eval(value);
+            return self.eval(value, ctx);
         }
 
         None
@@ -97,7 +137,7 @@ impl<'a> Eval<'a> {
 }
 
 pub fn eval(id: NodeId, nodes: &Arena, input: &str) -> Option<Value> {
-    Eval { nodes, input }.eval(id)
+    Eval { nodes, input }.eval(id, Context::default())
 }
 
 #[cfg(test)]

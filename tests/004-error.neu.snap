@@ -14,7 +14,7 @@ ROOT @ 0..3 = `???`
 
 
 ### Errors ###
-Expected one of number, `true`, `false`, `-`, `!`, string, `(`, `{`, `[` but found `???` @ N0
+Expected one of number, `true`, `false`, `-`, `!`, string, `(`, `{`, `[`, identifier but found `???` @ N0
 
 
 [eval]

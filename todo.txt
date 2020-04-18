@@ -14,8 +14,13 @@ TODO:
    * [x] Arrays
    * [x] Eval structs & arrays
    * [x] Better value printing
-   * [ ] Access to fields
+   * [x] Access to fields
+   * [ ] Access fields inside struct initializers
+   * [ ] Comments
+   * [ ] Proper const eval diagnostics (error, warn)
    * [ ] Generate json
+   * [ ] Markdown
+   * [ ] Parse error recovery
    * [ ] Local variables
    * [ ] Blocks
    * [ ] Conditional Expressions

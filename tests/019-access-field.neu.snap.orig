@@ -1,0 +1,84 @@
+```
+{
+    foo = {
+        bar = 50,
+        baz = 60
+    }
+}.foo.bar
+```
+
+[lexer]
+[
+    "OpenC `{`",
+    "Trivia `\n    `",
+    "Identifier `foo`",
+    "Trivia ` `",
+    "OpAssign `=`",
+    "Trivia ` `",
+    "OpenC `{`",
+    "Trivia `\n        `",
+    "Identifier `bar`",
+    "Trivia ` `",
+    "OpAssign `=`",
+    "Trivia ` `",
+    "Number `50`",
+    "Comma `,`",
+    "Trivia `\n        `",
+    "Identifier `size`",
+    "Trivia ` `",
+    "OpAssign `=`",
+    "Trivia ` `",
+    "Number `60`",
+    "Trivia `\n    `",
+    "CloseC `}`",
+    "Trivia `\n`",
+    "CloseC `}`",
+    "OpDot `.`",
+    "Identifier `primary`",
+    "OpDot `.`",
+    "Identifier `con`",
+]
+
+[parser]
+ROOT @ 0..64 = `{\n    foo = {\n        bar = 50,\n        baz = 60\n    }\n}.foo.bar`
+    IDENTPATH, VALUE @ 0..64 = `{\n    foo = {\n        bar = 50,\n        baz = 60\n    }\n}.foo.bar`
+        STRUCT, VALUE @ 0..56 = `{\n    foo = {\n        bar = 50,\n        baz = 60\n    }\n}`
+            TOKEN @ 0..1 = `{`
+            TRIVIA @ 1..6 = `\n    `
+            IDENTIFIER, KEY, TOKEN @ 6..9 = `foo`
+            TRIVIA @ 9..10 = ` `
+            TOKEN @ 10..11 = `=`
+            TRIVIA @ 11..12 = ` `
+            STRUCT, VALUE @ 12..54 = `{\n        bar = 50,\n        baz = 60\n    }`
+                TOKEN @ 12..13 = `{`
+                TRIVIA @ 13..22 = `\n        `
+                IDENTIFIER, KEY, TOKEN @ 22..25 = `bar`
+                TRIVIA @ 25..26 = ` `
+                TOKEN @ 26..27 = `=`
+                TRIVIA @ 27..28 = ` `
+                NUMBER, TOKEN, VALUE @ 28..30 = `50`
+                TOKEN @ 30..31 = `,`
+                TRIVIA @ 31..40 = `\n        `
+                IDENTIFIER, KEY, TOKEN @ 40..43 = `baz`
+                TRIVIA @ 43..44 = ` `
+                TOKEN @ 44..45 = `=`
+                TRIVIA @ 45..46 = ` `
+                NUMBER, TOKEN, VALUE @ 46..48 = `60`
+                TRIVIA @ 48..53 = `\n    `
+                TOKEN @ 53..54 = `}`
+                TRIVIA @ 54..55 = `\n`
+            TOKEN @ 55..56 = `}`
+        OP, TOKEN @ 56..57 = `.`
+        IDENTPATH, VALUE @ 57..64 = `foo.bar`
+            IDENTIFIER, TOKEN, VALUE @ 57..60 = `foo`
+            OP, TOKEN @ 60..61 = `.`
+            IDENTIFIER, TOKEN, VALUE @ 61..64 = `bar`
+    TOKEN @ 64..64 = ``
+
+
+### No Errors ###
+
+
+[eval]
+`50`
+

@@ -20,7 +20,7 @@ ROOT @ 0..7 = `true ==`
 
 
 ### Errors ###
-Expected one of number, `true`, `false`, `-`, `!`, string, `(`, `{`, `[` but found EOF @ N3
+Expected one of number, `true`, `false`, `-`, `!`, string, `(`, `{`, `[`, identifier but found EOF @ N3
 
 
 [eval]

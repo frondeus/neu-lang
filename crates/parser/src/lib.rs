@@ -65,7 +65,10 @@ mod token {
         CloseB,
 
         #[display(fmt = "`,`")]
-        Comma
+        Comma,
+
+        #[display(fmt = "`.`")]
+        OpDot
     }
 }
 
@@ -105,7 +108,10 @@ pub mod lexer {
         if peeked == '*' { return Some((Token::OpStar, input.chomp(1))); }
         if peeked == '/' { return Some((Token::OpSlash, input.chomp(1))); }
         if peeked == '=' { return Some((Token::OpAssign, input.chomp(1))); }
+        if peeked == '.' { return Some((Token::OpDot, input.chomp(1))); }
+
         if peeked == ',' { return Some((Token::Comma, input.chomp(1))); }
+
         if peeked == '(' { return Some((Token::OpenP, input.chomp(1))); }
         if peeked == ')' { return Some((Token::CloseP, input.chomp(1))); }
         if peeked == '{' { return Some((Token::OpenC, input.chomp(1))); }
@@ -148,7 +154,8 @@ pub mod nodes {
         Identifier,
         Key,
 
-        Array
+        Array,
+        IdentPath
     }
 }
 
@@ -172,6 +179,8 @@ pub fn parser() -> impl Parser {
 fn value() -> impl Parser {
     let next = |state: &mut State, ctx: &Context| left_value().parse(state, ctx);
     Pratt::new(next, |token| match token {
+        Some(Token::OpDot) => Some((Assoc::Left, 100)),
+
         Some(Token::OpStar) => Some((Assoc::Left, 20)),
         Some(Token::OpSlash) => Some((Assoc::Left, 20)),
 
@@ -181,7 +190,14 @@ fn value() -> impl Parser {
         Some(Token::OpDEqual) => Some((Assoc::Left, 1)),
         _ => None
     }, |builder, op_token| {
-        builder.name(Nodes::Binary);
+        match op_token {
+            Some(Token::OpDot) => {
+                builder.name(Nodes::IdentPath);
+            },
+            _ => {
+                builder.name(Nodes::Binary);
+            }
+        }
         builder.name(Nodes::Value);
         builder.parse(token(op_token).map(|n| n.with_name(Nodes::Op)));
     }).parser()
@@ -191,7 +207,7 @@ fn left_value() -> impl Parser {
     const VALUE_TOKENS: &[Token] = &[
         Token::Number, Token::True, Token::False,
         Token::OpMinus, Token::OpBang, Token::String, Token::OpenP,
-        Token::OpenC, Token::OpenB
+        Token::OpenC, Token::OpenB, Token::Identifier
     ];
 
     node(|builder| {
@@ -200,10 +216,14 @@ fn left_value() -> impl Parser {
         match builder.peek_token() {
             Some(Token::Number) => builder.parse(number()),
             Some(Token::True) | Some(Token::False) => builder.parse(boolean()),
-            Some(Token::OpMinus) | Some(Token::OpBang) => builder.parse(unary()),
+            Some(Token::OpMinus)
+            | Some(Token::OpBang)
+            | Some(Token::OpDot)
+                => builder.parse(unary()),
             Some(Token::String) => builder.parse(string()),
             Some(Token::OpenC) => builder.parse(strukt()),
             Some(Token::OpenB) => builder.parse(array()),
+            Some(Token::Identifier) => builder.parse(identifier()),
             Some(Token::OpenP) => {
                 builder.parse(node(|builder| {
                     builder.name(Nodes::Parens);
@@ -294,7 +314,7 @@ fn string() -> impl Parser {
 fn unary() -> impl Parser {
     node(|builder| {
         builder.name(Nodes::Unary);
-        builder.parse( tokens(vec![Token::OpMinus, Token::OpBang])
+        builder.parse( tokens(vec![Token::OpMinus, Token::OpBang, Token::OpDot])
                           .map(|n| n.with_name(Nodes::Op))
         );
         builder.parse(value());

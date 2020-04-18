@@ -1,13 +1,25 @@
 use std::collections::BTreeMap;
 use std::fmt;
+use neu_parser::core::NodeId;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Value {
     Number(i64),
     Boolean(bool),
     String(String),
     Array(Vec<Value>),
-    Struct(BTreeMap<String, Value>)
+    Struct(BTreeMap<String, Value>),
+
+    Partial(NodeId)
+}
+
+impl Value {
+    pub fn as_struct(&self) -> Option<&BTreeMap<String, Value>> {
+        match self {
+            Self::Struct(s) => Some(&s),
+            _ => None
+        }
+    }
 }
 
 impl fmt::Display for Value {
