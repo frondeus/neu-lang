@@ -1,6 +1,6 @@
-use crate::Token;
 use std::fmt::{Debug, Display, Formatter, Result};
 use text_size::TextRange;
+use crate::core::TokenKind;
 
 #[derive(PartialEq, Clone)]
 pub struct Spanned<K> {
@@ -8,12 +8,12 @@ pub struct Spanned<K> {
     pub span: TextRange,
 }
 
-impl Spanned<Token> {
-    pub fn new(span: TextRange, kind: Token) -> Self {
+impl<Tok: TokenKind> Spanned<Tok> {
+    pub fn new(span: TextRange, kind: Tok) -> Self {
         Self { kind, span }
     }
 
-    pub fn display<'k, 's>(&'k self, str: &'s str, display_kind: bool) -> DisplaySpanned<'k, 's, Token> {
+    pub fn display<'k, 's>(&'k self, str: &'s str, display_kind: bool) -> DisplaySpanned<'k, 's, Tok> {
         DisplaySpanned {
             str,
             kind: &self.kind,

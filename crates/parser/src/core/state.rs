@@ -1,5 +1,5 @@
 use std::fmt;
-use crate::core::{Context, Error, Lexer, Node, Parser};
+use crate::core::{Context, Error, Lexer, Node, Parser, TokenKind};
 use std::borrow::Borrow;
 
 #[derive(Clone, Copy)]
@@ -54,8 +54,8 @@ impl Arena {
 
 pub struct State<Lex: Lexer> {
     lexer: Lex,
-    errors: Vec<(NodeId, Error)>,
-    new_errors: Vec<Error>,
+    errors: Vec<(NodeId, Error<Lex::Token>)>,
+    new_errors: Vec<Error<Lex::Token>>,
     nodes: Arena
 }
 
@@ -81,7 +81,7 @@ impl<Lex: Lexer> State<Lex> {
         &mut self.lexer
     }
 
-    pub fn error(&mut self, e: Error) {
+    pub fn error(&mut self, e: Error<Lex::Token>) {
         self.new_errors.push(e);
     }
 
@@ -89,7 +89,7 @@ impl<Lex: Lexer> State<Lex> {
         self.errors.extend(self.new_errors.drain(..).map(|e| (id, e)));
     }
 
-    pub fn parse(lexer: Lex, parser: impl Parser<Lex>) -> ParseResult {
+    pub fn parse(lexer: Lex, parser: impl Parser<Lex>) -> ParseResult<Lex::Token> {
         let mut state = Self::new(lexer);
         let ctx = Context::default();
         let root = parser.parse(&mut state, &ctx);
@@ -106,24 +106,24 @@ impl<Lex: Lexer> State<Lex> {
 }
 
 #[derive(Debug)]
-pub struct ParseResult {
+pub struct ParseResult<Tok: TokenKind> {
     pub root: NodeId,
     pub nodes: Arena,
-    pub errors: Vec<(NodeId, Error)>,
+    pub errors: Vec<(NodeId, Error<Tok>)>,
 }
 
-impl ParseResult {
-    pub fn display<'s, 'n>(&'n self, str: &'s str) -> DisplayParseResult<'s, 'n> {
+impl<Tok: TokenKind> ParseResult<Tok> {
+    pub fn display<'s, 'n>(&'n self, str: &'s str) -> DisplayParseResult<'s, 'n, Tok> {
         DisplayParseResult { str, result: self }
     }
 }
 
-pub struct DisplayParseResult<'s, 'n> {
+pub struct DisplayParseResult<'s, 'n, Tok: TokenKind> {
     str: &'s str,
-    result: &'n ParseResult,
+    result: &'n ParseResult<Tok>,
 }
 
-impl <'s, 'n> fmt::Display for DisplayParseResult<'s, 'n> {
+impl <'s, 'n, Tok: TokenKind> fmt::Display for DisplayParseResult<'s, 'n, Tok> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let arena = &self.result.nodes;
         let node = arena.get(self.result.root).display(self.str, arena);

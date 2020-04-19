@@ -1,20 +1,19 @@
-use crate::Token;
 use std::fmt;
-use crate::core::Spanned;
+use crate::core::{Spanned, TokenKind};
 
 #[derive(Clone)]
-pub enum Error {
-    Expected { found: Option<Spanned<Token>>, expected: Vec<Token> },
-    ExpectedEOF { found: Spanned<Token> },
+pub enum Error<Tok: TokenKind> {
+    Expected { found: Option<Spanned<Tok>>, expected: Vec<Tok> },
+    ExpectedEOF { found: Spanned<Tok> },
 }
 
-impl Error {
-    pub fn display<'a, 's>(&'a self, str: &'s str) -> DisplayError<'a, 's> {
+impl<Tok: TokenKind> Error<Tok> {
+    pub fn display<'a, 's>(&'a self, str: &'s str) -> DisplayError<'a, 's, Tok> {
         DisplayError { error: self, str }
     }
 }
 
-impl fmt::Debug for Error {
+impl<Tok: TokenKind> fmt::Debug for Error<Tok> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::ExpectedEOF { found } => write!(f, r#""Expected EOF but found {:?}""#, found),
@@ -30,7 +29,7 @@ impl fmt::Debug for Error {
     }
 }
 
-fn format_expected(expected: &[Token], f: &mut fmt::Formatter<'_>) -> fmt::Result {
+fn format_expected<Tok: TokenKind>(expected: &[Tok], f: &mut fmt::Formatter<'_>) -> fmt::Result {
     write!(f, "Expected ")?;
     let last = expected.len() - 1;
     if last > 0 {
@@ -47,12 +46,12 @@ fn format_expected(expected: &[Token], f: &mut fmt::Formatter<'_>) -> fmt::Resul
     Ok(())
 }
 
-pub struct DisplayError<'a, 's> {
+pub struct DisplayError<'a, 's, Tok: TokenKind> {
     str: &'s str,
-    error: &'a Error
+    error: &'a Error<Tok>
 }
 
-impl<'a, 's> fmt::Display for DisplayError<'a, 's> {
+impl<'a, 's, Tok: TokenKind> fmt::Display for DisplayError<'a, 's, Tok> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.error {
             Error::ExpectedEOF { found } => write!(f, r#"Expected EOF but found {}"#, found.display(self.str, false)),

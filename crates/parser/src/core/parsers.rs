@@ -1,5 +1,5 @@
 use crate::core::{Context, Error, Node, NodeBuilder, OptionExt, Lexer, Parser, State};
-use crate::{Nodes, Token};
+use crate::Nodes;
 use std::marker::PhantomData;
 
 pub enum Assoc {
@@ -17,8 +17,8 @@ impl<N, BP, F, Lex> Clone for Pratt<N, BP, F, Lex>
 where
     Lex: Lexer,
     N: Clone + Parser<Lex>,
-    BP: Clone + Fn(Option<Token>) -> Option<(Assoc, i32)>,
-    F: Clone + Fn(&mut NodeBuilder<Lex>, Option<Token>)
+    BP: Clone + Fn(Option<Lex::Token>) -> Option<(Assoc, i32)>,
+    F: Clone + Fn(&mut NodeBuilder<Lex>, Option<Lex::Token>)
 {
     fn clone(&self) -> Self {
         Self {
@@ -35,8 +35,8 @@ impl<N, BP, F, Lex> Pratt<N, BP, F, Lex>
 where
     Lex: Lexer,
     N: Clone + Parser<Lex>,
-    BP: Clone + Fn(Option<Token>) -> Option<(Assoc, i32)>,
-    F: Clone + Fn(&mut NodeBuilder<Lex>, Option<Token>)
+    BP: Clone + Fn(Option<Lex::Token>) -> Option<(Assoc, i32)>,
+    F: Clone + Fn(&mut NodeBuilder<Lex>, Option<Lex::Token>)
 {
     pub fn new(next: N, bp: BP, f: F) -> Self {
         Self { next, bp, f, rbp: 0, _phantom: PhantomData }
@@ -82,7 +82,7 @@ pub fn node<Lex: Lexer>(f: impl Fn(&mut NodeBuilder<Lex>)) -> impl Parser<Lex> {
     }
 }
 
-pub fn expected<Lex: Lexer>(expected: &'static [Token]) -> impl Parser<Lex> {
+pub fn expected<Lex: Lexer>(expected: &'static [Lex::Token]) -> impl Parser<Lex> {
     node(move |builder| {
         let found = builder.next_token();
         builder.error(Error::Expected {
@@ -92,7 +92,7 @@ pub fn expected<Lex: Lexer>(expected: &'static [Token]) -> impl Parser<Lex> {
     })
 }
 
-pub fn tokens<Lex: Lexer>(expected: Vec<Token>) -> impl Parser<Lex> {
+pub fn tokens<Lex: Lexer>(expected: Vec<Lex::Token>) -> impl Parser<Lex> {
     node(move |builder: &mut NodeBuilder<Lex>| {
         builder.name(Nodes::Token);
         let token = builder.next_token();
@@ -117,7 +117,7 @@ pub fn tokens<Lex: Lexer>(expected: Vec<Token>) -> impl Parser<Lex> {
     })
 }
 
-pub fn token<Lex: Lexer>(expected: impl Into<Option<Token>>) -> impl Parser<Lex> {
+pub fn token<Lex: Lexer>(expected: impl Into<Option<Lex::Token>>) -> impl Parser<Lex> {
     let expected = expected.into();
     let expected = expected.into_iter().collect::<Vec<_>>();
     tokens(expected)

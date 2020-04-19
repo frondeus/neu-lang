@@ -2,6 +2,8 @@ pub mod core;
 
 mod token {
     use derive_more::Display;
+    use crate::core::TokenKind;
+
     #[derive(Debug, PartialEq, Clone, Copy, Display)]
     pub enum Token {
         #[display(fmt = "error")]
@@ -73,21 +75,28 @@ mod token {
         #[display(fmt = "`.`")]
         OpDot
     }
+
+    impl TokenKind for Token {
+        fn is_error(&self) -> bool {
+            self == &Self::Error
+        }
+    }
 }
 
 pub mod lexer {
     use crate::core::{Input, TextRange, LexerState, Lexer};
     use crate::Token;
 
-    pub struct MainLexer(LexerState);
+    pub struct MainLexer(LexerState<Token>);
     impl MainLexer {
         pub fn new(i: &str) -> Self {
             Self(LexerState::new(i))
         }
     }
     impl Lexer for MainLexer {
-        fn state_mut(&mut self) -> &mut LexerState { &mut self.0 }
-        fn state(&self) -> &LexerState { &self.0 }
+        type Token = Token;
+        fn state_mut(&mut self) -> &mut LexerState<Token> { &mut self.0 }
+        fn state(&self) -> &LexerState<Token> { &self.0 }
 
         fn lex(input: &mut Input) -> Option<(Token, TextRange)> {
             let i = input.as_ref();
@@ -382,7 +391,7 @@ fn trivia() -> impl Parser<MainLexer> {
 
 #[cfg(test)]
 mod tests {
-    use crate::core::{Lexer, State};
+    use crate::core::{State, Lexer};
     use crate::{parser, MainLexer};
 
     #[test]

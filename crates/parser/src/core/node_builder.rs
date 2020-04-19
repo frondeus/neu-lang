@@ -9,7 +9,7 @@ pub struct NodeBuilder<'a, Lex: Lexer> {
     span: TextRange,
     names: BTreeSet<Name>,
     children: Vec<NodeId>,
-    error: Option<Error>
+    error: Option<Error<Lex::Token>>
 }
 
 impl<'a, Lex: Lexer> NodeBuilder<'a, Lex> {
@@ -25,12 +25,12 @@ impl<'a, Lex: Lexer> NodeBuilder<'a, Lex> {
         }
     }
 
-    pub fn peek_token(&mut self) -> Option<crate::Token> {
+    pub fn peek_token(&mut self) -> Option<Lex::Token> {
         use crate::core::lexer::OptionExt;
         self.state.lexer_mut().peek().as_kind()
     }
 
-    pub fn next_token(&mut self) -> Option<crate::core::spanned::Spanned<crate::Token>> {
+    pub fn next_token(&mut self) -> Option<crate::core::spanned::Spanned<Lex::Token>> {
         let next = self.state.lexer_mut().next();
         let to = self.state.lexer().input().cursor;
         let span = TextRange(to, to);
@@ -43,7 +43,7 @@ impl<'a, Lex: Lexer> NodeBuilder<'a, Lex> {
         self
     }
 
-    pub fn error(&mut self, error: Error) -> &mut Self {
+    pub fn error(&mut self, error: Error<Lex::Token>) -> &mut Self {
         self.error = Some(error);
         self.name(Nodes::Error)
     }
