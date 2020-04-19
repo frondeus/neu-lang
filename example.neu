@@ -5,6 +5,7 @@
     }, // here is comment but here is eval ->
     health = {
         max = (primary.size + primary.constitution) / 10, // primary means field from top level struct
-        value = .max // but .max means field from current struct
+        value = .max, // but .max means field from current struct
+        label = "HP: ${"${.max}"}"
     }
 }.health

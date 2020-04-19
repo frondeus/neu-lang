@@ -28,6 +28,12 @@ impl fmt::Debug for Arena {
 }
 
 impl Arena {
+    pub fn take(&mut self) -> Self {
+        let mut nodes = vec![];
+        nodes.append(&mut self.nodes);
+        Self { nodes }
+    }
+
     pub fn add(&mut self, node: Node) -> NodeId {
         let len = self.nodes.len();
         self.nodes.push(node);
@@ -67,6 +73,22 @@ impl<Lex: Lexer> State<Lex> {
             new_errors: Default::default(),
             nodes: Default::default(),
         }
+    }
+
+    pub(crate) fn transform<Lex2: Lexer>(&mut self) -> State<Lex2> {
+        let lexer: Lex2 = self.lexer.transform();
+        State {
+            lexer,
+            nodes: self.nodes.take(),
+            errors: Default::default(),
+            new_errors: Default::default(),
+        }
+    }
+
+    pub(crate) fn restore<Lex2: Lexer>(&mut self, mut other: State<Lex2>) {
+        let lexer: Lex = other.lexer().transform();
+        self.lexer = lexer;
+        self.nodes = other.nodes.take();
     }
 
     pub fn nodes(&mut self) -> &mut Arena {

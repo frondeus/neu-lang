@@ -32,9 +32,9 @@ impl<'a, Lex: Lexer> NodeBuilder<'a, Lex> {
 
     pub fn next_token(&mut self) -> Option<crate::core::spanned::Spanned<Lex::Token>> {
         let next = self.state.lexer_mut().next();
-        let to = self.state.lexer().input().cursor;
-        let span = TextRange(to, to);
-        self.span = TextRange::covering(self.span, span);
+        if let Some(next) = next.as_ref() {
+            self.span = TextRange::covering(self.span, next.span);
+        }
         next
     }
 
@@ -46,6 +46,13 @@ impl<'a, Lex: Lexer> NodeBuilder<'a, Lex> {
     pub fn error(&mut self, error: Error<Lex::Token>) -> &mut Self {
         self.error = Some(error);
         self.name(Nodes::Error)
+    }
+
+    pub fn parse_mode<'b, Lex2: Lexer>(&mut self, ctx: &'b Context<'b, Lex2>, parser: impl Parser<Lex2>) {
+        let mut mode_state = self.state.transform();
+        let node = parser.parse(&mut mode_state, ctx);
+        self.state.restore(mode_state);
+        self.add(node);
     }
 
     pub fn parse_ctx<'b>(&mut self, ctx: &'b Context<'b, Lex>, parser: impl Parser<Lex>) {

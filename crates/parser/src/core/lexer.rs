@@ -1,5 +1,6 @@
 use crate::core::{Input, Spanned, TextRange};
 
+#[derive(Debug)]
 pub struct LexerState<Tok: TokenKind> {
     input: Input,
     #[allow(clippy::option_option)]
@@ -11,6 +12,13 @@ impl<Tok: TokenKind> LexerState<Tok> {
         Self {
             input: input.into(),
             peeked: None,
+        }
+    }
+
+    pub(crate) fn transform<Tok2: TokenKind>(&self) -> LexerState<Tok2> {
+        LexerState {
+            input: self.input.clone(),
+            peeked: None
         }
     }
 }
@@ -28,7 +36,7 @@ impl<Lex, T> Iterator for LexerIter<Lex, T> where Lex: Lexer<Token = T>, T: Toke
 }
 
 pub trait TokenKind: Clone + Copy + std::fmt::Debug + std::fmt::Display + PartialEq {
-    fn is_error(&self) -> bool;
+    fn is_mergeable(self, other: Self) -> bool;
 }
 
 pub trait Lexer {
@@ -36,7 +44,13 @@ pub trait Lexer {
 
     fn into_iter(self) -> LexerIter<Self, Self::Token> where Self: Sized { LexerIter { lexer: self } }
 
-    //TODO: Split into state/state_mut
+    fn build(state: LexerState<Self::Token>) -> Self where Self: Sized;
+
+    fn transform<L: Lexer>(&self) -> L {
+        let state = self.state().transform();
+        L::build(state)
+    }
+
     fn state_mut(&mut self) -> &mut LexerState<Self::Token>;
     fn state(&self) -> &LexerState<Self::Token>;
     fn input(&self) -> Input {
@@ -44,7 +58,7 @@ pub trait Lexer {
     }
 
     fn lex(input: &mut Input) -> Option<(Self::Token, TextRange)>;
-    //TODO: doc hidden
+    #[doc(hidden)]
     fn next_token(&mut self) -> Option<Spanned<Self::Token>> {
         if let Some(peeked) = self.state_mut().peeked.take() {
             if let Some(peeked) = peeked.as_ref() {
@@ -59,9 +73,9 @@ pub trait Lexer {
     fn next(&mut self) -> Option<Spanned<Self::Token>> {
         let mut first = self.next_token()?;
 
-        while first.kind.is_error() {
+        loop {
             match self.peek() {
-                Some(token) if token.kind.is_error() => {
+                Some(token) if first.kind.is_mergeable(token.kind) => {
                     first.span = TextRange::covering(first.span, token.span);
                     self.next_token();
                 }

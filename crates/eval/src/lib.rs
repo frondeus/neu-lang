@@ -175,9 +175,18 @@ impl<'a> Eval<'a> {
         }
 
         if node.is(Nodes::String) {
-            let len = text.len();
-            let text = &text[1..=len - 2];
-            return Some(Value::String(text.into()));
+            let mut s = String::new();
+            while let Some((_, value)) = children.find_node(Nodes::StrValue) {
+                if value.is(Nodes::Interpolated) {
+                    let mut children = Children::new(value.children.iter().copied(), self.nodes);
+                    let (value_id, _) = children.find_node(Nodes::Value)?;
+                    let value = self.eager_eval(value_id, ctx)?;
+                    s += &value.to_string();
+                } else {
+                    s += &self.input[value.span];
+                }
+            }
+            return Some(Value::String(s));
         }
         if node.is(Nodes::Parens) {
             let (value, _) = children.find_node(Nodes::Value)?;
@@ -203,11 +212,11 @@ pub fn eval(id: NodeId, nodes: &Arena, input: &str) -> EvalResult {
 mod tests {
     use super::*;
     use neu_parser::core::State;
-    use neu_parser::{parser, MainLexer};
+    use neu_parser::{neu::parser, MainLexer};
 
     #[test]
     fn eval_tests() {
-        test_runner::test_snapshots("eval", |input| {
+        test_runner::test_snapshots("neu", "eval", |input| {
             let lexer = MainLexer::new(input);
 
             let res = State::parse(lexer, parser());

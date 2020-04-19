@@ -1,0 +1,26 @@
+```
++++ sesja:1234abcd +++
+title = "Foo"
+health = 10
++++
+```
+
+[lexer]
+[
+    "Number `4`",
+]
+
+[parser]
+ROOT @ 0..1 = `4`
+    NUMBER, TOKEN, VALUE @ 0..1 = `4`
+    TOKEN @ 1..1 = ``
+
+
+### No Errors ###
+
+
+[eval]
+`4`
+
+### No Errors ###
+

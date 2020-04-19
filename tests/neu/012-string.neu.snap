@@ -2,17 +2,13 @@
  "foo" 
 ```
 
-[lexer]
-[
-    "Whitespace ` `",
-    "String `\"foo\"`",
-    "Whitespace ` `",
-]
-
 [parser]
 ROOT @ 0..7 = ` \"foo\" `
     TRIVIA @ 0..1 = ` `
-    STRING, TOKEN, VALUE @ 1..6 = `\"foo\"`
+    STRING, VALUE @ 1..6 = `\"foo\"`
+        TOKEN @ 1..2 = `\"`
+        STRVALUE, TOKEN @ 2..5 = `foo`
+        TOKEN @ 5..6 = `\"`
     TRIVIA @ 6..7 = ` `
     TOKEN @ 7..7 = ``
 

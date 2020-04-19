@@ -117,6 +117,13 @@ pub fn tokens<Lex: Lexer>(expected: Vec<Lex::Token>) -> impl Parser<Lex> {
     })
 }
 
+pub fn any_token<Lex: Lexer>() -> impl Parser<Lex> {
+    node(move |builder: &mut NodeBuilder<Lex>| {
+        builder.name(Nodes::Token);
+        builder.next_token();
+    })
+}
+
 pub fn token<Lex: Lexer>(expected: impl Into<Option<Lex::Token>>) -> impl Parser<Lex> {
     let expected = expected.into();
     let expected = expected.into_iter().collect::<Vec<_>>();

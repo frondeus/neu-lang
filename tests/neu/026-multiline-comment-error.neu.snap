@@ -64,7 +64,7 @@ ROOT @ 0..63 = `{\n    health = 4, /* foo }\n    bar */\n    sanity = 10, /* baz
 ### Errors ###
 Expected identifier but found `/*` @ N16
 Expected `=` but found `baz` @ N18
-Expected one of number, `true`, `false`, `-`, `!`, string, `(`, `{`, `[`, identifier but found `}` @ N20
+Expected one of number, `true`, `false`, `-`, `!`, `"`, `(`, `{`, `[`, identifier but found `}` @ N20
 Expected `}` but found EOF @ N21
 
 

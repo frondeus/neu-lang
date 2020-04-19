@@ -19,8 +19,13 @@ TODO:
    * [x] Access fields self
    * [x] Comments
    * [x] Proper const eval diagnostics (error, warn)
+   * [x] String interpolation
+   * [ ] Split tests into folders
+   * [ ] More string interpolation tests
+   * [ ] Node parent id
+   * [ ] Markdown string interpolation
+   * [ ] Markdown article
    * [ ] Generate json
-   * [ ] Markdown
    * [ ] Prevent field access cycle
    * [ ] Memoization of lazy fields
    * [ ] Parse error recovery
