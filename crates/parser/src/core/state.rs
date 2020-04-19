@@ -52,15 +52,15 @@ impl Arena {
     }
 }
 
-pub struct State {
-    lexer: Lexer,
+pub struct State<Lex: Lexer> {
+    lexer: Lex,
     errors: Vec<(NodeId, Error)>,
     new_errors: Vec<Error>,
     nodes: Arena
 }
 
-impl State {
-    fn new(lexer: Lexer) -> Self {
+impl<Lex: Lexer> State<Lex> {
+    fn new(lexer: Lex) -> Self {
         Self {
             lexer,
             errors: Default::default(),
@@ -73,11 +73,11 @@ impl State {
         &mut self.nodes
     }
 
-    pub fn lexer(&self) -> &Lexer {
+    pub fn lexer(&self) -> &Lex {
         &self.lexer
     }
 
-    pub fn lexer_mut(&mut self) -> &mut Lexer {
+    pub fn lexer_mut(&mut self) -> &mut Lex {
         &mut self.lexer
     }
 
@@ -89,7 +89,7 @@ impl State {
         self.errors.extend(self.new_errors.drain(..).map(|e| (id, e)));
     }
 
-    pub fn parse(lexer: Lexer, parser: impl Parser) -> ParseResult {
+    pub fn parse(lexer: Lex, parser: impl Parser<Lex>) -> ParseResult {
         let mut state = Self::new(lexer);
         let ctx = Context::default();
         let root = parser.parse(&mut state, &ctx);

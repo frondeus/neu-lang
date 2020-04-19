@@ -76,86 +76,97 @@ mod token {
 }
 
 pub mod lexer {
-    use crate::core::{Input, TextRange};
+    use crate::core::{Input, TextRange, LexerState, Lexer};
     use crate::Token;
 
-    pub fn lex(input: &mut Input) -> Option<(Token, TextRange)> {
-        let i = input.as_ref();
-        let peeked = i.chars().next()?;
-        if peeked.is_whitespace() {
-            let rest = i.chars().take_while(|c| c.is_whitespace()).count();
-
-            return Some((Token::Whitespace, input.chomp(rest)));
+    pub struct MainLexer(LexerState);
+    impl MainLexer {
+        pub fn new(i: &str) -> Self {
+            Self(LexerState::new(i))
         }
-        if peeked.is_ascii_digit() {
-            let rest = i.chars().take_while(|c| c.is_ascii_digit()).count();
+    }
+    impl Lexer for MainLexer {
+        fn state_mut(&mut self) -> &mut LexerState { &mut self.0 }
+        fn state(&self) -> &LexerState { &self.0 }
 
-            return Some((Token::Number, input.chomp(rest)));
-        }
+        fn lex(input: &mut Input) -> Option<(Token, TextRange)> {
+            let i = input.as_ref();
+            let peeked = i.chars().next()?;
+            if peeked.is_whitespace() {
+                let rest = i.chars().take_while(|c| c.is_whitespace()).count();
 
-        if i.starts_with("/*") {
-            let mut peeked = peeked;
-            let mut i = &i[2..];
-            let mut rest = 2;
-            while !i.starts_with("*/") {
-                i = &i[peeked.len_utf8()..];
-                rest += 1;
-                peeked = match i.chars().next() {
-                    Some(p) => p,
-                    None => return Some((Token::Error, input.chomp(2)))
-                }
+                return Some((Token::Whitespace, input.chomp(rest)));
             }
-            rest += 2;
-            return Some((Token::Comment, input.chomp(rest)));
+            if peeked.is_ascii_digit() {
+                let rest = i.chars().take_while(|c| c.is_ascii_digit()).count();
+
+                return Some((Token::Number, input.chomp(rest)));
+            }
+
+            if i.starts_with("/*") {
+                let mut peeked = peeked;
+                let mut i = &i[2..];
+                let mut rest = 2;
+                while !i.starts_with("*/") {
+                    i = &i[peeked.len_utf8()..];
+                    rest += 1;
+                    peeked = match i.chars().next() {
+                        Some(p) => p,
+                        None => return Some((Token::Error, input.chomp(2)))
+                    }
+                }
+                rest += 2;
+                return Some((Token::Comment, input.chomp(rest)));
+            }
+
+            if i.starts_with("//") {
+                let rest = i.chars().take_while(|c| *c != '\n').count();
+                return Some((Token::Comment, input.chomp(rest)));
+            }
+
+            if i.starts_with("==") {
+                return Some((Token::OpDEqual, input.chomp(2)));
+            }
+
+            if i.starts_with("true") {
+                return Some((Token::True, input.chomp(4)));
+            }
+
+            if i.starts_with("false") {
+                return Some((Token::False, input.chomp(5)));
+            }
+
+            if peeked == '-' { return Some((Token::OpMinus, input.chomp(1))); }
+            if peeked == '!' { return Some((Token::OpBang, input.chomp(1))); }
+            if peeked == '+' { return Some((Token::OpPlus, input.chomp(1))); }
+            if peeked == '*' { return Some((Token::OpStar, input.chomp(1))); }
+            if peeked == '/' { return Some((Token::OpSlash, input.chomp(1))); }
+            if peeked == '=' { return Some((Token::OpAssign, input.chomp(1))); }
+            if peeked == '.' { return Some((Token::OpDot, input.chomp(1))); }
+
+            if peeked == ',' { return Some((Token::Comma, input.chomp(1))); }
+
+            if peeked == '(' { return Some((Token::OpenP, input.chomp(1))); }
+            if peeked == ')' { return Some((Token::CloseP, input.chomp(1))); }
+            if peeked == '{' { return Some((Token::OpenC, input.chomp(1))); }
+            if peeked == '}' { return Some((Token::CloseC, input.chomp(1))); }
+            if peeked == '[' { return Some((Token::OpenB, input.chomp(1))); }
+            if peeked == ']' { return Some((Token::CloseB, input.chomp(1))); }
+
+            if peeked == '"' {
+                let rest = i.chars().skip(1).take_while(|c| *c != '"').count();
+
+                return Some((Token::String, input.chomp(rest + 2)));
+            }
+
+            if peeked.is_ascii_alphabetic() {
+                let rest = i.chars()
+                    .take_while(|c| c.is_ascii_alphanumeric() || *c == '_').count();
+                return Some((Token::Identifier, input.chomp(rest)));
+            }
+
+            Some((Token::Error, input.chomp(1)))
         }
-
-        if i.starts_with("//") {
-            let rest = i.chars().take_while(|c| *c != '\n').count();
-            return Some((Token::Comment, input.chomp(rest)));
-        }
-
-        if i.starts_with("==") {
-            return Some((Token::OpDEqual, input.chomp(2)));
-        }
-
-        if i.starts_with("true") {
-            return Some((Token::True, input.chomp(4)));
-        }
-
-        if i.starts_with("false") {
-            return Some((Token::False, input.chomp(5)));
-        }
-
-        if peeked == '-' { return Some((Token::OpMinus, input.chomp(1))); }
-        if peeked == '!' { return Some((Token::OpBang, input.chomp(1))); }
-        if peeked == '+' { return Some((Token::OpPlus, input.chomp(1))); }
-        if peeked == '*' { return Some((Token::OpStar, input.chomp(1))); }
-        if peeked == '/' { return Some((Token::OpSlash, input.chomp(1))); }
-        if peeked == '=' { return Some((Token::OpAssign, input.chomp(1))); }
-        if peeked == '.' { return Some((Token::OpDot, input.chomp(1))); }
-
-        if peeked == ',' { return Some((Token::Comma, input.chomp(1))); }
-
-        if peeked == '(' { return Some((Token::OpenP, input.chomp(1))); }
-        if peeked == ')' { return Some((Token::CloseP, input.chomp(1))); }
-        if peeked == '{' { return Some((Token::OpenC, input.chomp(1))); }
-        if peeked == '}' { return Some((Token::CloseC, input.chomp(1))); }
-        if peeked == '[' { return Some((Token::OpenB, input.chomp(1))); }
-        if peeked == ']' { return Some((Token::CloseB, input.chomp(1))); }
-
-        if peeked == '"' {
-            let rest = i.chars().skip(1).take_while(|c| *c != '"').count();
-
-            return Some((Token::String, input.chomp(rest + 2)));
-        }
-
-        if peeked.is_ascii_alphabetic() {
-            let rest = i.chars()
-                .take_while(|c| c.is_ascii_alphanumeric() || *c == '_').count();
-            return Some((Token::Identifier, input.chomp(rest)));
-        }
-
-        Some((Token::Error, input.chomp(1)))
     }
 }
 
@@ -190,7 +201,7 @@ pub use crate::token::*;
 use crate::core::*;
 pub use crate::{Nodes, Token};
 
-pub fn parser() -> impl Parser {
+pub fn parser() -> impl Parser<MainLexer> {
     node(|builder| {
         builder.name(Nodes::Root);
         let trivia = trivia();
@@ -200,8 +211,8 @@ pub fn parser() -> impl Parser {
     })
 }
 
-fn value() -> impl Parser {
-    let next = |state: &mut State, ctx: &Context| left_value().parse(state, ctx);
+fn value() -> impl Parser<MainLexer> {
+    let next = |state: &mut State<_>, ctx: &Context<_>| left_value().parse(state, ctx);
     Pratt::new(next, |token| match token {
         Some(Token::OpDot) => Some((Assoc::Left, 100)),
 
@@ -227,7 +238,7 @@ fn value() -> impl Parser {
     }).parser()
 }
 
-fn left_value() -> impl Parser {
+fn left_value() -> impl Parser<MainLexer> {
     const VALUE_TOKENS: &[Token] = &[
         Token::Number, Token::True, Token::False,
         Token::OpMinus, Token::OpBang, Token::String, Token::OpenP,
@@ -261,7 +272,7 @@ fn left_value() -> impl Parser {
     })
 }
 
-fn array() -> impl Parser {
+fn array() -> impl Parser<MainLexer> {
     node(|builder| {
         builder.name(Nodes::Array);
         builder.parse(token(Token::OpenB));
@@ -290,15 +301,15 @@ fn array() -> impl Parser {
     })
 }
 
-fn identifier() -> impl Parser {
+fn identifier() -> impl Parser<MainLexer> {
     token(Token::Identifier).map(|n| n.with_name(Nodes::Identifier))
 }
 
-fn strukt_key() -> impl Parser {
+fn strukt_key() -> impl Parser<MainLexer> {
     identifier().map(|n| n.with_name(Nodes::Key))
 }
 
-fn strukt() -> impl Parser {
+fn strukt() -> impl Parser<MainLexer> {
     node(|builder| {
         builder.name(Nodes::Struct);
         builder.parse(token(Token::OpenC));
@@ -331,11 +342,11 @@ fn strukt() -> impl Parser {
     })
 }
 
-fn string() -> impl Parser {
+fn string() -> impl Parser<MainLexer> {
     token(Token::String).map(|n| n.with_name(Nodes::String))
 }
 
-fn unary() -> impl Parser {
+fn unary() -> impl Parser<MainLexer> {
     node(|builder| {
         builder.name(Nodes::Unary);
         builder.parse( tokens(vec![Token::OpMinus, Token::OpBang, Token::OpDot])
@@ -345,15 +356,15 @@ fn unary() -> impl Parser {
     })
 }
 
-fn boolean() -> impl Parser {
+fn boolean() -> impl Parser<MainLexer> {
     tokens(vec![Token::True, Token::False]).map(|n| n.with_name(Nodes::Boolean))
 }
 
-fn number() -> impl Parser {
+fn number() -> impl Parser<MainLexer> {
     token(Token::Number).map(|n| n.with_name(Nodes::Number))
 }
 
-fn trivia() -> impl Parser {
+fn trivia() -> impl Parser<MainLexer> {
     node(|builder| {
         builder.name(Nodes::Trivia);
         let mut empty = true;
@@ -372,14 +383,14 @@ fn trivia() -> impl Parser {
 #[cfg(test)]
 mod tests {
     use crate::core::{Lexer, State};
-    use crate::parser;
+    use crate::{parser, MainLexer};
 
     #[test]
     fn lexer_tests() {
         test_runner::test_snapshots("lexer", |input| {
-            let lexer = Lexer::new(input);
+            let lexer = MainLexer::new(input);
 
-            let res: Vec<_> = lexer.map(|t| t.display(input, true).to_string()).collect();
+            let res: Vec<_> = lexer.into_iter().map(|t| t.display(input, true).to_string()).collect();
             format!("{:#?}", res)
         }).unwrap();
     }
@@ -387,7 +398,7 @@ mod tests {
     #[test]
     fn parser_tests() {
         test_runner::test_snapshots("parser", |input| {
-            let lexer = Lexer::new(input);
+            let lexer = MainLexer::new(input);
 
             let res = State::parse(lexer, parser());
 

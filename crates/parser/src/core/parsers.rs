@@ -1,40 +1,45 @@
-use crate::core::{Context, Error, Node, NodeBuilder, OptionExt, Parser, State};
+use crate::core::{Context, Error, Node, NodeBuilder, OptionExt, Lexer, Parser, State};
 use crate::{Nodes, Token};
+use std::marker::PhantomData;
 
 pub enum Assoc {
     Right, Left
 }
-pub struct Pratt<N, BP, F> {
+pub struct Pratt<N, BP, F, Lex> {
     next: N,
     bp: BP,
     f: F,
     rbp: i32,
+    _phantom: PhantomData<Lex>
 }
 
-impl<N, BP, F> Clone for Pratt<N, BP, F>
+impl<N, BP, F, Lex> Clone for Pratt<N, BP, F, Lex>
 where
-    N: Clone + Parser,
+    Lex: Lexer,
+    N: Clone + Parser<Lex>,
     BP: Clone + Fn(Option<Token>) -> Option<(Assoc, i32)>,
-    F: Clone + Fn(&mut NodeBuilder, Option<Token>)
+    F: Clone + Fn(&mut NodeBuilder<Lex>, Option<Token>)
 {
     fn clone(&self) -> Self {
         Self {
             next: self.next.clone(),
             bp: self.bp.clone(),
             f: self.f.clone(),
-            rbp: self.rbp
+            rbp: self.rbp,
+            _phantom: PhantomData
         }
     }
 }
 
-impl<N, BP, F> Pratt<N, BP, F>
+impl<N, BP, F, Lex> Pratt<N, BP, F, Lex>
 where
-    N: Clone + Parser,
+    Lex: Lexer,
+    N: Clone + Parser<Lex>,
     BP: Clone + Fn(Option<Token>) -> Option<(Assoc, i32)>,
-    F: Clone + Fn(&mut NodeBuilder, Option<Token>)
+    F: Clone + Fn(&mut NodeBuilder<Lex>, Option<Token>)
 {
     pub fn new(next: N, bp: BP, f: F) -> Self {
-        Self { next, bp, f, rbp: 0 }
+        Self { next, bp, f, rbp: 0, _phantom: PhantomData }
     }
 
     pub fn rbp(&self, rbp: i32) -> Self {
@@ -43,11 +48,10 @@ where
         new
     }
 
-    pub fn parser(&self) -> impl Parser {
-        use crate::core::peekable::PeekableIterator;
+    pub fn parser(&self) -> impl Parser<Lex> {
         let opt = self.clone();
 
-        move |state: &mut State, ctx: &Context| {
+        move |state: &mut State<Lex>, ctx: &Context<Lex>| {
             let mut left = opt.next.parse(state, ctx);
             loop {
                 let op_token = state.lexer_mut().peek().as_kind();
@@ -70,15 +74,15 @@ where
     }
 }
 
-pub fn node(f: impl Fn(&mut NodeBuilder)) -> impl Parser {
-    move |state: &mut State, ctx: &Context| {
+pub fn node<Lex: Lexer>(f: impl Fn(&mut NodeBuilder<Lex>)) -> impl Parser<Lex> {
+    move |state: &mut State<Lex>, ctx: &Context<Lex>| {
         let mut builder = NodeBuilder::new(state, ctx);
         f(&mut builder);
         builder.build()
     }
 }
 
-pub fn expected(expected: &'static [Token]) -> impl Parser {
+pub fn expected<Lex: Lexer>(expected: &'static [Token]) -> impl Parser<Lex> {
     node(move |builder| {
         let found = builder.next_token();
         builder.error(Error::Expected {
@@ -88,8 +92,8 @@ pub fn expected(expected: &'static [Token]) -> impl Parser {
     })
 }
 
-pub fn tokens(expected: Vec<Token>) -> impl Parser {
-    node(move |builder: &mut NodeBuilder| {
+pub fn tokens<Lex: Lexer>(expected: Vec<Token>) -> impl Parser<Lex> {
+    node(move |builder: &mut NodeBuilder<Lex>| {
         builder.name(Nodes::Token);
         let token = builder.next_token();
         match (token.as_kind(), expected.is_empty()) {
@@ -112,14 +116,15 @@ pub fn tokens(expected: Vec<Token>) -> impl Parser {
         };
     })
 }
-pub fn token(expected: impl Into<Option<Token>>) -> impl Parser {
+
+pub fn token<Lex: Lexer>(expected: impl Into<Option<Token>>) -> impl Parser<Lex> {
     let expected = expected.into();
     let expected = expected.into_iter().collect::<Vec<_>>();
     tokens(expected)
 }
 
 
-pub trait ParserExt: Parser {
+pub trait ParserExt<Lex: Lexer>: Parser<Lex> {
     fn map<F>(self, f: F) -> Map<Self, F>
     where
         F: Fn(Node) -> Node,
@@ -130,9 +135,10 @@ pub trait ParserExt: Parser {
     }
 }
 
-impl<P> ParserExt for P
+impl<P, Lex> ParserExt<Lex> for P
 where
-    P: Parser,
+    Lex: Lexer,
+    P: Parser<Lex>,
 {
     fn map<F>(self, f: F) -> Map<Self, F>
     where
@@ -148,12 +154,13 @@ pub struct Map<P, F> {
     f: F,
 }
 
-impl<P, Fun> Parser for Map<P, Fun>
+impl<P, Fun, Lex> Parser<Lex> for Map<P, Fun>
 where
-    P: Parser,
+    Lex: Lexer,
+    P: Parser<Lex>,
     Fun: Fn(Node) -> Node,
 {
-    fn parse(&self, state: &mut State, ctx: &Context) -> Node {
+    fn parse(&self, state: &mut State<Lex>, ctx: &Context<Lex>) -> Node {
         let o = self.parser.parse(state, ctx);
         (self.f)(o)
     }

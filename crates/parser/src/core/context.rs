@@ -1,18 +1,23 @@
-use crate::core::Parser;
+use crate::core::{Parser, Lexer};
 
-#[derive(Default)]
-pub struct Context<'a> {
-    trivia: Option<&'a dyn Parser>,
+pub struct Context<'a, Lex: Lexer> {
+    trivia: Option<&'a dyn Parser<Lex>>,
 }
 
-impl<'a> Context<'a> {
-    pub fn new(trivia: &'a dyn Parser) -> Self {
+impl<'a, Lex: Lexer> Default for Context<'a, Lex> {
+    fn default() -> Self {
+        Self { trivia: None }
+    }
+}
+
+impl<'a, Lex: Lexer> Context<'a, Lex> {
+    pub fn new(trivia: &'a dyn Parser<Lex>) -> Self {
         Self {
             trivia: Some(trivia),
         }
     }
 
-    pub fn trivia(&self) -> Option<&'a dyn Parser> {
+    pub fn trivia(&self) -> Option<&'a dyn Parser<Lex>> {
         self.trivia
     }
 }

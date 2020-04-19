@@ -1,19 +1,19 @@
-use crate::core::{Context, Name, Node, Parser, State, NodeId, Error};
+use crate::core::{Context, Name, Node, Parser, Lexer, State, NodeId, Error};
 use crate::Nodes;
 use std::collections::BTreeSet;
 use text_size::TextRange;
 
-pub struct NodeBuilder<'a> {
-    state: &'a mut State,
-    ctx: &'a Context<'a>,
+pub struct NodeBuilder<'a, Lex: Lexer> {
+    state: &'a mut State<Lex>,
+    ctx: &'a Context<'a, Lex>,
     span: TextRange,
     names: BTreeSet<Name>,
     children: Vec<NodeId>,
     error: Option<Error>
 }
 
-impl<'a> NodeBuilder<'a> {
-    pub(crate) fn new(state: &'a mut State, ctx: &'a Context<'a>) -> Self {
+impl<'a, Lex: Lexer> NodeBuilder<'a, Lex> {
+    pub(crate) fn new(state: &'a mut State<Lex>, ctx: &'a Context<'a, Lex>) -> Self {
         let from = state.lexer().input().cursor;
         let span = TextRange(from, from);
         Self {
@@ -26,7 +26,6 @@ impl<'a> NodeBuilder<'a> {
     }
 
     pub fn peek_token(&mut self) -> Option<crate::Token> {
-        use crate::core::peekable::PeekableIterator;
         use crate::core::lexer::OptionExt;
         self.state.lexer_mut().peek().as_kind()
     }
@@ -49,7 +48,7 @@ impl<'a> NodeBuilder<'a> {
         self.name(Nodes::Error)
     }
 
-    pub fn parse_ctx<'b>(&mut self, ctx: &'b Context<'b>, parser: impl Parser) {
+    pub fn parse_ctx<'b>(&mut self, ctx: &'b Context<'b, Lex>, parser: impl Parser<Lex>) {
         if let Some(trivia) = ctx.trivia() {
             let node = trivia.parse(self.state, ctx);
             self.add(node);
@@ -64,7 +63,7 @@ impl<'a> NodeBuilder<'a> {
         }
     }
 
-    pub fn parse(&mut self, parser: impl Parser) {
+    pub fn parse(&mut self, parser: impl Parser<Lex>) {
         self.parse_ctx(self.ctx, parser);
     }
 

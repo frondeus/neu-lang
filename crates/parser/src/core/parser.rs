@@ -1,14 +1,15 @@
-use crate::core::{Context, Node, State};
+use crate::core::{Context, Node, State, Lexer};
 
-pub trait Parser {
-    fn parse(&self, state: &mut State, ctx: &Context) -> Node;
+pub trait Parser<Lex: Lexer> {
+    fn parse(&self, state: &mut State<Lex>, ctx: &Context<Lex>) -> Node;
 }
 
-impl<Fun> Parser for Fun
+impl<Fun, Lex> Parser<Lex> for Fun
 where
-    Fun: Fn(&mut State, &Context) -> Node,
+    Lex: Lexer,
+    Fun: Fn(&mut State<Lex>, &Context<Lex>) -> Node,
 {
-    fn parse(&self, state: &mut State, ctx: &Context) -> Node {
+    fn parse(&self, state: &mut State<Lex>, ctx: &Context<Lex>) -> Node {
         self(state, ctx)
     }
 }

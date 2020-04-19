@@ -96,10 +96,10 @@ impl NeovimHandler {
                 let buf = lines.iter().join("\n");
 
                 let parse_result = {
-                    use neu_parser::core::{Lexer, State};
-                    use neu_parser::{parser};
+                    use neu_parser::core::State;
+                    use neu_parser::{parser, MainLexer};
 
-                    State::parse(Lexer::new(&buf), parser())
+                    State::parse(MainLexer::new(&buf), parser())
                 };
 
                 // Eval

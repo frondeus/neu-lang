@@ -202,13 +202,13 @@ pub fn eval(id: NodeId, nodes: &Arena, input: &str) -> EvalResult {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use neu_parser::core::{Lexer, State};
-    use neu_parser::parser;
+    use neu_parser::core::State;
+    use neu_parser::{parser, MainLexer};
 
     #[test]
     fn eval_tests() {
         test_runner::test_snapshots("eval", |input| {
-            let lexer = Lexer::new(input);
+            let lexer = MainLexer::new(input);
 
             let res = State::parse(lexer, parser());
             let result = eval(res.root, &res.nodes, input);
