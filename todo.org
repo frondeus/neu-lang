@@ -1,0 +1,59 @@
+* TODO
+** Testing [1/1]
+*** DONE Split tests into folders
+** Integers [/]
+** Parser [0/2]
+*** TODO Node parent id
+*** TODO Parse error recovery
+** Immediate Constants [/]
+** Unary primitives [/]
+** Binary primitives [/]
+** Strings  [0/2]
+*** TODO More string interpolation tests
+*** TODO Handle errors in interpolated strings
+** Structs [0/2]
+*** TODO Prevent field access cycle
+*** TODO Memoization of lazy fields
+** Arrays [/]
+** Markdown [0/2]
+*** TODO Markdown string interpolation
+*** TODO Markdown article
+** Gm notes [0/1]
+*** TODO Generate json
+** TODO Tuples [/]
+** TODO Type system
+** TODO Effect system
+** TODO Algebraic types
+** TODO Local Variables
+** TODO Blocks
+** TODO Assignment
+** TODO Conditional Expressions
+** TODO Procedure calls
+** TODO References
+** TODO Closures
+** TODO Heap Allocation
+** TODO Tail calls
+** TODO Libraries
+
+* Done [21/21]
+** [X] Integers
+** [X] Immediate Constants
+** [X] Unary primitives
+** [X] Binary primitives
+** [X] Pratt parsers
+** [X] ConstStrings
+** [X] Parens
+** [X] Eval
+** [X] Better snapshots
+** [X] Proper pratt span
+** [X] Structs
+** [X] Structs proper line ending
+** [X] Arrays
+** [X] Eval structs & arrays
+** [X] Better value printing
+** [X] Access to fields
+** [X] Access fields inside struct initializers
+** [X] Access fields self
+** [X] Comments
+** [X] Proper const eval diagnostics (error, warn)
+** [X] String interpolation
