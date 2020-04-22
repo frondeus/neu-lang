@@ -1,6 +1,8 @@
 use crate::core::{Context, Error, Node, NodeBuilder, OptionExt, Lexer, Parser, State};
 use crate::Nodes;
 use std::marker::PhantomData;
+use std::cell::{Cell, RefCell};
+use std::borrow::{BorrowMut, Borrow};
 
 pub enum Assoc {
     Right, Left
@@ -71,6 +73,16 @@ where
                 left = builder.build();
             }
         }
+    }
+}
+
+pub fn node_mut<Lex: Lexer>(mut f: impl FnMut(&mut NodeBuilder<Lex>)) -> impl Parser<Lex> {
+    NodeMut {
+        f: RefCell::new(move |state: &mut State<Lex>, ctx: &Context<Lex>| {
+            let mut builder = NodeBuilder::new(state, ctx);
+            f(&mut builder);
+            builder.build()
+        })
     }
 }
 
@@ -170,5 +182,19 @@ where
     fn parse(&self, state: &mut State<Lex>, ctx: &Context<Lex>) -> Node {
         let o = self.parser.parse(state, ctx);
         (self.f)(o)
+    }
+}
+
+struct NodeMut<F> {
+    f: RefCell<F>
+}
+
+impl<Lex: Lexer, F> Parser<Lex> for NodeMut<F>
+    where F: FnMut(&mut State<Lex>, &Context<Lex>) -> Node
+{
+    fn parse(&self, state: &mut State<Lex>, ctx: &Context<Lex>) -> Node {
+        let mut f = self.f.borrow_mut();
+        let f = &mut *f;
+        f(state, ctx)
     }
 }

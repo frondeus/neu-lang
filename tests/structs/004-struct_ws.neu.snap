@@ -1,0 +1,78 @@
+```
+{
+    health = 10
+    - 2,
+    sanity = 50 + 2
+}
+```
+
+[lexer]
+[
+    "OpenC `{`",
+    "Whitespace `\n    `",
+    "Identifier `health`",
+    "Whitespace ` `",
+    "OpAssign `=`",
+    "Whitespace ` `",
+    "Number `10`",
+    "Whitespace `\n    `",
+    "OpMinus `-`",
+    "Whitespace ` `",
+    "Number `2`",
+    "Comma `,`",
+    "Whitespace `\n    `",
+    "Identifier `sanity`",
+    "Whitespace ` `",
+    "OpAssign `=`",
+    "Whitespace ` `",
+    "Number `50`",
+    "Whitespace ` `",
+    "OpPlus `+`",
+    "Whitespace ` `",
+    "Number `2`",
+    "Whitespace `\n`",
+    "CloseC `}`",
+]
+
+[parser]
+ROOT @ 0..48 = `{\n    health = 10\n    - 2,\n    sanity = 50 + 2\n}`
+    STRUCT, VALUE @ 0..48 = `{\n    health = 10\n    - 2,\n    sanity = 50 + 2\n}`
+        TOKEN @ 0..1 = `{`
+        TRIVIA @ 1..6 = `\n    `
+        IDENTIFIER, KEY, TOKEN @ 6..12 = `health`
+        TRIVIA @ 12..13 = ` `
+        TOKEN @ 13..14 = `=`
+        TRIVIA @ 14..15 = ` `
+        BINARY, VALUE @ 15..25 = `10\n    - 2`
+            NUMBER, TOKEN, VALUE @ 15..17 = `10`
+            TRIVIA @ 17..22 = `\n    `
+            OP, TOKEN @ 22..23 = `-`
+            TRIVIA @ 23..24 = ` `
+            NUMBER, TOKEN, VALUE @ 24..25 = `2`
+        TOKEN @ 25..26 = `,`
+        TRIVIA @ 26..31 = `\n    `
+        IDENTIFIER, KEY, TOKEN @ 31..37 = `sanity`
+        TRIVIA @ 37..38 = ` `
+        TOKEN @ 38..39 = `=`
+        TRIVIA @ 39..40 = ` `
+        BINARY, VALUE @ 40..46 = `50 + 2`
+            NUMBER, TOKEN, VALUE @ 40..42 = `50`
+            TRIVIA @ 42..43 = ` `
+            OP, TOKEN @ 43..44 = `+`
+            TRIVIA @ 44..45 = ` `
+            NUMBER, TOKEN, VALUE @ 45..46 = `2`
+            TRIVIA @ 46..47 = `\n`
+        TOKEN @ 47..48 = `}`
+
+
+### No Errors ###
+
+
+[eval]
+`{
+    health = 8,
+    sanity = 52,
+ }`
+
+### No Errors ###
+

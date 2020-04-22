@@ -55,7 +55,10 @@ pub enum Token {
     OpenC,
 
     #[display(fmt = "`\"`")]
-    OpenS,
+    DoubleQuote,
+
+    #[display(fmt = "`md\"`")]
+    MdQuote,
 
     #[display(fmt = "`}}`")]
     CloseC,

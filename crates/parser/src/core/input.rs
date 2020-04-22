@@ -1,5 +1,6 @@
 use std::convert::TryFrom;
 use text_size::{TextRange, TextSize, TextSized};
+use crate::core::Node;
 
 #[derive(Debug, Clone)]
 pub struct Input {
@@ -23,6 +24,10 @@ impl Input {
         self.cursor = range.end();
 
         range
+    }
+
+    pub fn range_span(&self, range: TextRange) -> &str {
+        &self.str[range]
     }
 }
 

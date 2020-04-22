@@ -30,6 +30,14 @@ impl<'a, Lex: Lexer> NodeBuilder<'a, Lex> {
         self.state.lexer_mut().peek().as_kind()
     }
 
+    pub fn state(&self) -> &State<Lex> {
+        &self.state
+    }
+
+    pub fn set_span(&mut self, span: TextRange) {
+        self.span = span;
+    }
+
     pub fn next_token(&mut self) -> Option<crate::core::spanned::Spanned<Lex::Token>> {
         let next = self.state.lexer_mut().next();
         if let Some(next) = next.as_ref() {
@@ -88,7 +96,7 @@ impl<'a, Lex: Lexer> NodeBuilder<'a, Lex> {
                 child
             }).collect::<Vec<_>>();
             self.children.append(&mut children);
-        } else {
+        } else if node.is(Nodes::Error) || !node.children.is_empty() || !node.span.is_empty() {
             let id = self.state.nodes().add(node);
             self.state.commit_errors(id);
             self.children.push(id);

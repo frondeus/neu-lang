@@ -1,5 +1,6 @@
 use crate::core::*;
 use crate::{MainLexer, Nodes, Token, StringLexer, StrToken};
+use crate::md::inner_md_string;
 
 pub fn parser() -> impl Parser<MainLexer> {
     node(|builder| {
@@ -41,7 +42,7 @@ fn value() -> impl Parser<MainLexer> {
 fn left_value() -> impl Parser<MainLexer> {
     const VALUE_TOKENS: &[Token] = &[
         Token::Number, Token::True, Token::False,
-        Token::OpMinus, Token::OpBang, Token::OpenS, Token::OpenP,
+        Token::OpMinus, Token::OpBang, Token::DoubleQuote, Token::OpenP,
         Token::OpenC, Token::OpenB, Token::Identifier
     ];
 
@@ -55,7 +56,8 @@ fn left_value() -> impl Parser<MainLexer> {
             | Some(Token::OpBang)
             | Some(Token::OpDot)
             => builder.parse(unary()),
-            Some(Token::OpenS) => builder.parse(string()),
+            Some(Token::MdQuote) => builder.parse(md_string()),
+            Some(Token::DoubleQuote) => builder.parse(string()),
             Some(Token::OpenC) => builder.parse(strukt()),
             Some(Token::OpenB) => builder.parse(array()),
             Some(Token::Identifier) => builder.parse(identifier()),
@@ -142,14 +144,26 @@ fn strukt() -> impl Parser<MainLexer> {
     })
 }
 
+fn md_string() -> impl Parser<MainLexer> {
+    node(|builder| {
+        builder.name(Nodes::Markdown);
+        let ctx = Context::default();
+        builder.parse_ctx(&ctx, token(Token::MdQuote));
+        let ctx2 = Context::default();
+        builder.parse_mode(&ctx2, inner_md_string());
+        builder.parse_ctx(&ctx, token(Token::DoubleQuote));
+    })
+}
+
+
 fn string() -> impl Parser<MainLexer> {
     node(|builder: &mut NodeBuilder<'_, MainLexer>| {
         builder.name(Nodes::String);
         let ctx = Context::default();
-        builder.parse_ctx(&ctx, token(Token::OpenS));
+        builder.parse_ctx(&ctx, token(Token::DoubleQuote));
         let ctx2 = Context::default();
         builder.parse_mode(&ctx2, inner_string());
-        builder.parse_ctx(&ctx, token(Token::OpenS));
+        builder.parse_ctx(&ctx, token(Token::DoubleQuote));
     })
 }
 

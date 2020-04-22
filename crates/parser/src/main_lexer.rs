@@ -62,6 +62,10 @@ impl Lexer for MainLexer {
             return Some((Token::False, input.chomp(5)));
         }
 
+        if i.starts_with("md\"") {
+            return Some((Token::MdQuote, input.chomp(3)));
+        }
+
         if peeked == '-' { return Some((Token::OpMinus, input.chomp(1))); }
         if peeked == '!' { return Some((Token::OpBang, input.chomp(1))); }
         if peeked == '+' { return Some((Token::OpPlus, input.chomp(1))); }
@@ -79,7 +83,7 @@ impl Lexer for MainLexer {
         if peeked == '[' { return Some((Token::OpenB, input.chomp(1))); }
         if peeked == ']' { return Some((Token::CloseB, input.chomp(1))); }
 
-        if peeked == '"' { return Some((Token::OpenS, input.chomp(1))); }
+        if peeked == '"' { return Some((Token::DoubleQuote, input.chomp(1))); }
 
         if peeked.is_ascii_alphabetic() {
             let rest = i.chars()

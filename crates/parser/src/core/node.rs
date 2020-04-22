@@ -1,4 +1,5 @@
 use crate::core::{TextRange, NodeId, Arena};
+use text_size::TextSize;
 use std::collections::BTreeSet;
 use std::fmt;
 use itertools::Itertools;
@@ -53,6 +54,14 @@ pub struct Node {
 }
 
 impl Node {
+    pub fn empty() -> Self {
+        Self {
+            names: Default::default(),
+            children: Default::default(),
+            span: TextRange(TextSize::zero(), TextSize::zero())
+        }
+    }
+
     pub fn is(&self, name: Name) -> bool {
         self.names.contains(&name)
     }

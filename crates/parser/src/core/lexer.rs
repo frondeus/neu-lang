@@ -21,6 +21,10 @@ impl<Tok: TokenKind> LexerState<Tok> {
             peeked: None
         }
     }
+
+    pub fn input(&self) -> &Input {
+        &self.input
+    }
 }
 
 pub struct LexerIter<Lex: Lexer<Token = T>, T: TokenKind> {

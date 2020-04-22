@@ -1,8 +1,9 @@
 ```
 +++ sesja:1234abcd +++
-title = "Foo"
+title = "Foo",
 health = 10
 +++
+Foo *bar*
 ```
 
 [lexer]

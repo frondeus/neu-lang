@@ -1,0 +1,45 @@
+```
+(4 + 2) * 5
+```
+
+[lexer]
+[
+    "OpenP `(`",
+    "Number `4`",
+    "Whitespace ` `",
+    "OpPlus `+`",
+    "Whitespace ` `",
+    "Number `2`",
+    "CloseP `)`",
+    "Whitespace ` `",
+    "OpStar `*`",
+    "Whitespace ` `",
+    "Number `5`",
+]
+
+[parser]
+ROOT @ 0..11 = `(4 + 2) * 5`
+    BINARY, VALUE @ 0..11 = `(4 + 2) * 5`
+        PARENS, VALUE @ 0..7 = `(4 + 2)`
+            TOKEN @ 0..1 = `(`
+            BINARY, VALUE @ 1..6 = `4 + 2`
+                NUMBER, TOKEN, VALUE @ 1..2 = `4`
+                TRIVIA @ 2..3 = ` `
+                OP, TOKEN @ 3..4 = `+`
+                TRIVIA @ 4..5 = ` `
+                NUMBER, TOKEN, VALUE @ 5..6 = `2`
+            TOKEN @ 6..7 = `)`
+            TRIVIA @ 7..8 = ` `
+        OP, TOKEN @ 8..9 = `*`
+        TRIVIA @ 9..10 = ` `
+        NUMBER, TOKEN, VALUE @ 10..11 = `5`
+
+
+### No Errors ###
+
+
+[eval]
+`30`
+
+### No Errors ###
+

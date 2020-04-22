@@ -1,0 +1,29 @@
+```
+true ==
+```
+
+[lexer]
+[
+    "True `true`",
+    "Whitespace ` `",
+    "OpDEqual `==`",
+]
+
+[parser]
+ROOT @ 0..7 = `true ==`
+    BINARY, VALUE @ 0..7 = `true ==`
+        BOOLEAN, TOKEN, VALUE @ 0..4 = `true`
+        TRIVIA @ 4..5 = ` `
+        OP, TOKEN @ 5..7 = `==`
+        ERROR, VALUE @ 7..7 = ``
+
+
+### Errors ###
+Expected one of number, `true`, `false`, `-`, `!`, `"`, `(`, `{`, `[`, identifier but found EOF @ N3
+
+
+[eval]
+None
+
+### No Errors ###
+

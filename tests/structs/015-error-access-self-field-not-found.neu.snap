@@ -1,0 +1,60 @@
+```
+{
+    foo = 10,
+    bar = .baz
+}
+```
+
+[lexer]
+[
+    "OpenC `{`",
+    "Whitespace `\n    `",
+    "Identifier `foo`",
+    "Whitespace ` `",
+    "OpAssign `=`",
+    "Whitespace ` `",
+    "Number `10`",
+    "Comma `,`",
+    "Whitespace `\n    `",
+    "Identifier `bar`",
+    "Whitespace ` `",
+    "OpAssign `=`",
+    "Whitespace ` `",
+    "OpDot `.`",
+    "Identifier `baz`",
+    "Whitespace `\n`",
+    "CloseC `}`",
+]
+
+[parser]
+ROOT @ 0..32 = `{\n    foo = 10,\n    bar = .baz\n}`
+    STRUCT, VALUE @ 0..32 = `{\n    foo = 10,\n    bar = .baz\n}`
+        TOKEN @ 0..1 = `{`
+        TRIVIA @ 1..6 = `\n    `
+        IDENTIFIER, KEY, TOKEN @ 6..9 = `foo`
+        TRIVIA @ 9..10 = ` `
+        TOKEN @ 10..11 = `=`
+        TRIVIA @ 11..12 = ` `
+        NUMBER, TOKEN, VALUE @ 12..14 = `10`
+        TOKEN @ 14..15 = `,`
+        TRIVIA @ 15..20 = `\n    `
+        IDENTIFIER, KEY, TOKEN @ 20..23 = `bar`
+        TRIVIA @ 23..24 = ` `
+        TOKEN @ 24..25 = `=`
+        TRIVIA @ 25..26 = ` `
+        UNARY, VALUE @ 26..30 = `.baz`
+            OP, TOKEN @ 26..27 = `.`
+            IDENTIFIER, TOKEN, VALUE @ 27..30 = `baz`
+            TRIVIA @ 30..31 = `\n`
+        TOKEN @ 31..32 = `}`
+
+
+### No Errors ###
+
+
+[eval]
+None
+
+### Errors ###
+Field not found @ N14
+

@@ -10,7 +10,6 @@ false
 [parser]
 ROOT @ 0..5 = `false`
     BOOLEAN, TOKEN, VALUE @ 0..5 = `false`
-    TOKEN @ 5..5 = ``
 
 
 ### No Errors ###

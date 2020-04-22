@@ -10,7 +10,6 @@
 [parser]
 ROOT @ 0..3 = `???`
     ERROR, VALUE @ 0..3 = `???`
-    TOKEN @ 3..3 = ``
 
 
 ### Errors ###

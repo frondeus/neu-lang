@@ -10,7 +10,6 @@
 [parser]
 ROOT @ 0..1 = `4`
     NUMBER, TOKEN, VALUE @ 0..1 = `4`
-    TOKEN @ 1..1 = ``
 
 
 ### No Errors ###

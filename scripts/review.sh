@@ -3,7 +3,9 @@
 echo ""
 echo ""
 
-for file in $(find ./tests -type f -name "*.new"); do
+shopt -s globstar nullglob
+
+for file in ./tests/**/*.new; do
   ACTUAL="$file"
   DIR=$(dirname "$file")
 

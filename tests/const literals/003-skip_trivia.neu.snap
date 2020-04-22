@@ -12,7 +12,6 @@
 ROOT @ 0..5 = `    5`
     TRIVIA @ 0..4 = `    `
     NUMBER, TOKEN, VALUE @ 4..5 = `5`
-    TOKEN @ 5..5 = ``
 
 
 ### No Errors ###

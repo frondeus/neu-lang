@@ -9,6 +9,7 @@ nodes! {
     String,
     Interpolated,
 
+
     StrValue,
 
     Unary,
@@ -20,5 +21,14 @@ nodes! {
     Key,
 
     Array,
-    IdentPath
+    IdentPath,
+
+    Markdown,
+    MdBegin,
+    MdEnd,
+
+    MdParagraph,
+    MdEmphasis,
+    MdText,
+    MdHtml
 }
