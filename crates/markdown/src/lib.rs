@@ -1,7 +1,6 @@
 use text_size::{TextRange, TextSize, TextSized};
 use pulldown_cmark::{Event as MdEvent, Tag as MdTag, CodeBlockKind as MdCodeBlockKind, LinkType, Alignment, CowStr, Parser};
-use std::ops::Range;
-use std::convert::TryFrom;
+use std::convert::{TryFrom, TryInto};
 
 #[derive(Debug)]
 pub enum Span {
@@ -10,9 +9,20 @@ pub enum Span {
 }
 
 impl Span {
-    pub fn transform(range: TextRange, span: CowStr) -> Self {
+    fn offset(a: &str, orig: &str) -> usize {
+        let a = a.as_ptr() as usize;
+        let orig = orig.as_ptr() as usize;
+        a - orig
+    }
+
+    pub fn transform(range: TextRange, span: CowStr, orig: &str, from: TextSize) -> Self {
         match span {
             CowStr::Boxed(s) => Self::Owned(s),
+            CowStr::Borrowed(s) => {
+                let offset: TextSize = Self::offset(s, orig).try_into().unwrap();
+                let range = TextRange(offset + from, offset + s.text_size() + from);
+                Self::Borrowed(range)
+            },
             _ => Self::Borrowed(range)
         }
     }
@@ -31,10 +41,10 @@ pub enum CodeBlockKind {
 }
 
 impl CodeBlockKind {
-    pub fn transform(range: TextRange, kind: MdCodeBlockKind) -> Self {
+    pub fn transform(range: TextRange, kind: MdCodeBlockKind, orig: &str, from: TextSize) -> Self {
         match kind {
             MdCodeBlockKind::Indented => CodeBlockKind::Indented,
-            MdCodeBlockKind::Fenced(span) => CodeBlockKind::Fenced(Span::transform(range, span)),
+            MdCodeBlockKind::Fenced(span) => CodeBlockKind::Fenced(Span::transform(range, span, orig, from)),
         }
     }
 }
@@ -60,15 +70,15 @@ pub enum Tag {
 }
 
 impl Tag {
-    pub fn transform(range: TextRange, tag: MdTag) -> Self {
+    pub fn transform(range: TextRange, tag: MdTag, orig: &str, from: TextSize) -> Self {
         match tag {
             MdTag::Paragraph => Tag::Paragraph,
             MdTag::Heading(lvl) => Tag::Heading(lvl),
             MdTag::BlockQuote => Tag::BlockQuote,
-            MdTag::CodeBlock(c) => Tag::CodeBlock(CodeBlockKind::transform(range, c)),
+            MdTag::CodeBlock(c) => Tag::CodeBlock(CodeBlockKind::transform(range, c, orig, from)),
             MdTag::List(o) => Tag::List(o),
             MdTag::Item => Tag::Item,
-            MdTag::FootnoteDefinition(span) => Tag::FootnoteDefinition(Span::transform(range, span)),
+            MdTag::FootnoteDefinition(span) => Tag::FootnoteDefinition(Span::transform(range, span, orig, from)),
             MdTag::Table(a) => Tag::Table(a),
             MdTag::TableHead => Tag::TableHead,
             MdTag::TableRow => Tag::TableRow,
@@ -76,8 +86,12 @@ impl Tag {
             MdTag::Emphasis => Tag::Emphasis,
             MdTag::Strong => Tag::Strong,
             MdTag::Strikethrough => Tag::Strikethrough,
-            MdTag::Link(ltype, span, span2) => Tag::Link(ltype, Span::transform(range.clone(), span), Span::transform(range, span2)),
-            MdTag::Image(ltype, span, span2) => Tag::Link(ltype, Span::transform(range.clone(), span), Span::transform(range, span2)),
+            MdTag::Link(ltype, span, span2) => Tag::Link(ltype,
+                                                         Span::transform(range, span, orig, from),
+                                                         Span::transform(range, span2, orig, from)),
+            MdTag::Image(ltype, span, span2) => Tag::Link(ltype,
+                                                          Span::transform(range, span, orig, from),
+                                                          Span::transform(range, span2, orig, from)),
         }
     }
 }
@@ -98,16 +112,15 @@ pub enum Event {
 }
 
 impl Event {
-    pub fn transform(range: TextRange, event: MdEvent) -> Self {
-        dbg!(&range);
-        match dbg!(event) {
-            MdEvent::Start(tag) => Event::Start(Tag::transform(range, tag)),
-            MdEvent::End(tag) => Event::End(Tag::transform(range, tag)),
+    pub fn transform(range: TextRange, event: MdEvent, orig: &str, from: TextSize) -> Self {
+        match event {
+            MdEvent::Start(tag) => Event::Start(Tag::transform(range, tag, orig, from)),
+            MdEvent::End(tag) => Event::End(Tag::transform(range, tag, orig, from)),
 
-            MdEvent::Text(span) => Event::Text(Span::transform(range, span)),
-            MdEvent::Code(span) => Event::Code(Span::transform(range, span)),
-            MdEvent::Html(span) => Event::Html(Span::transform(range, span)),
-            MdEvent::FootnoteReference(span) => Event::FootnoteReference(Span::transform(range, span)),
+            MdEvent::Text(span) => Event::Text(Span::transform(range, span, orig, from)),
+            MdEvent::Code(span) => Event::Code(Span::transform(range, span, orig, from)),
+            MdEvent::Html(span) => Event::Html(Span::transform(range, span, orig, from)),
+            MdEvent::FootnoteReference(span) => Event::FootnoteReference(Span::transform(range, span, orig, from)),
 
             MdEvent::SoftBreak => Event::SoftBreak,
             MdEvent::HardBreak => Event::HardBreak,
@@ -117,13 +130,13 @@ impl Event {
     }
 }
 
-pub fn transform_md<'a>(parser: Parser<'a>, from: TextSize) -> impl Iterator<Item = (Event, TextRange),> + 'a {
+pub fn transform_md<'a>(parser: Parser<'a>, from: TextSize, orig: &'a str) -> impl Iterator<Item = (Event, TextRange),> + 'a {
     parser.into_offset_iter().map(move |(event, range)| {
         let range =  TextRange(
             TextSize::try_from(range.start).unwrap() + from,
             TextSize::try_from(range.end).unwrap() + from
         );
-        (Event::transform(range, event), range)
+        (Event::transform(range, event, orig, from), range)
     })
 }
 

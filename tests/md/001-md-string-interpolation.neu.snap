@@ -1,0 +1,29 @@
+```
+md"*foo `1 + 2` bar*"
+```
+
+[parser]
+ROOT @ 0..21 = `md\"*foo `1 + 2` bar*\"`
+    MARKDOWN, VALUE @ 0..21 = `md\"*foo `1 + 2` bar*\"`
+        TOKEN @ 0..3 = `md\"`
+        MDEMPHASIS, MDPARAGRAPH @ 3..20 = `*foo `1 + 2` bar*`
+            MDTEXT @ 4..8 = `foo `
+            INTERPOLATED, ROOT @ 9..14 = `1 + 2`
+                BINARY, VALUE @ 9..14 = `1 + 2`
+                    NUMBER, TOKEN, VALUE @ 9..10 = `1`
+                    TRIVIA @ 10..11 = ` `
+                    OP, TOKEN @ 11..12 = `+`
+                    TRIVIA @ 12..13 = ` `
+                    NUMBER, TOKEN, VALUE @ 13..14 = `2`
+            MDTEXT @ 15..19 = ` bar`
+        TOKEN @ 20..21 = `\"`
+
+
+### No Errors ###
+
+
+[.eval]
+`"<strong>foo</strong>"`
+
+### No Errors ###
+

@@ -7,6 +7,15 @@ pub struct LexerState<Tok: TokenKind> {
     peeked: Option<Option<Spanned<Tok>>>,
 }
 
+impl<Tok: TokenKind> From<Input> for LexerState<Tok> {
+    fn from(input: Input) -> Self {
+        Self {
+            input,
+            peeked: None
+        }
+    }
+}
+
 impl<Tok: TokenKind> LexerState<Tok> {
     pub fn new(input: &str) -> Self {
         Self {
@@ -24,6 +33,10 @@ impl<Tok: TokenKind> LexerState<Tok> {
 
     pub fn input(&self) -> &Input {
         &self.input
+    }
+
+    pub fn input_mut(&mut self) -> &mut Input {
+        &mut self.input
     }
 }
 
@@ -66,7 +79,7 @@ pub trait Lexer {
     fn next_token(&mut self) -> Option<Spanned<Self::Token>> {
         if let Some(peeked) = self.state_mut().peeked.take() {
             if let Some(peeked) = peeked.as_ref() {
-                self.state_mut().input.cursor = peeked.span.end();
+                self.state_mut().input.set_cursor(peeked.span.end());
             }
             return peeked;
         }
@@ -90,9 +103,9 @@ pub trait Lexer {
     }
     fn peek(&mut self) -> Option<&Spanned<Self::Token>> {
         if self.state_mut().peeked.is_none() {
-            let i = self.state_mut().input.cursor;
+            let i = self.state_mut().input.cursor();
             self.state_mut().peeked = Some(self.next());
-            self.state_mut().input.cursor = i;
+            self.state_mut().input.set_cursor(i);
         }
 
         self.state_mut().peeked.as_ref().and_then(|i| i.as_ref())

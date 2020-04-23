@@ -14,7 +14,7 @@ pub struct NodeBuilder<'a, Lex: Lexer> {
 
 impl<'a, Lex: Lexer> NodeBuilder<'a, Lex> {
     pub(crate) fn new(state: &'a mut State<Lex>, ctx: &'a Context<'a, Lex>) -> Self {
-        let from = state.lexer().input().cursor;
+        let from = state.lexer().input().cursor();
         let span = TextRange(from, from);
         Self {
             state, ctx,
@@ -32,6 +32,14 @@ impl<'a, Lex: Lexer> NodeBuilder<'a, Lex> {
 
     pub fn state(&self) -> &State<Lex> {
         &self.state
+    }
+    
+    pub fn state_mut(&mut self) -> &mut State<Lex> {
+        &mut self.state
+    }
+
+    pub fn span(&self) -> TextRange {
+        self.span
     }
 
     pub fn set_span(&mut self, span: TextRange) {

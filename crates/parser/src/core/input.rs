@@ -1,16 +1,14 @@
 use std::convert::TryFrom;
 use text_size::{TextRange, TextSize, TextSized};
-use crate::core::Node;
 
 #[derive(Debug, Clone)]
 pub struct Input {
-    pub(crate) str: Box<str>,
-    pub(crate) cursor: TextSize,
+    str: Box<str>,
+    range: TextRange,
 }
 
 impl Input {
     pub fn chomp(&mut self, len: usize) -> TextRange {
-        let end = TextSize::of(&*self.str);
 
         let range = match self
             .as_ref()
@@ -18,12 +16,24 @@ impl Input {
             .nth(len - 1)
             .and_then(|(last, c)| TextSize::try_from(last + c.len_utf8()).ok())
         {
-            Some(last) => TextRange(self.cursor, self.cursor + last),
-            None => TextRange(self.cursor, end),
+            Some(last) => TextRange(self.range.start(), self.range.start() + last),
+            None => self.range
         };
-        self.cursor = range.end();
+        self.set_cursor(range.end());
 
         range
+    }
+
+    pub fn cursor(&self) -> TextSize {
+        self.range.start()
+    }
+
+    pub fn set_cursor(&mut self, cursor: TextSize) {
+        self.range = TextRange(cursor, self.range.end());
+    }
+
+    pub fn set_range(&mut self, range: TextRange) {
+        self.range = range;
     }
 
     pub fn range_span(&self, range: TextRange) -> &str {
@@ -36,15 +46,13 @@ impl From<&'_ str> for Input {
         let str: Box<str> = Box::from(input);
         Self {
             str,
-            cursor: TextSize::zero(),
+            range: TextRange(TextSize::zero(), input.text_size()),
         }
     }
 }
 
 impl AsRef<str> for Input {
     fn as_ref(&self) -> &str {
-        let size = self.str.text_size();
-        let range = TextRange(self.cursor, size);
-        &self.str[range]
+        &self.str[self.range]
     }
 }

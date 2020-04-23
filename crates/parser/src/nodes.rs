@@ -24,8 +24,6 @@ nodes! {
     IdentPath,
 
     Markdown,
-    MdBegin,
-    MdEnd,
 
     MdParagraph,
     MdEmphasis,

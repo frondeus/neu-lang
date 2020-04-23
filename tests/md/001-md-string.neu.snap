@@ -3,14 +3,12 @@ md"*foo*"
 ```
 
 [parser]
-ROOT @ 0..7 = ` \"foo\" `
-    TRIVIA @ 0..1 = ` `
-    STRING, VALUE @ 1..6 = `\"foo\"`
-        TOKEN @ 1..2 = `\"`
-        STRVALUE, TOKEN @ 2..5 = `foo`
-        TOKEN @ 5..6 = `\"`
-    TRIVIA @ 6..7 = ` `
-    TOKEN @ 7..7 = ``
+ROOT @ 0..9 = `md\"*foo*\"`
+    MARKDOWN, VALUE @ 0..9 = `md\"*foo*\"`
+        TOKEN @ 0..3 = `md\"`
+        MDEMPHASIS, MDPARAGRAPH @ 3..8 = `*foo*`
+            MDTEXT @ 4..7 = `foo`
+        TOKEN @ 8..9 = `\"`
 
 
 ### No Errors ###
