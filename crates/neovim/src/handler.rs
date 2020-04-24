@@ -132,7 +132,7 @@ impl NeovimHandler {
 
                 // Highlighting
 
-                for node in parse_result.nodes.iter() {
+                for node in parse_result.nodes.iter().rev() {
                     if let Some(hl_group) = node.highlight() {
                         for LineCols { line, col_start, col_end } in node.span.lines_cols(&lines) {
                             current_bf.add_highlight(highlight_ns, hl_group, line, col_start as i64, col_end as i64).await?;

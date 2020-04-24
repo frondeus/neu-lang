@@ -11,7 +11,7 @@ endif
 
 let s:scriptdir = resolve(expand('<sfile>:p:h') . '/../../../')
 if !exists('g:neulang_program')
-    let g:neulang_program = s:scriptdir . '/target/debug/neu-nvim'
+    let g:neulang_program = s:scriptdir . '/target/release/neu-nvim'
 endif
 
 function! neulang#init()

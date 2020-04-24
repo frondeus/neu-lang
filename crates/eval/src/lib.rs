@@ -3,7 +3,7 @@ mod value;
 mod context;
 mod error;
 mod result;
-
+mod markdown;
 
 use neu_parser::core::{NodeId, Arena, Node};
 use neu_parser::Nodes;
@@ -172,6 +172,14 @@ impl<'a> Eval<'a> {
                 map.insert(key, value);
             }
             return Some(Value::Struct(map));
+        }
+
+        if node.is(Nodes::Markdown) {
+            let mut s = String::new();
+            while let Some((_, value)) = children.find_node(Nodes::Md_Value) {
+                self.eval_md(&mut s, value, ctx)?;
+            }
+            return Some(Value::String(s));
         }
 
         if node.is(Nodes::String) {

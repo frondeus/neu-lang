@@ -49,7 +49,7 @@ impl Arena {
         &mut self.nodes[id.0]
     }
 
-    pub fn iter(&self) -> impl Iterator<Item = &Node> {
+    pub fn iter(&self) -> impl DoubleEndedIterator<Item = &Node> {
         self.nodes.iter()
     }
 
