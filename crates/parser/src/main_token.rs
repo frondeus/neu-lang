@@ -1,4 +1,6 @@
 use derive_more::Display;
+use crate::core::{TextRange, TokenKind, Lexer};
+use crate::HashCount;
 
 #[derive(Debug, PartialEq, Clone, Copy, Display)]
 pub enum Token {
@@ -75,3 +77,120 @@ pub enum Token {
     OpDot
 }
 
+pub type MainLexer = Lexer<Token>;
+
+impl TokenKind for Token {
+    type Extra = HashCount;
+
+    fn is_mergeable(self, other: Self) -> bool {
+        match (self, other) {
+            (Self::Error, Self::Error) => true,
+            _ => false
+        }
+    }
+
+    fn lex(lexer: &mut Lexer<Self>) -> Option<(Self, TextRange)> {
+        let hash = lexer.extra.count;
+        let input = lexer.input_mut();
+        let i = input.as_ref();
+        let peeked = i.chars().next()?;
+        if peeked.is_whitespace() {
+            let rest = i.chars().take_while(|c| c.is_whitespace()).count();
+
+            return Some((Token::Whitespace, input.chomp(rest)));
+        }
+        if peeked.is_ascii_digit() {
+            let rest = i.chars().take_while(|c| c.is_ascii_digit()).count();
+
+            return Some((Token::Number, input.chomp(rest)));
+        }
+
+        if i.starts_with("/*") {
+            let mut peeked = peeked;
+            let mut i = &i[2..];
+            let mut rest = 2;
+            while !i.starts_with("*/") {
+                i = &i[peeked.len_utf8()..];
+                rest += 1;
+                peeked = match i.chars().next() {
+                    Some(p) => p,
+                    None => return Some((Token::Error, input.chomp(2)))
+                }
+            }
+            rest += 2;
+            return Some((Token::Comment, input.chomp(rest)));
+        }
+
+        if i.starts_with("//") {
+            let rest = i.chars().take_while(|c| *c != '\n').count();
+            return Some((Token::Comment, input.chomp(rest)));
+        }
+
+        if i.starts_with("==") {
+            return Some((Token::OpDEqual, input.chomp(2)));
+        }
+
+        if i.starts_with("true") {
+            return Some((Token::True, input.chomp(4)));
+        }
+
+        if i.starts_with("false") {
+            return Some((Token::False, input.chomp(5)));
+        }
+
+        if i.starts_with("md") {
+            let mut rest = 2;
+            let mut hash = 0;
+            loop {
+                let i = &i[rest..];
+                if i.starts_with('"') {
+                    let range = input.chomp(rest + 1);
+                    lexer.extra.count = hash;
+                    return Some((Token::MdQuote, range));
+                }
+                if i.starts_with('#')  {
+                    rest += 1;
+                    hash += 1;
+                    continue;
+                }
+                break;
+            }
+        }
+
+        if peeked == '-' { return Some((Token::OpMinus, input.chomp(1))); }
+        if peeked == '!' { return Some((Token::OpBang, input.chomp(1))); }
+        if peeked == '+' { return Some((Token::OpPlus, input.chomp(1))); }
+        if peeked == '*' { return Some((Token::OpStar, input.chomp(1))); }
+        if peeked == '/' { return Some((Token::OpSlash, input.chomp(1))); }
+        if peeked == '=' { return Some((Token::OpAssign, input.chomp(1))); }
+        if peeked == '.' { return Some((Token::OpDot, input.chomp(1))); }
+
+        if peeked == ',' { return Some((Token::Comma, input.chomp(1))); }
+
+        if peeked == '(' { return Some((Token::OpenP, input.chomp(1))); }
+        if peeked == ')' { return Some((Token::CloseP, input.chomp(1))); }
+        if peeked == '{' { return Some((Token::OpenC, input.chomp(1))); }
+        if peeked == '}' { return Some((Token::CloseC, input.chomp(1))); }
+        if peeked == '[' { return Some((Token::OpenB, input.chomp(1))); }
+        if peeked == ']' { return Some((Token::CloseB, input.chomp(1))); }
+
+        if hash > 0 {
+            let pat = format!("{:#<width$}", "\"", width = hash + 1);
+            if i.starts_with(&pat) {
+                let range = input.chomp(pat.len());
+                lexer.extra.count = 0;
+                return Some((Token::DoubleQuote, range));
+            }
+        }
+
+        if peeked == '"' { return Some((Token::DoubleQuote, input.chomp(1))); }
+
+        if peeked.is_ascii_alphabetic() {
+            let rest = i.chars()
+                .take_while(|c| c.is_ascii_alphanumeric() || *c == '_').count();
+            return Some((Token::Identifier, input.chomp(rest)));
+        }
+
+        Some((Token::Error, input.chomp(1)))
+    }
+}

@@ -30,6 +30,36 @@ impl<'a> Eval<'a> {
             }
         }
 
+        if node.is(Nodes::Md_CodeBlock) {
+            let mut children = Children::new(node.children.iter().copied(), self.nodes);
+            str.push_str("<pre><code");
+
+            if let Some((_, node)) = children.find_node(Nodes::Md_CodeBlockLang) {
+                let text = &self.input[node.span];
+                str.push_str(&format!(r#" class="language-{}""#, text));
+            }
+            str.push_str(">");
+            end_vec.push("</code></pre>".into());
+        }
+
+        if node.is(Nodes::Md_Image) {
+            let mut children = Children::new(node.children.iter().copied(), self.nodes);
+            str.push_str("<img");
+            if let Some((_, node)) = children.find_node(Nodes::Md_ImageSrc) {
+                let text = &self.input[node.span];
+                str.push_str(&format!(r#" src="{}""#, text));
+            }
+            if let Some((_, _node)) = children.find_node(Nodes::Md_ImageTitle) {
+                //let text = &self.input[node.span];
+                //str.push_str(&format!(r#" title="{}""#, text));
+                //TODO: Disabled title:
+                // Because of Pulldown cmark using inline string which loses
+                // information about the title span.
+            }
+            str.push_str(">");
+            end_vec.push("</img>".into());
+        }
+
         if node.is(Nodes::Md_Link) {
             let mut children = Children::new(node.children.iter().copied(), self.nodes);
             str.push_str("<a");

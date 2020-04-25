@@ -1,11 +1,7 @@
 pub mod core;
 
 mod main_token;
-mod main_lexer;
-
 mod string_token;
-mod string_lexer;
-
 mod md_string;
 
 mod nodes;
@@ -15,13 +11,8 @@ pub struct HashCount {
     count: usize
 }
 
-
 pub use crate::main_token::*;
-pub use crate::main_lexer::*;
-
 pub use crate::string_token::*;
-pub use crate::string_lexer::*;
-
 pub use crate::md_string::*;
 
 pub use crate::nodes::*;

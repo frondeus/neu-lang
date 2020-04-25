@@ -43,8 +43,21 @@ nodes! {
     Md_AutoLink,
     Md_EmailLink,
 
+    Md_Image,
+    Md_InlineImage,
+    Md_ReferenceImage,
+    Md_ShortcutImage,
+    Md_AutoImage,
+    Md_EmailImage,
+
     Md_LinkUrl,
     Md_LinkTitle,
+
+    Md_ImageSrc,
+    Md_ImageTitle,
+
+    Md_CodeBlock,
+    Md_CodeBlockLang,
 
     Md_H1,
     Md_H2,

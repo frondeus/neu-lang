@@ -16,6 +16,7 @@ impl NodeHighlight for Node {
         else if self.is(Nodes::Md_Link) { Some("Underlined") }
         else if self.is(Nodes::Identifier) { Some("Identifier") }
         else if self.is(Nodes::Trivia) { Some("Comment") }
+        else if self.is(Nodes::Interpolated) { Some("None") }
         else { None }
     }
 }

@@ -8,15 +8,16 @@
 ** Immediate Constants [/]
 ** Unary primitives [/]
 ** Binary primitives [/]
-** Strings  [0/2]
-*** TODO More string interpolation tests
+** Strings  [1/2]
+*** DONE More string interpolation tests
 *** TODO Handle errors in interpolated strings
 ** Structs [0/2]
 *** TODO Prevent field access cycle
 *** TODO Memoization of lazy fields
-** Arrays [/]
-** Markdown [0/2]
-*** TODO Markdown string interpolation
+** Arrays [0/1]
+*** TODO Access array item foo[0]
+** Markdown [1/2]
+*** DONE Markdown string interpolation
 *** TODO Markdown article
 ** Gm notes [0/1]
 *** TODO Generate json

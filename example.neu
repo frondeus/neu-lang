@@ -8,6 +8,18 @@
         value = .max, // but .max means field from current struct
         label = "HP: ${"${.max}"}",
         link = md"[`.max`](http://google.pl)",
-        desc = md"**foo `.max` bar**",
+        desc = md#"
+0 means *agony*. 
+
+```
+{
+    foo = 2,
+    bar = .foo,
+    baz = health.max
+}
+```
+
+**foo `.max` bar**
+        "#,
     }
 }.health

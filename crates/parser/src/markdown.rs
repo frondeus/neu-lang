@@ -1,7 +1,7 @@
 use crate::{MdStrToken, Token};
 use crate::Nodes;
 use crate::core::*;
-use pulldown_cmark::{Event, Tag, CowStr, LinkType};
+use pulldown_cmark::{Event, Tag, CowStr, LinkType, CodeBlockKind};
 use text_size::{TextSize, TextRange, TextSized};
 use std::convert::TryFrom;
 
@@ -46,7 +46,49 @@ fn parse_start<'a>(
         Tag::Heading(5) => Nodes::Md_H5,
         Tag::Heading(_) => Nodes::Md_H6,
         Tag::BlockQuote => Nodes::Md_BlockQuote,
-        Tag::CodeBlock(_) => todo!("CodeBlock"),
+        Tag::CodeBlock(lang_kind) => {
+            let mut range: Option<TextRange> = None;
+            let lang_str = match lang_kind {
+                CodeBlockKind::Indented => "",
+                CodeBlockKind::Fenced(lang) => lang.as_ref()
+            };
+            if lang_str == "neu" || lang_str == "" {
+                while let Some((peeked, peeked_range)) = events.peek() {
+                    if let Event::End(_) = peeked { events.next(); break; }
+                    let peeked_range = *peeked_range;
+                    events.next();
+                    match range.as_mut() {
+                        None => { range = Some(peeked_range); },
+                        Some(range) => { *range = TextRange::covering(*range, peeked_range); }
+                    }
+                }
+            }
+
+            match (range, lang_kind) {
+                (None, CodeBlockKind::Fenced(lang)) => {
+                    let lang_range = get_range(str, lang, span, from);
+                    builder.parse(node(|builder| {
+                        builder.name(Nodes::Md_CodeBlockLang);
+                        builder.set_span(lang_range);
+                    }));
+                    Nodes::Md_CodeBlock
+                },
+                (None, CodeBlockKind::Indented) => Nodes::Md_CodeBlock,
+                (Some(range), _) => {
+                    let ctx = Context::default();
+                    return builder.parse_mode(&ctx, node(move |builder: &mut NodeBuilder<Token>| {
+                        let saved = builder.state_mut().lexer_mut().input().clone();
+
+                        builder.state_mut().lexer_mut().input_mut().set_range(range);
+                        builder.name(Nodes::Virtual);
+                        builder.name(Nodes::Interpolated);
+                        builder.parse(crate::neu::parser());
+
+                        *builder.state_mut().lexer_mut().input_mut() = saved;
+                    }));
+                },
+            }
+        },
         Tag::List(None) => Nodes::Md_UnorderedList,
         Tag::List(Some(1)) => Nodes::Md_OrderedList,
         Tag::List(_offset) => {
@@ -85,7 +127,30 @@ fn parse_start<'a>(
                 LinkType::Email => Nodes::Md_EmailLink,
             }
         },
-        Tag::Image(_, _, _) => todo!("Image"),
+        Tag::Image(link_type, src, title) => {
+            let src_range = get_range(str, src, span, from);
+            let title_range = get_range(str, title, span, from);
+            builder.parse(node(|builder| {
+                builder.name(Nodes::Md_ImageSrc);
+                builder.set_span(src_range);
+            }));
+            builder.parse(node(|builder| {
+                builder.name(Nodes::Md_ImageTitle);
+                builder.set_span(title_range);
+            }));
+            builder.name(Nodes::Md_Image);
+            match link_type {
+                LinkType::Inline => Nodes::Md_InlineImage,
+                LinkType::Reference => Nodes::Md_ReferenceImage,
+                LinkType::ReferenceUnknown => todo!("LinkType LinkType::ReferenceUnknown"),
+                LinkType::Collapsed => todo!("LinkType LinkType::Collapsed"),
+                LinkType::CollapsedUnknown => todo!("LinkType LinkType::CollapsedUnknown"),
+                LinkType::Shortcut => Nodes::Md_ShortcutImage,
+                LinkType::ShortcutUnknown => todo!("LinkType LinkType::ShortcutUnknown"),
+                LinkType::Autolink => Nodes::Md_AutoImage,
+                LinkType::Email => Nodes::Md_EmailImage,
+            }
+        },
     };
     builder.name(name);
     while let Some((peeked, _)) = events.peek() {

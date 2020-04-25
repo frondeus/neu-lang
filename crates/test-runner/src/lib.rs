@@ -139,7 +139,7 @@ fn get_source(file: &str) -> Result<(&str, &str)> {
     let bt_count = iter.take_while(|c| *c == '`').count();
     let pat = format!("{:`>width$}", "\n", width = bt_count + 1);
     let splited = file.split(&pat).collect::<Vec<_>>();
-    if splited.len() != 3 { bail!("Expected one source wrapped in ```") }
+    if splited.len() != 3 { bail!("Expected one source wrapped in ```: {}", file) }
     let input = splited[1].trim_end_matches('\n');//.trim();
     let sections = splited[2];
     Ok((input, sections))
