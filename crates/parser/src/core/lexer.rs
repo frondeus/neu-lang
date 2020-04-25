@@ -73,8 +73,11 @@ pub trait Lexer {
     fn input(&self) -> Input {
         self.state().input.clone()
     }
+    fn input_mut(&mut self) -> &mut Input {
+        &mut self.state_mut().input
+    }
 
-    fn lex(input: &mut Input) -> Option<(Self::Token, TextRange)>;
+    fn lex(&mut self) -> Option<(Self::Token, TextRange)>;
     #[doc(hidden)]
     fn next_token(&mut self) -> Option<Spanned<Self::Token>> {
         if let Some(peeked) = self.state_mut().peeked.take() {
@@ -84,14 +87,14 @@ pub trait Lexer {
             return peeked;
         }
 
-        let (token, span) = Self::lex(&mut self.state_mut().input)?;
+        let (token, span) = self.lex()?;
         Some(Spanned::new(span, token))
     }
     fn next(&mut self) -> Option<Spanned<Self::Token>> {
         let mut first = self.next_token()?;
 
         loop {
-            match self.peek() {
+            match self.peek_one() {
                 Some(token) if first.kind.is_mergeable(token.kind) => {
                     first.span = TextRange::covering(first.span, token.span);
                     self.next_token();
@@ -100,6 +103,15 @@ pub trait Lexer {
             }
         }
         Some(first)
+    }
+    fn peek_one(&mut self) -> Option<&Spanned<Self::Token>> {
+        if self.state_mut().peeked.is_none() {
+            let i = self.state_mut().input.cursor();
+            self.state_mut().peeked = Some(self.next_token());
+            self.state_mut().input.set_cursor(i);
+        }
+
+        self.state_mut().peeked.as_ref().and_then(|i| i.as_ref())
     }
     fn peek(&mut self) -> Option<&Spanned<Self::Token>> {
         if self.state_mut().peeked.is_none() {

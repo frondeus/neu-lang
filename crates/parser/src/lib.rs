@@ -33,20 +33,29 @@ mod md_string_lexer {
     use crate::core::{LexerState, Lexer, Input, TextRange};
     use crate::MdStrToken;
 
-    pub struct MdStringLexer(LexerState<MdStrToken>);
+    pub struct MdStringLexer(LexerState<MdStrToken>, usize);
+
+    impl MdStringLexer {
+        pub fn set_hash(&mut self, hash: usize) {
+            self.1 = hash;
+        }
+    }
 
     impl Lexer for MdStringLexer {
         type Token = MdStrToken;
 
-        fn build(state: LexerState<MdStrToken>) -> Self { Self(state) }
+        fn build(state: LexerState<MdStrToken>) -> Self { Self(state, 0) }
         fn state_mut(&mut self) -> &mut LexerState<Self::Token> { &mut self.0 }
         fn state(&self) -> &LexerState<Self::Token> { &self.0 }
 
-        fn lex(input: &mut Input) -> Option<(Self::Token, TextRange)> {
+        fn lex(&mut self) -> Option<(Self::Token, TextRange)> {
+            let hash = self.1;
+            let input = self.input_mut();
             let i = input.as_ref();
             if i.is_empty() { return None; }
-            if i.starts_with('"') {
-                return Some((MdStrToken::Close, input.chomp(1)));
+            let pat = format!("{:#<width$}", "\"", width = hash + 1);
+            if i.starts_with(&pat) {
+                return Some((MdStrToken::Close, input.chomp(pat.len())));
             }
 
             Some((MdStrToken::Text, input.chomp(1)))
@@ -68,4 +77,4 @@ pub use crate::md_string_lexer::*;
 pub use crate::nodes::*;
 
 pub mod neu;
-pub mod md;
+pub mod markdown;

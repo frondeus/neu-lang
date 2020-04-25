@@ -10,7 +10,8 @@ impl Lexer for StringLexer {
     fn state_mut(&mut self) -> &mut LexerState<Self::Token> { &mut self.0 }
     fn state(&self) -> &LexerState<Self::Token> { &self.0 }
 
-    fn lex(input: &mut Input) -> Option<(Self::Token, TextRange)> {
+    fn lex(&mut self) -> Option<(Self::Token, TextRange)> {
+        let input = self.input_mut();
         let i = input.as_ref();
         if i.is_empty() { return None; }
         if i.starts_with('"') {

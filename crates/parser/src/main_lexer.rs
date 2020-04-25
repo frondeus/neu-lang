@@ -15,7 +15,8 @@ impl Lexer for MainLexer {
     fn state_mut(&mut self) -> &mut LexerState<Token> { &mut self.0 }
     fn state(&self) -> &LexerState<Token> { &self.0 }
 
-    fn lex(input: &mut Input) -> Option<(Token, TextRange)> {
+    fn lex(&mut self) -> Option<(Self::Token, TextRange)> {
+        let input = self.input_mut();
         let i = input.as_ref();
         let peeked = i.chars().next()?;
         if peeked.is_whitespace() {
@@ -62,8 +63,19 @@ impl Lexer for MainLexer {
             return Some((Token::False, input.chomp(5)));
         }
 
-        if i.starts_with("md\"") {
-            return Some((Token::MdQuote, input.chomp(3)));
+        if i.starts_with("md") {
+            let mut rest = 2;
+            loop {
+                let i = &i[rest..];
+                if i.starts_with('"') {
+                    return Some((Token::MdQuote, input.chomp(2)));
+                }
+                if i.starts_with('#')  {
+                    rest += 1;
+                    continue;
+                }
+                break;
+            }
         }
 
         if peeked == '-' { return Some((Token::OpMinus, input.chomp(1))); }
@@ -84,6 +96,7 @@ impl Lexer for MainLexer {
         if peeked == ']' { return Some((Token::CloseB, input.chomp(1))); }
 
         if peeked == '"' { return Some((Token::DoubleQuote, input.chomp(1))); }
+        if peeked == '#' { return Some((Token::Hash, input.chomp(1))); }
 
         if peeked.is_ascii_alphabetic() {
             let rest = i.chars()

@@ -1,6 +1,6 @@
 use crate::core::*;
 use crate::{MainLexer, Nodes, Token, StringLexer, StrToken};
-use crate::md::inner_md_string;
+use crate::markdown::inner_md_string;
 
 pub fn parser() -> impl Parser<MainLexer> {
     node(|builder| {
@@ -149,9 +149,18 @@ fn md_string() -> impl Parser<MainLexer> {
         builder.name(Nodes::Markdown);
         let ctx = Context::default();
         builder.parse_ctx(&ctx, token(Token::MdQuote));
-        let ctx2 = Context::default();
-        builder.parse_mode(&ctx2, inner_md_string());
+        let mut hash = 0;
+        while let Some(Token::Hash) = builder.peek_token() {
+            builder.parse_ctx(&ctx, token(Token::Hash));
+            hash += 1;
+        }
         builder.parse_ctx(&ctx, token(Token::DoubleQuote));
+        let ctx2 = Context::default();
+        builder.parse_mode(&ctx2, inner_md_string(hash));
+        builder.parse_ctx(&ctx, token(Token::DoubleQuote));
+        for _ in 0..hash {
+            builder.parse_ctx(&ctx, token(Token::Hash));
+        }
     })
 }
 

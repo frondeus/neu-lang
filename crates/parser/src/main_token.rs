@@ -57,8 +57,11 @@ pub enum Token {
     #[display(fmt = "`\"`")]
     DoubleQuote,
 
-    #[display(fmt = "`md\"`")]
+    #[display(fmt = "`md`")]
     MdQuote,
+
+    #[display(fmt = "#")]
+    Hash,
 
     #[display(fmt = "`}}`")]
     CloseC,

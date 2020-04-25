@@ -15,7 +15,11 @@ impl<'a> Eval<'a> {
             (Nodes::Md_H5, "h5"),
             (Nodes::Md_H6, "h6"),
             (Nodes::Md_Emphasis, "em"),
-            (Nodes::Md_Strong, "strong")
+            (Nodes::Md_Strong, "strong"),
+            (Nodes::Md_BlockQuote, "blockquote"),
+            (Nodes::Md_UnorderedList, "ul"),
+            (Nodes::Md_OrderedList, "ol"),
+            (Nodes::Md_ListItem, "li")
         ];
 
         let mut end_vec = vec![];
@@ -24,6 +28,28 @@ impl<'a> Eval<'a> {
                 str.push_str(&format!("<{}>", tag_str));
                 end_vec.push(format!("</{}>", tag_str));
             }
+        }
+
+        if node.is(Nodes::Md_Link) {
+            let mut children = Children::new(node.children.iter().copied(), self.nodes);
+            str.push_str("<a");
+            if let Some((_, node)) = children.find_node(Nodes::Md_LinkUrl) {
+                let text = &self.input[node.span];
+                str.push_str(&format!(r#" href="{}""#, text));
+            }
+            if let Some((_, _node)) = children.find_node(Nodes::Md_LinkTitle) {
+                //let text = &self.input[node.span];
+                //str.push_str(&format!(r#" title="{}""#, text));
+                //TODO: Disabled title:
+                // Because of Pulldown cmark using inline string which loses
+                // information about the title span.
+            }
+            str.push_str(">");
+            end_vec.push("</a>".into());
+        }
+
+        if node.is(Nodes::Md_Rule) {
+            str.push_str("<hr/>")
         }
 
         if node.is(Nodes::Md_SoftBreak) {

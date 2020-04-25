@@ -5,7 +5,8 @@ md"*foo `1 + 2` bar*"
 [parser]
 ROOT @ 0..21 = `md\"*foo `1 + 2` bar*\"`
     MARKDOWN, VALUE @ 0..21 = `md\"*foo `1 + 2` bar*\"`
-        TOKEN @ 0..3 = `md\"`
+        TOKEN @ 0..2 = `md`
+        TOKEN @ 2..3 = `\"`
         MD_EMPHASIS, MD_PARAGRAPH, MD_VALUE @ 3..20 = `*foo `1 + 2` bar*`
             MD_TEXT @ 4..8 = `foo `
             INTERPOLATED, ROOT @ 9..14 = `1 + 2`

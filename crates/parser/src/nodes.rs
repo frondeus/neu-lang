@@ -30,6 +30,21 @@ nodes! {
     Md_Emphasis,
     Md_Strong,
     Md_SoftBreak,
+    Md_Rule,
+    Md_BlockQuote,
+    Md_UnorderedList,
+    Md_ListItem,
+    Md_OrderedList,
+
+    Md_Link,
+    Md_InlineLink,
+    Md_ReferenceLink,
+    Md_ShortcutLink,
+    Md_AutoLink,
+    Md_EmailLink,
+
+    Md_LinkUrl,
+    Md_LinkTitle,
 
     Md_H1,
     Md_H2,

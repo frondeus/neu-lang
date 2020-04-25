@@ -1,0 +1,89 @@
+```
+md#"
+[I'm an inline-style link](https://www.google.com)
+
+[I'm an inline-style link with title](https://www.google.com "Google's Homepage")
+
+[I'm a reference-style link][Arbitrary case-insensitive reference text]
+
+[I'm a relative reference to a repository file](../blob/master/LICENSE)
+
+[You can use numbers for reference-style link definitions][1]
+
+Or leave it empty and use the [link text itself].
+
+URLs and URLs in angle brackets will automatically get turned into links.
+http://www.example.com or <http://www.example.com> and sometimes
+example.com (but not on Github, for example).
+
+<frondeus@gmail.com>
+
+Some text to show that the reference links can follow later.
+
+[arbitrary case-insensitive reference text]: https://www.mozilla.org
+[1]: http://slashdot.org
+[link text itself]: http://www.reddit.com
+"#
+```
+
+[parser]
+ROOT @ 0..808 = `md#\"\n[I\'m an inline-style link](https://www.google.com)\n\n[I\'m an inline-style link with title](https://www.google.com \"Google\'s Homepage\")\n\n[I\'m a reference-style link][Arbitrary case-insensitive reference text]\n\n[I\'m a relative reference to a repository file](../blob/master/LICENSE)\n\n[You can use numbers for reference-style link definitions][1]\n\nOr leave it empty and use the [link text itself].\n\nURLs and URLs in angle brackets will automatically get turned into links.\nhttp://www.example.com or <http://www.example.com> and sometimes\nexample.com (but not on Github, for example).\n\n<frondeus@gmail.com>\n\nSome text to show that the reference links can follow later.\n\n[arbitrary case-insensitive reference text]: https://www.mozilla.org\n[1]: http://slashdot.org\n[link text itself]: http://www.reddit.com\n\"#`
+    MARKDOWN, VALUE @ 0..808 = `md#\"\n[I\'m an inline-style link](https://www.google.com)\n\n[I\'m an inline-style link with title](https://www.google.com \"Google\'s Homepage\")\n\n[I\'m a reference-style link][Arbitrary case-insensitive reference text]\n\n[I\'m a relative reference to a repository file](../blob/master/LICENSE)\n\n[You can use numbers for reference-style link definitions][1]\n\nOr leave it empty and use the [link text itself].\n\nURLs and URLs in angle brackets will automatically get turned into links.\nhttp://www.example.com or <http://www.example.com> and sometimes\nexample.com (but not on Github, for example).\n\n<frondeus@gmail.com>\n\nSome text to show that the reference links can follow later.\n\n[arbitrary case-insensitive reference text]: https://www.mozilla.org\n[1]: http://slashdot.org\n[link text itself]: http://www.reddit.com\n\"#`
+        TOKEN @ 0..2 = `md`
+        TOKEN @ 2..3 = `#`
+        TOKEN @ 3..4 = `\"`
+        MD_PARAGRAPH, MD_VALUE @ 5..56 = `[I\'m an inline-style link](https://www.google.com)\n`
+            MD_INLINELINK, MD_LINK @ 5..55 = `[I\'m an inline-style link](https://www.google.com)`
+                MD_LINKURL @ 32..54 = `https://www.google.com`
+                MD_TEXT @ 6..30 = `I\'m an inline-style link`
+        MD_PARAGRAPH, MD_VALUE @ 57..139 = `[I\'m an inline-style link with title](https://www.google.com \"Google\'s Homepage\")\n`
+            MD_INLINELINK, MD_LINK @ 57..138 = `[I\'m an inline-style link with title](https://www.google.com \"Google\'s Homepage\")`
+                MD_LINKURL @ 95..117 = `https://www.google.com`
+                MD_LINKTITLE @ 57..138 = `[I\'m an inline-style link with title](https://www.google.com \"Google\'s Homepage\")`
+                MD_TEXT @ 58..93 = `I\'m an inline-style link with title`
+        MD_PARAGRAPH, MD_VALUE @ 140..738 = `[I\'m a reference-style link][Arbitrary case-insensitive reference text]\n\n[I\'m a relative reference to a repository file](../blob/master/LICENSE)\n\n[You can use numbers for reference-style link definitions][1]\n\nOr leave it empty and use the [link text itself].\n\nURLs and URLs in angle brackets will automatically get turned into links.\nhttp://www.example.com or <http://www.example.com> and sometimes\nexample.com (but not on Github, for example).\n\n<frondeus@gmail.com>\n\nSome text to show that the reference links can follow later.\n\n[arbitrary case-insensitive reference text]: https://www.mozilla.org`
+            MD_LINK, MD_REFERENCELINK @ 140..738 = `[I\'m a reference-style link][Arbitrary case-insensitive reference text]\n\n[I\'m a relative reference to a repository file](../blob/master/LICENSE)\n\n[You can use numbers for reference-style link definitions][1]\n\nOr leave it empty and use the [link text itself].\n\nURLs and URLs in angle brackets will automatically get turned into links.\nhttp://www.example.com or <http://www.example.com> and sometimes\nexample.com (but not on Github, for example).\n\n<frondeus@gmail.com>\n\nSome text to show that the reference links can follow later.\n\n[arbitrary case-insensitive reference text]: https://www.mozilla.org`
+                MD_LINKURL @ 715..738 = `https://www.mozilla.org`
+                MD_TEXT @ 141..167 = `I\'m a reference-style link`
+        MD_PARAGRAPH, MD_VALUE @ 213..285 = `[I\'m a relative reference to a repository file](../blob/master/LICENSE)\n`
+            MD_INLINELINK, MD_LINK @ 213..284 = `[I\'m a relative reference to a repository file](../blob/master/LICENSE)`
+                MD_LINKURL @ 261..283 = `../blob/master/LICENSE`
+                MD_TEXT @ 214..259 = `I\'m a relative reference to a repository file`
+        MD_PARAGRAPH, MD_VALUE @ 286..763 = `[You can use numbers for reference-style link definitions][1]\n\nOr leave it empty and use the [link text itself].\n\nURLs and URLs in angle brackets will automatically get turned into links.\nhttp://www.example.com or <http://www.example.com> and sometimes\nexample.com (but not on Github, for example).\n\n<frondeus@gmail.com>\n\nSome text to show that the reference links can follow later.\n\n[arbitrary case-insensitive reference text]: https://www.mozilla.org\n[1]: http://slashdot.org`
+            MD_LINK, MD_REFERENCELINK @ 286..763 = `[You can use numbers for reference-style link definitions][1]\n\nOr leave it empty and use the [link text itself].\n\nURLs and URLs in angle brackets will automatically get turned into links.\nhttp://www.example.com or <http://www.example.com> and sometimes\nexample.com (but not on Github, for example).\n\n<frondeus@gmail.com>\n\nSome text to show that the reference links can follow later.\n\n[arbitrary case-insensitive reference text]: https://www.mozilla.org\n[1]: http://slashdot.org`
+                MD_LINKURL @ 744..763 = `http://slashdot.org`
+                MD_TEXT @ 287..343 = `You can use numbers for reference-style link definitions`
+        MD_PARAGRAPH, MD_VALUE @ 349..805 = `Or leave it empty and use the [link text itself].\n\nURLs and URLs in angle brackets will automatically get turned into links.\nhttp://www.example.com or <http://www.example.com> and sometimes\nexample.com (but not on Github, for example).\n\n<frondeus@gmail.com>\n\nSome text to show that the reference links can follow later.\n\n[arbitrary case-insensitive reference text]: https://www.mozilla.org\n[1]: http://slashdot.org\n[link text itself]: http://www.reddit.com`
+            MD_TEXT @ 349..379 = `Or leave it empty and use the `
+            MD_LINK, MD_SHORTCUTLINK @ 379..805 = `[link text itself].\n\nURLs and URLs in angle brackets will automatically get turned into links.\nhttp://www.example.com or <http://www.example.com> and sometimes\nexample.com (but not on Github, for example).\n\n<frondeus@gmail.com>\n\nSome text to show that the reference links can follow later.\n\n[arbitrary case-insensitive reference text]: https://www.mozilla.org\n[1]: http://slashdot.org\n[link text itself]: http://www.reddit.com`
+                MD_LINKURL @ 784..805 = `http://www.reddit.com`
+                MD_TEXT @ 380..396 = `link text itself`
+            MD_TEXT @ 397..398 = `.`
+        MD_PARAGRAPH, MD_VALUE @ 400..585 = `URLs and URLs in angle brackets will automatically get turned into links.\nhttp://www.example.com or <http://www.example.com> and sometimes\nexample.com (but not on Github, for example).\n`
+            MD_TEXT @ 400..473 = `URLs and URLs in angle brackets will automatically get turned into links.`
+            MD_SOFTBREAK @ 473..474 = `\n`
+            MD_TEXT @ 474..500 = `http://www.example.com or `
+            MD_AUTOLINK, MD_LINK @ 500..524 = `<http://www.example.com>`
+                MD_LINKURL @ 501..523 = `http://www.example.com`
+                MD_TEXT @ 501..523 = `http://www.example.com`
+            MD_TEXT @ 524..538 = ` and sometimes`
+            MD_SOFTBREAK @ 538..539 = `\n`
+            MD_TEXT @ 539..584 = `example.com (but not on Github, for example).`
+        MD_PARAGRAPH, MD_VALUE @ 586..607 = `<frondeus@gmail.com>\n`
+            MD_EMAILLINK, MD_LINK @ 586..606 = `<frondeus@gmail.com>`
+                MD_LINKURL @ 587..605 = `frondeus@gmail.com`
+                MD_TEXT @ 587..605 = `frondeus@gmail.com`
+        MD_PARAGRAPH, MD_VALUE @ 608..669 = `Some text to show that the reference links can follow later.\n`
+            MD_TEXT @ 608..668 = `Some text to show that the reference links can follow later.`
+        TOKEN @ 806..807 = `\"`
+        TOKEN @ 807..808 = `#`
+
+
+### No Errors ###
+
+
+[eval]
+`"<p><a href=\"https://www.google.com\">I\'m an inline-style link</a></p><p><a href=\"https://www.google.com\">I\'m an inline-style link with title</a></p><p><a href=\"https://www.mozilla.org\">I\'m a reference-style link</a></p><p><a href=\"../blob/master/LICENSE\">I\'m a relative reference to a repository file</a></p><p><a href=\"http://slashdot.org\">You can use numbers for reference-style link definitions</a></p><p>Or leave it empty and use the <a href=\"http://www.reddit.com\">link text itself</a>.</p><p>URLs and URLs in angle brackets will automatically get turned into links.\nhttp://www.example.com or <a href=\"http://www.example.com\">http://www.example.com</a> and sometimes\nexample.com (but not on Github, for example).</p><p><a href=\"frondeus@gmail.com\">frondeus@gmail.com</a></p><p>Some text to show that the reference links can follow later.</p>"`
+
+### No Errors ###
+

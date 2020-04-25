@@ -1,0 +1,11 @@
+```
+{
+    label = "HP: ${ 2 + 3 }",
+    link = "[AB](http://google.pl)",
+    desc = "**foo `4` bar**"
+}.label
+```
+
+[parser]
+
+[.eval]

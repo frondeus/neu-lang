@@ -6,7 +6,8 @@ bar"
 [parser]
 ROOT @ 0..11 = `md\"foo\nbar\"`
     MARKDOWN, VALUE @ 0..11 = `md\"foo\nbar\"`
-        TOKEN @ 0..3 = `md\"`
+        TOKEN @ 0..2 = `md`
+        TOKEN @ 2..3 = `\"`
         MD_PARAGRAPH, MD_VALUE @ 3..10 = `foo\nbar`
             MD_TEXT @ 3..6 = `foo`
             MD_SOFTBREAK @ 6..7 = `\n`

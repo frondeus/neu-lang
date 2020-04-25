@@ -5,7 +5,8 @@ md"**foo**"
 [parser]
 ROOT @ 0..11 = `md\"**foo**\"`
     MARKDOWN, VALUE @ 0..11 = `md\"**foo**\"`
-        TOKEN @ 0..3 = `md\"`
+        TOKEN @ 0..2 = `md`
+        TOKEN @ 2..3 = `\"`
         MD_PARAGRAPH, MD_STRONG, MD_VALUE @ 3..10 = `**foo**`
             MD_TEXT @ 5..8 = `foo`
         TOKEN @ 10..11 = `\"`
