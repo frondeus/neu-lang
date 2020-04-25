@@ -29,9 +29,7 @@ Some text to show that the reference links can follow later.
 [parser]
 ROOT @ 0..808 = `md#\"\n[I\'m an inline-style link](https://www.google.com)\n\n[I\'m an inline-style link with title](https://www.google.com \"Google\'s Homepage\")\n\n[I\'m a reference-style link][Arbitrary case-insensitive reference text]\n\n[I\'m a relative reference to a repository file](../blob/master/LICENSE)\n\n[You can use numbers for reference-style link definitions][1]\n\nOr leave it empty and use the [link text itself].\n\nURLs and URLs in angle brackets will automatically get turned into links.\nhttp://www.example.com or <http://www.example.com> and sometimes\nexample.com (but not on Github, for example).\n\n<frondeus@gmail.com>\n\nSome text to show that the reference links can follow later.\n\n[arbitrary case-insensitive reference text]: https://www.mozilla.org\n[1]: http://slashdot.org\n[link text itself]: http://www.reddit.com\n\"#`
     MARKDOWN, VALUE @ 0..808 = `md#\"\n[I\'m an inline-style link](https://www.google.com)\n\n[I\'m an inline-style link with title](https://www.google.com \"Google\'s Homepage\")\n\n[I\'m a reference-style link][Arbitrary case-insensitive reference text]\n\n[I\'m a relative reference to a repository file](../blob/master/LICENSE)\n\n[You can use numbers for reference-style link definitions][1]\n\nOr leave it empty and use the [link text itself].\n\nURLs and URLs in angle brackets will automatically get turned into links.\nhttp://www.example.com or <http://www.example.com> and sometimes\nexample.com (but not on Github, for example).\n\n<frondeus@gmail.com>\n\nSome text to show that the reference links can follow later.\n\n[arbitrary case-insensitive reference text]: https://www.mozilla.org\n[1]: http://slashdot.org\n[link text itself]: http://www.reddit.com\n\"#`
-        TOKEN @ 0..2 = `md`
-        TOKEN @ 2..3 = `#`
-        TOKEN @ 3..4 = `\"`
+        TOKEN @ 0..4 = `md#\"`
         MD_PARAGRAPH, MD_VALUE @ 5..56 = `[I\'m an inline-style link](https://www.google.com)\n`
             MD_INLINELINK, MD_LINK @ 5..55 = `[I\'m an inline-style link](https://www.google.com)`
                 MD_LINKURL @ 32..54 = `https://www.google.com`
@@ -75,8 +73,7 @@ ROOT @ 0..808 = `md#\"\n[I\'m an inline-style link](https://www.google.com)\n\n[
                 MD_TEXT @ 587..605 = `frondeus@gmail.com`
         MD_PARAGRAPH, MD_VALUE @ 608..669 = `Some text to show that the reference links can follow later.\n`
             MD_TEXT @ 608..668 = `Some text to show that the reference links can follow later.`
-        TOKEN @ 806..807 = `\"`
-        TOKEN @ 807..808 = `#`
+        TOKEN @ 806..808 = `\"#`
 
 
 ### No Errors ###

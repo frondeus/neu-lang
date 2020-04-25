@@ -9,8 +9,7 @@ md"
 [parser]
 ROOT @ 0..33 = `md\"\n1. Apple\n2. Orange\n3. Grape\n\"`
     MARKDOWN, VALUE @ 0..33 = `md\"\n1. Apple\n2. Orange\n3. Grape\n\"`
-        TOKEN @ 0..2 = `md`
-        TOKEN @ 2..3 = `\"`
+        TOKEN @ 0..3 = `md\"`
         MD_ORDEREDLIST, MD_VALUE @ 4..32 = `1. Apple\n2. Orange\n3. Grape\n`
             MD_LISTITEM @ 4..13 = `1. Apple\n`
                 MD_TEXT @ 7..12 = `Apple`

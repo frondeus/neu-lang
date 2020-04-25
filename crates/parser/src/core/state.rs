@@ -1,5 +1,5 @@
 use std::fmt;
-use crate::core::{Context, Error, Lexer, Node, Parser, TokenKind};
+use crate::core::{Context, Error, TokenKind, Node, Parser, Lexer};
 use std::borrow::Borrow;
 
 #[derive(Clone, Copy)]
@@ -58,15 +58,15 @@ impl Arena {
     }
 }
 
-pub struct State<Lex: Lexer> {
-    lexer: Lex,
-    errors: Vec<(NodeId, Error<Lex::Token>)>,
-    new_errors: Vec<Error<Lex::Token>>,
+pub struct State<Tok: TokenKind> {
+    lexer: Lexer<Tok>,
+    errors: Vec<(NodeId, Error<Tok>)>,
+    new_errors: Vec<Error<Tok>>,
     nodes: Arena
 }
 
-impl<Lex: Lexer> State<Lex> {
-    fn new(lexer: Lex) -> Self {
+impl<Tok: TokenKind> State<Tok> {
+    fn new(lexer: Lexer<Tok>) -> Self {
         Self {
             lexer,
             errors: Default::default(),
@@ -75,8 +75,11 @@ impl<Lex: Lexer> State<Lex> {
         }
     }
 
-    pub(crate) fn transform<Lex2: Lexer>(&mut self) -> State<Lex2> {
-        let lexer: Lex2 = self.lexer.transform();
+    pub(crate) fn transform<Tok2>(&mut self) -> State<Tok2>
+        where Tok2: TokenKind,
+              Tok::Extra: Into<Tok2::Extra>
+    {
+        let lexer: Lexer<Tok2> = self.lexer.transform();
         State {
             lexer,
             nodes: self.nodes.take(),
@@ -85,8 +88,11 @@ impl<Lex: Lexer> State<Lex> {
         }
     }
 
-    pub(crate) fn restore<Lex2: Lexer>(&mut self, mut other: State<Lex2>) {
-        let lexer: Lex = other.lexer().transform();
+    pub(crate) fn restore<Tok2>(&mut self, mut other: State<Tok2>)
+        where Tok2: TokenKind,
+              Tok2::Extra: Into<Tok::Extra>
+    {
+        let lexer: Lexer<Tok> = other.lexer().transform();
         self.lexer = lexer;
         self.nodes = other.nodes.take();
     }
@@ -95,15 +101,15 @@ impl<Lex: Lexer> State<Lex> {
         &mut self.nodes
     }
 
-    pub fn lexer(&self) -> &Lex {
+    pub fn lexer(&self) -> &Lexer<Tok> {
         &self.lexer
     }
 
-    pub fn lexer_mut(&mut self) -> &mut Lex {
+    pub fn lexer_mut(&mut self) -> &mut Lexer<Tok> {
         &mut self.lexer
     }
 
-    pub fn error(&mut self, e: Error<Lex::Token>) {
+    pub fn error(&mut self, e: Error<Tok>) {
         self.new_errors.push(e);
     }
 
@@ -111,7 +117,7 @@ impl<Lex: Lexer> State<Lex> {
         self.errors.extend(self.new_errors.drain(..).map(|e| (id, e)));
     }
 
-    pub fn parse(lexer: Lex, parser: impl Parser<Lex>) -> ParseResult<Lex::Token> {
+    pub fn parse(lexer: Lexer<Tok>, parser: impl Parser<Tok>) -> ParseResult<Tok> {
         let mut state = Self::new(lexer);
         let ctx = Context::default();
         let root = parser.parse(&mut state, &ctx);

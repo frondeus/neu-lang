@@ -7,7 +7,7 @@
         max = (primary.size + primary.constitution) / 10, // primary means field from top level struct
         value = .max, // but .max means field from current struct
         label = "HP: ${"${.max}"}",
-        link = md"[AB](http://google.pl)",
+        link = md"[`.max`](http://google.pl)",
         desc = md"**foo `.max` bar**",
     }
 }.health

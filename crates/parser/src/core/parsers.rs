@@ -1,26 +1,25 @@
-use crate::core::{Context, Error, Node, NodeBuilder, OptionExt, Lexer, Parser, State};
+use crate::core::{Context, Error, Node, NodeBuilder, OptionExt, TokenKind, Parser, State, PeekableIterator};
 use crate::Nodes;
 use std::marker::PhantomData;
-use std::cell::{Cell, RefCell};
-use std::borrow::{BorrowMut, Borrow};
+use std::cell::RefCell;
 
 pub enum Assoc {
     Right, Left
 }
-pub struct Pratt<N, BP, F, Lex> {
+pub struct Pratt<N, BP, F, Tok> {
     next: N,
     bp: BP,
     f: F,
     rbp: i32,
-    _phantom: PhantomData<Lex>
+    _phantom: PhantomData<Tok>
 }
 
-impl<N, BP, F, Lex> Clone for Pratt<N, BP, F, Lex>
+impl<N, BP, F, Tok> Clone for Pratt<N, BP, F, Tok>
 where
-    Lex: Lexer,
-    N: Clone + Parser<Lex>,
-    BP: Clone + Fn(Option<Lex::Token>) -> Option<(Assoc, i32)>,
-    F: Clone + Fn(&mut NodeBuilder<Lex>, Option<Lex::Token>)
+    Tok: TokenKind,
+    N: Clone + Parser<Tok>,
+    BP: Clone + Fn(Option<Tok>) -> Option<(Assoc, i32)>,
+    F: Clone + Fn(&mut NodeBuilder<Tok>, Option<Tok>)
 {
     fn clone(&self) -> Self {
         Self {
@@ -33,12 +32,12 @@ where
     }
 }
 
-impl<N, BP, F, Lex> Pratt<N, BP, F, Lex>
+impl<N, BP, F, Tok> Pratt<N, BP, F, Tok>
 where
-    Lex: Lexer,
-    N: Clone + Parser<Lex>,
-    BP: Clone + Fn(Option<Lex::Token>) -> Option<(Assoc, i32)>,
-    F: Clone + Fn(&mut NodeBuilder<Lex>, Option<Lex::Token>)
+    Tok: TokenKind,
+    N: Clone + Parser<Tok>,
+    BP: Clone + Fn(Option<Tok>) -> Option<(Assoc, i32)>,
+    F: Clone + Fn(&mut NodeBuilder<Tok>, Option<Tok>)
 {
     pub fn new(next: N, bp: BP, f: F) -> Self {
         Self { next, bp, f, rbp: 0, _phantom: PhantomData }
@@ -50,10 +49,10 @@ where
         new
     }
 
-    pub fn parser(&self) -> impl Parser<Lex> {
+    pub fn parser(&self) -> impl Parser<Tok> {
         let opt = self.clone();
 
-        move |state: &mut State<Lex>, ctx: &Context<Lex>| {
+        move |state: &mut State<Tok>, ctx: &Context<Tok>| {
             let mut left = opt.next.parse(state, ctx);
             loop {
                 let op_token = state.lexer_mut().peek().as_kind();
@@ -76,9 +75,9 @@ where
     }
 }
 
-pub fn node_mut<Lex: Lexer>(mut f: impl FnMut(&mut NodeBuilder<Lex>)) -> impl Parser<Lex> {
+pub fn node_mut<Tok: TokenKind>(mut f: impl FnMut(&mut NodeBuilder<Tok>)) -> impl Parser<Tok> {
     NodeMut {
-        f: RefCell::new(move |state: &mut State<Lex>, ctx: &Context<Lex>| {
+        f: RefCell::new(move |state: &mut State<Tok>, ctx: &Context<Tok>| {
             let mut builder = NodeBuilder::new(state, ctx);
             f(&mut builder);
             builder.build()
@@ -86,15 +85,15 @@ pub fn node_mut<Lex: Lexer>(mut f: impl FnMut(&mut NodeBuilder<Lex>)) -> impl Pa
     }
 }
 
-pub fn node<Lex: Lexer>(f: impl Fn(&mut NodeBuilder<Lex>)) -> impl Parser<Lex> {
-    move |state: &mut State<Lex>, ctx: &Context<Lex>| {
+pub fn node<Tok: TokenKind>(f: impl Fn(&mut NodeBuilder<Tok>)) -> impl Parser<Tok> {
+    move |state: &mut State<Tok>, ctx: &Context<Tok>| {
         let mut builder = NodeBuilder::new(state, ctx);
         f(&mut builder);
         builder.build()
     }
 }
 
-pub fn expected<Lex: Lexer>(expected: &'static [Lex::Token]) -> impl Parser<Lex> {
+pub fn expected<Tok: TokenKind>(expected: &'static [Tok]) -> impl Parser<Tok> {
     node(move |builder| {
         let found = builder.next_token();
         builder.error(Error::Expected {
@@ -104,8 +103,8 @@ pub fn expected<Lex: Lexer>(expected: &'static [Lex::Token]) -> impl Parser<Lex>
     })
 }
 
-pub fn tokens<Lex: Lexer>(expected: Vec<Lex::Token>) -> impl Parser<Lex> {
-    node(move |builder: &mut NodeBuilder<Lex>| {
+pub fn tokens<Tok: TokenKind>(expected: Vec<Tok>) -> impl Parser<Tok> {
+    node(move |builder: &mut NodeBuilder<Tok>| {
         builder.name(Nodes::Token);
         let token = builder.next_token();
         match (token.as_kind(), expected.is_empty()) {
@@ -129,21 +128,21 @@ pub fn tokens<Lex: Lexer>(expected: Vec<Lex::Token>) -> impl Parser<Lex> {
     })
 }
 
-pub fn any_token<Lex: Lexer>() -> impl Parser<Lex> {
-    node(move |builder: &mut NodeBuilder<Lex>| {
+pub fn any_token<Tok: TokenKind>() -> impl Parser<Tok> {
+    node(move |builder: &mut NodeBuilder<Tok>| {
         builder.name(Nodes::Token);
         builder.next_token();
     })
 }
 
-pub fn token<Lex: Lexer>(expected: impl Into<Option<Lex::Token>>) -> impl Parser<Lex> {
+pub fn token<Tok: TokenKind>(expected: impl Into<Option<Tok>>) -> impl Parser<Tok> {
     let expected = expected.into();
     let expected = expected.into_iter().collect::<Vec<_>>();
     tokens(expected)
 }
 
 
-pub trait ParserExt<Lex: Lexer>: Parser<Lex> {
+pub trait ParserExt<Tok: TokenKind>: Parser<Tok> {
     fn map<F>(self, f: F) -> Map<Self, F>
     where
         F: Fn(Node) -> Node,
@@ -154,10 +153,10 @@ pub trait ParserExt<Lex: Lexer>: Parser<Lex> {
     }
 }
 
-impl<P, Lex> ParserExt<Lex> for P
+impl<P, Tok> ParserExt<Tok> for P
 where
-    Lex: Lexer,
-    P: Parser<Lex>,
+    Tok: TokenKind,
+    P: Parser<Tok>,
 {
     fn map<F>(self, f: F) -> Map<Self, F>
     where
@@ -173,13 +172,13 @@ pub struct Map<P, F> {
     f: F,
 }
 
-impl<P, Fun, Lex> Parser<Lex> for Map<P, Fun>
+impl<P, Fun, Tok> Parser<Tok> for Map<P, Fun>
 where
-    Lex: Lexer,
-    P: Parser<Lex>,
+    Tok: TokenKind,
+    P: Parser<Tok>,
     Fun: Fn(Node) -> Node,
 {
-    fn parse(&self, state: &mut State<Lex>, ctx: &Context<Lex>) -> Node {
+    fn parse(&self, state: &mut State<Tok>, ctx: &Context<Tok>) -> Node {
         let o = self.parser.parse(state, ctx);
         (self.f)(o)
     }
@@ -189,10 +188,10 @@ struct NodeMut<F> {
     f: RefCell<F>
 }
 
-impl<Lex: Lexer, F> Parser<Lex> for NodeMut<F>
-    where F: FnMut(&mut State<Lex>, &Context<Lex>) -> Node
+impl<Tok: TokenKind, F> Parser<Tok> for NodeMut<F>
+    where F: FnMut(&mut State<Tok>, &Context<Tok>) -> Node
 {
-    fn parse(&self, state: &mut State<Lex>, ctx: &Context<Lex>) -> Node {
+    fn parse(&self, state: &mut State<Tok>, ctx: &Context<Tok>) -> Node {
         let mut f = self.f.borrow_mut();
         let f = &mut *f;
         f(state, ctx)

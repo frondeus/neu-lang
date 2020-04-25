@@ -1,4 +1,4 @@
-use crate::{MdStringLexer, MdStrToken, MainLexer};
+use crate::{MdStrToken, Token};
 use crate::Nodes;
 use crate::core::*;
 use pulldown_cmark::{Event, Tag, CowStr, LinkType};
@@ -31,7 +31,7 @@ fn parse_start<'a>(
                span: TextRange,
                tag: &Tag,
                str: &'a str,
-               builder: &mut NodeBuilder<MdStringLexer>,
+               builder: &mut NodeBuilder<MdStrToken>,
                events: &mut impl PeekableIterator<Item = (Event<'a>, TextRange)>,
                from: TextSize
 ) {
@@ -99,7 +99,7 @@ fn parse_start<'a>(
 
 fn parse_event<'a>(
     str: &'a str,
-    builder: &mut NodeBuilder<MdStringLexer>,
+    builder: &mut NodeBuilder<MdStrToken>,
     events: &mut impl PeekableIterator<Item = (Event<'a>, TextRange)>,
             from: TextSize
 ) {
@@ -126,15 +126,15 @@ fn parse_event<'a>(
         Event::Code(cow) => {
             let range = get_range(str, &cow, span, from);
             let ctx = Context::default();
-            builder.parse_mode(&ctx, node(move |builder: &mut NodeBuilder<MainLexer>| {
-                let saved = builder.state_mut().lexer_mut().state_mut().input().clone();
+            builder.parse_mode(&ctx, node(move |builder: &mut NodeBuilder<Token>| {
+                let saved = builder.state_mut().lexer_mut().input().clone();
 
-                builder.state_mut().lexer_mut().state_mut().input_mut().set_range(range);
+                builder.state_mut().lexer_mut().input_mut().set_range(range);
                 builder.name(Nodes::Virtual);
                 builder.name(Nodes::Interpolated);
                 builder.parse(crate::neu::parser());
 
-                *builder.state_mut().lexer_mut().state_mut().input_mut() = saved;
+                *builder.state_mut().lexer_mut().input_mut() = saved;
             }));
             //let lexer = MainLexer::build(input.into());
         },
@@ -158,10 +158,9 @@ fn parse_event<'a>(
     }
 }
 
-pub fn inner_md_string(hash: usize) -> impl Parser<MdStringLexer> {
-    move |state: &mut State<MdStringLexer>, ctx: &Context<MdStringLexer>| {
-        state.lexer_mut().set_hash(hash);
-        let i = state.lexer().state().input().clone();
+pub fn inner_md_string() -> impl Parser<MdStrToken> {
+    move |state: &mut State<MdStrToken>, ctx: &Context<MdStrToken>| {
+        let i = state.lexer().input().clone();
         let next = state.lexer_mut().peek().as_kind();
         let mut builder = NodeBuilder::new(state, ctx);
         builder.name(Nodes::Virtual);

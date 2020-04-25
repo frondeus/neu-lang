@@ -1,19 +1,19 @@
-use crate::core::{Context, Name, Node, Parser, Lexer, State, NodeId, Error};
+use crate::core::{Context, Name, Node, Parser, TokenKind, State, NodeId, Error, PeekableIterator, OptionExt};
 use crate::Nodes;
 use std::collections::BTreeSet;
 use text_size::TextRange;
 
-pub struct NodeBuilder<'a, Lex: Lexer> {
-    state: &'a mut State<Lex>,
-    ctx: &'a Context<'a, Lex>,
+pub struct NodeBuilder<'a, Tok: TokenKind> {
+    state: &'a mut State<Tok>,
+    ctx: &'a Context<'a, Tok>,
     span: TextRange,
     names: BTreeSet<Name>,
     children: Vec<NodeId>,
-    error: Option<Error<Lex::Token>>
+    error: Option<Error<Tok>>
 }
 
-impl<'a, Lex: Lexer> NodeBuilder<'a, Lex> {
-    pub(crate) fn new(state: &'a mut State<Lex>, ctx: &'a Context<'a, Lex>) -> Self {
+impl<'a, Tok: TokenKind> NodeBuilder<'a, Tok> {
+    pub(crate) fn new(state: &'a mut State<Tok>, ctx: &'a Context<'a, Tok>) -> Self {
         let from = state.lexer().input().cursor();
         let span = TextRange(from, from);
         Self {
@@ -25,16 +25,15 @@ impl<'a, Lex: Lexer> NodeBuilder<'a, Lex> {
         }
     }
 
-    pub fn peek_token(&mut self) -> Option<Lex::Token> {
-        use crate::core::lexer::OptionExt;
+    pub fn peek_token(&mut self) -> Option<Tok> {
         self.state.lexer_mut().peek().as_kind()
     }
 
-    pub fn state(&self) -> &State<Lex> {
+    pub fn state(&self) -> &State<Tok> {
         &self.state
     }
     
-    pub fn state_mut(&mut self) -> &mut State<Lex> {
+    pub fn state_mut(&mut self) -> &mut State<Tok> {
         &mut self.state
     }
 
@@ -46,7 +45,7 @@ impl<'a, Lex: Lexer> NodeBuilder<'a, Lex> {
         self.span = span;
     }
 
-    pub fn next_token(&mut self) -> Option<crate::core::spanned::Spanned<Lex::Token>> {
+    pub fn next_token(&mut self) -> Option<crate::core::spanned::Spanned<Tok>> {
         let next = self.state.lexer_mut().next();
         if let Some(next) = next.as_ref() {
             self.span = TextRange::covering(self.span, next.span);
@@ -59,19 +58,23 @@ impl<'a, Lex: Lexer> NodeBuilder<'a, Lex> {
         self
     }
 
-    pub fn error(&mut self, error: Error<Lex::Token>) -> &mut Self {
+    pub fn error(&mut self, error: Error<Tok>) -> &mut Self {
         self.error = Some(error);
         self.name(Nodes::Error)
     }
 
-    pub fn parse_mode<'b, Lex2: Lexer>(&mut self, ctx: &'b Context<'b, Lex2>, parser: impl Parser<Lex2>) {
-        let mut mode_state = self.state.transform();
+    pub fn parse_mode<'b, Tok2>(&mut self, ctx: &'b Context<'b, Tok2>, parser: impl Parser<Tok2>)
+        where Tok2: TokenKind,
+              Tok2::Extra: Into<Tok::Extra>,
+              Tok::Extra: Into<Tok2::Extra>
+    {
+    let mut mode_state = self.state.transform();
         let node = parser.parse(&mut mode_state, ctx);
         self.state.restore(mode_state);
         self.add(node);
     }
 
-    pub fn parse_ctx<'b>(&mut self, ctx: &'b Context<'b, Lex>, parser: impl Parser<Lex>) {
+    pub fn parse_ctx<'b>(&mut self, ctx: &'b Context<'b, Tok>, parser: impl Parser<Tok>) {
         if let Some(trivia) = ctx.trivia() {
             let node = trivia.parse(self.state, ctx);
             self.add(node);
@@ -86,7 +89,7 @@ impl<'a, Lex: Lexer> NodeBuilder<'a, Lex> {
         }
     }
 
-    pub fn parse(&mut self, parser: impl Parser<Lex>) {
+    pub fn parse(&mut self, parser: impl Parser<Tok>) {
         self.parse_ctx(self.ctx, parser);
     }
 

@@ -7,5 +7,62 @@
 ```
 
 [parser]
+ROOT @ 0..105 = `{\n    label = \"HP: ${ 2 + 3 }\",\n    link = \"[AB](http://google.pl)\",\n    desc = \"**foo `4` bar**\"\n}.label`
+    IDENTPATH, VALUE @ 0..105 = `{\n    label = \"HP: ${ 2 + 3 }\",\n    link = \"[AB](http://google.pl)\",\n    desc = \"**foo `4` bar**\"\n}.label`
+        STRUCT, VALUE @ 0..99 = `{\n    label = \"HP: ${ 2 + 3 }\",\n    link = \"[AB](http://google.pl)\",\n    desc = \"**foo `4` bar**\"\n}`
+            TOKEN @ 0..1 = `{`
+            TRIVIA @ 1..6 = `\n    `
+            IDENTIFIER, KEY, TOKEN @ 6..11 = `label`
+            TRIVIA @ 11..12 = ` `
+            TOKEN @ 12..13 = `=`
+            TRIVIA @ 13..14 = ` `
+            STRING, VALUE @ 14..30 = `\"HP: ${ 2 + 3 }\"`
+                TOKEN @ 14..15 = `\"`
+                STRVALUE, TOKEN @ 15..19 = `HP: `
+                INTERPOLATED, STRVALUE @ 19..29 = `${ 2 + 3 }`
+                    TOKEN @ 19..21 = `${`
+                    BINARY, VALUE @ 22..27 = `2 + 3`
+                        TRIVIA @ 21..22 = ` `
+                        ERROR, VALUE @ 22..23 = `2`
+                        TRIVIA @ 23..24 = ` `
+                        OP, TOKEN @ 24..25 = `+`
+                        TRIVIA @ 25..26 = ` `
+                        NUMBER, TOKEN, VALUE @ 26..27 = `3`
+                        TRIVIA @ 27..28 = ` `
+                    TOKEN @ 28..29 = `}`
+                TOKEN @ 29..30 = `\"`
+            TOKEN @ 30..31 = `,`
+            TRIVIA @ 31..36 = `\n    `
+            IDENTIFIER, KEY, TOKEN @ 36..40 = `link`
+            TRIVIA @ 40..41 = ` `
+            TOKEN @ 41..42 = `=`
+            TRIVIA @ 42..43 = ` `
+            STRING, VALUE @ 43..67 = `\"[AB](http://google.pl)\"`
+                TOKEN @ 43..44 = `\"`
+                STRVALUE, TOKEN @ 44..66 = `[AB](http://google.pl)`
+                TOKEN @ 66..67 = `\"`
+            TOKEN @ 67..68 = `,`
+            TRIVIA @ 68..73 = `\n    `
+            IDENTIFIER, KEY, TOKEN @ 73..77 = `desc`
+            TRIVIA @ 77..78 = ` `
+            TOKEN @ 78..79 = `=`
+            TRIVIA @ 79..80 = ` `
+            STRING, VALUE @ 80..97 = `\"**foo `4` bar**\"`
+                TOKEN @ 80..81 = `\"`
+                STRVALUE, TOKEN @ 81..96 = `**foo `4` bar**`
+                TOKEN @ 96..97 = `\"`
+            TRIVIA @ 97..98 = `\n`
+            TOKEN @ 98..99 = `}`
+        OP, TOKEN @ 99..100 = `.`
+        IDENTIFIER, TOKEN, VALUE @ 100..105 = `label`
+
+
+### No Errors ###
+
 
 [.eval]
+None
+
+### Errors ###
+Field not found @ N27
+

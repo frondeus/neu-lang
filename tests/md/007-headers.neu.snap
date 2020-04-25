@@ -10,8 +10,7 @@ defg
 [parser]
 ROOT @ 0..28 = `md\"\n# foo\nabcd\n## bar\ndefg\n\"`
     MARKDOWN, VALUE @ 0..28 = `md\"\n# foo\nabcd\n## bar\ndefg\n\"`
-        TOKEN @ 0..2 = `md`
-        TOKEN @ 2..3 = `\"`
+        TOKEN @ 0..3 = `md\"`
         MD_H1, MD_VALUE @ 4..10 = `# foo\n`
             MD_TEXT @ 6..9 = `foo`
         MD_PARAGRAPH, MD_VALUE @ 10..15 = `abcd\n`

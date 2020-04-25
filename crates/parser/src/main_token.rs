@@ -1,5 +1,4 @@
 use derive_more::Display;
-use crate::core::TokenKind;
 
 #[derive(Debug, PartialEq, Clone, Copy, Display)]
 pub enum Token {
@@ -60,9 +59,6 @@ pub enum Token {
     #[display(fmt = "`md`")]
     MdQuote,
 
-    #[display(fmt = "#")]
-    Hash,
-
     #[display(fmt = "`}}`")]
     CloseC,
 
@@ -79,11 +75,3 @@ pub enum Token {
     OpDot
 }
 
-impl TokenKind for Token {
-    fn is_mergeable(self, other: Self) -> bool {
-        match (self, other) {
-            (Self::Error, Self::Error) => true,
-            _ => false
-        }
-    }
-}

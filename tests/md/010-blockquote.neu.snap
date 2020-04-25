@@ -9,8 +9,7 @@ md"foo
 [parser]
 ROOT @ 0..21 = `md\"foo\n\n> bar\n> baz\n\"`
     MARKDOWN, VALUE @ 0..21 = `md\"foo\n\n> bar\n> baz\n\"`
-        TOKEN @ 0..2 = `md`
-        TOKEN @ 2..3 = `\"`
+        TOKEN @ 0..3 = `md\"`
         MD_PARAGRAPH, MD_VALUE @ 3..7 = `foo\n`
             MD_TEXT @ 3..6 = `foo`
         MD_BLOCKQUOTE, MD_VALUE @ 8..20 = `> bar\n> baz\n`

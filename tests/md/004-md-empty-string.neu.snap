@@ -5,8 +5,7 @@ md""
 [parser]
 ROOT @ 0..4 = `md\"\"`
     MARKDOWN, VALUE @ 0..4 = `md\"\"`
-        TOKEN @ 0..2 = `md`
-        TOKEN @ 2..3 = `\"`
+        TOKEN @ 0..3 = `md\"`
         TOKEN @ 3..4 = `\"`
 
 

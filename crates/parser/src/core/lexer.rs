@@ -1,33 +1,36 @@
-use crate::core::{Input, Spanned, TextRange};
+use crate::core::{Input, Spanned, TextRange, PeekableIterator};
 
-#[derive(Debug)]
-pub struct LexerState<Tok: TokenKind> {
+pub trait TokenKind: Clone + Copy + std::fmt::Debug + std::fmt::Display + PartialEq {
+    type Extra: Default + Clone;
+    fn is_mergeable(self, other: Self) -> bool;
+    fn lex(lexer: &mut Lexer<Self>) -> Option<(Self, TextRange)>;
+}
+
+pub struct Lexer<Tok: TokenKind> {
     input: Input,
     #[allow(clippy::option_option)]
     peeked: Option<Option<Spanned<Tok>>>,
+    pub extra: Tok::Extra
 }
 
-impl<Tok: TokenKind> From<Input> for LexerState<Tok> {
-    fn from(input: Input) -> Self {
+impl<Tok: TokenKind> Lexer<Tok> {
+    pub fn new(i: &str) -> Self {
         Self {
-            input,
-            peeked: None
-        }
-    }
-}
-
-impl<Tok: TokenKind> LexerState<Tok> {
-    pub fn new(input: &str) -> Self {
-        Self {
-            input: input.into(),
+            input: Input::from(i),
             peeked: None,
+            extra: Default::default()
         }
     }
 
-    pub(crate) fn transform<Tok2: TokenKind>(&self) -> LexerState<Tok2> {
-        LexerState {
-            input: self.input.clone(),
-            peeked: None
+    pub fn transform<Tok2>(&self) -> Lexer<Tok2>
+        where Tok2: TokenKind,
+            Tok::Extra: Into<Tok2::Extra>
+    {
+        let input = self.input.clone();
+        Lexer {
+            input,
+            peeked: None,
+            extra: self.extra.clone().into()
         }
     }
 
@@ -38,91 +41,65 @@ impl<Tok: TokenKind> LexerState<Tok> {
     pub fn input_mut(&mut self) -> &mut Input {
         &mut self.input
     }
-}
 
-pub struct LexerIter<Lex: Lexer<Token = T>, T: TokenKind> {
-    lexer: Lex
-}
-
-impl<Lex, T> Iterator for LexerIter<Lex, T> where Lex: Lexer<Token = T>, T: TokenKind {
-    type Item = Spanned<T>;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        self.lexer.next()
-    }
-}
-
-pub trait TokenKind: Clone + Copy + std::fmt::Debug + std::fmt::Display + PartialEq {
-    fn is_mergeable(self, other: Self) -> bool;
-}
-
-pub trait Lexer {
-    type Token: TokenKind;
-
-    fn into_iter(self) -> LexerIter<Self, Self::Token> where Self: Sized { LexerIter { lexer: self } }
-
-    fn build(state: LexerState<Self::Token>) -> Self where Self: Sized;
-
-    fn transform<L: Lexer>(&self) -> L {
-        let state = self.state().transform();
-        L::build(state)
-    }
-
-    fn state_mut(&mut self) -> &mut LexerState<Self::Token>;
-    fn state(&self) -> &LexerState<Self::Token>;
-    fn input(&self) -> Input {
-        self.state().input.clone()
-    }
-    fn input_mut(&mut self) -> &mut Input {
-        &mut self.state_mut().input
-    }
-
-    fn lex(&mut self) -> Option<(Self::Token, TextRange)>;
-    #[doc(hidden)]
-    fn next_token(&mut self) -> Option<Spanned<Self::Token>> {
-        if let Some(peeked) = self.state_mut().peeked.take() {
+    fn lex(&mut self) -> Option<Spanned<Tok>> {
+        if let Some(peeked) = self.peeked.take() {
             if let Some(peeked) = peeked.as_ref() {
-                self.state_mut().input.set_cursor(peeked.span.end());
+                self.input.set_cursor(peeked.span.end());
             }
             return peeked;
         }
 
-        let (token, span) = self.lex()?;
+        let (token, span) = Tok::lex(self)?;
         Some(Spanned::new(span, token))
     }
-    fn next(&mut self) -> Option<Spanned<Self::Token>> {
-        let mut first = self.next_token()?;
+
+    fn peek_one(&mut self) -> Option<&Spanned<Tok>> {
+        if self.peeked.is_none() {
+            let i = self.input.cursor();
+            self.peeked = Some(self.lex());
+            self.input.set_cursor(i);
+        }
+
+        self.peeked.as_ref().and_then(|i| i.as_ref())
+    }
+}
+
+impl<Tok> PeekableIterator for Lexer<Tok>
+where Tok: TokenKind {
+    fn peek(&mut self) -> Option<&Self::Item> {
+        if self.peeked.is_none() {
+            let i = self.input.cursor();
+            self.peeked = Some(self.next());
+            self.input.set_cursor(i);
+        }
+
+        self.peeked.as_ref().and_then(|i| i.as_ref())
+    }
+}
+
+impl<Tok> Iterator for Lexer<Tok>
+where
+    Tok: TokenKind
+{
+    type Item = Spanned<Tok>;
+
+    fn next(&mut self) -> Option<Spanned<Tok>> {
+        let mut first = self.lex()?;
 
         loop {
             match self.peek_one() {
                 Some(token) if first.kind.is_mergeable(token.kind) => {
                     first.span = TextRange::covering(first.span, token.span);
-                    self.next_token();
+                    self.lex();
                 }
                 _ => break,
             }
         }
         Some(first)
     }
-    fn peek_one(&mut self) -> Option<&Spanned<Self::Token>> {
-        if self.state_mut().peeked.is_none() {
-            let i = self.state_mut().input.cursor();
-            self.state_mut().peeked = Some(self.next_token());
-            self.state_mut().input.set_cursor(i);
-        }
-
-        self.state_mut().peeked.as_ref().and_then(|i| i.as_ref())
-    }
-    fn peek(&mut self) -> Option<&Spanned<Self::Token>> {
-        if self.state_mut().peeked.is_none() {
-            let i = self.state_mut().input.cursor();
-            self.state_mut().peeked = Some(self.next());
-            self.state_mut().input.set_cursor(i);
-        }
-
-        self.state_mut().peeked.as_ref().and_then(|i| i.as_ref())
-    }
 }
+
 
 pub trait OptionExt<T> {
     fn as_kind(&self) -> Option<T>;

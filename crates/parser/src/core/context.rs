@@ -1,23 +1,23 @@
-use crate::core::{Parser, Lexer};
+use crate::core::{Parser, TokenKind};
 
-pub struct Context<'a, Lex: Lexer> {
-    trivia: Option<&'a dyn Parser<Lex>>,
+pub struct Context<'a, Tok: TokenKind> {
+    trivia: Option<&'a dyn Parser<Tok>>,
 }
 
-impl<'a, Lex: Lexer> Default for Context<'a, Lex> {
+impl<'a, Tok: TokenKind> Default for Context<'a, Tok> {
     fn default() -> Self {
         Self { trivia: None }
     }
 }
 
-impl<'a, Lex: Lexer> Context<'a, Lex> {
-    pub fn new(trivia: &'a dyn Parser<Lex>) -> Self {
+impl<'a, Tok: TokenKind> Context<'a, Tok> {
+    pub fn new(trivia: &'a dyn Parser<Tok>) -> Self {
         Self {
             trivia: Some(trivia),
         }
     }
 
-    pub fn trivia(&self) -> Option<&'a dyn Parser<Lex>> {
+    pub fn trivia(&self) -> Option<&'a dyn Parser<Tok>> {
         self.trivia
     }
 }

@@ -1,22 +1,21 @@
-use crate::core::{Input, TextRange, LexerState, Lexer};
-use crate::Token;
+use crate::core::{TextRange, TokenKind, Lexer};
+use crate::{Token, HashCount};
 
-pub struct MainLexer(LexerState<Token>);
+pub type MainLexer = Lexer<Token>;
 
-impl MainLexer {
-    pub fn new(i: &str) -> Self {
-        Self(LexerState::new(i))
+impl TokenKind for Token {
+    type Extra = HashCount;
+
+    fn is_mergeable(self, other: Self) -> bool {
+        match (self, other) {
+            (Self::Error, Self::Error) => true,
+            _ => false
+        }
     }
-}
 
-impl Lexer for MainLexer {
-    type Token = Token;
-    fn build(state: LexerState<Token>) -> Self { Self(state) }
-    fn state_mut(&mut self) -> &mut LexerState<Token> { &mut self.0 }
-    fn state(&self) -> &LexerState<Token> { &self.0 }
-
-    fn lex(&mut self) -> Option<(Self::Token, TextRange)> {
-        let input = self.input_mut();
+    fn lex(lexer: &mut Lexer<Self>) -> Option<(Self, TextRange)> {
+        let hash = lexer.extra.count;
+        let input = lexer.input_mut();
         let i = input.as_ref();
         let peeked = i.chars().next()?;
         if peeked.is_whitespace() {
@@ -65,13 +64,17 @@ impl Lexer for MainLexer {
 
         if i.starts_with("md") {
             let mut rest = 2;
+            let mut hash = 0;
             loop {
                 let i = &i[rest..];
                 if i.starts_with('"') {
-                    return Some((Token::MdQuote, input.chomp(2)));
+                    let range = input.chomp(rest + 1);
+                    lexer.extra.count = hash;
+                    return Some((Token::MdQuote, range));
                 }
                 if i.starts_with('#')  {
                     rest += 1;
+                    hash += 1;
                     continue;
                 }
                 break;
@@ -95,8 +98,16 @@ impl Lexer for MainLexer {
         if peeked == '[' { return Some((Token::OpenB, input.chomp(1))); }
         if peeked == ']' { return Some((Token::CloseB, input.chomp(1))); }
 
+        if hash > 0 {
+            let pat = format!("{:#<width$}", "\"", width = hash + 1);
+            if i.starts_with(&pat) {
+                let range = input.chomp(pat.len());
+                lexer.extra.count = 0;
+                return Some((Token::DoubleQuote, range));
+            }
+        }
+
         if peeked == '"' { return Some((Token::DoubleQuote, input.chomp(1))); }
-        if peeked == '#' { return Some((Token::Hash, input.chomp(1))); }
 
         if peeked.is_ascii_alphabetic() {
             let rest = i.chars()

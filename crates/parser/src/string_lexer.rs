@@ -1,17 +1,21 @@
-use crate::core::{LexerState, Lexer, Input, TextRange};
-use crate::StrToken;
+use crate::core::{Lexer, TextRange, TokenKind};
+use crate::{StrToken, HashCount};
 
-pub struct StringLexer(LexerState<StrToken>);
+pub type StringLexer = Lexer<StrToken>;
 
-impl Lexer for StringLexer {
-    type Token = StrToken;
+impl TokenKind for StrToken {
+    type Extra = HashCount;
 
-    fn build(state: LexerState<StrToken>) -> Self { Self(state) }
-    fn state_mut(&mut self) -> &mut LexerState<Self::Token> { &mut self.0 }
-    fn state(&self) -> &LexerState<Self::Token> { &self.0 }
+    fn is_mergeable(self, other: Self) -> bool {
+        match (self, other) {
+            (Self::Text, Self::Text) => true,
+            (Self::Text, Self::CloseI) => true,
+            _ => false
+        }
+    }
 
-    fn lex(&mut self) -> Option<(Self::Token, TextRange)> {
-        let input = self.input_mut();
+    fn lex(lexer: &mut Lexer<Self>) -> Option<(Self, TextRange)> {
+        let input = lexer.input_mut();
         let i = input.as_ref();
         if i.is_empty() { return None; }
         if i.starts_with('"') {

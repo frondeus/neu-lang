@@ -1,8 +1,9 @@
 use crate::core::*;
-use crate::{MainLexer, Nodes, Token, StringLexer, StrToken};
+use crate::{Nodes, Token, StrToken};
 use crate::markdown::inner_md_string;
 
-pub fn parser() -> impl Parser<MainLexer> {
+
+pub fn parser() -> impl Parser<Token> {
     node(|builder| {
         builder.name(Nodes::Root);
         let trivia = trivia();
@@ -12,7 +13,7 @@ pub fn parser() -> impl Parser<MainLexer> {
     })
 }
 
-fn value() -> impl Parser<MainLexer> {
+fn value() -> impl Parser<Token> {
     let next = |state: &mut State<_>, ctx: &Context<_>| left_value().parse(state, ctx);
     Pratt::new(next, |token| match token {
         Some(Token::OpDot) => Some((Assoc::Left, 100)),
@@ -39,7 +40,7 @@ fn value() -> impl Parser<MainLexer> {
     }).parser()
 }
 
-fn left_value() -> impl Parser<MainLexer> {
+fn left_value() -> impl Parser<Token> {
     const VALUE_TOKENS: &[Token] = &[
         Token::Number, Token::True, Token::False,
         Token::OpMinus, Token::OpBang, Token::DoubleQuote, Token::OpenP,
@@ -74,7 +75,7 @@ fn left_value() -> impl Parser<MainLexer> {
     })
 }
 
-fn array() -> impl Parser<MainLexer> {
+fn array() -> impl Parser<Token> {
     node(|builder| {
         builder.name(Nodes::Array);
         builder.parse(token(Token::OpenB));
@@ -103,15 +104,15 @@ fn array() -> impl Parser<MainLexer> {
     })
 }
 
-fn identifier() -> impl Parser<MainLexer> {
+fn identifier() -> impl Parser<Token> {
     token(Token::Identifier).map(|n| n.with_name(Nodes::Identifier))
 }
 
-fn strukt_key() -> impl Parser<MainLexer> {
+fn strukt_key() -> impl Parser<Token> {
     identifier().map(|n| n.with_name(Nodes::Key))
 }
 
-fn strukt() -> impl Parser<MainLexer> {
+fn strukt() -> impl Parser<Token> {
     node(|builder| {
         builder.name(Nodes::Struct);
         builder.parse(token(Token::OpenC));
@@ -144,29 +145,20 @@ fn strukt() -> impl Parser<MainLexer> {
     })
 }
 
-fn md_string() -> impl Parser<MainLexer> {
+fn md_string() -> impl Parser<Token> {
     node(|builder| {
         builder.name(Nodes::Markdown);
         let ctx = Context::default();
         builder.parse_ctx(&ctx, token(Token::MdQuote));
-        let mut hash = 0;
-        while let Some(Token::Hash) = builder.peek_token() {
-            builder.parse_ctx(&ctx, token(Token::Hash));
-            hash += 1;
-        }
-        builder.parse_ctx(&ctx, token(Token::DoubleQuote));
         let ctx2 = Context::default();
-        builder.parse_mode(&ctx2, inner_md_string(hash));
+        builder.parse_mode(&ctx2, inner_md_string());
         builder.parse_ctx(&ctx, token(Token::DoubleQuote));
-        for _ in 0..hash {
-            builder.parse_ctx(&ctx, token(Token::Hash));
-        }
     })
 }
 
 
-fn string() -> impl Parser<MainLexer> {
-    node(|builder: &mut NodeBuilder<'_, MainLexer>| {
+fn string() -> impl Parser<Token> {
+    node(|builder: &mut NodeBuilder<'_, Token>| {
         builder.name(Nodes::String);
         let ctx = Context::default();
         builder.parse_ctx(&ctx, token(Token::DoubleQuote));
@@ -176,7 +168,7 @@ fn string() -> impl Parser<MainLexer> {
     })
 }
 
-fn inner_string() -> impl Parser<StringLexer> {
+fn inner_string() -> impl Parser<StrToken> {
     node(|builder| {
         builder.name(Nodes::Virtual);
         builder.name(Nodes::StrValue);
@@ -202,7 +194,7 @@ fn inner_string() -> impl Parser<StringLexer> {
     })
 }
 
-fn unary() -> impl Parser<MainLexer> {
+fn unary() -> impl Parser<Token> {
     node(|builder| {
         builder.name(Nodes::Unary);
         builder.parse( tokens(vec![Token::OpMinus, Token::OpBang, Token::OpDot])
@@ -212,15 +204,15 @@ fn unary() -> impl Parser<MainLexer> {
     })
 }
 
-fn boolean() -> impl Parser<MainLexer> {
+fn boolean() -> impl Parser<Token> {
     tokens(vec![Token::True, Token::False]).map(|n| n.with_name(Nodes::Boolean))
 }
 
-fn number() -> impl Parser<MainLexer> {
+fn number() -> impl Parser<Token> {
     token(Token::Number).map(|n| n.with_name(Nodes::Number))
 }
 
-fn trivia() -> impl Parser<MainLexer> {
+fn trivia() -> impl Parser<Token> {
     node(|builder| {
         builder.name(Nodes::Trivia);
         let mut empty = true;
@@ -238,15 +230,16 @@ fn trivia() -> impl Parser<MainLexer> {
 
 #[cfg(test)]
 mod tests {
-    use crate::core::{State, Lexer};
-    use super::{parser, MainLexer};
+    use crate::core::State;
+    use super::{parser};
+    use crate::{MainLexer};
 
     #[test]
     fn lexer_tests() {
         test_runner::test_snapshots("neu", "lexer", |input| {
             let lexer = MainLexer::new(input);
 
-            let res: Vec<_> = lexer.into_iter().map(|t| t.display(input, true).to_string()).collect();
+            let res: Vec<_> = lexer.map(|t| t.display(input, true).to_string()).collect();
             format!("{:#?}", res)
         }).unwrap();
     }

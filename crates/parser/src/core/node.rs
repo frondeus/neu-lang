@@ -62,6 +62,14 @@ impl Node {
         }
     }
 
+    pub fn is_any(&self, names: &[Name]) -> bool {
+        names.iter().any(|name| self.is(*name))
+    }
+
+    pub fn is_all(&self, names: &[Name]) -> bool {
+        names.iter().all(|name| self.is(*name))
+    }
+
     pub fn is(&self, name: Name) -> bool {
         self.names.contains(&name)
     }
