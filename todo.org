@@ -2,8 +2,8 @@
 ** Testing [1/1]
 *** DONE Split tests into folders
 ** Integers [/]
-** Parser [0/2]
-*** TODO Node parent id
+** Parser [1/2]
+*** DONE Node parent id
 *** TODO Parse error recovery
 ** Immediate Constants [/]
 ** Unary primitives [/]
@@ -35,6 +35,7 @@
 ** TODO Heap Allocation
 ** TODO Tail calls
 ** TODO Libraries
+** TODO Events
 
 * Done [21/21]
 ** [X] Integers

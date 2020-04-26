@@ -51,6 +51,7 @@ pub struct Node {
     pub span: TextRange,
     pub names: BTreeSet<Name>,
     pub children: Vec<NodeId>,
+    pub parent: Option<NodeId>
 }
 
 impl Node {
@@ -58,6 +59,7 @@ impl Node {
         Self {
             names: Default::default(),
             children: Default::default(),
+            parent: Default::default(),
             span: TextRange(TextSize::zero(), TextSize::zero())
         }
     }
@@ -85,6 +87,10 @@ impl Node {
             node: self,
             arena
         }
+    }
+
+    pub fn parent(&self) -> Option<NodeId> {
+        self.parent
     }
 
 }

@@ -102,7 +102,8 @@ impl<'a, Tok: TokenKind> NodeBuilder<'a, Tok> {
                 .collect();
             let mut children = node.children.into_iter().map(|child| {
                 if !self.state.nodes().get(child).is(Nodes::Trivia) {
-                    self.state.nodes().get_mut(child).names.extend(names.iter());
+                    let child_node = self.state.nodes().get_mut(child);
+                    child_node.names.extend(names.iter());
                 }
                 child
             }).collect::<Vec<_>>();
@@ -136,6 +137,7 @@ impl<'a, Tok: TokenKind> NodeBuilder<'a, Tok> {
             span,
             names,
             children,
+            parent: Default::default(),
         }
     }
 }

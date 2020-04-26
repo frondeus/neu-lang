@@ -22,4 +22,4 @@
 **foo `.max` bar**
         "#,
     }
-}.health
+}.health.max

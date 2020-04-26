@@ -10,7 +10,7 @@ pub enum Value {
     Array(Vec<Value>),
     Struct(BTreeMap<String, Value>),
 
-    Lazy { id: NodeId, parent: NodeId }
+    Lazy { id: NodeId }
 }
 
 impl Value {

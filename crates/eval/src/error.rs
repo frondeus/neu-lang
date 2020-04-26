@@ -2,9 +2,6 @@ use derive_more::Display;
 
 #[derive(Debug, Display)]
 pub enum Error {
-    #[display(fmt = "Todo")]
-    Todo,
-
     #[display(fmt = "Couldn't find any structure for field access")]
     ContextNotFound,
 
@@ -12,5 +9,5 @@ pub enum Error {
     ValueNotStruct,
 
     #[display(fmt = "Field not found")]
-    FieldNotFound
+    FieldNotFound,
 }

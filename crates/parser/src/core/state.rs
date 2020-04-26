@@ -11,6 +11,25 @@ impl fmt::Debug for NodeId {
     }
 }
 
+pub struct Ancestors<'a> {
+    current: Option<NodeId>,
+    arena: &'a Arena
+}
+
+impl<'a> Iterator for Ancestors<'a> {
+    type Item = NodeId;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let current = self.current.map(|id| self.arena.get(id))?;
+
+        let ancestor = current.parent();
+
+        let current = self.current.take();
+        self.current = ancestor;
+        current
+    }
+}
+
 #[derive(Default)]
 pub struct Arena {
     nodes: Vec<Node>
@@ -36,8 +55,20 @@ impl Arena {
 
     pub fn add(&mut self, node: Node) -> NodeId {
         let len = self.nodes.len();
+        let id = NodeId(len);
+        for child_id in node.children.iter() {
+            let child = self.get_mut(child_id);
+            child.parent = Some(id);
+        }
         self.nodes.push(node);
-        NodeId(len)
+        id
+    }
+
+    pub fn ancestors<'a>(&'a self, id: NodeId) -> Ancestors<'a> {
+        Ancestors {
+            current: Some(id),
+            arena: self
+        }
     }
 
     pub fn get(&self, id: impl Borrow<NodeId>) -> &Node {
@@ -45,7 +76,8 @@ impl Arena {
         &self.nodes[id.0]
     }
 
-    pub fn get_mut(&mut self, id: NodeId) -> &mut Node {
+    pub fn get_mut(&mut self, id: impl Borrow<NodeId>) -> &mut Node {
+        let id = *id.borrow();
         &mut self.nodes[id.0]
     }
 

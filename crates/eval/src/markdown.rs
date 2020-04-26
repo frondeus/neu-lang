@@ -1,11 +1,10 @@
 use crate::Eval;
 use neu_parser::core::{Node, Name};
 use neu_parser::Nodes;
-use crate::context::Context;
 use crate::children::Children;
 
 impl<'a> Eval<'a> {
-    pub(crate) fn eval_md(&mut self, str: &mut String, node: &Node, ctx: Context) -> Option<()> {
+    pub(crate) fn eval_md(&mut self, str: &mut String, node: &Node) -> Option<()> {
         const TAGS: &[(Name, &str)] = &[
             (Nodes::Md_Paragraph, "p"),
             (Nodes::Md_H1, "h1"),
@@ -94,13 +93,13 @@ impl<'a> Eval<'a> {
         if node.is(Nodes::Interpolated) {
             let mut children = Children::new(node.children.iter().copied(), self.nodes);
             let (value_id, _) = children.find_node(Nodes::Value)?;
-            let value = self.eager_eval(value_id, ctx)?;
+            let value = self.eager_eval(value_id, true)?;
             str.push_str(&value.to_string());
         }
 
         for id in node.children.iter() {
             let child = self.nodes.get(id);
-            self.eval_md(str, child, ctx)?;
+            self.eval_md(str, child)?;
         }
 
         for end in end_vec.into_iter().rev() { str.push_str(&end); }
