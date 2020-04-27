@@ -1,4 +1,4 @@
-use crate::core::*;
+use neu_parser::*;
 use crate::{Nodes, Token, StrToken};
 use crate::markdown::inner_md_string;
 
@@ -230,7 +230,7 @@ fn trivia() -> impl Parser<Token> {
 
 #[cfg(test)]
 mod tests {
-    use crate::core::State;
+    use neu_parser::State;
     use super::{parser};
     use crate::{MainLexer};
 
@@ -246,7 +246,7 @@ mod tests {
 
     #[test]
     fn parser_tests() {
-        test_runner::test_snapshots("neu", "parser", |input| {
+        test_runner::test_snapshots("neu", "syntax", |input| {
             let lexer = MainLexer::new(input);
 
             let res = State::parse(lexer, parser());

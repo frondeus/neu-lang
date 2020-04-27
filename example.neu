@@ -19,7 +19,12 @@
 }
 ```
 
+This is a markdown
+
 **foo `.max` bar**
+
+And you can interpolate expressions inside of it :)
+
         "#,
     }
 }.health.max

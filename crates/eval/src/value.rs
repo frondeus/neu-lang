@@ -1,6 +1,6 @@
 use std::collections::BTreeMap;
 use std::fmt;
-use neu_parser::core::NodeId;
+use neu_parser::NodeId;
 
 #[derive(Debug, Clone)]
 pub enum Value {

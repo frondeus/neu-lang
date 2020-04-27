@@ -5,7 +5,7 @@ use crate::diagnostic::{Diagnostic, DiagnosticType};
 use crate::highlight::NodeHighlight;
 use crate::span_ext::{TextRangeExt, LineCols};
 use crate::state::State;
-use neu_parser::Nodes;
+use neu_syntax::Nodes;
 use itertools::Itertools;
 use nvim_rs::rpc::IntoVal;
 use nvim_rs::{compat::tokio::Compat, Handler};
@@ -96,8 +96,8 @@ impl NeovimHandler {
                 let buf = lines.iter().join("\n");
 
                 let parse_result = {
-                    use neu_parser::core::State;
-                    use neu_parser::{neu::parser, MainLexer};
+                    use neu_parser::State;
+                    use neu_syntax::{neu::parser, MainLexer};
 
                     State::parse(MainLexer::new(&buf), parser())
                 };

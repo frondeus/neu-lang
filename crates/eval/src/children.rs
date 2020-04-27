@@ -1,5 +1,5 @@
-use neu_parser::core::{Arena, NodeId, Node, Name};
-use neu_parser::Nodes;
+use neu_parser::{Arena, NodeId, Node, Name};
+use neu_syntax::Nodes;
 
 pub struct Children<'a, I> {
     iter: I,

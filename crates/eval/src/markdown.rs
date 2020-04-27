@@ -1,6 +1,6 @@
 use crate::Eval;
-use neu_parser::core::{Node, Name};
-use neu_parser::Nodes;
+use neu_parser::{Node, Name};
+use neu_syntax::Nodes;
 use crate::children::Children;
 
 impl<'a> Eval<'a> {

@@ -1,4 +1,4 @@
-use crate::core::{Parser, TokenKind};
+use crate::{Parser, TokenKind};
 
 pub struct Context<'a, Tok: TokenKind> {
     trivia: Option<&'a dyn Parser<Tok>>,

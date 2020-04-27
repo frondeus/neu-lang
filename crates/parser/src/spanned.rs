@@ -1,6 +1,6 @@
 use std::fmt::{Debug, Display, Formatter, Result};
 use text_size::TextRange;
-use crate::core::TokenKind;
+use crate::TokenKind;
 
 #[derive(PartialEq, Clone)]
 pub struct Spanned<K> {

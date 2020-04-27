@@ -1,5 +1,5 @@
 use std::fmt;
-use crate::core::{Spanned, TokenKind};
+use crate::{Spanned, TokenKind};
 
 #[derive(Clone)]
 pub enum Error<Tok: TokenKind> {

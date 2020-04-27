@@ -1,6 +1,6 @@
 use crate::value::Value;
 use crate::error::Error;
-use neu_parser::core::NodeId;
+use neu_parser::NodeId;
 use std::fmt;
 
 pub struct EvalResult {

@@ -1,5 +1,5 @@
-use neu_parser::core::Node;
-use neu_parser::Nodes;
+use neu_parser::Node;
+use neu_syntax::Nodes;
 
 pub trait NodeHighlight {
     fn highlight(&self) -> Option<&'static str>;

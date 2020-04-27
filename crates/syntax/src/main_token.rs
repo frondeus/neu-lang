@@ -1,5 +1,5 @@
 use derive_more::Display;
-use crate::core::{TextRange, TokenKind, Lexer};
+use neu_parser::{TextRange, TokenKind, Lexer};
 use crate::HashCount;
 
 #[derive(Debug, PartialEq, Clone, Copy, Display)]

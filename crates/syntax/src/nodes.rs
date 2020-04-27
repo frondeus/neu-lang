@@ -1,5 +1,5 @@
-use crate::core::Name;
-use crate::nodes;
+use neu_parser::Name;
+use neu_parser::nodes;
 
 nodes! {
     Value,

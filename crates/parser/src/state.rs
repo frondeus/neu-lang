@@ -1,5 +1,5 @@
 use std::fmt;
-use crate::core::{Context, Error, TokenKind, Node, Parser, Lexer};
+use crate::{Context, Error, TokenKind, Node, Parser, Lexer};
 use std::borrow::Borrow;
 
 #[derive(Clone, Copy)]
@@ -64,7 +64,7 @@ impl Arena {
         id
     }
 
-    pub fn ancestors<'a>(&'a self, id: NodeId) -> Ancestors<'a> {
+    pub fn ancestors(&self, id: NodeId) -> Ancestors {
         Ancestors {
             current: Some(id),
             arena: self

@@ -1,5 +1,5 @@
-use crate::core::{Context, Error, Node, NodeBuilder, OptionExt, TokenKind, Parser, State, PeekableIterator};
-use crate::Nodes;
+use crate::{Context, Error, Node, NodeBuilder, OptionExt, TokenKind, Parser, State, PeekableIterator};
+use crate::CoreNodes as Nodes;
 use std::marker::PhantomData;
 use std::cell::RefCell;
 

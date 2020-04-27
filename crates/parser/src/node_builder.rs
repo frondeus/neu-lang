@@ -1,5 +1,5 @@
-use crate::core::{Context, Name, Node, Parser, TokenKind, State, NodeId, Error, PeekableIterator, OptionExt};
-use crate::Nodes;
+use crate::{Context, Name, Node, Parser, TokenKind, State, NodeId, Error, PeekableIterator, OptionExt};
+use crate::CoreNodes as Nodes;
 use std::collections::BTreeSet;
 use text_size::TextRange;
 
@@ -13,7 +13,7 @@ pub struct NodeBuilder<'a, Tok: TokenKind> {
 }
 
 impl<'a, Tok: TokenKind> NodeBuilder<'a, Tok> {
-    pub(crate) fn new(state: &'a mut State<Tok>, ctx: &'a Context<'a, Tok>) -> Self {
+    pub fn new(state: &'a mut State<Tok>, ctx: &'a Context<'a, Tok>) -> Self {
         let from = state.lexer().input().cursor();
         let span = TextRange(from, from);
         Self {
@@ -45,7 +45,7 @@ impl<'a, Tok: TokenKind> NodeBuilder<'a, Tok> {
         self.span = span;
     }
 
-    pub fn next_token(&mut self) -> Option<crate::core::spanned::Spanned<Tok>> {
+    pub fn next_token(&mut self) -> Option<crate::spanned::Spanned<Tok>> {
         let next = self.state.lexer_mut().next();
         if let Some(next) = next.as_ref() {
             self.span = TextRange::covering(self.span, next.span);

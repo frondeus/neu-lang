@@ -1,4 +1,4 @@
-use crate::core::{Input, Spanned, TextRange, PeekableIterator};
+use crate::{Input, Spanned, TextRange, PeekableIterator};
 
 pub trait TokenKind: Clone + Copy + std::fmt::Debug + std::fmt::Display + PartialEq {
     type Extra: Default + Clone;

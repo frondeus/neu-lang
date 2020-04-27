@@ -4,8 +4,8 @@ mod error;
 mod result;
 mod markdown;
 
-use neu_parser::core::{NodeId, Arena, Node};
-use neu_parser::Nodes;
+use neu_parser::{NodeId, Arena, Node};
+use neu_syntax::Nodes;
 use value::Value;
 use children::Children;
 use error::Error;
@@ -224,8 +224,8 @@ pub fn eval(id: NodeId, nodes: &Arena, input: &str) -> EvalResult {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use neu_parser::core::State;
-    use neu_parser::{neu::parser, MainLexer};
+    use neu_parser::State;
+    use neu_syntax::{neu::parser, MainLexer};
 
     #[test]
     fn eval_tests() {

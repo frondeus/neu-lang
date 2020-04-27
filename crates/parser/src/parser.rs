@@ -1,4 +1,4 @@
-use crate::core::{Context, Node, State, TokenKind};
+use crate::{Context, Node, State, TokenKind};
 
 pub trait Parser<Tok: TokenKind> {
     fn parse(&self, state: &mut State<Tok>, ctx: &Context<Tok>) -> Node;

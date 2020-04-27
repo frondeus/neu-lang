@@ -1,4 +1,4 @@
-use crate::core::{TextRange, NodeId, Arena};
+use crate::{TextRange, NodeId, Arena};
 use text_size::TextSize;
 use std::collections::BTreeSet;
 use std::fmt;

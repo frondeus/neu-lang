@@ -16,11 +16,16 @@
 *** TODO Memoization of lazy fields
 ** Arrays [0/1]
 *** TODO Access array item foo[0]
-** Markdown [1/2]
+** Markdown [1/7]
 *** DONE Markdown string interpolation
-*** TODO Markdown article
-** Gm notes [0/1]
+*** TODO Inline HTML
+*** TODO Tables
+*** TODO Footnote
+*** TODO Hard Break
+*** TODO Check mark
+** Gm notes [0/2]
 *** TODO Generate json
+*** TODO Markdown article
 ** TODO Tuples [/]
 ** TODO Type system
 ** TODO Effect system

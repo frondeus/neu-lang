@@ -1,6 +1,6 @@
 use crate::{MdStrToken, Token};
 use crate::Nodes;
-use crate::core::*;
+use neu_parser::*;
 use pulldown_cmark::{Event, Tag, CowStr, LinkType, CodeBlockKind};
 use text_size::{TextSize, TextRange, TextSized};
 use std::convert::TryFrom;
