@@ -109,6 +109,7 @@ impl NeovimHandler {
                     for (id, node) in parse_result.nodes.enumerate() {
                         if !node.is(Nodes::Value) { continue; }
                         if node.children.is_empty() { continue; }
+                        if node.is_any(&[Nodes::Struct, Nodes::Array]) { continue; }
                         let eval_result = neu_eval::eval(id, &parse_result.nodes, &buf);
                         if let Some(value) = eval_result.value {
                             if let Some(LineCols { line, .. }) = node.span.lines_cols(&lines).last() {
