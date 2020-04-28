@@ -90,7 +90,7 @@ where
         loop {
             match self.peek_one() {
                 Some(token) if first.kind.is_mergeable(token.kind) => {
-                    first.span = TextRange::covering(first.span, token.span);
+                    first.span = first.span.cover(token.span);
                     self.lex();
                 }
                 _ => break,

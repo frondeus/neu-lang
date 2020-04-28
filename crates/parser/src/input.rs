@@ -1,5 +1,5 @@
 use std::convert::TryFrom;
-use text_size::{TextRange, TextSize, TextSized};
+use text_size::{TextRange, TextSize, TextLen};
 
 #[derive(Debug, Clone)]
 pub struct Input {
@@ -16,7 +16,7 @@ impl Input {
             .nth(len - 1)
             .and_then(|(last, c)| TextSize::try_from(last + c.len_utf8()).ok())
         {
-            Some(last) => TextRange(self.range.start(), self.range.start() + last),
+            Some(last) => TextRange::new(self.range.start(), self.range.start() + last),
             None => self.range
         };
         self.set_cursor(range.end());
@@ -29,7 +29,7 @@ impl Input {
     }
 
     pub fn set_cursor(&mut self, cursor: TextSize) {
-        self.range = TextRange(cursor, self.range.end());
+        self.range = TextRange::new(cursor, self.range.end());
     }
 
     pub fn set_range(&mut self, range: TextRange) {
@@ -46,7 +46,7 @@ impl From<&'_ str> for Input {
         let str: Box<str> = Box::from(input);
         Self {
             str,
-            range: TextRange(TextSize::zero(), input.text_size()),
+            range: TextRange::up_to(input.text_len()),
         }
     }
 }

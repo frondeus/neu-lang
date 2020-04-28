@@ -1,6 +1,6 @@
 {
     primary = {
-        size = 50, // Example of a comment 
+        size = 40, // Example of a comment 
         constitution = 60,
     }, // here is comment but here is eval ->
     health = {
@@ -9,14 +9,13 @@
         label = "HP: ${"${.max}"}",
         link = md"[`.max`](http://google.pl)",
         desc = md#"
-0 means *agony*. 
-
+0 means **agony**.
 ```
 {
     foo = 2,
     bar = .foo,
     baz = health.max
-}
+}.bar
 ```
 
 This is a markdown

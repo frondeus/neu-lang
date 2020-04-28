@@ -15,7 +15,7 @@ pub struct NodeBuilder<'a, Tok: TokenKind> {
 impl<'a, Tok: TokenKind> NodeBuilder<'a, Tok> {
     pub fn new(state: &'a mut State<Tok>, ctx: &'a Context<'a, Tok>) -> Self {
         let from = state.lexer().input().cursor();
-        let span = TextRange(from, from);
+        let span = TextRange::new(from, from);
         Self {
             state, ctx,
             span,
@@ -48,7 +48,7 @@ impl<'a, Tok: TokenKind> NodeBuilder<'a, Tok> {
     pub fn next_token(&mut self) -> Option<crate::spanned::Spanned<Tok>> {
         let next = self.state.lexer_mut().next();
         if let Some(next) = next.as_ref() {
-            self.span = TextRange::covering(self.span, next.span);
+            self.span = self.span.cover(next.span);
         }
         next
     }
@@ -127,7 +127,7 @@ impl<'a, Tok: TokenKind> NodeBuilder<'a, Tok> {
         for child in &children {
             let child_node = &state.nodes().get(*child);
             if child_node.is(Nodes::Trivia) { continue; }
-            span = TextRange::covering(span, child_node.span);
+            span = span.cover(child_node.span);
         }
 
         if let Some(error) = error {

@@ -1,5 +1,4 @@
 use crate::{TextRange, NodeId, Arena};
-use text_size::TextSize;
 use std::collections::BTreeSet;
 use std::fmt;
 use itertools::Itertools;
@@ -60,7 +59,7 @@ impl Node {
             names: Default::default(),
             children: Default::default(),
             parent: Default::default(),
-            span: TextRange(TextSize::zero(), TextSize::zero())
+            span: TextRange::empty(0.into())
         }
     }
 

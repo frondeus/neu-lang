@@ -101,15 +101,19 @@ impl NeovimHandler {
 
                     State::parse(MainLexer::new(&buf), parser())
                 };
+                let root = parse_result.root;
 
                 // Eval
                 current_bf.clear_namespace(highlight_ns, 0, -1).await?;
 
+                let root_eval_result = neu_eval::eval(root, &parse_result.nodes, &buf);
                 {
                     for (id, node) in parse_result.nodes.enumerate() {
-                        if !node.is(Nodes::Value) { continue; }
-                        if node.children.is_empty() { continue; }
-                        if node.is_any(&[Nodes::Struct, Nodes::Array]) { continue; }
+                        if !node.is(Nodes::Error) {
+                            if !node.is(Nodes::Value) { continue; }
+                            if node.children.is_empty() { continue; }
+                            if node.is_any(&[Nodes::Struct, Nodes::Array]) { continue; }
+                        }
                         let eval_result = neu_eval::eval(id, &parse_result.nodes, &buf);
                         if let Some(value) = eval_result.value {
                             if let Some(LineCols { line, .. }) = node.span.lines_cols(&lines).last() {
@@ -143,7 +147,6 @@ impl NeovimHandler {
 
                 // Errors
                 let current_w = api.get_current_win().await?;
-                let root = parse_result.root;
 
                 let mut diagnostics = parse_result.errors.iter().filter_map(|(id, error)| {
                     let node = parse_result.nodes.get(id);
@@ -154,7 +157,6 @@ impl NeovimHandler {
                     }
                 }).collect::<Vec<Diagnostic>>();
 
-                let root_eval_result = neu_eval::eval(root, &parse_result.nodes, &buf);
                 for (id, error) in root_eval_result.errors.iter() {
                     let node = parse_result.nodes.get(id);
                     if let Some(LineCols { line, col_start, col_end }) = node.span.lines_cols(&lines).last() {

@@ -9,7 +9,7 @@ edition = "2018"
 [dependencies]
 neu-parser = { path = "../parser" }
 
-text-size = { version = "0.99.0-dev.2", git = "https://github.com/rust-analyzer/text_unit.git", branch = "master"}
+text-size = { version = "1.0.0" }
 itertools = "0.9.0"
 derive_more = "0.99.5"
 pulldown-cmark = "0.7.0"

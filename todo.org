@@ -26,6 +26,10 @@
 ** Gm notes [0/2]
 *** TODO Generate json
 *** TODO Markdown article
+** Neovim [0/3]
+*** TODO Add autocompletion
+*** TODO Add intentions
+*** TODO Add expand selections
 ** TODO Tuples [/]
 ** TODO Type system
 ** TODO Effect system

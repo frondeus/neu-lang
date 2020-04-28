@@ -4,7 +4,7 @@ use regex::Regex;
 use std::io::Write;
 use std::time::SystemTime;
 use chrono::{DateTime, Local};
-use neu_diff::{Comparison, PatchOptions, DisplayOptions};
+use diff_utils::{Comparison, PatchOptions, DisplayOptions};
 
 fn assert_section(entry: Entry, actual: String) -> Result<()> {
     let mut new_snap_path: PathBuf = entry.entry.into();
@@ -16,10 +16,11 @@ fn assert_section(entry: Entry, actual: String) -> Result<()> {
     if expected != actual {
         let expected_lines = expected.lines().collect::<Vec<_>>();
         let actual_lines = actual.lines().collect::<Vec<_>>();
-        let comparison = Comparison::new(&expected_lines, &actual_lines);
+        let comparison = Comparison::new(&expected_lines, &actual_lines).compare()?;
         eprintln!("\nFound mismatch in section [{}] in {}\n{}", entry.section_name, entry.entry.display(),
                   comparison.display(DisplayOptions {
-                      offset: entry.line
+                      offset: entry.line,
+                      .. Default::default()
                   }));
 
         std::fs::File::create(&new_snap_path)

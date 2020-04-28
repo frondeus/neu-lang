@@ -2,7 +2,7 @@ use crate::{MdStrToken, Token};
 use crate::Nodes;
 use neu_parser::*;
 use pulldown_cmark::{Event, Tag, CowStr, LinkType, CodeBlockKind};
-use text_size::{TextSize, TextRange, TextSized};
+use text_size::{TextSize, TextRange, TextLen};
 use std::convert::TryFrom;
 
 fn offset(a: &str, orig: &str) -> Option<usize> {
@@ -21,7 +21,7 @@ fn get_range<'a>(str: &'a str, cow: &CowStr<'a>, range: TextRange, from: TextSiz
         CowStr::Borrowed(s) => {
             let offset = offset(s, str).unwrap_or(0);
             let offset = TextSize::try_from(offset).unwrap();
-            TextRange(offset + from, offset + s.text_size() + from)
+            TextRange::at(offset + from, s.text_len())
         },
         _ => range
     }
@@ -59,7 +59,7 @@ fn parse_start<'a>(
                     events.next();
                     match range.as_mut() {
                         None => { range = Some(peeked_range); },
-                        Some(range) => { *range = TextRange::covering(*range, peeked_range); }
+                        Some(range) => { *range = range.cover(peeked_range); }
                     }
                 }
             }
@@ -237,7 +237,7 @@ pub fn inner_md_string() -> impl Parser<MdStrToken> {
             let from = span.start();
             let md_parser = pulldown_cmark::Parser::new(str)
                 .into_offset_iter().map(|(event, range)| {
-                let range = TextRange(
+                let range = TextRange::new(
                     TextSize::try_from(range.start).unwrap() + from,
                     TextSize::try_from(range.end).unwrap() + from
                 );

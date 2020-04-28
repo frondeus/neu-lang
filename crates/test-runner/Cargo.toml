@@ -7,7 +7,7 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-neu-diff = { path = "../diff", features = ["display", "patch"] }
+diff_utils = { git = "https://github.com/anixe/diff-assert.git", features = ["display", "patch"] }
 
 glob = "0.3.0"
 anyhow = "1.0.28"
