@@ -1,0 +1,23 @@
+```
+md#"![alt text](https://github.com/icon48.png "Logo Title Text 1")"#
+```
+
+[parser]
+ROOT @ 0..68 = `md#\"![alt text](https://github.com/icon48.png \"Logo Title Text 1\")\"#`
+    MARKDOWN, VALUE @ 0..68 = `md#\"![alt text](https://github.com/icon48.png \"Logo Title Text 1\")\"#`
+        TOKEN @ 0..4 = `md#\"`
+        MD_IMAGE, MD_INLINEIMAGE, MD_PARAGRAPH, MD_VALUE @ 4..66 = `![alt text](https://github.com/icon48.png \"Logo Title Text 1\")`
+            MD_IMAGESRC @ 16..45 = `https://github.com/icon48.png`
+            MD_IMAGETITLE @ 4..66 = `![alt text](https://github.com/icon48.png \"Logo Title Text 1\")`
+            MD_TEXT @ 6..14 = `alt text`
+        TOKEN @ 66..68 = `\"#`
+
+
+### No Errors ###
+
+
+[eval]
+`"<p><img src=\"https://github.com/icon48.png\">alt text</img></p>"`
+
+### No Errors ###
+

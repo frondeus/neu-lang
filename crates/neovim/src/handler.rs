@@ -97,9 +97,9 @@ impl NeovimHandler {
 
                 let parse_result = {
                     use neu_parser::State;
-                    use neu_syntax::{neu::parser, MainLexer};
+                    use neu_syntax::{neu::parser, lexers::neu::Lexer};
 
-                    State::parse(MainLexer::new(&buf), parser())
+                    State::parse(Lexer::new(&buf), parser())
                 };
                 let root = parse_result.root;
 

@@ -1,9 +1,9 @@
 use derive_more::Display;
-use neu_parser::{Lexer, TextRange, TokenKind};
+use neu_parser::{TextRange, TokenKind};
 use crate::HashCount;
 
 #[derive(Debug, PartialEq, Clone, Copy, Display)]
-pub enum MdStrToken {
+pub enum Token {
     #[display(fmt = "text")]
     Text,
 
@@ -11,9 +11,9 @@ pub enum MdStrToken {
     Close,
 }
 
-pub type MdStringLexer = Lexer<MdStrToken>;
+pub type Lexer<T = Token> = neu_parser::Lexer<T>;
 
-impl TokenKind for MdStrToken {
+impl TokenKind for Token {
     type Extra = HashCount;
 
     fn is_mergeable(self, other: Self) -> bool {
@@ -30,9 +30,9 @@ impl TokenKind for MdStrToken {
         if i.is_empty() { return None; }
         let pat = format!("{:#<width$}", "\"", width = hash + 1);
         if i.starts_with(&pat) {
-            return Some((MdStrToken::Close, input.chomp(pat.len())));
+            return Some((Token::Close, input.chomp(pat.len())));
         }
 
-        Some((MdStrToken::Text, input.chomp(1)))
+        Some((Token::Text, input.chomp(1)))
     }
 }

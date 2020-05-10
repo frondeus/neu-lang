@@ -1,4 +1,4 @@
-use crate::{MdStrToken, Token};
+use crate::{lexers::md_string::Token as MdStrToken, lexers::neu::Token as NeuToken, HashCount};
 use crate::Nodes;
 use neu_parser::*;
 use pulldown_cmark::{Event, Tag, CowStr, LinkType, CodeBlockKind};
@@ -27,14 +27,18 @@ fn get_range<'a>(str: &'a str, cow: &CowStr<'a>, range: TextRange, from: TextSiz
     }
 }
 
-fn parse_start<'a>(
+fn parse_start<'a, Token>(
                span: TextRange,
                tag: &Tag,
                str: &'a str,
-               builder: &mut NodeBuilder<MdStrToken>,
+               builder: &mut NodeBuilder<Token>,
                events: &mut impl PeekableIterator<Item = (Event<'a>, TextRange)>,
                from: TextSize
-) {
+)
+where
+    Token: TokenKind,
+    Token::Extra: From<HashCount> + Into<HashCount>,
+{
     builder.set_span(span);
     let name = match tag {
         Tag::Emphasis => Nodes::Md_Emphasis,
@@ -76,7 +80,7 @@ fn parse_start<'a>(
                 (None, CodeBlockKind::Indented) => Nodes::Md_CodeBlock,
                 (Some(range), _) => {
                     let ctx = Context::default();
-                    return builder.parse_mode(&ctx, node(move |builder: &mut NodeBuilder<Token>| {
+                    return builder.parse_mode(&ctx, node(move |builder: &mut NodeBuilder<NeuToken>| {
                         let saved = builder.state_mut().lexer_mut().input().clone();
 
                         builder.state_mut().lexer_mut().input_mut().set_range(range);
@@ -162,12 +166,16 @@ fn parse_start<'a>(
     }
 }
 
-fn parse_event<'a>(
+fn parse_event<'a, Token>(
     str: &'a str,
-    builder: &mut NodeBuilder<MdStrToken>,
+    builder: &mut NodeBuilder<Token>,
     events: &mut impl PeekableIterator<Item = (Event<'a>, TextRange)>,
             from: TextSize
-) {
+)
+where
+    Token: TokenKind,
+    Token::Extra: From<HashCount> + Into<HashCount>
+{
 
     let (event, span) = match events.next() { Some(s) => s, None => return };
     match event {
@@ -191,7 +199,7 @@ fn parse_event<'a>(
         Event::Code(cow) => {
             let range = get_range(str, &cow, span, from);
             let ctx = Context::default();
-            builder.parse_mode(&ctx, node(move |builder: &mut NodeBuilder<Token>| {
+            builder.parse_mode(&ctx, node(move |builder: &mut NodeBuilder<NeuToken>| {
                 let saved = builder.state_mut().lexer_mut().input().clone();
 
                 builder.state_mut().lexer_mut().input_mut().set_range(range);
@@ -223,32 +231,39 @@ fn parse_event<'a>(
     }
 }
 
-pub fn inner_md_string() -> impl Parser<MdStrToken> {
-    move |state: &mut State<MdStrToken>, ctx: &Context<MdStrToken>| {
-        let i = state.lexer().input().clone();
-        let next = state.lexer_mut().peek().as_kind();
-        let mut builder = NodeBuilder::new(state, ctx);
+pub(crate) fn markdown<Token>(
+    builder: &mut NodeBuilder<Token>,
+    i: Input
+)
+where
+    Token: TokenKind,
+    Token::Extra: From<HashCount> + Into<HashCount>
+{
+    let next = builder.state_mut().lexer_mut().next().unwrap();
+    let span = next.span;
+    let str = i.range_span(span);
+    let from = span.start();
+    let md_parser = pulldown_cmark::Parser::new(str)
+        .into_offset_iter().map(|(event, range)| {
+        let range = TextRange::new(
+            TextSize::try_from(range.start).unwrap() + from,
+            TextSize::try_from(range.end).unwrap() + from
+        );
+        (event, range)
+    });
+    let mut events = md_parser.peekable();
+    while events.peek().is_some() {
+        parse_event(str, builder, &mut events,  from);
+    }
+}
+
+pub(crate) fn inner_md_string() -> impl Parser<MdStrToken> {
+    node(|builder| {
         builder.name(Nodes::Virtual);
         builder.name(Nodes::Md_Value);
-        if let Some(MdStrToken::Text) = next {
-            let next = builder.state_mut().lexer_mut().next().unwrap();
-            let span = next.span;
-            let str = i.range_span(span);
-            let from = span.start();
-            let md_parser = pulldown_cmark::Parser::new(str)
-                .into_offset_iter().map(|(event, range)| {
-                let range = TextRange::new(
-                    TextSize::try_from(range.start).unwrap() + from,
-                    TextSize::try_from(range.end).unwrap() + from
-                );
-                (event, range)
-            });
-            let mut events = md_parser.peekable();
-            while events.peek().is_some() {
-                parse_event(str, &mut builder, &mut events,  from);
-            }
+        let i = builder.state().lexer().input().clone();
+        if let Some(MdStrToken::Text) = builder.peek_token() {
+            markdown(builder, i);
         }
-
-        builder.build()
-    }
+    })
 }

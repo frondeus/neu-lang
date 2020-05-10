@@ -6,7 +6,7 @@ use web_sys::console;
 use crate::diagnostic::{Diagnostic, DiagnosticType};
 use crate::span_ext::{TextRangeExt, LinesCols};
 use neu_parser::State;
-use neu_syntax::{neu::parser, MainLexer};
+use neu_syntax::{neu::parser, lexers::neu::Lexer};
 
 // When the `wee_alloc` feature is enabled, this uses `wee_alloc` as the global
 // allocator.
@@ -48,7 +48,7 @@ extern "C" {
 pub fn on_change(buf: &str) {
     let lines = buf.lines().map(|s| s.to_string()).collect::<Vec<_>>();
 
-    let parse_result = State::parse(MainLexer::new(buf), parser());
+    let parse_result = State::parse(Lexer::new(buf), parser());
     //log(&format!("{:?}", &parse_result));
 
     clear_diagnostics();

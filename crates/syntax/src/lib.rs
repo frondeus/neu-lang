@@ -1,19 +1,23 @@
-mod main_token;
-mod string_token;
-mod md_string;
-
 mod nodes;
+
+pub mod lexers;
+
+mod common;
 
 #[derive(Default, Clone)]
 pub struct HashCount {
     count: usize
 }
 
-pub use crate::main_token::*;
-pub use crate::string_token::*;
-pub use crate::md_string::*;
+impl From<()> for HashCount {
+    fn from(_: ()) -> Self { Default::default() }
+}
+impl From<HashCount> for () {
+    fn from(_: HashCount) -> Self { () }
+}
 
 pub use crate::nodes::*;
 
 pub mod neu;
 pub mod markdown;
+pub mod article_item;

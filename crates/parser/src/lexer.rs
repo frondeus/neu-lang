@@ -6,6 +6,7 @@ pub trait TokenKind: Clone + Copy + std::fmt::Debug + std::fmt::Display + Partia
     fn lex(lexer: &mut Lexer<Self>) -> Option<(Self, TextRange)>;
 }
 
+#[derive(Debug)]
 pub struct Lexer<Tok: TokenKind> {
     input: Input,
     #[allow(clippy::option_option)]

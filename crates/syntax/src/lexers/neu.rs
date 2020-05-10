@@ -1,5 +1,5 @@
 use derive_more::Display;
-use neu_parser::{TextRange, TokenKind, Lexer};
+use neu_parser::{TextRange, TokenKind};
 use crate::HashCount;
 
 #[derive(Debug, PartialEq, Clone, Copy, Display)]
@@ -77,7 +77,7 @@ pub enum Token {
     OpDot
 }
 
-pub type MainLexer = Lexer<Token>;
+pub type Lexer<T = Token> = neu_parser::Lexer<T>;
 
 impl TokenKind for Token {
     type Extra = HashCount;

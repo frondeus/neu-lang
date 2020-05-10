@@ -1,4 +1,4 @@
-use crate::{Context, Error, Node, NodeBuilder, OptionExt, TokenKind, Parser, State, PeekableIterator};
+use crate::{Context, Error, Node, NodeBuilder, OptionExt, TokenKind, Parser, State, PeekableIterator, Name};
 use crate::CoreNodes as Nodes;
 use std::marker::PhantomData;
 use std::cell::RefCell;
@@ -49,7 +49,7 @@ where
         new
     }
 
-    pub fn parser(&self) -> impl Parser<Tok> {
+    pub fn parser(&self) -> impl Parser<Tok> + Clone {
         let opt = self.clone();
 
         move |state: &mut State<Tok>, ctx: &Context<Tok>| {
@@ -85,7 +85,7 @@ pub fn node_mut<Tok: TokenKind>(mut f: impl FnMut(&mut NodeBuilder<Tok>)) -> imp
     }
 }
 
-pub fn node<Tok: TokenKind>(f: impl Fn(&mut NodeBuilder<Tok>)) -> impl Parser<Tok> {
+pub fn node<Tok: TokenKind>(f: impl Fn(&mut NodeBuilder<Tok>) + Clone) -> impl Parser<Tok> + Clone {
     move |state: &mut State<Tok>, ctx: &Context<Tok>| {
         let mut builder = NodeBuilder::new(state, ctx);
         f(&mut builder);
@@ -141,6 +141,9 @@ pub fn token<Tok: TokenKind>(expected: impl Into<Option<Tok>>) -> impl Parser<To
     tokens(expected)
 }
 
+pub fn named<Tok: TokenKind>(parser: impl Parser<Tok>, name: Name) -> impl Parser<Tok> {
+    parser.map(move |node| node.with_name(name))
+}
 
 pub trait ParserExt<Tok: TokenKind>: Parser<Tok> {
     fn map<F>(self, f: F) -> Map<Self, F>

@@ -1,6 +1,11 @@
 use neu_parser::*;
-use crate::{Nodes, Token, StrToken};
+use crate::{Nodes,
+            lexers::{
+                neu::Token,
+                string::Token as StrToken}
+};
 use crate::markdown::inner_md_string;
+use crate::common::separated;
 
 
 pub fn parser() -> impl Parser<Token> {
@@ -13,7 +18,7 @@ pub fn parser() -> impl Parser<Token> {
     })
 }
 
-fn value() -> impl Parser<Token> {
+pub(crate) fn value() -> impl Parser<Token> + Clone {
     let next = |state: &mut State<_>, ctx: &Context<_>| left_value().parse(state, ctx);
     Pratt::new(next, |token| match token {
         Some(Token::OpDot) => Some((Assoc::Left, 100)),
@@ -36,7 +41,7 @@ fn value() -> impl Parser<Token> {
             }
         }
         builder.name(Nodes::Value);
-        builder.parse(token(op_token).map(|n| n.with_name(Nodes::Op)));
+        builder.parse(named(token(op_token), Nodes::Op));
     }).parser()
 }
 
@@ -79,68 +84,29 @@ fn array() -> impl Parser<Token> {
     node(|builder| {
         builder.name(Nodes::Array);
         builder.parse(token(Token::OpenB));
-        match builder.peek_token() {
-            Some(Token::CloseB) => (),
-            _ => 'outer: loop {
-                builder.parse(value());
-                'inner: loop {
-                    match builder.peek_token() {
-                        None | Some(Token::CloseB) => { break 'outer; },
-                        Some(Token::Comma) => {
-                            builder.parse(token(Token::Comma)); //recover(","));
-                            if let Some(Token::CloseB) = builder.peek_token() { // Trailing comma
-                                break 'outer;
-                            }
-                            break 'inner;
-                        },
-                        _ => {
-                            builder.parse(tokens(vec![Token::Comma, Token::CloseB]));
-                        }
-                    }
-                }
-            }
-        }
+        builder.parse(separated(value(), Token::Comma, Token::CloseB, true));
         builder.parse(token(Token::CloseB));
     })
 }
 
 fn identifier() -> impl Parser<Token> {
-    token(Token::Identifier).map(|n| n.with_name(Nodes::Identifier))
+    named(token(Token::Identifier), Nodes::Identifier)
 }
 
-fn strukt_key() -> impl Parser<Token> {
-    identifier().map(|n| n.with_name(Nodes::Key))
+pub(crate) fn strukt_key() -> impl Parser<Token> {
+    named(identifier(), Nodes::Key)
 }
 
 fn strukt() -> impl Parser<Token> {
     node(|builder| {
         builder.name(Nodes::Struct);
         builder.parse(token(Token::OpenC));
-        match builder.peek_token() {
-            Some(Token::CloseC) => (),
-            _ => 'outer: loop {
-                builder.parse(strukt_key());
-                builder.parse(token(Token::OpAssign));
-                builder.parse(value());
-                'inner: loop {
-                    match builder.peek_token() {
-                        None | Some(Token::CloseC) => {
-                            break 'outer
-                        },
-                        Some(Token::Comma) => {
-                            builder.parse(token(Token::Comma)); //recover(","));
-                            if let Some(Token::CloseC) = builder.peek_token() { // Trailing comma
-                                break 'outer;
-                            }
-                            break 'inner;
-                        }
-                        _ => {
-                            builder.parse(tokens(vec![Token::Comma, Token::CloseC]));
-                        }
-                    }
-                }
-            }
-        }
+        builder.parse(separated(node(|builder| {
+            builder.name(Nodes::Virtual);
+            builder.parse(strukt_key());
+            builder.parse(token(Token::OpAssign));
+            builder.parse(value());
+        }), Token::Comma, Token::CloseC, true));
         builder.parse(token(Token::CloseC));
     })
 }
@@ -197,57 +163,50 @@ fn inner_string() -> impl Parser<StrToken> {
 fn unary() -> impl Parser<Token> {
     node(|builder| {
         builder.name(Nodes::Unary);
-        builder.parse( tokens(vec![Token::OpMinus, Token::OpBang, Token::OpDot])
-            .map(|n| n.with_name(Nodes::Op))
+        builder.parse(
+            named(tokens(vec![Token::OpMinus, Token::OpBang, Token::OpDot]), Nodes::Op)
         );
         builder.parse(value());
     })
 }
 
 fn boolean() -> impl Parser<Token> {
-    tokens(vec![Token::True, Token::False]).map(|n| n.with_name(Nodes::Boolean))
+    named(tokens(vec![Token::True, Token::False]), Nodes::Boolean)
 }
 
 fn number() -> impl Parser<Token> {
-    token(Token::Number).map(|n| n.with_name(Nodes::Number))
+    named(token(Token::Number), Nodes::Number)
 }
 
-fn trivia() -> impl Parser<Token> {
+pub(crate) fn trivia() -> impl Parser<Token> {
     node(|builder| {
         builder.name(Nodes::Trivia);
-        let mut empty = true;
-        while let Some(Token::Whitespace)
-        | Some(Token::Comment) = builder.peek_token() {
+        while let Some(Token::Whitespace) | Some(Token::Comment) = builder.peek_token() {
             builder.next_token();
-            empty = false;
-        }
-
-        if empty {
-            builder.name(Nodes::Virtual);
         }
     })
 }
 
 #[cfg(test)]
 mod tests {
-    use neu_parser::State;
+    use neu_parser::{State, Spanned};
     use super::{parser};
-    use crate::{MainLexer};
+    use crate::lexers::neu::{Lexer, Token};
 
     #[test]
     fn lexer_tests() {
         test_runner::test_snapshots("neu", "lexer", |input| {
-            let lexer = MainLexer::new(input);
+            let lexer = Lexer::new(input);
 
-            let res: Vec<_> = lexer.map(|t| t.display(input, true).to_string()).collect();
+            let res: Vec<_> = lexer.map(|t: Spanned<Token>| t.display(input, true).to_string()).collect();
             format!("{:#?}", res)
         }).unwrap();
     }
 
     #[test]
     fn parser_tests() {
-        test_runner::test_snapshots("neu", "syntax", |input| {
-            let lexer = MainLexer::new(input);
+        test_runner::test_snapshots("neu", "parser", |input| {
+            let lexer = Lexer::new(input);
 
             let res = State::parse(lexer, parser());
 

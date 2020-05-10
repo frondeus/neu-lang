@@ -3,7 +3,7 @@ use neu_parser::{Lexer, TextRange, TokenKind};
 use crate::HashCount;
 
 #[derive(Debug, PartialEq, Clone, Copy, Display)]
-pub enum StrToken {
+pub enum Token {
     #[display(fmt = "text")]
     Text,
 
@@ -18,9 +18,9 @@ pub enum StrToken {
 
 }
 
-pub type StringLexer = Lexer<StrToken>;
+pub type StringLexer = Lexer<Token>;
 
-impl TokenKind for StrToken {
+impl TokenKind for Token {
     type Extra = HashCount;
 
     fn is_mergeable(self, other: Self) -> bool {
@@ -36,17 +36,17 @@ impl TokenKind for StrToken {
         let i = input.as_ref();
         if i.is_empty() { return None; }
         if i.starts_with('"') {
-            return Some((StrToken::Close, input.chomp(1)));
+            return Some((Token::Close, input.chomp(1)));
         }
 
         if i.starts_with("${") {
-            return Some((StrToken::OpenI, input.chomp(2)));
+            return Some((Token::OpenI, input.chomp(2)));
         }
 
         if i.starts_with('}') {
-            return Some((StrToken::CloseI, input.chomp(1)));
+            return Some((Token::CloseI, input.chomp(1)));
         }
 
-        Some((StrToken::Text, input.chomp(1)))
+        Some((Token::Text, input.chomp(1)))
     }
 }

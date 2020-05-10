@@ -24,11 +24,15 @@ macro_rules! nodes {
             pub const Error: Name = Name::new("Error");
         }
     };
-    ($($node: ident),*) => {
+    (
+        $($group: ident {
+            $($node: ident),*
+        }),*
+    ) => {
         nodes!();
         #[allow(non_upper_case_globals)]
         impl Nodes {
-            $( pub const $node: Name = Name::new(stringify!($node)); )*
+            $( $( pub const $node: Name = Name::new(stringify!($node)); )* )*
         }
     }
 }
