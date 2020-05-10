@@ -1,15 +1,13 @@
-use neu_parser::*;
-use crate::{
-    lexers::{
-        article_item_file::Token as FileToken,
-        article_item_header::Token as HeaderToken,
-        article_item_body::Token as BodyToken,
-        neu::Token as NeuToken,
-    },
-    neu,
-    Nodes};
 use crate::common::separated;
 use crate::markdown::markdown;
+use crate::{
+    lexers::{
+        article_item_body::Token as BodyToken, article_item_file::Token as FileToken,
+        article_item_header::Token as HeaderToken, neu::Token as NeuToken,
+    },
+    neu, Nodes,
+};
+use neu_parser::*;
 
 pub fn parser() -> impl Parser<FileToken> {
     node(|builder| {
@@ -18,8 +16,10 @@ pub fn parser() -> impl Parser<FileToken> {
             None => (),
             Some(FileToken::ThreePlus) => {
                 builder.parse(main_item());
-            },
-            Some(FileToken::Error) => todo!("In theory this may be a classic md file so ignore it now.")
+            }
+            Some(FileToken::Error) => {
+                todo!("In theory this may be a classic md file so ignore it now.")
+            }
         }
         builder.parse(token(None));
     })
@@ -53,7 +53,10 @@ fn main_item_header() -> impl Parser<HeaderToken> {
     node(|builder| {
         builder.name(Nodes::Virtual);
         builder.parse(req_trivia(HeaderToken::InlineWhitespace));
-        builder.parse(named(tokens(vec![HeaderToken::Identifier, HeaderToken::ItemId]), Nodes::Identifier));
+        builder.parse(named(
+            tokens(vec![HeaderToken::Identifier, HeaderToken::ItemId]),
+            Nodes::Identifier,
+        ));
         builder.parse(token(HeaderToken::Colon));
         builder.parse(named(token(HeaderToken::ItemId), Nodes::ArticleItemId));
         builder.parse(req_trivia(HeaderToken::InlineWhitespace));
@@ -62,11 +65,16 @@ fn main_item_header() -> impl Parser<HeaderToken> {
         builder.parse(req_trivia(HeaderToken::NewLine));
         builder.parse(node(|builder| {
             builder.name(Nodes::Struct);
-            builder.parse(separated(node(|builder| {
-                builder.name(Nodes::Virtual);
-                let ctx = Context::default();
-                builder.parse_mode(&ctx, struct_key_val());
-            }), HeaderToken::NewLine, HeaderToken::ThreePlus, true));
+            builder.parse(separated(
+                node(|builder| {
+                    builder.name(Nodes::Virtual);
+                    let ctx = Context::default();
+                    builder.parse_mode(&ctx, struct_key_val());
+                }),
+                HeaderToken::NewLine,
+                HeaderToken::ThreePlus,
+                true,
+            ));
         }));
         builder.parse(token(HeaderToken::ThreePlus));
     })
@@ -99,9 +107,9 @@ fn opt_ws() -> impl Parser<HeaderToken> {
 
 #[cfg(test)]
 mod tests {
-    use neu_parser::State;
     use super::parser;
     use crate::lexers::article_item_file::Lexer;
+    use neu_parser::State;
 
     #[test]
     fn article_parser_tests() {
@@ -111,6 +119,7 @@ mod tests {
             let res = State::parse(lexer, parser());
 
             format!("{}", res.display(input))
-        }).unwrap();
+        })
+        .unwrap();
     }
 }

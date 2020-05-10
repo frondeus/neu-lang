@@ -1,12 +1,12 @@
-mod span_ext;
 mod diagnostic;
+mod span_ext;
 
+use crate::diagnostic::{Diagnostic, DiagnosticType};
+use crate::span_ext::{LinesCols, TextRangeExt};
+use neu_parser::State;
+use neu_syntax::{lexers::neu::Lexer, neu::parser};
 use wasm_bindgen::prelude::*;
 use web_sys::console;
-use crate::diagnostic::{Diagnostic, DiagnosticType};
-use crate::span_ext::{TextRangeExt, LinesCols};
-use neu_parser::State;
-use neu_syntax::{neu::parser, lexers::neu::Lexer};
 
 // When the `wee_alloc` feature is enabled, this uses `wee_alloc` as the global
 // allocator.
@@ -15,7 +15,6 @@ use neu_syntax::{neu::parser, lexers::neu::Lexer};
 #[cfg(feature = "wee_alloc")]
 #[global_allocator]
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
-
 
 // This is like the `main` function, except for JavaScript.
 #[wasm_bindgen(start)]
@@ -43,7 +42,6 @@ extern "C" {
     fn log(s: &str);
 }
 
-
 #[wasm_bindgen]
 pub fn on_change(buf: &str) {
     let lines = buf.lines().map(|s| s.to_string()).collect::<Vec<_>>();
@@ -53,17 +51,27 @@ pub fn on_change(buf: &str) {
 
     clear_diagnostics();
 
-    let mut diagnostics = parse_result.errors.iter().map(|(id, error)| {
-        let node = parse_result.nodes.get(id);
-        let LinesCols { line_start, line_end, col_start, col_end } = node.span.lines_cols(&lines);
-        Diagnostic::new(error.display(&buf).to_string(),
-                             line_start,
-                             col_start,
-                             line_end,
-                             col_end,
-                             DiagnosticType::Error
-        )
-    }).collect::<Vec<Diagnostic>>();
+    let mut diagnostics = parse_result
+        .errors
+        .iter()
+        .map(|(id, error)| {
+            let node = parse_result.nodes.get(id);
+            let LinesCols {
+                line_start,
+                line_end,
+                col_start,
+                col_end,
+            } = node.span.lines_cols(&lines);
+            Diagnostic::new(
+                error.display(&buf).to_string(),
+                line_start,
+                col_start,
+                line_end,
+                col_end,
+                DiagnosticType::Error,
+            )
+        })
+        .collect::<Vec<Diagnostic>>();
 
     let root = parse_result.root;
 
@@ -76,13 +84,20 @@ pub fn on_change(buf: &str) {
 
     for (id, error) in root_eval_result.errors.iter() {
         let node = parse_result.nodes.get(id);
-        let LinesCols { line_start, line_end, col_start, col_end } = node.span.lines_cols(&lines);
-        diagnostics.push(Diagnostic::new(error.to_string(),
-                                         line_start,
-                                         col_start,
-                                         line_end,
-                                         col_end,
-                                         DiagnosticType::Error));
+        let LinesCols {
+            line_start,
+            line_end,
+            col_start,
+            col_end,
+        } = node.span.lines_cols(&lines);
+        diagnostics.push(Diagnostic::new(
+            error.to_string(),
+            line_start,
+            col_start,
+            line_end,
+            col_end,
+            DiagnosticType::Error,
+        ));
     }
 
     for diagnostic in diagnostics {

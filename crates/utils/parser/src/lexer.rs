@@ -1,4 +1,4 @@
-use crate::{Input, Spanned, TextRange, PeekableIterator};
+use crate::{Input, PeekableIterator, Spanned, TextRange};
 
 pub trait TokenKind: Clone + Copy + std::fmt::Debug + std::fmt::Display + PartialEq {
     type Extra: Default + Clone;
@@ -11,7 +11,7 @@ pub struct Lexer<Tok: TokenKind> {
     input: Input,
     #[allow(clippy::option_option)]
     peeked: Option<Option<Spanned<Tok>>>,
-    pub extra: Tok::Extra
+    pub extra: Tok::Extra,
 }
 
 impl<Tok: TokenKind> Lexer<Tok> {
@@ -19,19 +19,20 @@ impl<Tok: TokenKind> Lexer<Tok> {
         Self {
             input: Input::from(i),
             peeked: None,
-            extra: Default::default()
+            extra: Default::default(),
         }
     }
 
     pub fn transform<Tok2>(&self) -> Lexer<Tok2>
-        where Tok2: TokenKind,
-            Tok::Extra: Into<Tok2::Extra>
+    where
+        Tok2: TokenKind,
+        Tok::Extra: Into<Tok2::Extra>,
     {
         let input = self.input.clone();
         Lexer {
             input,
             peeked: None,
-            extra: self.extra.clone().into()
+            extra: self.extra.clone().into(),
         }
     }
 
@@ -67,7 +68,9 @@ impl<Tok: TokenKind> Lexer<Tok> {
 }
 
 impl<Tok> PeekableIterator for Lexer<Tok>
-where Tok: TokenKind {
+where
+    Tok: TokenKind,
+{
     fn peek(&mut self) -> Option<&Self::Item> {
         if self.peeked.is_none() {
             let i = self.input.cursor();
@@ -81,7 +84,7 @@ where Tok: TokenKind {
 
 impl<Tok> Iterator for Lexer<Tok>
 where
-    Tok: TokenKind
+    Tok: TokenKind,
 {
     type Item = Spanned<Tok>;
 
@@ -100,7 +103,6 @@ where
         Some(first)
     }
 }
-
 
 pub trait OptionExt<T> {
     fn as_kind(&self) -> Option<T>;

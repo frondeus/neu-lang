@@ -1,6 +1,6 @@
-use anyhow::{Error, Result, Context};
-use nvim_rs::create::tokio as create;
+use anyhow::{Context, Error, Result};
 use neu_nvim::handler::NeovimHandler;
+use nvim_rs::create::tokio as create;
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -13,8 +13,7 @@ async fn main() -> Result<()> {
     match io_handler.await.context("Error joining IO loop")? {
         Err(err) => {
             if !err.is_reader_error() {
-                nvim
-                    .err_writeln(&format!("Error: '{}'", err))
+                nvim.err_writeln(&format!("Error: '{}'", err))
                     .await
                     .unwrap_or_else(|e| {
                         eprintln!("Well, dang... '{}'", e);

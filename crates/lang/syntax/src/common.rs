@@ -1,11 +1,11 @@
-use neu_parser::*;
 use crate::Nodes;
+use neu_parser::*;
 
 pub fn separated<Token: TokenKind>(
     parser: impl Parser<Token> + Clone,
     separator: Token,
     close_token: Token,
-    trailing: bool
+    trailing: bool,
 ) -> impl Parser<Token> {
     node(move |builder| {
         builder.name(Nodes::Virtual);
@@ -21,10 +21,8 @@ pub fn separated<Token: TokenKind>(
                         Some(tok) if tok == separator => {
                             builder.parse(token(separator)); //recover(","));
                             match builder.peek_token() {
-                                Some(tok) if
-                                    trailing &&
-                                    tok == close_token => break 'outer,
-                                _ => break 'inner
+                                Some(tok) if trailing && tok == close_token => break 'outer,
+                                _ => break 'inner,
                             }
                         }
                         _ => {
@@ -32,7 +30,7 @@ pub fn separated<Token: TokenKind>(
                         }
                     }
                 }
-            }
+            },
         }
     })
 }

@@ -1,7 +1,7 @@
-use crate::Eval;
-use neu_parser::{Node, Name};
-use neu_syntax::Nodes;
 use crate::children::Children;
+use crate::Eval;
+use neu_parser::{Name, Node};
+use neu_syntax::Nodes;
 
 impl<'a> Eval<'a> {
     pub(crate) fn eval_md(&mut self, str: &mut String, node: &Node) -> Option<()> {
@@ -18,7 +18,7 @@ impl<'a> Eval<'a> {
             (Nodes::Md_BlockQuote, "blockquote"),
             (Nodes::Md_UnorderedList, "ul"),
             (Nodes::Md_OrderedList, "ol"),
-            (Nodes::Md_ListItem, "li")
+            (Nodes::Md_ListItem, "li"),
         ];
 
         let mut end_vec = vec![];
@@ -102,7 +102,9 @@ impl<'a> Eval<'a> {
             self.eval_md(str, child)?;
         }
 
-        for end in end_vec.into_iter().rev() { str.push_str(&end); }
+        for end in end_vec.into_iter().rev() {
+            str.push_str(&end);
+        }
 
         Some(())
     }

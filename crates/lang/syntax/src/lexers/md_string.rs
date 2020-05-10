@@ -1,6 +1,6 @@
+use crate::HashCount;
 use derive_more::Display;
 use neu_parser::{TextRange, TokenKind};
-use crate::HashCount;
 
 #[derive(Debug, PartialEq, Clone, Copy, Display)]
 pub enum Token {
@@ -19,7 +19,7 @@ impl TokenKind for Token {
     fn is_mergeable(self, other: Self) -> bool {
         match (self, other) {
             (Self::Text, Self::Text) => true,
-            _ => false
+            _ => false,
         }
     }
 
@@ -27,7 +27,9 @@ impl TokenKind for Token {
         let hash = lexer.extra.count;
         let input = lexer.input_mut();
         let i = input.as_ref();
-        if i.is_empty() { return None; }
+        if i.is_empty() {
+            return None;
+        }
         let pat = format!("{:#<width$}", "\"", width = hash + 1);
         if i.starts_with(&pat) {
             return Some((Token::Close, input.chomp(pat.len())));

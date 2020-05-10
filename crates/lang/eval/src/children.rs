@@ -1,13 +1,14 @@
-use neu_parser::{Arena, NodeId, Node, Name};
+use neu_parser::{Arena, Name, Node, NodeId};
 use neu_syntax::Nodes;
 
 pub struct Children<'a, I> {
     iter: I,
-    arena: &'a Arena
+    arena: &'a Arena,
 }
 
 impl<'a, I> Iterator for Children<'a, I>
-    where I: Iterator<Item = NodeId>
+where
+    I: Iterator<Item = NodeId>,
 {
     type Item = (NodeId, &'a Node);
 
@@ -23,9 +24,9 @@ impl<'a, I> Iterator for Children<'a, I>
     }
 }
 
-
 impl<'a, I> Children<'a, I>
-where I: Iterator<Item = NodeId>
+where
+    I: Iterator<Item = NodeId>,
 {
     pub fn new(iter: I, arena: &'a Arena) -> Self {
         Self { iter, arena }

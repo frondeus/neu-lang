@@ -1,7 +1,7 @@
-use crate::{TextRange, NodeId, Arena};
+use crate::{Arena, NodeId, TextRange};
+use itertools::Itertools;
 use std::collections::BTreeSet;
 use std::fmt;
-use itertools::Itertools;
 
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Name(pub(crate) &'static str);
@@ -54,7 +54,7 @@ pub struct Node {
     pub span: TextRange,
     pub names: BTreeSet<Name>,
     pub children: Vec<NodeId>,
-    pub parent: Option<NodeId>
+    pub parent: Option<NodeId>,
 }
 
 impl Node {
@@ -63,7 +63,7 @@ impl Node {
             names: Default::default(),
             children: Default::default(),
             parent: Default::default(),
-            span: TextRange::empty(0.into())
+            span: TextRange::empty(0.into()),
         }
     }
 
@@ -84,38 +84,53 @@ impl Node {
         self
     }
 
-    pub fn display<'s, 'n, 'a>(&'n self, str: &'s str, arena: &'a Arena) -> DisplayNode<'s, 'n, 'a> {
+    pub fn display<'s, 'n, 'a>(
+        &'n self,
+        str: &'s str,
+        arena: &'a Arena,
+    ) -> DisplayNode<'s, 'n, 'a> {
         DisplayNode {
             str,
             node: self,
-            arena
+            arena,
         }
     }
 
     pub fn parent(&self) -> Option<NodeId> {
         self.parent
     }
-
 }
 
 pub struct DisplayNode<'s, 'n, 'a> {
     str: &'s str,
     node: &'n Node,
-    arena: &'a Arena
+    arena: &'a Arena,
 }
 
-impl <'s, 'n, 'a> fmt::Display for DisplayNode<'s, 'n, 'a> {
+impl<'s, 'n, 'a> fmt::Display for DisplayNode<'s, 'n, 'a> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let width = f.width().unwrap_or_default();
-        if width > 0 { write!(f, "{:width$}", " ", width = width)?; }
+        if width > 0 {
+            write!(f, "{:width$}", " ", width = width)?;
+        }
 
         let span = &self.str[self.node.span].escape_default();
-        writeln!(f, "{} @ {:?} = `{}`", self.node.names.iter().join(", ").to_uppercase(), self.node.span, span)?;
+        writeln!(
+            f,
+            "{} @ {:?} = `{}`",
+            self.node.names.iter().join(", ").to_uppercase(),
+            self.node.span,
+            span
+        )?;
         let c_width = width + 4;
-        for child in self.node.children.iter().map(|child| self.arena.get(child).display(self.str, self.arena)) {
+        for child in self
+            .node
+            .children
+            .iter()
+            .map(|child| self.arena.get(child).display(self.str, self.arena))
+        {
             write!(f, "{:width$}", child, width = c_width)?;
         }
         Ok(())
     }
 }
-

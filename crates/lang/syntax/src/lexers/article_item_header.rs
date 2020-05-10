@@ -22,7 +22,7 @@ pub enum Token {
     ItemId,
 
     #[display("error")]
-    Error
+    Error,
 }
 
 pub type Lexer<T = Token> = neu_parser::Lexer<T>;
@@ -33,7 +33,7 @@ impl TokenKind for Token {
     fn is_mergeable(self, other: Self) -> bool {
         match (self, other) {
             (Self::Error, Self::Error) => true,
-            _ => false
+            _ => false,
         }
     }
 
@@ -47,28 +47,44 @@ impl TokenKind for Token {
         if is_inline_ws(&peeked) {
             let rest = i.chars().take_while(is_inline_ws).count();
             return Some((Token::InlineWhitespace, input.chomp(rest)));
-
         }
 
         if i.starts_with("+++") {
             return Some((Token::ThreePlus, input.chomp(3)));
         }
 
-        if i.starts_with('\n') { return Some((Token::NewLine, input.chomp(1))); }
-        if i.starts_with("\r\n") { return Some((Token::NewLine, input.chomp(2))); }
+        if i.starts_with('\n') {
+            return Some((Token::NewLine, input.chomp(1)));
+        }
+        if i.starts_with("\r\n") {
+            return Some((Token::NewLine, input.chomp(2)));
+        }
 
-        if peeked == ':' { return Some((Token::Colon, input.chomp(1))); }
+        if peeked == ':' {
+            return Some((Token::Colon, input.chomp(1)));
+        }
 
         if peeked.is_ascii_hexdigit() {
-            let rest = i.chars()
-                .take_while(|c| c.is_ascii_hexdigit() || *c == '_').count();
+            let rest = i
+                .chars()
+                .take_while(|c| c.is_ascii_hexdigit() || *c == '_')
+                .count();
 
-            return Some((if rest == 8 { Token::ItemId } else { Token::Identifier }, input.chomp(rest)))
+            return Some((
+                if rest == 8 {
+                    Token::ItemId
+                } else {
+                    Token::Identifier
+                },
+                input.chomp(rest),
+            ));
         }
 
         if peeked.is_ascii_alphabetic() {
-            let rest = i.chars()
-                .take_while(|c| c.is_ascii_alphabetic() || *c == '_').count();
+            let rest = i
+                .chars()
+                .take_while(|c| c.is_ascii_alphabetic() || *c == '_')
+                .count();
 
             return Some((Token::Identifier, input.chomp(rest)));
         }

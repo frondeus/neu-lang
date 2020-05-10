@@ -7,7 +7,7 @@ pub enum Token {
     ThreePlus,
 
     #[display("error")]
-    Error
+    Error,
 }
 
 pub type Lexer<T = Token> = neu_parser::Lexer<T>;
@@ -18,7 +18,7 @@ impl TokenKind for Token {
     fn is_mergeable(self, other: Self) -> bool {
         match (self, other) {
             (Self::Error, Self::Error) => true,
-            _ => false
+            _ => false,
         }
     }
 
@@ -26,7 +26,9 @@ impl TokenKind for Token {
         let input = lexer.input_mut();
         let i = input.as_ref();
 
-        if i.is_empty() { return None; }
+        if i.is_empty() {
+            return None;
+        }
         if i.starts_with("+++") {
             return Some((Token::ThreePlus, input.chomp(3)));
         }

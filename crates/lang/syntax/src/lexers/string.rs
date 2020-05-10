@@ -1,6 +1,6 @@
+use crate::HashCount;
 use derive_more::Display;
 use neu_parser::{Lexer, TextRange, TokenKind};
-use crate::HashCount;
 
 #[derive(Debug, PartialEq, Clone, Copy, Display)]
 pub enum Token {
@@ -15,7 +15,6 @@ pub enum Token {
 
     #[display(fmt = "`\"`")]
     Close,
-
 }
 
 pub type StringLexer = Lexer<Token>;
@@ -27,14 +26,16 @@ impl TokenKind for Token {
         match (self, other) {
             (Self::Text, Self::Text) => true,
             (Self::Text, Self::CloseI) => true,
-            _ => false
+            _ => false,
         }
     }
 
     fn lex(lexer: &mut Lexer<Self>) -> Option<(Self, TextRange)> {
         let input = lexer.input_mut();
         let i = input.as_ref();
-        if i.is_empty() { return None; }
+        if i.is_empty() {
+            return None;
+        }
         if i.starts_with('"') {
             return Some((Token::Close, input.chomp(1)));
         }

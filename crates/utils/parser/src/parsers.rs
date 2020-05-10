@@ -1,17 +1,20 @@
-use crate::{Context, Error, Node, NodeBuilder, OptionExt, TokenKind, Parser, State, PeekableIterator, Name};
 use crate::CoreNodes as Nodes;
-use std::marker::PhantomData;
+use crate::{
+    Context, Error, Name, Node, NodeBuilder, OptionExt, Parser, PeekableIterator, State, TokenKind,
+};
 use std::cell::RefCell;
+use std::marker::PhantomData;
 
 pub enum Assoc {
-    Right, Left
+    Right,
+    Left,
 }
 pub struct Pratt<N, BP, F, Tok> {
     next: N,
     bp: BP,
     f: F,
     rbp: i32,
-    _phantom: PhantomData<Tok>
+    _phantom: PhantomData<Tok>,
 }
 
 impl<N, BP, F, Tok> Clone for Pratt<N, BP, F, Tok>
@@ -19,7 +22,7 @@ where
     Tok: TokenKind,
     N: Clone + Parser<Tok>,
     BP: Clone + Fn(Option<Tok>) -> Option<(Assoc, i32)>,
-    F: Clone + Fn(&mut NodeBuilder<Tok>, Option<Tok>)
+    F: Clone + Fn(&mut NodeBuilder<Tok>, Option<Tok>),
 {
     fn clone(&self) -> Self {
         Self {
@@ -27,7 +30,7 @@ where
             bp: self.bp.clone(),
             f: self.f.clone(),
             rbp: self.rbp,
-            _phantom: PhantomData
+            _phantom: PhantomData,
         }
     }
 }
@@ -37,10 +40,16 @@ where
     Tok: TokenKind,
     N: Clone + Parser<Tok>,
     BP: Clone + Fn(Option<Tok>) -> Option<(Assoc, i32)>,
-    F: Clone + Fn(&mut NodeBuilder<Tok>, Option<Tok>)
+    F: Clone + Fn(&mut NodeBuilder<Tok>, Option<Tok>),
 {
     pub fn new(next: N, bp: BP, f: F) -> Self {
-        Self { next, bp, f, rbp: 0, _phantom: PhantomData }
+        Self {
+            next,
+            bp,
+            f,
+            rbp: 0,
+            _phantom: PhantomData,
+        }
     }
 
     pub fn rbp(&self, rbp: i32) -> Self {
@@ -81,7 +90,7 @@ pub fn node_mut<Tok: TokenKind>(mut f: impl FnMut(&mut NodeBuilder<Tok>)) -> imp
             let mut builder = NodeBuilder::new(state, ctx);
             f(&mut builder);
             builder.build()
-        })
+        }),
     }
 }
 
@@ -98,7 +107,7 @@ pub fn expected<Tok: TokenKind>(expected: &'static [Tok]) -> impl Parser<Tok> {
         let found = builder.next_token();
         builder.error(Error::Expected {
             found,
-            expected: expected.to_vec()
+            expected: expected.to_vec(),
         });
     })
 }
@@ -111,11 +120,13 @@ pub fn tokens<Tok: TokenKind>(expected: Vec<Tok>) -> impl Parser<Tok> {
             (None, false) => {
                 builder.error(Error::Expected {
                     expected: expected.clone(),
-                    found: None
+                    found: None,
                 });
             }
             (Some(_), true) => {
-                builder.error(Error::ExpectedEOF { found: token.unwrap() });
+                builder.error(Error::ExpectedEOF {
+                    found: token.unwrap(),
+                });
             }
             (Some(found), false) if !expected.contains(&found) => {
                 builder.error(Error::Expected {
@@ -151,7 +162,10 @@ pub trait ParserExt<Tok: TokenKind>: Parser<Tok> {
         F: Fn(Node) -> Node,
         Self: Sized;
 
-    fn boxed(self) -> Box<Self> where Self: Sized {
+    fn boxed(self) -> Box<Self>
+    where
+        Self: Sized,
+    {
         Box::new(self)
     }
 }
@@ -188,11 +202,12 @@ where
 }
 
 struct NodeMut<F> {
-    f: RefCell<F>
+    f: RefCell<F>,
 }
 
 impl<Tok: TokenKind, F> Parser<Tok> for NodeMut<F>
-    where F: FnMut(&mut State<Tok>, &Context<Tok>) -> Node
+where
+    F: FnMut(&mut State<Tok>, &Context<Tok>) -> Node,
 {
     fn parse(&self, state: &mut State<Tok>, ctx: &Context<Tok>) -> Node {
         let mut f = self.f.borrow_mut();

@@ -4,7 +4,7 @@ use neu_parser::TextRange;
 pub struct LineCols {
     pub line: i32,
     pub col_start: i32,
-    pub col_end: i32
+    pub col_end: i32,
 }
 
 #[derive(Clone, Copy)]
@@ -12,7 +12,7 @@ pub struct LinesCols {
     pub line_start: i32,
     pub line_end: i32,
     pub col_start: i32,
-    pub col_end: i32
+    pub col_end: i32,
 }
 
 pub trait TextRangeExt {
@@ -28,18 +28,22 @@ impl TextRangeExt for TextRange {
         let (start_l, start_c) = build(start, lines);
         let (end_l, end_c) = build(end, lines);
 
-        (start_l ..= end_l).map(|line| {
-            let col_start = if line == start_l {
-                start_c
-            } else { 0_i32 };
-            let col_end = if line == end_l {
-                end_c
-            } else {
-                lines[line as usize].len() as i32
-            };
+        (start_l..=end_l)
+            .map(|line| {
+                let col_start = if line == start_l { start_c } else { 0_i32 };
+                let col_end = if line == end_l {
+                    end_c
+                } else {
+                    lines[line as usize].len() as i32
+                };
 
-            LineCols { line, col_start, col_end }
-        }).collect()
+                LineCols {
+                    line,
+                    col_start,
+                    col_end,
+                }
+            })
+            .collect()
     }
 
     fn lines_cols(&self, lines: &[String]) -> LinesCols {
@@ -48,7 +52,12 @@ impl TextRangeExt for TextRange {
 
         let (line_start, col_start) = build(start, lines);
         let (line_end, col_end) = build(end, lines);
-        LinesCols { line_start, col_start, line_end, col_end }
+        LinesCols {
+            line_start,
+            col_start,
+            line_end,
+            col_end,
+        }
     }
 }
 
@@ -68,5 +77,5 @@ pub fn build(offset: usize, lines: &[String]) -> (i32, i32) {
         }
     }
 
-    ( line, column )
+    (line, column)
 }

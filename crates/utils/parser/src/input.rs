@@ -1,5 +1,5 @@
 use std::convert::TryFrom;
-use text_size::{TextRange, TextSize, TextLen};
+use text_size::{TextLen, TextRange, TextSize};
 
 #[derive(Debug, Clone)]
 pub struct Input {
@@ -9,7 +9,6 @@ pub struct Input {
 
 impl Input {
     pub fn chomp(&mut self, len: usize) -> TextRange {
-
         let range = match self
             .as_ref()
             .char_indices()
@@ -17,7 +16,7 @@ impl Input {
             .and_then(|(last, c)| TextSize::try_from(last + c.len_utf8()).ok())
         {
             Some(last) => TextRange::new(self.range.start(), self.range.start() + last),
-            None => self.range
+            None => self.range,
         };
         self.set_cursor(range.end());
 

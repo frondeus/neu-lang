@@ -1,6 +1,6 @@
-use std::fmt;
-use crate::{Context, Error, TokenKind, Node, Parser, Lexer};
+use crate::{Context, Error, Lexer, Node, Parser, TokenKind};
 use std::borrow::Borrow;
+use std::fmt;
 
 #[derive(Clone, Copy)]
 pub struct NodeId(pub(crate) usize);
@@ -13,7 +13,7 @@ impl fmt::Debug for NodeId {
 
 pub struct Ancestors<'a> {
     current: Option<NodeId>,
-    arena: &'a Arena
+    arena: &'a Arena,
 }
 
 impl<'a> Iterator for Ancestors<'a> {
@@ -32,7 +32,7 @@ impl<'a> Iterator for Ancestors<'a> {
 
 #[derive(Default)]
 pub struct Arena {
-    nodes: Vec<Node>
+    nodes: Vec<Node>,
 }
 
 impl fmt::Debug for Arena {
@@ -67,7 +67,7 @@ impl Arena {
     pub fn ancestors(&self, id: NodeId) -> Ancestors {
         Ancestors {
             current: Some(id),
-            arena: self
+            arena: self,
         }
     }
 
@@ -94,7 +94,7 @@ pub struct State<Tok: TokenKind> {
     lexer: Lexer<Tok>,
     errors: Vec<(NodeId, Error<Tok>)>,
     new_errors: Vec<Error<Tok>>,
-    nodes: Arena
+    nodes: Arena,
 }
 
 impl<Tok: TokenKind> State<Tok> {
@@ -108,8 +108,9 @@ impl<Tok: TokenKind> State<Tok> {
     }
 
     pub(crate) fn transform<Tok2>(&mut self) -> State<Tok2>
-        where Tok2: TokenKind,
-              Tok::Extra: Into<Tok2::Extra>
+    where
+        Tok2: TokenKind,
+        Tok::Extra: Into<Tok2::Extra>,
     {
         let lexer: Lexer<Tok2> = self.lexer.transform();
         State {
@@ -121,8 +122,9 @@ impl<Tok: TokenKind> State<Tok> {
     }
 
     pub(crate) fn restore<Tok2>(&mut self, mut other: State<Tok2>)
-        where Tok2: TokenKind,
-              Tok2::Extra: Into<Tok::Extra>
+    where
+        Tok2: TokenKind,
+        Tok2::Extra: Into<Tok::Extra>,
     {
         let lexer: Lexer<Tok> = other.lexer().transform();
         self.lexer = lexer;
@@ -146,7 +148,8 @@ impl<Tok: TokenKind> State<Tok> {
     }
 
     pub fn commit_errors(&mut self, id: NodeId) {
-        self.errors.extend(self.new_errors.drain(..).map(|e| (id, e)));
+        self.errors
+            .extend(self.new_errors.drain(..).map(|e| (id, e)));
     }
 
     pub fn parse(lexer: Lexer<Tok>, parser: impl Parser<Tok>) -> ParseResult<Tok> {
@@ -183,7 +186,7 @@ pub struct DisplayParseResult<'s, 'n, Tok: TokenKind> {
     result: &'n ParseResult<Tok>,
 }
 
-impl <'s, 'n, Tok: TokenKind> fmt::Display for DisplayParseResult<'s, 'n, Tok> {
+impl<'s, 'n, Tok: TokenKind> fmt::Display for DisplayParseResult<'s, 'n, Tok> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let arena = &self.result.nodes;
         let node = arena.get(self.result.root).display(self.str, arena);

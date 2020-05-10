@@ -1,5 +1,5 @@
-use neu_parser::Name;
 use neu_parser::nodes;
+use neu_parser::Name;
 
 nodes! {
     Neu {

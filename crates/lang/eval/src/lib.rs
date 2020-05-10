@@ -1,21 +1,21 @@
 mod children;
-mod value;
 mod error;
-mod result;
 mod markdown;
+mod result;
+mod value;
 
-use neu_parser::{NodeId, Arena, Node};
-use neu_syntax::Nodes;
-use value::Value;
+use crate::result::EvalResult;
 use children::Children;
 use error::Error;
+use neu_parser::{Arena, Node, NodeId};
+use neu_syntax::Nodes;
 use std::collections::BTreeMap;
-use crate::result::EvalResult;
+use value::Value;
 
 struct Eval<'a> {
     pub nodes: &'a Arena,
     pub input: &'a str,
-    pub errors: Vec<(NodeId, Error)>
+    pub errors: Vec<(NodeId, Error)>,
 }
 
 impl<'a> Eval<'a> {
@@ -23,7 +23,7 @@ impl<'a> Eval<'a> {
         Self {
             nodes,
             input,
-            errors: vec![]
+            errors: vec![],
         }
     }
 
@@ -32,25 +32,29 @@ impl<'a> Eval<'a> {
         match value {
             Value::Lazy { id } => {
                 let v = self.eval(id)?;
-                if !recursive { return Some(v); }
+                if !recursive {
+                    return Some(v);
+                }
                 self.into_eager(v, recursive)
-            },
+            }
             Value::Struct(s) => {
-                let s = s.into_iter()
+                let s = s
+                    .into_iter()
                     .map(|(k, v)| {
                         let v = self.into_eager(v, recursive);
                         v.map(|v| (k, v))
-                    }).collect::<Option<BTreeMap<String, Value>>>()?;
+                    })
+                    .collect::<Option<BTreeMap<String, Value>>>()?;
                 Some(Value::Struct(s))
-            },
+            }
             Value::Array(a) => {
-                let a = a.into_iter()
-                    .map(|v| {
-                        self.into_eager(v, recursive)
-                    }).collect::<Option<Vec<Value>>>()?;
+                let a = a
+                    .into_iter()
+                    .map(|v| self.into_eager(v, recursive))
+                    .collect::<Option<Vec<Value>>>()?;
                 Some(Value::Array(a))
-            },
-            v => Some(v)
+            }
+            v => Some(v),
         }
     }
 
@@ -69,12 +73,12 @@ impl<'a> Eval<'a> {
         }
     }
 
-    fn eval_identifier(&mut self, id: NodeId, node: &Node)  -> Option<Value> {
+    fn eval_identifier(&mut self, id: NodeId, node: &Node) -> Option<Value> {
         let text = &self.input[node.span];
-        let top = self.nodes.ancestors(id)
-            .filter(|ancestor| {
-                self.nodes.get(ancestor).is(Nodes::Struct)
-            })
+        let top = self
+            .nodes
+            .ancestors(id)
+            .filter(|ancestor| self.nodes.get(ancestor).is(Nodes::Struct))
             .last();
         let top = self.expect_some(id, top, Error::ContextNotFound)?;
         let top = self.eval(top)?;
@@ -94,12 +98,17 @@ impl<'a> Eval<'a> {
         self.expect_some(right_id, map.remove(key), Error::FieldNotFound)
     }
 
-    fn eval_self_ident_path(&mut self, op_id: NodeId, value_id: NodeId, value: &Node) -> Option<Value> {
+    fn eval_self_ident_path(
+        &mut self,
+        op_id: NodeId,
+        value_id: NodeId,
+        value: &Node,
+    ) -> Option<Value> {
         let text = &self.input[value.span];
-        let current = self.nodes.ancestors(op_id)
-            .find(|ancestor| {
-                self.nodes.get(ancestor).is(Nodes::Struct)
-            });
+        let current = self
+            .nodes
+            .ancestors(op_id)
+            .find(|ancestor| self.nodes.get(ancestor).is(Nodes::Struct));
         let current = self.expect_some(op_id, current, Error::ContextNotFound)?;
         let current = self.eval(current)?;
         let mut map = self.expect_some(op_id, current.into_struct(), Error::ValueNotStruct)?;
@@ -113,13 +122,15 @@ impl<'a> Eval<'a> {
 
         let (value_id, value) = children.find_node(Nodes::Value)?;
 
-        if text_op == "." { return self.eval_self_ident_path(op_id, value_id, value); }
+        if text_op == "." {
+            return self.eval_self_ident_path(op_id, value_id, value);
+        }
 
         let value = self.eager_eval(value_id, false)?;
         match (text_op, value) {
-            ("-", Value::Number(i))  => Some(Value::Number(-i)),
-            ("!", Value::Boolean(b))  => Some(Value::Boolean(!b)),
-            _ => unreachable!()
+            ("-", Value::Number(i)) => Some(Value::Number(-i)),
+            ("!", Value::Boolean(b)) => Some(Value::Boolean(!b)),
+            _ => unreachable!(),
         }
     }
 
@@ -132,12 +143,12 @@ impl<'a> Eval<'a> {
         let right = self.eager_eval(right, false)?;
         let text_op = &self.input[op.span];
         match (left, text_op, right) {
-            (Value::Number(l), "-", Value::Number(r))  => Some(Value::Number(l - r)),
-            (Value::Number(l), "+", Value::Number(r))  => Some(Value::Number(l + r)),
-            (Value::Number(l), "*", Value::Number(r))  => Some(Value::Number(l * r)),
-            (Value::Number(l), "/", Value::Number(r))  => Some(Value::Number(l / r)),
-            (Value::Boolean(l), "==", Value::Boolean(r))  => Some(Value::Boolean(l == r)),
-            _ => unreachable!()
+            (Value::Number(l), "-", Value::Number(r)) => Some(Value::Number(l - r)),
+            (Value::Number(l), "+", Value::Number(r)) => Some(Value::Number(l + r)),
+            (Value::Number(l), "*", Value::Number(r)) => Some(Value::Number(l * r)),
+            (Value::Number(l), "/", Value::Number(r)) => Some(Value::Number(l / r)),
+            (Value::Boolean(l), "==", Value::Boolean(r)) => Some(Value::Boolean(l == r)),
+            _ => unreachable!(),
         }
     }
 
@@ -145,21 +156,37 @@ impl<'a> Eval<'a> {
         let node = self.nodes.get(id);
 
         if node.is(Nodes::Root) {
-            return node.children.iter()
+            return node
+                .children
+                .iter()
                 .filter_map(|child| self.eval(*child))
                 .next();
         }
-        if !node.is(Nodes::Value) { return None; }
+        if !node.is(Nodes::Value) {
+            return None;
+        }
 
         let mut children = Children::new(node.children.iter().copied(), self.nodes);
         let text = &self.input[node.span];
 
-        if node.is(Nodes::Identifier) { return self.eval_identifier(id, node); }
-        if node.is(Nodes::IdentPath) { return self.eval_ident_path(node); }
-        if node.is(Nodes::Number) { return Some(Value::Number(text.parse().unwrap())); }
-        if node.is(Nodes::Boolean) { return Some(Value::Boolean(text == "true")); }
-        if node.is(Nodes::Unary) { return self.eval_unary(node); }
-        if node.is(Nodes::Binary) { return self.eval_binary(node); }
+        if node.is(Nodes::Identifier) {
+            return self.eval_identifier(id, node);
+        }
+        if node.is(Nodes::IdentPath) {
+            return self.eval_ident_path(node);
+        }
+        if node.is(Nodes::Number) {
+            return Some(Value::Number(text.parse().unwrap()));
+        }
+        if node.is(Nodes::Boolean) {
+            return Some(Value::Boolean(text == "true"));
+        }
+        if node.is(Nodes::Unary) {
+            return self.eval_unary(node);
+        }
+        if node.is(Nodes::Binary) {
+            return self.eval_binary(node);
+        }
 
         if node.is(Nodes::Array) {
             let mut values = vec![];
@@ -214,18 +241,18 @@ impl<'a> Eval<'a> {
 
 pub fn eval(id: NodeId, nodes: &Arena, input: &str) -> EvalResult {
     let mut eval = Eval::new(nodes, input);
-    let value = eval.eval(id)
-        .and_then(|val| {
-            eval.into_eager(val, true)
-        });
-    EvalResult { value, errors: eval.errors }
+    let value = eval.eval(id).and_then(|val| eval.into_eager(val, true));
+    EvalResult {
+        value,
+        errors: eval.errors,
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
     use neu_parser::State;
-    use neu_syntax::{neu::parser, lexers::neu::Lexer};
+    use neu_syntax::{lexers::neu::Lexer, neu::parser};
 
     #[test]
     fn eval_tests() {
@@ -236,7 +263,7 @@ mod tests {
             let result = eval(res.root, &res.nodes, input);
 
             result.display(input).to_string()
-        }).unwrap();
+        })
+        .unwrap();
     }
-
 }

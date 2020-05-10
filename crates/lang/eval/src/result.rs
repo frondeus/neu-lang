@@ -1,11 +1,11 @@
-use crate::value::Value;
 use crate::error::Error;
+use crate::value::Value;
 use neu_parser::NodeId;
 use std::fmt;
 
 pub struct EvalResult {
     pub value: Option<Value>,
-    pub errors: Vec<(NodeId, Error)>
+    pub errors: Vec<(NodeId, Error)>,
 }
 
 impl EvalResult {
@@ -17,19 +17,18 @@ impl EvalResult {
 pub struct DisplayEvalResult<'s, 'n> {
     #[allow(dead_code)]
     str: &'s str,
-    result: &'n EvalResult
+    result: &'n EvalResult,
 }
 
 impl<'s, 'n> fmt::Display for DisplayEvalResult<'s, 'n> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match &self.result.value {
             None => write!(f, "None")?,
-            Some(r) => write!(f, "`{:#}`", r)?
+            Some(r) => write!(f, "`{:#}`", r)?,
         };
         if self.result.errors.is_empty() {
             write!(f, "\n\n### No Errors ###")?;
-        }
-        else {
+        } else {
             write!(f, "\n\n### Errors ###")?;
         }
 

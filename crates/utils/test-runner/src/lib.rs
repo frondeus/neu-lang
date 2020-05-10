@@ -1,10 +1,10 @@
-use anyhow::{Result, anyhow, bail};
-use std::path::{PathBuf, Path};
+use anyhow::{anyhow, bail, Result};
+use chrono::{DateTime, Local};
+use diff_utils::{Comparison, DisplayOptions, PatchOptions};
 use regex::Regex;
 use std::io::Write;
+use std::path::{Path, PathBuf};
 use std::time::SystemTime;
-use chrono::{DateTime, Local};
-use diff_utils::{Comparison, PatchOptions, DisplayOptions};
 
 fn assert_section(entry: Entry, actual: String) -> Result<()> {
     let mut new_snap_path: PathBuf = entry.entry.into();
@@ -17,36 +17,41 @@ fn assert_section(entry: Entry, actual: String) -> Result<()> {
         let expected_lines = expected.lines().collect::<Vec<_>>();
         let actual_lines = actual.lines().collect::<Vec<_>>();
         let comparison = Comparison::new(&expected_lines, &actual_lines).compare()?;
-        eprintln!("\nFound mismatch in section [{}] in {}\n{}", entry.section_name, entry.entry.display(),
-                  comparison.display(DisplayOptions {
-                      offset: entry.line,
-                      .. Default::default()
-                  }));
-
-        std::fs::File::create(&new_snap_path)
-            .and_then(|mut file| {
-                let datetime: DateTime<Local> = entry.modified.into();
-                let dt = datetime.format("%F %T %z");
-
-                let entry_basename = entry.entry.file_name().unwrap().to_string_lossy();
-                let snap_basename = new_snap_path.file_name().unwrap().to_string_lossy();
-
-                writeln!(file, "```")?;
-                writeln!(file, "{}", entry.input)?;
-                writeln!(file, "```")?;
-                write!(file, "{}", comparison.patch(
-                    entry_basename, &dt,
-                    snap_basename, &dt,
-                    PatchOptions {
-                        offset: entry.line,
-                    }
-                ))
+        eprintln!(
+            "\nFound mismatch in section [{}] in {}\n{}",
+            entry.section_name,
+            entry.entry.display(),
+            comparison.display(DisplayOptions {
+                offset: entry.line,
+                ..Default::default()
             })
-            ?;
+        );
+
+        std::fs::File::create(&new_snap_path).and_then(|mut file| {
+            let datetime: DateTime<Local> = entry.modified.into();
+            let dt = datetime.format("%F %T %z");
+
+            let entry_basename = entry.entry.file_name().unwrap().to_string_lossy();
+            let snap_basename = new_snap_path.file_name().unwrap().to_string_lossy();
+
+            writeln!(file, "```")?;
+            writeln!(file, "{}", entry.input)?;
+            writeln!(file, "```")?;
+            write!(
+                file,
+                "{}",
+                comparison.patch(
+                    entry_basename,
+                    &dt,
+                    snap_basename,
+                    &dt,
+                    PatchOptions { offset: entry.line }
+                )
+            )
+        })?;
 
         bail!("failed");
-    }
-    else if new_snap_path.exists() {
+    } else if new_snap_path.exists() {
         std::fs::remove_file(new_snap_path)?;
     }
 
@@ -59,7 +64,7 @@ struct Entry<'a> {
     section: &'a str,
     input: &'a str,
     entry: &'a Path,
-    modified: SystemTime
+    modified: SystemTime,
 }
 
 pub fn test_snapshots(ext: &str, section_name: &str, f: impl Fn(&str) -> String) -> Result<()> {
@@ -100,30 +105,35 @@ pub fn test_snapshots(ext: &str, section_name: &str, f: impl Fn(&str) -> String)
                 section_name,
                 section: &snaps[from..to],
                 line,
-                modified: metadata.modified()?
+                modified: metadata.modified()?,
             };
             let last_line = match last_line {
                 Some(from) => &snaps[from..to],
-                None => &snaps[to..to]
+                None => &snaps[to..to],
             };
             let actual = format!("[{}]\n{}\n\n{}", section_name, f(input), last_line);
             match assert_section(e, actual) {
                 Ok(_) => {
                     successes += 1;
                     eprint!(".");
-                },
+                }
                 Err(e) => {
                     eprintln!("{}: {:?}", entry.display(), e);
                 }
             }
             processed += 1;
-        }
-        else {
+        } else {
             skipped += 1;
         }
     }
-    eprintln!("\nProcessed {}: {}, Failed: {}, Skipped: {}", section_name, processed, processed - successes, skipped);
-    if successes != processed  {
+    eprintln!(
+        "\nProcessed {}: {}, Failed: {}, Skipped: {}",
+        section_name,
+        processed,
+        processed - successes,
+        skipped
+    );
+    if successes != processed {
         bail!("Some tests failed");
     }
     Ok(())
@@ -140,8 +150,10 @@ fn get_source(file: &str) -> Result<(&str, &str)> {
     let bt_count = iter.take_while(|c| *c == '`').count();
     let pat = format!("{:`>width$}", "\n", width = bt_count + 1);
     let splited = file.split(&pat).collect::<Vec<_>>();
-    if splited.len() != 3 { bail!("Expected one source wrapped in ```: {}", file) }
-    let input = splited[1].trim_end_matches('\n');//.trim();
+    if splited.len() != 3 {
+        bail!("Expected one source wrapped in ```: {}", file)
+    }
+    let input = splited[1].trim_end_matches('\n'); //.trim();
     let sections = splited[2];
     Ok((input, sections))
 }
@@ -155,7 +167,10 @@ fn go_to_root() -> Result<PathBuf> {
     let mut path = std::env::current_dir()?;
 
     while !path.join("Cargo.lock").exists() {
-        path = path.parent().ok_or_else(|| anyhow!("Couldn't find parent directory"))?.into();
+        path = path
+            .parent()
+            .ok_or_else(|| anyhow!("Couldn't find parent directory"))?
+            .into();
     }
 
     path = path.canonicalize()?;
