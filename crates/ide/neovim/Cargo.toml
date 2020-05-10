@@ -7,9 +7,9 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-neu-parser = { path = "../parser" }
-neu-syntax = { path = "../syntax" }
-neu-eval = { path = "../eval" }
+neu-parser = { path = "../../utils/parser" }
+neu-syntax = { path = "../../lang/syntax" }
+neu-eval = { path = "../../lang/eval" }
 
 nvim-rs = { git = "https://github.com/frondeus/nvim-rs.git", branch = "wpo_buffer_clone", features = ["use_tokio"] }
 tokio = "0.2.17"

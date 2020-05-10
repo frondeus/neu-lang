@@ -21,9 +21,9 @@ lto = true
 #default = ["wee_alloc"]
 
 [dependencies]
-neu-parser = { path = "../parser" }
-neu-syntax = { path = "../syntax" }
-neu-eval = { path = "../eval" }
+neu-parser = { path = "../../utils/parser" }
+neu-syntax = { path = "../../lang/syntax" }
+neu-eval = { path = "../../lang/eval" }
 
 derive_more = "0.99.5"
 # The `wasm-bindgen` crate provides the bare minimum functionality needed

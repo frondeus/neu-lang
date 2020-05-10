@@ -3,4 +3,3 @@
 Cargo.lock
 *.new
 *.orig
-crates/old_wasm/pkg
