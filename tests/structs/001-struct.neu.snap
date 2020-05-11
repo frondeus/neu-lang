@@ -8,20 +8,22 @@
 [lexer]
 [
     "OpenC `{`",
-    "Whitespace `\n    `",
+    "LineEnd `\n`",
+    "Whitespace `    `",
     "Identifier `health`",
     "Whitespace ` `",
     "OpAssign `=`",
     "Whitespace ` `",
     "Number `10`",
     "Comma `,`",
-    "Whitespace `\n    `",
+    "LineEnd `\n`",
+    "Whitespace `    `",
     "Identifier `sanity`",
     "Whitespace ` `",
     "OpAssign `=`",
     "Whitespace ` `",
     "Number `50`",
-    "Whitespace `\n`",
+    "LineEnd `\n`",
     "CloseC `}`",
 ]
 

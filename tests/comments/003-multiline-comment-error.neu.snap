@@ -9,7 +9,8 @@
 [lexer]
 [
     "OpenC `{`",
-    "Whitespace `\n    `",
+    "LineEnd `\n`",
+    "Whitespace `    `",
     "Identifier `health`",
     "Whitespace ` `",
     "OpAssign `=`",
@@ -18,7 +19,8 @@
     "Comma `,`",
     "Whitespace ` `",
     "Comment `/* foo }\n    bar */`",
-    "Whitespace `\n    `",
+    "LineEnd `\n`",
+    "Whitespace `    `",
     "Identifier `sanity`",
     "Whitespace ` `",
     "OpAssign `=`",
@@ -29,7 +31,7 @@
     "Error `/*`",
     "Whitespace ` `",
     "Identifier `baz`",
-    "Whitespace `\n`",
+    "LineEnd `\n`",
     "CloseC `}`",
 ]
 
@@ -44,7 +46,8 @@ ROOT @ 0..63 = `{\n    health = 4, /* foo }\n    bar */\n    sanity = 10, /* baz
         TRIVIA @ 14..15 = ` `
         NUMBER, TOKEN, VALUE @ 15..16 = `4`
         TOKEN @ 16..17 = `,`
-        TRIVIA @ 17..42 = ` /* foo }\n    bar */\n    `
+        TRIVIA @ 17..37 = ` /* foo }\n    bar */`
+        TRIVIA @ 37..42 = `\n    `
         IDENTIFIER, KEY, TOKEN @ 42..48 = `sanity`
         TRIVIA @ 48..49 = ` `
         TOKEN @ 49..50 = `=`
@@ -61,10 +64,10 @@ ROOT @ 0..63 = `{\n    health = 4, /* foo }\n    bar */\n    sanity = 10, /* baz
 
 
 ### Errors ###
-Expected identifier but found `/*` @ N16
-Expected `=` but found `baz` @ N18
-Expected one of number, `true`, `false`, `-`, `!`, `"`, `(`, `{`, `[`, identifier but found `}` @ N20
-Expected `}` but found EOF @ N21
+Expected identifier but found `/*` @ N17
+Expected `=` but found `baz` @ N19
+Expected one of number, `true`, `false`, `-`, `!`, `"`, `(`, `{`, `[`, identifier but found `}` @ N21
+Expected `}` but found EOF @ N22
 
 
 [eval]

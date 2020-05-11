@@ -9,18 +9,21 @@
 [lexer]
 [
     "OpenC `{`",
-    "Whitespace `\n    `",
+    "LineEnd `\n`",
+    "Whitespace `    `",
     "Identifier `health`",
     "Whitespace ` `",
     "OpAssign `=`",
     "Whitespace ` `",
     "Number `10`",
-    "Whitespace `\n    `",
+    "LineEnd `\n`",
+    "Whitespace `    `",
     "OpMinus `-`",
     "Whitespace ` `",
     "Number `2`",
     "Comma `,`",
-    "Whitespace `\n    `",
+    "LineEnd `\n`",
+    "Whitespace `    `",
     "Identifier `sanity`",
     "Whitespace ` `",
     "OpAssign `=`",
@@ -30,7 +33,7 @@
     "OpPlus `+`",
     "Whitespace ` `",
     "Number `2`",
-    "Whitespace `\n`",
+    "LineEnd `\n`",
     "CloseC `}`",
 ]
 
@@ -61,7 +64,7 @@ ROOT @ 0..48 = `{\n    health = 10\n    - 2,\n    sanity = 50 + 2\n}`
             OP, TOKEN @ 43..44 = `+`
             TRIVIA @ 44..45 = ` `
             NUMBER, TOKEN, VALUE @ 45..46 = `2`
-            TRIVIA @ 46..47 = `\n`
+        TRIVIA @ 46..47 = `\n`
         TOKEN @ 47..48 = `}`
 
 

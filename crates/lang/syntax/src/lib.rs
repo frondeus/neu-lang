@@ -1,27 +1,15 @@
 mod nodes;
 
 pub mod lexers;
-
-mod common;
-
-#[derive(Default, Clone)]
-pub struct HashCount {
-    count: usize,
+pub mod parsers {
+    pub(crate) mod common;
+    pub mod article_item;
+    pub mod markdown;
+    pub mod neu;
 }
 
-impl From<()> for HashCount {
-    fn from(_: ()) -> Self {
-        Default::default()
-    }
-}
-impl From<HashCount> for () {
-    fn from(_: HashCount) -> Self {
-        ()
-    }
-}
+
+pub(crate) mod context;
 
 pub use crate::nodes::*;
-
-pub mod article_item;
-pub mod markdown;
-pub mod neu;
+pub use crate::context::*;

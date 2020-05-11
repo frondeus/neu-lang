@@ -29,7 +29,16 @@ impl<'a, Tok: TokenKind> NodeBuilder<'a, Tok> {
     }
 
     pub fn peek_token(&mut self) -> Option<Tok> {
-        self.state.lexer_mut().peek().as_kind()
+        let saved = self.state.lexer().input().clone();
+        let ctx = self.ctx;
+        if let Some(trivia) = ctx.leading_trivia() {
+            let trivia_ctx = Context::default();
+            trivia.parse(self.state, &trivia_ctx);
+        }
+
+        let peeked = self.state.lexer_mut().peek().as_kind();
+        self.state.lexer_mut().set_input(saved);
+        peeked
     }
 
     pub fn state(&self) -> &State<Tok> {
@@ -80,7 +89,8 @@ impl<'a, Tok: TokenKind> NodeBuilder<'a, Tok> {
 
     pub fn parse_ctx<'b>(&mut self, ctx: &'b Context<'b, Tok>, parser: impl Parser<Tok>) {
         if let Some(trivia) = ctx.leading_trivia() {
-            let node = trivia.parse(self.state, ctx);
+            let trivia_ctx = Context::default();
+            let node = trivia.parse(self.state, &trivia_ctx);
             self.add(node);
         }
 
@@ -88,7 +98,8 @@ impl<'a, Tok: TokenKind> NodeBuilder<'a, Tok> {
         self.add(node);
 
         if let Some(trivia) = ctx.trailing_trivia() {
-            let node = trivia.parse(self.state, ctx);
+            let trivia_ctx = Context::default();
+            let node = trivia.parse(self.state, &trivia_ctx);
             self.add(node);
         }
     }
@@ -123,14 +134,14 @@ impl<'a, Tok: TokenKind> NodeBuilder<'a, Tok> {
         }
     }
 
-    pub fn build(self) -> Node {
+    pub fn build(self) -> (Node, &'a mut State<Tok>, &'a Context<'a, Tok>) {
         let NodeBuilder {
             names,
             children,
             error,
             state,
             mut span,
-            ..
+            ctx
         } = self;
         for child in &children {
             let child_node = &state.nodes().get(*child);
@@ -143,11 +154,11 @@ impl<'a, Tok: TokenKind> NodeBuilder<'a, Tok> {
         if let Some(error) = error {
             state.error(error);
         }
-        Node {
+        (Node {
             span,
             names,
             children,
             parent: Default::default(),
-        }
+        }, state, ctx)
     }
 }

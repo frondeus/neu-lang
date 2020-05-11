@@ -15,35 +15,41 @@
 [lexer]
 [
     "OpenC `{`",
-    "Whitespace `\n    `",
+    "LineEnd `\n`",
+    "Whitespace `    `",
     "Identifier `primary`",
     "Whitespace ` `",
     "OpAssign `=`",
     "Whitespace ` `",
     "OpenC `{`",
-    "Whitespace `\n        `",
+    "LineEnd `\n`",
+    "Whitespace `        `",
     "Identifier `con`",
     "Whitespace ` `",
     "OpAssign `=`",
     "Whitespace ` `",
     "Number `50`",
     "Comma `,`",
-    "Whitespace `\n        `",
+    "LineEnd `\n`",
+    "Whitespace `        `",
     "Identifier `size`",
     "Whitespace ` `",
     "OpAssign `=`",
     "Whitespace ` `",
     "Number `60`",
-    "Whitespace `\n    `",
+    "LineEnd `\n`",
+    "Whitespace `    `",
     "CloseC `}`",
     "Comma `,`",
-    "Whitespace `\n    `",
+    "LineEnd `\n`",
+    "Whitespace `    `",
     "Identifier `health`",
     "Whitespace ` `",
     "OpAssign `=`",
     "Whitespace ` `",
     "OpenC `{`",
-    "Whitespace `\n        `",
+    "LineEnd `\n`",
+    "Whitespace `        `",
     "Identifier `max`",
     "Whitespace ` `",
     "OpAssign `=`",
@@ -64,17 +70,20 @@
     "Whitespace ` `",
     "Number `10`",
     "Comma `,`",
-    "Whitespace `\n        `",
+    "LineEnd `\n`",
+    "Whitespace `        `",
     "Identifier `value`",
     "Whitespace ` `",
     "OpAssign `=`",
     "Whitespace ` `",
     "OpDot `.`",
     "Identifier `max`",
-    "Whitespace `\n    `",
+    "LineEnd `\n`",
+    "Whitespace `    `",
     "CloseC `}`",
     "Comma `,`",
-    "Whitespace `\n    `",
+    "LineEnd `\n`",
+    "Whitespace `    `",
     "Identifier `sanity`",
     "Whitespace ` `",
     "OpAssign `=`",
@@ -84,7 +93,7 @@
     "OpPlus `+`",
     "Whitespace ` `",
     "Number `2`",
-    "Whitespace `\n`",
+    "LineEnd `\n`",
     "CloseC `}`",
     "OpDot `.`",
     "Identifier `health`",
@@ -162,7 +171,7 @@ ROOT @ 0..187 = `{\n    primary = {\n        con = 50,\n        size = 60\n    }
                     UNARY, VALUE @ 141..145 = `.max`
                         OP, TOKEN @ 141..142 = `.`
                         IDENTIFIER, TOKEN, VALUE @ 142..145 = `max`
-                        TRIVIA @ 145..150 = `\n    `
+                    TRIVIA @ 145..150 = `\n    `
                     TOKEN @ 150..151 = `}`
                 TOKEN @ 151..152 = `,`
                 TRIVIA @ 152..157 = `\n    `
@@ -176,7 +185,7 @@ ROOT @ 0..187 = `{\n    primary = {\n        con = 50,\n        size = 60\n    }
                     OP, TOKEN @ 169..170 = `+`
                     TRIVIA @ 170..171 = ` `
                     NUMBER, TOKEN, VALUE @ 171..172 = `2`
-                    TRIVIA @ 172..173 = `\n`
+                TRIVIA @ 172..173 = `\n`
                 TOKEN @ 173..174 = `}`
             OP, TOKEN @ 174..175 = `.`
             IDENTIFIER, TOKEN, VALUE @ 175..181 = `health`

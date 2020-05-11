@@ -36,6 +36,11 @@ impl<Tok: TokenKind> Lexer<Tok> {
         }
     }
 
+    pub(crate) fn set_input(&mut self, input: Input) {
+        self.input = input;
+        self.peeked = None;
+    }
+
     pub fn input(&self) -> &Input {
         &self.input
     }

@@ -7,8 +7,11 @@ pub enum Token {
     #[display(fmt = "error")]
     Error,
 
-    #[display(fmt = "` `, `\t`, `\n`")]
+    #[display(fmt = "` `, `\t`")]
     Whitespace,
+
+    #[display(fmt = "`\n`, `\r\n`")]
+    LineEnd,
 
     #[display(fmt = "comment")]
     Comment,
@@ -85,6 +88,7 @@ impl TokenKind for Token {
     fn is_mergeable(self, other: Self) -> bool {
         match (self, other) {
             (Self::Error, Self::Error) => true,
+            (Self::LineEnd, Self::LineEnd) => true,
             _ => false,
         }
     }
@@ -94,6 +98,14 @@ impl TokenKind for Token {
         let input = lexer.input_mut();
         let i = input.as_ref();
         let peeked = i.chars().next()?;
+
+        if i.starts_with("\r\n") {
+            return Some((Token::LineEnd, input.chomp(2)));
+        }
+        if i.starts_with('\n') {
+            return Some((Token::LineEnd, input.chomp(1)));
+        }
+
         if peeked.is_whitespace() {
             let rest = i.chars().take_while(|c| c.is_whitespace()).count();
 
@@ -163,7 +175,7 @@ impl TokenKind for Token {
         if peeked == '!' {
             return Some((Token::OpBang, input.chomp(1)));
         }
-        if peeked == '+' {
+        if peeked == '+'  && !i.starts_with("+++") { // TODO: Dirty hack
             return Some((Token::OpPlus, input.chomp(1)));
         }
         if peeked == '*' {

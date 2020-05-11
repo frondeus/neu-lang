@@ -21,9 +21,9 @@ ROOT @ 0..105 = `{\n    label = \"HP: ${ 2 + 3 }\",\n    link = \"[AB](http://go
                 STRVALUE, TOKEN @ 15..19 = `HP: `
                 INTERPOLATED, STRVALUE @ 19..29 = `${ 2 + 3 }`
                     TOKEN @ 19..21 = `${`
-                    BINARY, VALUE @ 22..27 = `2 + 3`
+                    BINARY, VALUE @ 21..27 = ` 2 + 3`
                         TRIVIA @ 21..22 = ` `
-                        ERROR, VALUE @ 22..23 = `2`
+                        NUMBER, TOKEN, VALUE @ 22..23 = `2`
                         TRIVIA @ 23..24 = ` `
                         OP, TOKEN @ 24..25 = `+`
                         TRIVIA @ 25..26 = ` `

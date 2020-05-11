@@ -252,7 +252,7 @@ pub fn eval(id: NodeId, nodes: &Arena, input: &str) -> EvalResult {
 mod tests {
     use super::*;
     use neu_parser::State;
-    use neu_syntax::{lexers::neu::Lexer, neu::parser};
+    use neu_syntax::{lexers::neu::Lexer, parsers::neu::parser};
 
     #[test]
     fn eval_tests() {

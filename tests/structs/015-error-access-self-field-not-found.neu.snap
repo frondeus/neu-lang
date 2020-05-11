@@ -8,21 +8,23 @@
 [lexer]
 [
     "OpenC `{`",
-    "Whitespace `\n    `",
+    "LineEnd `\n`",
+    "Whitespace `    `",
     "Identifier `foo`",
     "Whitespace ` `",
     "OpAssign `=`",
     "Whitespace ` `",
     "Number `10`",
     "Comma `,`",
-    "Whitespace `\n    `",
+    "LineEnd `\n`",
+    "Whitespace `    `",
     "Identifier `bar`",
     "Whitespace ` `",
     "OpAssign `=`",
     "Whitespace ` `",
     "OpDot `.`",
     "Identifier `baz`",
-    "Whitespace `\n`",
+    "LineEnd `\n`",
     "CloseC `}`",
 ]
 
@@ -45,7 +47,7 @@ ROOT @ 0..32 = `{\n    foo = 10,\n    bar = .baz\n}`
         UNARY, VALUE @ 26..30 = `.baz`
             OP, TOKEN @ 26..27 = `.`
             IDENTIFIER, TOKEN, VALUE @ 27..30 = `baz`
-            TRIVIA @ 30..31 = `\n`
+        TRIVIA @ 30..31 = `\n`
         TOKEN @ 31..32 = `}`
 
 

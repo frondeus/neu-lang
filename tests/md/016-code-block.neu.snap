@@ -69,11 +69,11 @@ ROOT @ 0..197 = `md#\"\n```\n{\n    health = {\n        max = (60 + 70) / 10,\n 
                         UNARY, VALUE @ 72..76 = `.max`
                             OP, TOKEN @ 72..73 = `.`
                             IDENTIFIER, TOKEN, VALUE @ 73..76 = `max`
-                            TRIVIA @ 76..81 = `\n    `
+                        TRIVIA @ 76..81 = `\n    `
                         TOKEN @ 81..82 = `}`
-                        TRIVIA @ 82..83 = `\n`
+                    TRIVIA @ 82..83 = `\n`
                     TOKEN @ 83..84 = `}`
-                    TRIVIA @ 84..85 = `\n`
+                TRIVIA @ 84..85 = `\n`
         MD_PARAGRAPH, MD_VALUE @ 90..107 = `Here should eval\n`
             MD_TEXT @ 90..106 = `Here should eval`
         MD_VALUE @ 107..123 = ````neu\n5 + 2\n````
@@ -84,7 +84,7 @@ ROOT @ 0..197 = `md#\"\n```\n{\n    health = {\n        max = (60 + 70) / 10,\n 
                     OP, TOKEN @ 116..117 = `+`
                     TRIVIA @ 117..118 = ` `
                     NUMBER, TOKEN, VALUE @ 118..119 = `2`
-                    TRIVIA @ 119..120 = `\n`
+                TRIVIA @ 119..120 = `\n`
         MD_PARAGRAPH, MD_VALUE @ 125..142 = `Here is intended\n`
             MD_TEXT @ 125..141 = `Here is intended`
         MD_VALUE @ 147..153 = `2 + 5\n`
@@ -95,7 +95,7 @@ ROOT @ 0..197 = `md#\"\n```\n{\n    health = {\n        max = (60 + 70) / 10,\n 
                     OP, TOKEN @ 149..150 = `+`
                     TRIVIA @ 150..151 = ` `
                     NUMBER, TOKEN, VALUE @ 151..152 = `5`
-                    TRIVIA @ 152..153 = `\n`
+                TRIVIA @ 152..153 = `\n`
         MD_PARAGRAPH, MD_VALUE @ 154..173 = `But here shouldn\'t\n`
             MD_TEXT @ 154..172 = `But here shouldn\'t`
         MD_CODEBLOCK, MD_VALUE @ 173..193 = ````example\n5 + 2\n````

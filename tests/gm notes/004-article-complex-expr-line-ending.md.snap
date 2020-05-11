@@ -1,7 +1,8 @@
 `````
 +++ sesja:a88907fd +++
 title = "Pośród Pradawnych Drzew"
-a = 1 + 2
+a = 1
+    + 2
 +++
 
 Ala ma **kota**
@@ -9,8 +10,8 @@ Ala ma **kota**
 `````
 
 [parser]
-ROOT @ 0..89 = `+++ sesja:a88907fd +++\ntitle = \"Po\u{15b}r\u{f3}d Pradawnych Drzew\"\na = 1 + 2\n+++\n\nAla ma **kota**`
-    ARTICLEITEM @ 0..89 = `+++ sesja:a88907fd +++\ntitle = \"Po\u{15b}r\u{f3}d Pradawnych Drzew\"\na = 1 + 2\n+++\n\nAla ma **kota**`
+ROOT @ 0..93 = `+++ sesja:a88907fd +++\ntitle = \"Po\u{15b}r\u{f3}d Pradawnych Drzew\"\na = 1\n    + 2\n+++\n\nAla ma **kota**`
+    ARTICLEITEM @ 0..93 = `+++ sesja:a88907fd +++\ntitle = \"Po\u{15b}r\u{f3}d Pradawnych Drzew\"\na = 1\n    + 2\n+++\n\nAla ma **kota**`
         TOKEN @ 0..3 = `+++`
         TOKEN, TRIVIA @ 3..4 = ` `
         IDENTIFIER, TOKEN @ 4..9 = `sesja`
@@ -19,7 +20,7 @@ ROOT @ 0..89 = `+++ sesja:a88907fd +++\ntitle = \"Po\u{15b}r\u{f3}d Pradawnych D
         TOKEN, TRIVIA @ 18..19 = ` `
         TOKEN @ 19..22 = `+++`
         TOKEN, TRIVIA @ 22..23 = `\n`
-        STRUCT @ 23..69 = `title = \"Po\u{15b}r\u{f3}d Pradawnych Drzew\"\na = 1 + 2\n`
+        STRUCT @ 23..73 = `title = \"Po\u{15b}r\u{f3}d Pradawnych Drzew\"\na = 1\n    + 2\n`
             IDENTIFIER, KEY, TOKEN @ 23..28 = `title`
             TRIVIA @ 28..29 = ` `
             TOKEN @ 29..30 = `=`
@@ -33,19 +34,19 @@ ROOT @ 0..89 = `+++ sesja:a88907fd +++\ntitle = \"Po\u{15b}r\u{f3}d Pradawnych D
             TRIVIA @ 60..61 = ` `
             TOKEN @ 61..62 = `=`
             TRIVIA @ 62..63 = ` `
-            BINARY, VALUE @ 63..68 = `1 + 2`
+            BINARY, VALUE @ 63..72 = `1\n    + 2`
                 NUMBER, TOKEN, VALUE @ 63..64 = `1`
-                TRIVIA @ 64..65 = ` `
-                OP, TOKEN @ 65..66 = `+`
-                TRIVIA @ 66..67 = ` `
-                NUMBER, TOKEN, VALUE @ 67..68 = `2`
-            TOKEN @ 68..69 = `\n`
-        TOKEN @ 69..72 = `+++`
-        ARTICLEBODY @ 72..89 = `\n\nAla ma **kota**`
-            MD_PARAGRAPH @ 74..89 = `Ala ma **kota**`
-                MD_TEXT @ 74..81 = `Ala ma `
-                MD_STRONG @ 81..89 = `**kota**`
-                    MD_TEXT @ 83..87 = `kota`
+                TRIVIA @ 64..69 = `\n    `
+                OP, TOKEN @ 69..70 = `+`
+                TRIVIA @ 70..71 = ` `
+                NUMBER, TOKEN, VALUE @ 71..72 = `2`
+            TOKEN @ 72..73 = `\n`
+        TOKEN @ 73..76 = `+++`
+        ARTICLEBODY @ 76..93 = `\n\nAla ma **kota**`
+            MD_PARAGRAPH @ 78..93 = `Ala ma **kota**`
+                MD_TEXT @ 78..85 = `Ala ma `
+                MD_STRONG @ 85..93 = `**kota**`
+                    MD_TEXT @ 87..91 = `kota`
 
 
 ### No Errors ###

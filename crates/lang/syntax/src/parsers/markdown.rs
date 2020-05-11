@@ -94,7 +94,7 @@ fn parse_start<'a, Token>(
                             builder.state_mut().lexer_mut().input_mut().set_range(range);
                             builder.name(Nodes::Virtual);
                             builder.name(Nodes::Interpolated);
-                            builder.parse(crate::neu::parser());
+                            builder.parse(crate::parsers::neu::parser());
 
                             *builder.state_mut().lexer_mut().input_mut() = saved;
                         }),
@@ -216,12 +216,11 @@ fn parse_event<'a, Token>(
                     builder.state_mut().lexer_mut().input_mut().set_range(range);
                     builder.name(Nodes::Virtual);
                     builder.name(Nodes::Interpolated);
-                    builder.parse(crate::neu::parser());
+                    builder.parse(crate::parsers::neu::parser());
 
                     *builder.state_mut().lexer_mut().input_mut() = saved;
                 }),
             );
-            //let lexer = MainLexer::build(input.into());
         }
         Event::Html(_span) => todo!("Html"),
         Event::FootnoteReference(_span) => todo!("FootnoteReference"),

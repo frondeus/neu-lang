@@ -8,7 +8,8 @@
 [lexer]
 [
     "OpenC `{`",
-    "Whitespace `\n    `",
+    "LineEnd `\n`",
+    "Whitespace `    `",
     "Identifier `health`",
     "Whitespace ` `",
     "OpAssign `=`",
@@ -17,7 +18,8 @@
     "Comma `,`",
     "Whitespace ` `",
     "Comment `// foo }`",
-    "Whitespace `\n    `",
+    "LineEnd `\n`",
+    "Whitespace `    `",
     "Identifier `sanity`",
     "Whitespace ` `",
     "OpAssign `=`",
@@ -26,7 +28,7 @@
     "Comma `,`",
     "Whitespace ` `",
     "Comment `//bar`",
-    "Whitespace `\n`",
+    "LineEnd `\n`",
     "CloseC `}`",
 ]
 
@@ -41,14 +43,16 @@ ROOT @ 0..51 = `{\n    health = 4, // foo }\n    sanity = 10, //bar\n}`
         TRIVIA @ 14..15 = ` `
         NUMBER, TOKEN, VALUE @ 15..16 = `4`
         TOKEN @ 16..17 = `,`
-        TRIVIA @ 17..31 = ` // foo }\n    `
+        TRIVIA @ 17..26 = ` // foo }`
+        TRIVIA @ 26..31 = `\n    `
         IDENTIFIER, KEY, TOKEN @ 31..37 = `sanity`
         TRIVIA @ 37..38 = ` `
         TOKEN @ 38..39 = `=`
         TRIVIA @ 39..40 = ` `
         NUMBER, TOKEN, VALUE @ 40..42 = `10`
         TOKEN @ 42..43 = `,`
-        TRIVIA @ 43..50 = ` //bar\n`
+        TRIVIA @ 43..49 = ` //bar`
+        TRIVIA @ 49..50 = `\n`
         TOKEN @ 50..51 = `}`
 
 

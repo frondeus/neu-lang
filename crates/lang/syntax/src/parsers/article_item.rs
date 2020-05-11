@@ -1,13 +1,14 @@
-use crate::common::separated;
-use crate::markdown::markdown;
+use crate::parsers::common::separated;
+use crate::parsers::markdown::markdown;
 use crate::{
     lexers::{
         article_item_body::Token as BodyToken, article_item_file::Token as FileToken,
         article_item_header::Token as HeaderToken, neu::Token as NeuToken,
     },
-    neu, Nodes,
+    parsers::neu, Nodes,
 };
 use neu_parser::*;
+use crate::parsers::neu::{leading_trivia, trailing_trivia};
 
 pub fn parser() -> impl Parser<FileToken> {
     node(|builder| {
@@ -68,7 +69,14 @@ fn main_item_header() -> impl Parser<HeaderToken> {
             builder.parse(separated(
                 node(|builder| {
                     builder.name(Nodes::Virtual);
-                    let ctx = Context::default();
+
+                    let leading_trivia = leading_trivia();
+                    let trailing_trivia = trailing_trivia();
+
+                    let ctx = Context {
+                        leading_trivia: Some(&leading_trivia),
+                        trailing_trivia: Some(&trailing_trivia),
+                    };
                     builder.parse_mode(&ctx, struct_key_val());
                 }),
                 HeaderToken::NewLine,
@@ -83,11 +91,8 @@ fn main_item_header() -> impl Parser<HeaderToken> {
 fn struct_key_val() -> impl Parser<NeuToken> {
     node(|builder| {
         builder.name(Nodes::Virtual);
-        builder.parse(neu::trivia());
         builder.parse(neu::strukt_key());
-        builder.parse(neu::trivia());
         builder.parse(token(NeuToken::OpAssign));
-        builder.parse(neu::trivia());
         builder.parse(neu::value());
     })
 }

@@ -43,11 +43,12 @@ ROOT @ 0..149 = `{\n    health = {\n        max = 100,\n        desc = {\n      
                     IDENTIFIER, TOKEN, VALUE @ 71..77 = `health`
                     OP, TOKEN @ 77..78 = `.`
                     IDENTIFIER, TOKEN, VALUE @ 78..81 = `max`
-                    TRIVIA @ 81..140 = ` // TODO: Here we have semi-circular field access.\n        `
+                    TRIVIA @ 81..131 = ` // TODO: Here we have semi-circular field access.`
+                TRIVIA @ 131..140 = `\n        `
                 TOKEN @ 140..141 = `}`
-                TRIVIA @ 141..146 = `\n    `
+            TRIVIA @ 141..146 = `\n    `
             TOKEN @ 146..147 = `}`
-            TRIVIA @ 147..148 = `\n`
+        TRIVIA @ 147..148 = `\n`
         TOKEN @ 148..149 = `}`
 
 

@@ -1,0 +1,94 @@
+`````
++++ sesja:a88907fd +++
+title = "Pośród Pradawnych Drzew"
+when = "20.10.2019"
+desc = "Sesja jednostrzałowa dla Macek II RP"
+chrono = "20.06.1925"
+age = 5
++++
+
+Ala ma **kota**.
+
+```
+4 + .age
+```
+
+`````
+
+[parser]
+ROOT @ 0..195 = `+++ sesja:a88907fd +++\ntitle = \"Po\u{15b}r\u{f3}d Pradawnych Drzew\"\nwhen = \"20.10.2019\"\ndesc = \"Sesja jednostrza\u{142}owa dla Macek II RP\"\nchrono = \"20.06.1925\"\nage = 5\n+++\n\nAla ma **kota**.\n\n```\n4 + .age\n````
+    ARTICLEITEM @ 0..195 = `+++ sesja:a88907fd +++\ntitle = \"Po\u{15b}r\u{f3}d Pradawnych Drzew\"\nwhen = \"20.10.2019\"\ndesc = \"Sesja jednostrza\u{142}owa dla Macek II RP\"\nchrono = \"20.06.1925\"\nage = 5\n+++\n\nAla ma **kota**.\n\n```\n4 + .age\n````
+        TOKEN @ 0..3 = `+++`
+        TOKEN, TRIVIA @ 3..4 = ` `
+        IDENTIFIER, TOKEN @ 4..9 = `sesja`
+        TOKEN @ 9..10 = `:`
+        ARTICLEITEMID, TOKEN @ 10..18 = `a88907fd`
+        TOKEN, TRIVIA @ 18..19 = ` `
+        TOKEN @ 19..22 = `+++`
+        TOKEN, TRIVIA @ 22..23 = `\n`
+        STRUCT @ 23..156 = `title = \"Po\u{15b}r\u{f3}d Pradawnych Drzew\"\nwhen = \"20.10.2019\"\ndesc = \"Sesja jednostrza\u{142}owa dla Macek II RP\"\nchrono = \"20.06.1925\"\nage = 5\n`
+            IDENTIFIER, KEY, TOKEN @ 23..28 = `title`
+            TRIVIA @ 28..29 = ` `
+            TOKEN @ 29..30 = `=`
+            TRIVIA @ 30..31 = ` `
+            STRING, VALUE @ 31..58 = `\"Po\u{15b}r\u{f3}d Pradawnych Drzew\"`
+                TOKEN @ 31..32 = `\"`
+                STRVALUE, TOKEN @ 32..57 = `Po\u{15b}r\u{f3}d Pradawnych Drzew`
+                TOKEN @ 57..58 = `\"`
+            TOKEN @ 58..59 = `\n`
+            IDENTIFIER, KEY, TOKEN @ 59..63 = `when`
+            TRIVIA @ 63..64 = ` `
+            TOKEN @ 64..65 = `=`
+            TRIVIA @ 65..66 = ` `
+            STRING, VALUE @ 66..78 = `\"20.10.2019\"`
+                TOKEN @ 66..67 = `\"`
+                STRVALUE, TOKEN @ 67..77 = `20.10.2019`
+                TOKEN @ 77..78 = `\"`
+            TOKEN @ 78..79 = `\n`
+            IDENTIFIER, KEY, TOKEN @ 79..83 = `desc`
+            TRIVIA @ 83..84 = ` `
+            TOKEN @ 84..85 = `=`
+            TRIVIA @ 85..86 = ` `
+            STRING, VALUE @ 86..125 = `\"Sesja jednostrza\u{142}owa dla Macek II RP\"`
+                TOKEN @ 86..87 = `\"`
+                STRVALUE, TOKEN @ 87..124 = `Sesja jednostrza\u{142}owa dla Macek II RP`
+                TOKEN @ 124..125 = `\"`
+            TOKEN @ 125..126 = `\n`
+            IDENTIFIER, KEY, TOKEN @ 126..132 = `chrono`
+            TRIVIA @ 132..133 = ` `
+            TOKEN @ 133..134 = `=`
+            TRIVIA @ 134..135 = ` `
+            STRING, VALUE @ 135..147 = `\"20.06.1925\"`
+                TOKEN @ 135..136 = `\"`
+                STRVALUE, TOKEN @ 136..146 = `20.06.1925`
+                TOKEN @ 146..147 = `\"`
+            TOKEN @ 147..148 = `\n`
+            IDENTIFIER, KEY, TOKEN @ 148..151 = `age`
+            TRIVIA @ 151..152 = ` `
+            TOKEN @ 152..153 = `=`
+            TRIVIA @ 153..154 = ` `
+            NUMBER, TOKEN, VALUE @ 154..155 = `5`
+            TOKEN @ 155..156 = `\n`
+        TOKEN @ 156..159 = `+++`
+        ARTICLEBODY @ 159..195 = `\n\nAla ma **kota**.\n\n```\n4 + .age\n````
+            MD_PARAGRAPH @ 161..178 = `Ala ma **kota**.\n`
+                MD_TEXT @ 161..168 = `Ala ma `
+                MD_STRONG @ 168..176 = `**kota**`
+                    MD_TEXT @ 170..174 = `kota`
+                MD_TEXT @ 176..177 = `.`
+             @ 179..195 = ````\n4 + .age\n````
+                INTERPOLATED, ROOT @ 183..191 = `4 + .age`
+                    BINARY, VALUE @ 183..191 = `4 + .age`
+                        NUMBER, TOKEN, VALUE @ 183..184 = `4`
+                        TRIVIA @ 184..185 = ` `
+                        OP, TOKEN @ 185..186 = `+`
+                        TRIVIA @ 186..187 = ` `
+                        UNARY, VALUE @ 187..191 = `.age`
+                            OP, TOKEN @ 187..188 = `.`
+                            IDENTIFIER, TOKEN, VALUE @ 188..191 = `age`
+                    TRIVIA @ 191..192 = `\n`
+
+
+### No Errors ###
+
+

@@ -9,22 +9,25 @@
 [lexer]
 [
     "OpenC `{`",
-    "Whitespace `\n    `",
+    "LineEnd `\n`",
+    "Whitespace `    `",
     "Identifier `health`",
     "Whitespace ` `",
     "OpAssign `=`",
     "Whitespace ` `",
     "OpenC `{`",
-    "Whitespace `\n        `",
+    "LineEnd `\n`",
+    "Whitespace `        `",
     "Identifier `value`",
     "Whitespace ` `",
     "OpAssign `=`",
     "Whitespace ` `",
     "OpDot `.`",
     "Identifier `value`",
-    "Whitespace `\n    `",
+    "LineEnd `\n`",
+    "Whitespace `    `",
     "CloseC `}`",
-    "Whitespace `\n`",
+    "LineEnd `\n`",
     "CloseC `}`",
     "OpDot `.`",
     "Identifier `health`",
@@ -53,9 +56,9 @@ ROOT @ 0..60 = `{\n    health = {\n        value = .value\n    }\n}.health.value
                     UNARY, VALUE @ 33..39 = `.value`
                         OP, TOKEN @ 33..34 = `.`
                         IDENTIFIER, TOKEN, VALUE @ 34..39 = `value`
-                        TRIVIA @ 39..44 = `\n    `
+                    TRIVIA @ 39..44 = `\n    `
                     TOKEN @ 44..45 = `}`
-                    TRIVIA @ 45..46 = `\n`
+                TRIVIA @ 45..46 = `\n`
                 TOKEN @ 46..47 = `}`
             OP, TOKEN @ 47..48 = `.`
             IDENTIFIER, TOKEN, VALUE @ 48..54 = `health`

@@ -1,6 +1,6 @@
-use crate::CoreNodes as Nodes;
+use crate::{CoreNodes as Nodes, CoreNodes};
 use crate::{
-    Context, Error, Name, Node, NodeBuilder, OptionExt, Parser, PeekableIterator, State, TokenKind,
+    Context, Error, Name, Node, NodeBuilder, OptionExt, Parser, State, TokenKind,
 };
 use std::cell::RefCell;
 use std::marker::PhantomData;
@@ -60,7 +60,35 @@ where
 
     pub fn parser(&self) -> impl Parser<Tok> + Clone {
         let opt = self.clone();
+        move |state: &mut State<Tok>, ctx: &Context<Tok>| {
 
+            let mut builder = NodeBuilder::new(state, ctx);
+            builder.parse(opt.next.clone()); // Left
+
+            loop {
+                let op_token = builder.peek_token();
+                let (op_assoc, op_bp) = match (opt.bp)(op_token.as_ref().copied()) {
+                    Some(op) if op.1 > opt.rbp => op,
+                    _ => {
+                        builder.name(CoreNodes::Virtual);
+                        return builder.build().0;
+                    }
+                };
+
+                (opt.f)(&mut builder, op_token);
+                let new_op_bp = match op_assoc {
+                    Assoc::Left => op_bp + 1,
+                    Assoc::Right => op_bp - 1,
+                };
+                builder.parse(opt.rbp(new_op_bp).parser());
+
+                let (left, state, ctx) = builder.build();
+                builder = NodeBuilder::new(state, ctx);
+                builder.add(left);
+            }
+        }
+
+        /*
         move |state: &mut State<Tok>, ctx: &Context<Tok>| {
             let mut left = opt.next.parse(state, ctx);
             loop {
@@ -81,6 +109,7 @@ where
                 left = builder.build();
             }
         }
+         */
     }
 }
 
@@ -89,7 +118,7 @@ pub fn node_mut<Tok: TokenKind>(mut f: impl FnMut(&mut NodeBuilder<Tok>)) -> imp
         f: RefCell::new(move |state: &mut State<Tok>, ctx: &Context<Tok>| {
             let mut builder = NodeBuilder::new(state, ctx);
             f(&mut builder);
-            builder.build()
+            builder.build().0
         }),
     }
 }
@@ -98,7 +127,7 @@ pub fn node<Tok: TokenKind>(f: impl Fn(&mut NodeBuilder<Tok>) + Clone) -> impl P
     move |state: &mut State<Tok>, ctx: &Context<Tok>| {
         let mut builder = NodeBuilder::new(state, ctx);
         f(&mut builder);
-        builder.build()
+        builder.build().0
     }
 }
 

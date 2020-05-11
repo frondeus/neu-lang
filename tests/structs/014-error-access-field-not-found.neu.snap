@@ -7,14 +7,15 @@
 [lexer]
 [
     "OpenC `{`",
-    "Whitespace `\n    `",
+    "LineEnd `\n`",
+    "Whitespace `    `",
     "Identifier `foo`",
     "Whitespace ` `",
     "OpAssign `=`",
     "Whitespace ` `",
     "Number `10`",
     "Comma `,`",
-    "Whitespace `\n`",
+    "LineEnd `\n`",
     "CloseC `}`",
     "OpDot `.`",
     "Identifier `x`",

@@ -10,28 +10,32 @@
 [lexer]
 [
     "OpenC `{`",
-    "Whitespace `\n    `",
+    "LineEnd `\n`",
+    "Whitespace `    `",
     "Identifier `foo`",
     "Whitespace ` `",
     "OpAssign `=`",
     "Whitespace ` `",
     "OpenC `{`",
-    "Whitespace `\n        `",
+    "LineEnd `\n`",
+    "Whitespace `        `",
     "Identifier `bar`",
     "Whitespace ` `",
     "OpAssign `=`",
     "Whitespace ` `",
     "Number `50`",
     "Comma `,`",
-    "Whitespace `\n        `",
+    "LineEnd `\n`",
+    "Whitespace `        `",
     "Identifier `baz`",
     "Whitespace ` `",
     "OpAssign `=`",
     "Whitespace ` `",
     "Number `60`",
-    "Whitespace `\n    `",
+    "LineEnd `\n`",
+    "Whitespace `    `",
     "CloseC `}`",
-    "Whitespace `\n`",
+    "LineEnd `\n`",
     "CloseC `}`",
     "OpDot `.`",
     "Identifier `foo`",
@@ -67,7 +71,7 @@ ROOT @ 0..64 = `{\n    foo = {\n        bar = 50,\n        baz = 60\n    }\n}.fo
                     NUMBER, TOKEN, VALUE @ 46..48 = `60`
                     TRIVIA @ 48..53 = `\n    `
                     TOKEN @ 53..54 = `}`
-                    TRIVIA @ 54..55 = `\n`
+                TRIVIA @ 54..55 = `\n`
                 TOKEN @ 55..56 = `}`
             OP, TOKEN @ 56..57 = `.`
             IDENTIFIER, TOKEN, VALUE @ 57..60 = `foo`

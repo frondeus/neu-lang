@@ -1,5 +1,5 @@
-use crate::common::separated;
-use crate::markdown::inner_md_string;
+use crate::parsers::common::separated;
+use crate::parsers::markdown::inner_md_string;
 use crate::{
     lexers::{neu::Token, string::Token as StrToken},
     Nodes,
@@ -9,10 +9,14 @@ use neu_parser::*;
 pub fn parser() -> impl Parser<Token> {
     node(|builder| {
         builder.name(Nodes::Root);
-        let trivia = trivia();
-        let ctx = Context::new(&trivia);
+        let leading_trivia = leading_trivia();
+        let trailing_trivia = trailing_trivia();
+        let ctx = Context {
+            leading_trivia: Some(&leading_trivia),
+            trailing_trivia: Some(&trailing_trivia),
+        };
         builder.parse_ctx(&ctx, value());
-        builder.parse(token(None));
+        builder.parse_ctx(&ctx, token(None));
     })
 }
 
@@ -159,8 +163,12 @@ fn inner_string() -> impl Parser<StrToken> {
                     builder.parse(node(|builder| {
                         builder.name(Nodes::Interpolated);
                         builder.parse(token(StrToken::OpenI));
-                        let trivia = trivia();
-                        let ctx = Context::new(&trivia);
+                        let leading_trivia = leading_trivia();
+                        let trailing_trivia = trailing_trivia();
+                        let ctx = Context {
+                            leading_trivia: Some(&leading_trivia),
+                            trailing_trivia: Some(&trailing_trivia),
+                        };
                         builder.parse_mode(&ctx, value());
                         builder.parse(token(StrToken::CloseI));
                     }));
@@ -190,9 +198,21 @@ fn number() -> impl Parser<Token> {
     named(token(Token::Number), Nodes::Number)
 }
 
-pub(crate) fn trivia() -> impl Parser<Token> {
+pub(crate) fn trailing_trivia() -> impl Parser<Token> {
     node(|builder| {
         builder.name(Nodes::Trivia);
+        while let Some(Token::Whitespace) | Some(Token::Comment) = builder.peek_token() {
+            builder.next_token();
+        }
+    })
+}
+
+pub(crate) fn leading_trivia() -> impl Parser<Token> {
+    node(|builder| {
+        builder.name(Nodes::Trivia);
+        while let Some(Token::LineEnd) = builder.peek_token() {
+            builder.next_token();
+        }
         while let Some(Token::Whitespace) | Some(Token::Comment) = builder.peek_token() {
             builder.next_token();
         }

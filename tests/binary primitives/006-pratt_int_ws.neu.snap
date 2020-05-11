@@ -1,0 +1,42 @@
+```
+4 + 2
+ * 5
+```
+
+[lexer]
+[
+    "Number `4`",
+    "Whitespace ` `",
+    "OpPlus `+`",
+    "Whitespace ` `",
+    "Number `2`",
+    "LineEnd `\n`",
+    "Whitespace ` `",
+    "OpStar `*`",
+    "Whitespace ` `",
+    "Number `5`",
+]
+
+[parser]
+ROOT @ 0..10 = `4 + 2\n * 5`
+    BINARY, VALUE @ 0..10 = `4 + 2\n * 5`
+        NUMBER, TOKEN, VALUE @ 0..1 = `4`
+        TRIVIA @ 1..2 = ` `
+        OP, TOKEN @ 2..3 = `+`
+        TRIVIA @ 3..4 = ` `
+        BINARY, VALUE @ 4..10 = `2\n * 5`
+            NUMBER, TOKEN, VALUE @ 4..5 = `2`
+            TRIVIA @ 5..7 = `\n `
+            OP, TOKEN @ 7..8 = `*`
+            TRIVIA @ 8..9 = ` `
+            NUMBER, TOKEN, VALUE @ 9..10 = `5`
+
+
+### No Errors ###
+
+
+[eval]
+`14`
+
+### No Errors ###
+

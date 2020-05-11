@@ -15,7 +15,7 @@ impl TokenKind for Token {
     fn is_mergeable(self, other: Self) -> bool {
         match (self, other) {
             (Self::Text, Self::Text) => true,
-            _ => false,
+            //_ => false,
         }
     }
 
