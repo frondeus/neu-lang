@@ -1,12 +1,7 @@
 mod nodes;
 
 pub mod lexers;
-pub mod parsers {
-    pub(crate) mod common;
-    pub mod article_item;
-    pub mod markdown;
-    pub mod neu;
-}
+pub mod parsers;
 
 
 pub(crate) mod context;

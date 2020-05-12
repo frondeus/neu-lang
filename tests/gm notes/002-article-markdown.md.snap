@@ -21,7 +21,7 @@ ROOT @ 0..168 = `+++ sesja:a88907fd +++\ntitle = \"Po\u{15b}r\u{f3}d Pradawnych 
         TOKEN, TRIVIA @ 18..19 = ` `
         TOKEN @ 19..22 = `+++`
         TOKEN, TRIVIA @ 22..23 = `\n`
-        STRUCT @ 23..148 = `title = \"Po\u{15b}r\u{f3}d Pradawnych Drzew\"\nwhen = \"20.10.2019\"\ndesc = \"Sesja jednostrza\u{142}owa dla Macek II RP\"\nchrono = \"20.06.1925\"\n`
+        STRUCT, VALUE @ 23..148 = `title = \"Po\u{15b}r\u{f3}d Pradawnych Drzew\"\nwhen = \"20.10.2019\"\ndesc = \"Sesja jednostrza\u{142}owa dla Macek II RP\"\nchrono = \"20.06.1925\"\n`
             IDENTIFIER, KEY, TOKEN @ 23..28 = `title`
             TRIVIA @ 28..29 = ` `
             TOKEN @ 29..30 = `=`

@@ -20,6 +20,7 @@ mod error;
 mod parser;
 mod parsers;
 mod state;
+mod children;
 
 #[macro_use]
 mod node;
@@ -38,3 +39,4 @@ pub use state::*;
 
 pub use node::*;
 pub use node_builder::*;
+pub use children::*;

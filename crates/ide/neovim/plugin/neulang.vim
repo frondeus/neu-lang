@@ -9,7 +9,7 @@ if !exists('s:jobid')
 endif
 
 
-let s:scriptdir = resolve(expand('<sfile>:p:h') . '/../../../')
+let s:scriptdir = resolve(expand('<sfile>:p:h') . '/../../../../')
 if !exists('g:neulang_program')
     let g:neulang_program = s:scriptdir . '/target/release/neu-nvim'
 endif
@@ -39,33 +39,14 @@ function! s:ConfigureJob(jobid)
     augroup neulang
         autocmd!
 
-        command! -nargs=+ Add :call s:Add(<f-args>)
-        command! -nargs=+ Multiply :call s:Multiply(<f-args>)
-
         autocmd BufReadPre,FileReadPre *.neu :call s:Load()
     augroup END
 endfunction
 
-let s:MsgAdd = 'add'
-let s:MsgMultiply = 'multiply'
 let s:MsgLoad = 'load'
 
 function! s:Load(...)
     call rpcnotify(s:jobid, s:MsgLoad)
-endfunction
-
-function! s:Add(...)
-  let s:p = get(a:, 1, 0)
-  let s:q = get(a:, 2, 0)
-
-  call rpcnotify(s:jobid, s:MsgAdd, str2nr(s:p), str2nr(s:q))
-endfunction
-
-function! s:Multiply(...)
-  let s:p = get(a:, 1, 1)
-  let s:q = get(a:, 2, 1)
-
-  call rpcnotify(s:jobid, s:MsgMultiply, str2nr(s:p), str2nr(s:q))
 endfunction
 
 function! s:OnStderr(id, data, event) dict

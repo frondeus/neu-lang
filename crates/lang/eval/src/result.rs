@@ -3,6 +3,7 @@ use crate::value::Value;
 use neu_parser::NodeId;
 use std::fmt;
 
+#[derive(Debug)]
 pub struct EvalResult {
     pub value: Option<Value>,
     pub errors: Vec<(NodeId, Error)>,

@@ -1,13 +1,11 @@
-mod children;
 mod error;
 mod markdown;
 mod result;
 mod value;
 
 use crate::result::EvalResult;
-use children::Children;
 use error::Error;
-use neu_parser::{Arena, Node, NodeId};
+use neu_parser::{Arena, Node, NodeId, Children};
 use neu_syntax::Nodes;
 use std::collections::BTreeMap;
 use value::Value;

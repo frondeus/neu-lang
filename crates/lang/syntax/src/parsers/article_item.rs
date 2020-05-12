@@ -65,6 +65,7 @@ fn main_item_header() -> impl Parser<HeaderToken> {
         builder.parse(opt_ws());
         builder.parse(req_trivia(HeaderToken::NewLine));
         builder.parse(node(|builder| {
+            builder.name(Nodes::Value);
             builder.name(Nodes::Struct);
             builder.parse(separated(
                 node(|builder| {

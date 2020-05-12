@@ -25,7 +25,6 @@ for file in ./tests/**/*.new; do
     cwd=$(pwd)
     cd "$DIR" || exit
     filename=$(basename -- "$ACTUAL")
-    #patch --ignore-whitespace --verbose < "$filename" || exit
     patch --ignore-whitespace < "$filename" || exit
     rm ./*.orig || exit
     cd "$cwd" || exit

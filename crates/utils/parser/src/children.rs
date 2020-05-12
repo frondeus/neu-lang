@@ -1,5 +1,4 @@
-use neu_parser::{Arena, Name, Node, NodeId};
-use neu_syntax::Nodes;
+use crate::{Arena, Name, Node, NodeId, CoreNodes};
 
 pub struct Children<'a, I> {
     iter: I,
@@ -15,7 +14,7 @@ where
     fn next(&mut self) -> Option<Self::Item> {
         let mut id = self.iter.next()?;
         let mut node = self.arena.get(id);
-        while node.is(Nodes::Trivia) {
+        while node.is(CoreNodes::Trivia) {
             id = self.iter.next()?;
             node = self.arena.get(id);
         }

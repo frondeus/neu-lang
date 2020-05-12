@@ -3,7 +3,7 @@
     health = {
         max = 100,
         desc = {
-            baz = health.max // TODO: Here we have semi-circular field access.
+            baz = health.max
         }
     }
 }
