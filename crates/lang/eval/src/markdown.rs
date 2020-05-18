@@ -93,7 +93,10 @@ impl<'a> Eval<'a> {
             let mut children = Children::new(node.children.iter().copied(), self.nodes);
             let (value_id, _) = children.find_node(Nodes::Value)?;
             let value = self.eager_eval(value_id, true)?;
-            str.push_str(&value.to_string());
+
+            str.push_str("<pre><code>");
+            str.push_str(&format!("{:#}", value));
+            end_vec.push("</code></pre>".into());
         }
 
         for id in node.children.iter() {

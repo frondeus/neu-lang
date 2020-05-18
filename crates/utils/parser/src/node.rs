@@ -49,7 +49,7 @@ impl fmt::Display for Name {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Node {
     pub span: TextRange,
     pub names: BTreeSet<Name>,

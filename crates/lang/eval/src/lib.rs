@@ -8,9 +8,9 @@ use error::Error;
 use neu_parser::{Arena, Node, NodeId, Children};
 use neu_syntax::Nodes;
 use std::collections::BTreeMap;
-use value::Value;
+pub use value::Value;
 
-struct Eval<'a> {
+pub struct Eval<'a> {
     pub nodes: &'a Arena,
     pub input: &'a str,
     pub errors: Vec<(NodeId, Error)>,
@@ -26,7 +26,7 @@ impl<'a> Eval<'a> {
     }
 
     #[allow(clippy::wrong_self_convention)]
-    fn into_eager(&mut self, value: Value, recursive: bool) -> Option<Value> {
+    pub fn into_eager(&mut self, value: Value, recursive: bool) -> Option<Value> {
         match value {
             Value::Lazy { id } => {
                 let v = self.eval(id)?;
@@ -150,7 +150,7 @@ impl<'a> Eval<'a> {
         }
     }
 
-    fn eval(&mut self, id: NodeId) -> Option<Value> {
+    pub fn eval(&mut self, id: NodeId) -> Option<Value> {
         let node = self.nodes.get(id);
 
         if node.is(Nodes::Root) {

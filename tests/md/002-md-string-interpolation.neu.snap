@@ -23,7 +23,7 @@ ROOT @ 0..21 = `md\"*foo `1 + 2` bar*\"`
 
 
 [eval]
-`"<p><em>foo 3 bar</em></p>"`
+`"<p><em>foo <pre><code>3</code></pre> bar</em></p>"`
 
 ### No Errors ###
 

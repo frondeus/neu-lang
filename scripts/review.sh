@@ -26,7 +26,7 @@ for file in ./tests/**/*.new; do
     cd "$DIR" || exit
     filename=$(basename -- "$ACTUAL")
     patch --ignore-whitespace < "$filename" || exit
-    rm ./*.orig || exit
+    #rm ./*.orig || exit
     cd "$cwd" || exit
   elif [[ $REPLY =~ ^[Rr]$ ]]
   then

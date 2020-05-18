@@ -10,6 +10,11 @@ Ala ma **kota**
 
 `````
 
+[render]
+`<p>Ala ma <strong>kota</strong></p>`
+
+### No Errors ###
+
 [parser]
 ROOT @ 0..168 = `+++ sesja:a88907fd +++\ntitle = \"Po\u{15b}r\u{f3}d Pradawnych Drzew\"\nwhen = \"20.10.2019\"\ndesc = \"Sesja jednostrza\u{142}owa dla Macek II RP\"\nchrono = \"20.06.1925\"\n+++\n\nAla ma **kota**`
     ARTICLEITEM @ 0..168 = `+++ sesja:a88907fd +++\ntitle = \"Po\u{15b}r\u{f3}d Pradawnych Drzew\"\nwhen = \"20.10.2019\"\ndesc = \"Sesja jednostrza\u{142}owa dla Macek II RP\"\nchrono = \"20.06.1925\"\n+++\n\nAla ma **kota**`
@@ -59,8 +64,8 @@ ROOT @ 0..168 = `+++ sesja:a88907fd +++\ntitle = \"Po\u{15b}r\u{f3}d Pradawnych 
                 TOKEN @ 146..147 = `\"`
             TOKEN @ 147..148 = `\n`
         TOKEN @ 148..151 = `+++`
-        ARTICLEBODY @ 151..168 = `\n\nAla ma **kota**`
-            MD_PARAGRAPH @ 153..168 = `Ala ma **kota**`
+        ARTICLEBODY, MARKDOWN, VALUE @ 151..168 = `\n\nAla ma **kota**`
+            MD_PARAGRAPH, MD_VALUE @ 153..168 = `Ala ma **kota**`
                 MD_TEXT @ 153..160 = `Ala ma `
                 MD_STRONG @ 160..168 = `**kota**`
                     MD_TEXT @ 162..166 = `kota`

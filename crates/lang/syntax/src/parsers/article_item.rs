@@ -40,13 +40,26 @@ fn main_item() -> impl Parser<FileToken> {
 fn main_item_body() -> impl Parser<BodyToken> {
     node(|builder| {
         builder.name(Nodes::ArticleBody);
-        let i = builder.state().lexer().input().clone();
-        match builder.peek_token() {
-            None => (),
-            Some(BodyToken::Text) => {
-                markdown(builder, i);
-            }
-        }
+        builder.name(Nodes::Markdown);
+        builder.name(Nodes::Value);
+        builder.parse(
+            // Copierd from inner_md_string();
+            node(|builder| {
+                builder.name(Nodes::Virtual);
+                builder.name(Nodes::Md_Value);
+                let i = builder.state().lexer().input().clone();
+                if let Some(BodyToken::Text) = builder.peek_token() {
+                    markdown(builder, i);
+                }
+            })
+        );
+        //let i = builder.state().lexer().input().clone();
+        //match builder.peek_token() {
+            //None => (),
+            //Some(BodyToken::Text) => {
+                //markdown(builder, i);
+            //}
+        //}
     })
 }
 

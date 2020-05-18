@@ -108,7 +108,7 @@ ROOT @ 0..197 = `md#\"\n```\n{\n    health = {\n        max = (60 + 70) / 10,\n 
 
 
 [eval]
-`"{ health = { max = 13, value = 13 } }<p>Here should eval</p>7<p>Here is intended</p>7<p>But here shouldn\'t</p><pre><code class=\"language-example\">5 + 2\n</code></pre>"`
+`"<pre><code>{\n    health = {\n        max = 13,\n        value = 13,\n    },\n }</code></pre><p>Here should eval</p><pre><code>7</code></pre><p>Here is intended</p><pre><code>7</code></pre><p>But here shouldn\'t</p><pre><code class=\"language-example\">5 + 2\n</code></pre>"`
 
 ### No Errors ###
 

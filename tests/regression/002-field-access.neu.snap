@@ -10,15 +10,15 @@
 `````
 
 [parser]
-ROOT @ 0..149 = `{\n    health = {\n        max = 100,\n        desc = {\n            baz = health.max // TODO: Here we have semi-circular field access.\n        }\n    }\n}`
-    STRUCT, VALUE @ 0..149 = `{\n    health = {\n        max = 100,\n        desc = {\n            baz = health.max // TODO: Here we have semi-circular field access.\n        }\n    }\n}`
+ROOT @ 0..99 = `{\n    health = {\n        max = 100,\n        desc = {\n            baz = health.max\n        }\n    }\n}`
+    STRUCT, VALUE @ 0..99 = `{\n    health = {\n        max = 100,\n        desc = {\n            baz = health.max\n        }\n    }\n}`
         TOKEN @ 0..1 = `{`
         TRIVIA @ 1..6 = `\n    `
         IDENTIFIER, KEY, TOKEN @ 6..12 = `health`
         TRIVIA @ 12..13 = ` `
         TOKEN @ 13..14 = `=`
         TRIVIA @ 14..15 = ` `
-        STRUCT, VALUE @ 15..147 = `{\n        max = 100,\n        desc = {\n            baz = health.max // TODO: Here we have semi-circular field access.\n        }\n    }`
+        STRUCT, VALUE @ 15..97 = `{\n        max = 100,\n        desc = {\n            baz = health.max\n        }\n    }`
             TOKEN @ 15..16 = `{`
             TRIVIA @ 16..25 = `\n        `
             IDENTIFIER, KEY, TOKEN @ 25..28 = `max`
@@ -32,7 +32,7 @@ ROOT @ 0..149 = `{\n    health = {\n        max = 100,\n        desc = {\n      
             TRIVIA @ 48..49 = ` `
             TOKEN @ 49..50 = `=`
             TRIVIA @ 50..51 = ` `
-            STRUCT, VALUE @ 51..141 = `{\n            baz = health.max // TODO: Here we have semi-circular field access.\n        }`
+            STRUCT, VALUE @ 51..91 = `{\n            baz = health.max\n        }`
                 TOKEN @ 51..52 = `{`
                 TRIVIA @ 52..65 = `\n            `
                 IDENTIFIER, KEY, TOKEN @ 65..68 = `baz`
@@ -43,13 +43,12 @@ ROOT @ 0..149 = `{\n    health = {\n        max = 100,\n        desc = {\n      
                     IDENTIFIER, TOKEN, VALUE @ 71..77 = `health`
                     OP, TOKEN @ 77..78 = `.`
                     IDENTIFIER, TOKEN, VALUE @ 78..81 = `max`
-                    TRIVIA @ 81..131 = ` // TODO: Here we have semi-circular field access.`
-                TRIVIA @ 131..140 = `\n        `
-                TOKEN @ 140..141 = `}`
-            TRIVIA @ 141..146 = `\n    `
-            TOKEN @ 146..147 = `}`
-        TRIVIA @ 147..148 = `\n`
-        TOKEN @ 148..149 = `}`
+                TRIVIA @ 81..90 = `\n        `
+                TOKEN @ 90..91 = `}`
+            TRIVIA @ 91..96 = `\n    `
+            TOKEN @ 96..97 = `}`
+        TRIVIA @ 97..98 = `\n`
+        TOKEN @ 98..99 = `}`
 
 
 ### No Errors ###
