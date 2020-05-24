@@ -1,0 +1,22 @@
+```
+false
+```
+
+[lexer]
+[
+    "False `false`",
+]
+
+[parser]
+ROOT @ 0..5 = `false`
+    BOOLEAN, TOKEN, VALUE @ 0..5 = `false`
+
+
+### No Errors ###
+
+
+[eval]
+`false`
+
+### No Errors ###
+

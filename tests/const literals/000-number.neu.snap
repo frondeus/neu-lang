@@ -1,0 +1,22 @@
+```
+4
+```
+
+[lexer]
+[
+    "Number `4`",
+]
+
+[parser]
+ROOT @ 0..1 = `4`
+    NUMBER, TOKEN, VALUE @ 0..1 = `4`
+
+
+### No Errors ###
+
+
+[eval]
+`4`
+
+### No Errors ###
+

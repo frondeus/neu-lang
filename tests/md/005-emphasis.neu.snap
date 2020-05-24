@@ -1,0 +1,21 @@
+```
+md"*foo*"
+```
+
+[parser]
+ROOT @ 0..9 = `md\"*foo*\"`
+    MARKDOWN, VALUE @ 0..9 = `md\"*foo*\"`
+        TOKEN @ 0..3 = `md\"`
+        MD_EMPHASIS, MD_PARAGRAPH, MD_VALUE @ 3..8 = `*foo*`
+            MD_TEXT @ 4..7 = `foo`
+        TOKEN @ 8..9 = `\"`
+
+
+### No Errors ###
+
+
+[eval]
+`"<p><em>foo</em></p>"`
+
+### No Errors ###
+

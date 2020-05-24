@@ -1,0 +1,203 @@
+```
+{
+    primary = {
+        con = 50,
+        size = 60
+    },
+    health = {
+        max = (primary.con + primary.size) / 10,
+        value = .max
+    },
+    sanity = 50 + 2
+}.health.value
+```
+
+[lexer]
+[
+    "OpenC `{`",
+    "LineEnd `\n`",
+    "Whitespace `    `",
+    "Identifier `primary`",
+    "Whitespace ` `",
+    "OpAssign `=`",
+    "Whitespace ` `",
+    "OpenC `{`",
+    "LineEnd `\n`",
+    "Whitespace `        `",
+    "Identifier `con`",
+    "Whitespace ` `",
+    "OpAssign `=`",
+    "Whitespace ` `",
+    "Number `50`",
+    "Comma `,`",
+    "LineEnd `\n`",
+    "Whitespace `        `",
+    "Identifier `size`",
+    "Whitespace ` `",
+    "OpAssign `=`",
+    "Whitespace ` `",
+    "Number `60`",
+    "LineEnd `\n`",
+    "Whitespace `    `",
+    "CloseC `}`",
+    "Comma `,`",
+    "LineEnd `\n`",
+    "Whitespace `    `",
+    "Identifier `health`",
+    "Whitespace ` `",
+    "OpAssign `=`",
+    "Whitespace ` `",
+    "OpenC `{`",
+    "LineEnd `\n`",
+    "Whitespace `        `",
+    "Identifier `max`",
+    "Whitespace ` `",
+    "OpAssign `=`",
+    "Whitespace ` `",
+    "OpenP `(`",
+    "Identifier `primary`",
+    "OpDot `.`",
+    "Identifier `con`",
+    "Whitespace ` `",
+    "OpPlus `+`",
+    "Whitespace ` `",
+    "Identifier `primary`",
+    "OpDot `.`",
+    "Identifier `size`",
+    "CloseP `)`",
+    "Whitespace ` `",
+    "OpSlash `/`",
+    "Whitespace ` `",
+    "Number `10`",
+    "Comma `,`",
+    "LineEnd `\n`",
+    "Whitespace `        `",
+    "Identifier `value`",
+    "Whitespace ` `",
+    "OpAssign `=`",
+    "Whitespace ` `",
+    "OpDot `.`",
+    "Identifier `max`",
+    "LineEnd `\n`",
+    "Whitespace `    `",
+    "CloseC `}`",
+    "Comma `,`",
+    "LineEnd `\n`",
+    "Whitespace `    `",
+    "Identifier `sanity`",
+    "Whitespace ` `",
+    "OpAssign `=`",
+    "Whitespace ` `",
+    "Number `50`",
+    "Whitespace ` `",
+    "OpPlus `+`",
+    "Whitespace ` `",
+    "Number `2`",
+    "LineEnd `\n`",
+    "CloseC `}`",
+    "OpDot `.`",
+    "Identifier `health`",
+    "OpDot `.`",
+    "Identifier `value`",
+]
+
+[parser]
+ROOT @ 0..187 = `{\n    primary = {\n        con = 50,\n        size = 60\n    },\n    health = {\n        max = (primary.con + primary.size) / 10,\n        value = .max\n    },\n    sanity = 50 + 2\n}.health.value`
+    IDENTPATH, VALUE @ 0..187 = `{\n    primary = {\n        con = 50,\n        size = 60\n    },\n    health = {\n        max = (primary.con + primary.size) / 10,\n        value = .max\n    },\n    sanity = 50 + 2\n}.health.value`
+        IDENTPATH, VALUE @ 0..181 = `{\n    primary = {\n        con = 50,\n        size = 60\n    },\n    health = {\n        max = (primary.con + primary.size) / 10,\n        value = .max\n    },\n    sanity = 50 + 2\n}.health`
+            STRUCT, VALUE @ 0..174 = `{\n    primary = {\n        con = 50,\n        size = 60\n    },\n    health = {\n        max = (primary.con + primary.size) / 10,\n        value = .max\n    },\n    sanity = 50 + 2\n}`
+                TOKEN @ 0..1 = `{`
+                TRIVIA @ 1..6 = `\n    `
+                IDENTIFIER, KEY, TOKEN @ 6..13 = `primary`
+                TRIVIA @ 13..14 = ` `
+                TOKEN @ 14..15 = `=`
+                TRIVIA @ 15..16 = ` `
+                STRUCT, VALUE @ 16..59 = `{\n        con = 50,\n        size = 60\n    }`
+                    TOKEN @ 16..17 = `{`
+                    TRIVIA @ 17..26 = `\n        `
+                    IDENTIFIER, KEY, TOKEN @ 26..29 = `con`
+                    TRIVIA @ 29..30 = ` `
+                    TOKEN @ 30..31 = `=`
+                    TRIVIA @ 31..32 = ` `
+                    NUMBER, TOKEN, VALUE @ 32..34 = `50`
+                    TOKEN @ 34..35 = `,`
+                    TRIVIA @ 35..44 = `\n        `
+                    IDENTIFIER, KEY, TOKEN @ 44..48 = `size`
+                    TRIVIA @ 48..49 = ` `
+                    TOKEN @ 49..50 = `=`
+                    TRIVIA @ 50..51 = ` `
+                    NUMBER, TOKEN, VALUE @ 51..53 = `60`
+                    TRIVIA @ 53..58 = `\n    `
+                    TOKEN @ 58..59 = `}`
+                TOKEN @ 59..60 = `,`
+                TRIVIA @ 60..65 = `\n    `
+                IDENTIFIER, KEY, TOKEN @ 65..71 = `health`
+                TRIVIA @ 71..72 = ` `
+                TOKEN @ 72..73 = `=`
+                TRIVIA @ 73..74 = ` `
+                STRUCT, VALUE @ 74..151 = `{\n        max = (primary.con + primary.size) / 10,\n        value = .max\n    }`
+                    TOKEN @ 74..75 = `{`
+                    TRIVIA @ 75..84 = `\n        `
+                    IDENTIFIER, KEY, TOKEN @ 84..87 = `max`
+                    TRIVIA @ 87..88 = ` `
+                    TOKEN @ 88..89 = `=`
+                    TRIVIA @ 89..90 = ` `
+                    BINARY, VALUE @ 90..123 = `(primary.con + primary.size) / 10`
+                        PARENS, VALUE @ 90..118 = `(primary.con + primary.size)`
+                            TOKEN @ 90..91 = `(`
+                            BINARY, VALUE @ 91..117 = `primary.con + primary.size`
+                                IDENTPATH, VALUE @ 91..102 = `primary.con`
+                                    IDENTIFIER, TOKEN, VALUE @ 91..98 = `primary`
+                                    OP, TOKEN @ 98..99 = `.`
+                                    IDENTIFIER, TOKEN, VALUE @ 99..102 = `con`
+                                    TRIVIA @ 102..103 = ` `
+                                OP, TOKEN @ 103..104 = `+`
+                                TRIVIA @ 104..105 = ` `
+                                IDENTPATH, VALUE @ 105..117 = `primary.size`
+                                    IDENTIFIER, TOKEN, VALUE @ 105..112 = `primary`
+                                    OP, TOKEN @ 112..113 = `.`
+                                    IDENTIFIER, TOKEN, VALUE @ 113..117 = `size`
+                            TOKEN @ 117..118 = `)`
+                            TRIVIA @ 118..119 = ` `
+                        OP, TOKEN @ 119..120 = `/`
+                        TRIVIA @ 120..121 = ` `
+                        NUMBER, TOKEN, VALUE @ 121..123 = `10`
+                    TOKEN @ 123..124 = `,`
+                    TRIVIA @ 124..133 = `\n        `
+                    IDENTIFIER, KEY, TOKEN @ 133..138 = `value`
+                    TRIVIA @ 138..139 = ` `
+                    TOKEN @ 139..140 = `=`
+                    TRIVIA @ 140..141 = ` `
+                    UNARY, VALUE @ 141..145 = `.max`
+                        OP, TOKEN @ 141..142 = `.`
+                        IDENTIFIER, TOKEN, VALUE @ 142..145 = `max`
+                    TRIVIA @ 145..150 = `\n    `
+                    TOKEN @ 150..151 = `}`
+                TOKEN @ 151..152 = `,`
+                TRIVIA @ 152..157 = `\n    `
+                IDENTIFIER, KEY, TOKEN @ 157..163 = `sanity`
+                TRIVIA @ 163..164 = ` `
+                TOKEN @ 164..165 = `=`
+                TRIVIA @ 165..166 = ` `
+                BINARY, VALUE @ 166..172 = `50 + 2`
+                    NUMBER, TOKEN, VALUE @ 166..168 = `50`
+                    TRIVIA @ 168..169 = ` `
+                    OP, TOKEN @ 169..170 = `+`
+                    TRIVIA @ 170..171 = ` `
+                    NUMBER, TOKEN, VALUE @ 171..172 = `2`
+                TRIVIA @ 172..173 = `\n`
+                TOKEN @ 173..174 = `}`
+            OP, TOKEN @ 174..175 = `.`
+            IDENTIFIER, TOKEN, VALUE @ 175..181 = `health`
+        OP, TOKEN @ 181..182 = `.`
+        IDENTIFIER, TOKEN, VALUE @ 182..187 = `value`
+
+
+### No Errors ###
+
+
+[eval]
+`11`
+
+### No Errors ###
+

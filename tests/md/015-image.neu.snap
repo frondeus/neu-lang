@@ -1,0 +1,45 @@
+```
+md#"
+Here's our logo (hover to see the title text):
+
+Inline-style:
+![alt text](https://github.com/adam-p/markdown-here/raw/master/src/common/images/icon48.png "Logo Title Text 1")
+
+Reference-style:
+![alt text][logo]
+
+[logo]: https://github.com/adam-p/markdown-here/raw/master/src/common/images/icon48.png "Logo Title Text 2"
+"#
+```
+
+[parser]
+ROOT @ 0..327 = `md#\"\nHere\'s our logo (hover to see the title text):\n\nInline-style:\n![alt text](https://github.com/adam-p/markdown-here/raw/master/src/common/images/icon48.png \"Logo Title Text 1\")\n\nReference-style:\n![alt text][logo]\n\n[logo]: https://github.com/adam-p/markdown-here/raw/master/src/common/images/icon48.png \"Logo Title Text 2\"\n\"#`
+    MARKDOWN, VALUE @ 0..327 = `md#\"\nHere\'s our logo (hover to see the title text):\n\nInline-style:\n![alt text](https://github.com/adam-p/markdown-here/raw/master/src/common/images/icon48.png \"Logo Title Text 1\")\n\nReference-style:\n![alt text][logo]\n\n[logo]: https://github.com/adam-p/markdown-here/raw/master/src/common/images/icon48.png \"Logo Title Text 2\"\n\"#`
+        TOKEN @ 0..4 = `md#\"`
+        MD_PARAGRAPH, MD_VALUE @ 5..52 = `Here\'s our logo (hover to see the title text):\n`
+            MD_TEXT @ 5..51 = `Here\'s our logo (hover to see the title text):`
+        MD_PARAGRAPH, MD_VALUE @ 53..180 = `Inline-style:\n![alt text](https://github.com/adam-p/markdown-here/raw/master/src/common/images/icon48.png \"Logo Title Text 1\")\n`
+            MD_TEXT @ 53..66 = `Inline-style:`
+            MD_SOFTBREAK @ 66..67 = `\n`
+            MD_IMAGE, MD_INLINEIMAGE @ 67..179 = `![alt text](https://github.com/adam-p/markdown-here/raw/master/src/common/images/icon48.png \"Logo Title Text 1\")`
+                MD_IMAGESRC @ 79..158 = `https://github.com/adam-p/markdown-here/raw/master/src/common/images/icon48.png`
+                MD_IMAGETITLE @ 67..179 = `![alt text](https://github.com/adam-p/markdown-here/raw/master/src/common/images/icon48.png \"Logo Title Text 1\")`
+                MD_TEXT @ 69..77 = `alt text`
+        MD_PARAGRAPH, MD_VALUE @ 181..323 = `Reference-style:\n![alt text][logo]\n\n[logo]: https://github.com/adam-p/markdown-here/raw/master/src/common/images/icon48.png \"Logo Title Text 2`
+            MD_TEXT @ 181..197 = `Reference-style:`
+            MD_SOFTBREAK @ 197..198 = `\n`
+            MD_IMAGE, MD_REFERENCEIMAGE @ 198..323 = `![alt text][logo]\n\n[logo]: https://github.com/adam-p/markdown-here/raw/master/src/common/images/icon48.png \"Logo Title Text 2`
+                MD_IMAGESRC @ 225..304 = `https://github.com/adam-p/markdown-here/raw/master/src/common/images/icon48.png`
+                MD_IMAGETITLE @ 306..323 = `Logo Title Text 2`
+                MD_TEXT @ 200..208 = `alt text`
+        TOKEN @ 325..327 = `\"#`
+
+
+### No Errors ###
+
+
+[eval]
+`"<p>Here\'s our logo (hover to see the title text):</p><p>Inline-style:\n<img src=\"https://github.com/adam-p/markdown-here/raw/master/src/common/images/icon48.png\">alt text</img></p><p>Reference-style:\n<img src=\"https://github.com/adam-p/markdown-here/raw/master/src/common/images/icon48.png\">alt text</img></p>"`
+
+### No Errors ###
+

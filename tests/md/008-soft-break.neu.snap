@@ -1,0 +1,24 @@
+```
+md"foo
+bar"
+```
+
+[parser]
+ROOT @ 0..11 = `md\"foo\nbar\"`
+    MARKDOWN, VALUE @ 0..11 = `md\"foo\nbar\"`
+        TOKEN @ 0..3 = `md\"`
+        MD_PARAGRAPH, MD_VALUE @ 3..10 = `foo\nbar`
+            MD_TEXT @ 3..6 = `foo`
+            MD_SOFTBREAK @ 6..7 = `\n`
+            MD_TEXT @ 7..10 = `bar`
+        TOKEN @ 10..11 = `\"`
+
+
+### No Errors ###
+
+
+[eval]
+`"<p>foo\nbar</p>"`
+
+### No Errors ###
+

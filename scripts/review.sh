@@ -3,24 +3,31 @@
 echo ""
 echo ""
 
-for file in $(find . -type f -name "*.new"); do
+shopt -s globstar nullglob
+
+for file in ./tests/**/*.new; do
   ACTUAL="$file"
-  EXPECTED="${file%%.new}"
+  DIR=$(dirname "$file")
 
   echo "Accepting: $ACTUAL";
   echo "-----"
 
-  diff -y -N "$EXPECTED" "$ACTUAL" | colordiff
+  cat "$ACTUAL" | colordiff
 
   echo ""
   echo ""
   echo "-----"
-  read -p "[A]ccept, [R]reject or [S]kip" -n 1 -r
+  read -p "[Aa]ccept, [Rr]reject or [Ss]kip: " -n 1 -r
   echo
 
   if [[ $REPLY =~ ^[Aa]$ ]]
   then
-    mv -- "$ACTUAL" "$EXPECTED"
+    cwd=$(pwd)
+    cd "$DIR" || exit
+    filename=$(basename -- "$ACTUAL")
+    patch --ignore-whitespace < "$filename" || exit
+    #rm ./*.orig || exit
+    cd "$cwd" || exit
   elif [[ $REPLY =~ ^[Rr]$ ]]
   then
     rm -- "$ACTUAL"

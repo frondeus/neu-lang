@@ -1,0 +1,22 @@
+```
+true
+```
+
+[lexer]
+[
+    "True `true`",
+]
+
+[parser]
+ROOT @ 0..4 = `true`
+    BOOLEAN, TOKEN, VALUE @ 0..4 = `true`
+
+
+### No Errors ###
+
+
+[eval]
+`true`
+
+### No Errors ###
+

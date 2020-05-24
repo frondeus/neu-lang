@@ -1,0 +1,40 @@
+```
+6 - 0 + 4
+```
+
+[lexer]
+[
+    "Number `6`",
+    "Whitespace ` `",
+    "OpMinus `-`",
+    "Whitespace ` `",
+    "Number `0`",
+    "Whitespace ` `",
+    "OpPlus `+`",
+    "Whitespace ` `",
+    "Number `4`",
+]
+
+[parser]
+ROOT @ 0..9 = `6 - 0 + 4`
+    BINARY, VALUE @ 0..9 = `6 - 0 + 4`
+        BINARY, VALUE @ 0..5 = `6 - 0`
+            NUMBER, TOKEN, VALUE @ 0..1 = `6`
+            TRIVIA @ 1..2 = ` `
+            OP, TOKEN @ 2..3 = `-`
+            TRIVIA @ 3..4 = ` `
+            NUMBER, TOKEN, VALUE @ 4..5 = `0`
+            TRIVIA @ 5..6 = ` `
+        OP, TOKEN @ 6..7 = `+`
+        TRIVIA @ 7..8 = ` `
+        NUMBER, TOKEN, VALUE @ 8..9 = `4`
+
+
+### No Errors ###
+
+
+[eval]
+`10`
+
+### No Errors ###
+
