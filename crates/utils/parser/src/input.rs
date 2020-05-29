@@ -38,6 +38,10 @@ impl Input {
     pub fn range_span(&self, range: TextRange) -> &str {
         &self.str[range]
     }
+
+    pub(crate) fn todo_whole_str(&self) -> &str {
+        &self.str 
+    }
 }
 
 impl From<&'_ str> for Input {

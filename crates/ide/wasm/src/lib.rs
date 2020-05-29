@@ -54,7 +54,8 @@ pub fn on_change(buf: &str) {
     let mut diagnostics = parse_result
         .errors
         .iter()
-        .map(|(id, error)| {
+        .map(|error| {
+            /*
             let node = parse_result.nodes.get(id);
             let LinesCols {
                 line_start,
@@ -70,6 +71,8 @@ pub fn on_change(buf: &str) {
                 col_end,
                 DiagnosticType::Error,
             )
+            */
+            todo!()
         })
         .collect::<Vec<Diagnostic>>();
 

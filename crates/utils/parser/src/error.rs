@@ -1,5 +1,7 @@
 use crate::{Spanned, TokenKind};
 use std::fmt;
+use neu_diagnostic::{Error as DiagnosticError, Severity, ToReport, Report};
+use crate::NodeId;
 
 #[derive(Clone)]
 pub enum Error<Tok: TokenKind> {
@@ -12,9 +14,19 @@ pub enum Error<Tok: TokenKind> {
     },
 }
 
-impl<Tok: TokenKind> Error<Tok> {
-    pub fn display<'a, 's>(&'a self, str: &'s str) -> DisplayError<'a, 's, Tok> {
-        DisplayError { error: self, str }
+impl<Tok: TokenKind + 'static> ToReport for Error<Tok> {
+    fn to_report<T>(self) -> Report<T> where Self: Sized {
+        todo!()
+    }
+}
+
+impl<Tok: TokenKind + 'static> Error<Tok> {
+    pub fn into_error(self, id: NodeId, str: &str) -> DiagnosticError {
+        DiagnosticError::new(Severity::Error, 
+                             //format!("{}", DisplayError { str, error: &self }),
+                             self,
+                             id.into(),
+                             vec![])
     }
 }
 

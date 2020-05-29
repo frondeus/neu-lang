@@ -1,6 +1,8 @@
-use crate::{Context, Error, Lexer, Node, Parser, TokenKind};
+use crate::{Context, Error as ParseError, Lexer, Node, Parser, TokenKind};
 use std::borrow::Borrow;
 use std::fmt;
+use neu_diagnostic::Error;
+use neu_diagnostic::NodeId as DiagnosticId;
 
 #[derive(Clone, Copy)]
 pub struct NodeId(pub(crate) usize);
@@ -10,6 +12,19 @@ impl fmt::Debug for NodeId {
         write!(f, "N{}", self.0)
     }
 }
+
+impl From<DiagnosticId> for NodeId {
+    fn from(id: DiagnosticId) -> Self {
+        Self(id.id())
+    }
+}
+
+impl Into<DiagnosticId> for NodeId {
+    fn into(self) -> DiagnosticId {
+        DiagnosticId::new(self.0)
+    }
+}
+
 
 pub struct Ancestors<'a> {
     current: Option<NodeId>,
@@ -92,12 +107,12 @@ impl Arena {
 
 pub struct State<Tok: TokenKind> {
     lexer: Lexer<Tok>,
-    errors: Vec<(NodeId, Error<Tok>)>,
-    new_errors: Vec<Error<Tok>>,
+    errors: Vec<Error>,
+    new_errors: Vec<ParseError<Tok>>,
     nodes: Arena,
 }
 
-impl<Tok: TokenKind> State<Tok> {
+impl<Tok: TokenKind + 'static> State<Tok> {
     fn new(lexer: Lexer<Tok>) -> Self {
         Self {
             lexer,
@@ -116,7 +131,7 @@ impl<Tok: TokenKind> State<Tok> {
         State {
             lexer,
             nodes: self.nodes.take(),
-            errors: Default::default(),
+            errors: self.errors.drain(..).collect(),
             new_errors: Default::default(),
         }
     }
@@ -129,6 +144,7 @@ impl<Tok: TokenKind> State<Tok> {
         let lexer: Lexer<Tok> = other.lexer().transform();
         self.lexer = lexer;
         self.nodes = other.nodes.take();
+        self.errors = other.errors.drain(..).collect();
     }
 
     pub fn nodes(&mut self) -> &mut Arena {
@@ -143,16 +159,21 @@ impl<Tok: TokenKind> State<Tok> {
         &mut self.lexer
     }
 
-    pub fn error(&mut self, e: Error<Tok>) {
+    pub fn error(&mut self, e: ParseError<Tok>) {
         self.new_errors.push(e);
     }
 
     pub fn commit_errors(&mut self, id: NodeId) {
+        let new_errors = self.new_errors.drain(..).collect::<Vec<_>>();
+        let whole_str = self.lexer().input().todo_whole_str();
+        let mut new_errors = new_errors.into_iter().map(|e| {
+                e.into_error(id, whole_str)
+        }).collect::<Vec<_>>();
         self.errors
-            .extend(self.new_errors.drain(..).map(|e| (id, e)));
+            .append(&mut new_errors);
     }
 
-    pub fn parse(lexer: Lexer<Tok>, parser: impl Parser<Tok>) -> ParseResult<Tok> {
+    pub fn parse(lexer: Lexer<Tok>, parser: impl Parser<Tok>) -> ParseResult {
         let mut state = Self::new(lexer);
         let ctx = Context::default();
         let root = parser.parse(&mut state, &ctx);
@@ -169,24 +190,24 @@ impl<Tok: TokenKind> State<Tok> {
 }
 
 #[derive(Debug)]
-pub struct ParseResult<Tok: TokenKind> {
+pub struct ParseResult {
     pub root: NodeId,
     pub nodes: Arena,
-    pub errors: Vec<(NodeId, Error<Tok>)>,
+    pub errors: Vec<Error>,
 }
 
-impl<Tok: TokenKind> ParseResult<Tok> {
-    pub fn display<'s, 'n>(&'n self, str: &'s str) -> DisplayParseResult<'s, 'n, Tok> {
+impl ParseResult {
+    pub fn display<'s, 'n>(&'n self, str: &'s str) -> DisplayParseResult<'s, 'n> {
         DisplayParseResult { str, result: self }
     }
 }
 
-pub struct DisplayParseResult<'s, 'n, Tok: TokenKind> {
+pub struct DisplayParseResult<'s, 'n> {
     str: &'s str,
-    result: &'n ParseResult<Tok>,
+    result: &'n ParseResult,
 }
 
-impl<'s, 'n, Tok: TokenKind> fmt::Display for DisplayParseResult<'s, 'n, Tok> {
+impl<'s, 'n> fmt::Display for DisplayParseResult<'s, 'n> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let arena = &self.result.nodes;
         let node = arena.get(self.result.root).display(self.str, arena);
@@ -197,8 +218,9 @@ impl<'s, 'n, Tok: TokenKind> fmt::Display for DisplayParseResult<'s, 'n, Tok> {
             writeln!(f, "\n\n### Errors ###")?;
         }
 
-        for (node_id, error) in self.result.errors.iter() {
-            writeln!(f, "{} @ {:?}", error.display(self.str), node_id)?;
+        for error in self.result.errors.iter() {
+            writeln!(f, "{} @ {:?}", error.desc(), error.location())?;
+            //writeln!(f, "{} @ {:?}", error.display(self.str), node_id)?;
         }
         Ok(())
     }

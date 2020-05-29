@@ -175,12 +175,15 @@ impl NeovimHandler {
                 let mut diagnostics = parse_result
                     .errors
                     .iter()
-                    .filter_map(|(id, error)| {
-                        let node = parse_result.nodes.get(id);
-                        if let Some(LineCols {
-                            line, col_start, ..
-                        }) = node.span.lines_cols(&lines).last()
-                        {
+                    .filter_map(|error| {
+                        //let id = error.id();
+                        //let node = parse_result.nodes.get(id);
+                        //if let Some(LineCols {
+                            //line, col_start, ..
+                        //}) = node.span.lines_cols(&lines).last()
+                        //{
+                            /*
+                             * TODO:
                             Some(Diagnostic::new(
                                 &current_bf,
                                 error.display(&buf).to_string(),
@@ -188,9 +191,11 @@ impl NeovimHandler {
                                 *col_start,
                                 DiagnosticType::Error,
                             ))
-                        } else {
+                            */
+                            //None
+                        //} else {
                             None
-                        }
+                        //}
                     })
                     .collect::<Vec<Diagnostic>>();
 

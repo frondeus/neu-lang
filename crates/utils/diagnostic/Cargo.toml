@@ -1,5 +1,5 @@
 [package]
-name = "neu-parser"
+name = "neu-diagnostic"
 version = "0.1.0"
 authors = ["Wojciech Polak <frondeus@gmail.com>"]
 edition = "2018"
@@ -7,9 +7,3 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-# Workspace
-neu-diagnostic = { path = "../diagnostic" }
-
-# Crates.io
-text-size = { version = "1.0.0" }
-itertools = "0.9.0"
