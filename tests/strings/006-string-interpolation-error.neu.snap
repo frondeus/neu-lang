@@ -1,0 +1,36 @@
+```
+ "10 = ${5 + 2 + +}"
+```
+
+[parser]
+ROOT @ 0..20 = ` \"10 = ${5 + 2 + +}\"`
+    TRIVIA @ 0..1 = ` `
+    STRING, VALUE @ 1..20 = `\"10 = ${5 + 2 + +}\"`
+        TOKEN @ 1..2 = `\"`
+        STRVALUE, TOKEN @ 2..7 = `10 = `
+        INTERPOLATED, STRVALUE @ 7..19 = `${5 + 2 + +}`
+            TOKEN @ 7..9 = `${`
+            BINARY, VALUE @ 9..18 = `5 + 2 + +`
+                BINARY, VALUE @ 9..14 = `5 + 2`
+                    NUMBER, TOKEN, VALUE @ 9..10 = `5`
+                    TRIVIA @ 10..11 = ` `
+                    OP, TOKEN @ 11..12 = `+`
+                    TRIVIA @ 12..13 = ` `
+                    NUMBER, TOKEN, VALUE @ 13..14 = `2`
+                    TRIVIA @ 14..15 = ` `
+                OP, TOKEN @ 15..16 = `+`
+                TRIVIA @ 16..17 = ` `
+                ERROR, VALUE @ 17..18 = `+`
+            TOKEN @ 18..19 = `}`
+        TOKEN @ 19..20 = `\"`
+
+
+### Errors ###
+Expected one of number, `true`, `false`, `-`, `!`, `"`, `(`, `{`, `[`, identifier but found `+` @ N13
+
+
+[eval]
+None
+
+### No Errors ###
+

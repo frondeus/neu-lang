@@ -1,6 +1,6 @@
 use crate::{CoreNodes as Nodes, CoreNodes};
 use crate::{
-    Context, Error, Name, Node, NodeBuilder, OptionExt, Parser, State, TokenKind,
+    Context, ParseError, Name, Node, NodeBuilder, OptionExt, Parser, State, TokenKind,
 };
 use std::cell::RefCell;
 use std::marker::PhantomData;
@@ -131,34 +131,34 @@ pub fn node<Tok: TokenKind>(f: impl Fn(&mut NodeBuilder<Tok>) + Clone) -> impl P
     }
 }
 
-pub fn expected<Tok: TokenKind>(expected: &'static [Tok]) -> impl Parser<Tok> {
+pub fn expected<Tok: TokenKind + Send>(expected: &'static [Tok]) -> impl Parser<Tok> {
     node(move |builder| {
         let found = builder.next_token();
-        builder.error(Error::Expected {
+        builder.error(ParseError::Expected {
             found,
             expected: expected.to_vec(),
         });
     })
 }
 
-pub fn tokens<Tok: TokenKind>(expected: Vec<Tok>) -> impl Parser<Tok> {
+pub fn tokens<Tok: TokenKind + Send + 'static>(expected: Vec<Tok>) -> impl Parser<Tok> {
     node(move |builder: &mut NodeBuilder<Tok>| {
         builder.name(Nodes::Token);
         let token = builder.next_token();
         match (token.as_kind(), expected.is_empty()) {
             (None, false) => {
-                builder.error(Error::Expected {
+                builder.error(ParseError::Expected {
                     expected: expected.clone(),
                     found: None,
                 });
             }
             (Some(_), true) => {
-                builder.error(Error::ExpectedEOF {
+                builder.error(ParseError::ExpectedEOF {
                     found: token.unwrap(),
                 });
             }
             (Some(found), false) if !expected.contains(&found) => {
-                builder.error(Error::Expected {
+                builder.error(ParseError::Expected {
                     found: Some(token.unwrap()),
                     expected: expected.clone(),
                 });
@@ -175,7 +175,7 @@ pub fn any_token<Tok: TokenKind>() -> impl Parser<Tok> {
     })
 }
 
-pub fn token<Tok: TokenKind>(expected: impl Into<Option<Tok>>) -> impl Parser<Tok> {
+pub fn token<Tok: TokenKind + Send + 'static>(expected: impl Into<Option<Tok>>) -> impl Parser<Tok> {
     let expected = expected.into();
     let expected = expected.into_iter().collect::<Vec<_>>();
     tokens(expected)

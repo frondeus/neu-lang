@@ -1,6 +1,6 @@
-use crate::CoreNodes as Nodes;
+use crate::{CoreNodes as Nodes, ToReport};
 use crate::{
-    Context, Error, Name, Node, NodeId, OptionExt, Parser, PeekableIterator, State, TokenKind,
+    Context, Name, Node, NodeId, OptionExt, Parser, PeekableIterator, State, TokenKind,
 };
 use std::collections::BTreeSet;
 use text_size::TextRange;
@@ -11,7 +11,7 @@ pub struct NodeBuilder<'a, Tok: TokenKind> {
     span: TextRange,
     names: BTreeSet<Name>,
     children: Vec<NodeId>,
-    error: Option<Error<Tok>>,
+    error: Option<Box<dyn ToReport + Send>>,
 }
 
 impl<'a, Tok: TokenKind> NodeBuilder<'a, Tok> {
@@ -70,8 +70,8 @@ impl<'a, Tok: TokenKind> NodeBuilder<'a, Tok> {
         self
     }
 
-    pub fn error(&mut self, error: Error<Tok>) -> &mut Self {
-        self.error = Some(error);
+    pub fn error(&mut self, error: impl ToReport + Send + 'static) -> &mut Self {
+        self.error = Some(error.boxed());
         self.name(Nodes::Error)
     }
 

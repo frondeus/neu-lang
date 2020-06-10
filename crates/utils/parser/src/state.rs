@@ -1,99 +1,10 @@
-use crate::{Context, Error, Lexer, Node, Parser, TokenKind};
-use std::borrow::Borrow;
+use crate::{Context, Lexer, Parser, TokenKind, ToReport, NodeId, Arena};
 use std::fmt;
-
-#[derive(Clone, Copy)]
-pub struct NodeId(pub(crate) usize);
-
-impl fmt::Debug for NodeId {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "N{}", self.0)
-    }
-}
-
-pub struct Ancestors<'a> {
-    current: Option<NodeId>,
-    arena: &'a Arena,
-}
-
-impl<'a> Iterator for Ancestors<'a> {
-    type Item = NodeId;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        let current = self.current.map(|id| self.arena.get(id))?;
-
-        let ancestor = current.parent();
-
-        let current = self.current.take();
-        self.current = ancestor;
-        current
-    }
-}
-
-#[derive(Default)]
-pub struct Arena {
-    nodes: Vec<Node>,
-}
-
-impl fmt::Debug for Arena {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(f, "Arena")?;
-        for (i, n) in self.nodes.iter().enumerate() {
-            write!(f, "\tN{}: ", i)?;
-            writeln!(f, "{:?}", n)?;
-        }
-        Ok(())
-    }
-}
-
-impl Arena {
-    pub fn take(&mut self) -> Self {
-        let mut nodes = vec![];
-        nodes.append(&mut self.nodes);
-        Self { nodes }
-    }
-
-    pub fn add(&mut self, node: Node) -> NodeId {
-        let len = self.nodes.len();
-        let id = NodeId(len);
-        for child_id in node.children.iter() {
-            let child = self.get_mut(child_id);
-            child.parent = Some(id);
-        }
-        self.nodes.push(node);
-        id
-    }
-
-    pub fn ancestors(&self, id: NodeId) -> Ancestors {
-        Ancestors {
-            current: Some(id),
-            arena: self,
-        }
-    }
-
-    pub fn get(&self, id: impl Borrow<NodeId>) -> &Node {
-        let id = *id.borrow();
-        &self.nodes[id.0]
-    }
-
-    pub fn get_mut(&mut self, id: impl Borrow<NodeId>) -> &mut Node {
-        let id = *id.borrow();
-        &mut self.nodes[id.0]
-    }
-
-    pub fn iter(&self) -> impl DoubleEndedIterator<Item = &Node> {
-        self.nodes.iter()
-    }
-
-    pub fn enumerate(&self) -> impl Iterator<Item = (NodeId, &Node)> {
-        self.nodes.iter().enumerate().map(|(id, n)| (NodeId(id), n))
-    }
-}
 
 pub struct State<Tok: TokenKind> {
     lexer: Lexer<Tok>,
-    errors: Vec<(NodeId, Error<Tok>)>,
-    new_errors: Vec<Error<Tok>>,
+    errors: Vec<(NodeId, Box<dyn ToReport + Send>)>,
+    new_errors: Vec<Box<dyn ToReport + Send>>,
     nodes: Arena,
 }
 
@@ -116,7 +27,7 @@ impl<Tok: TokenKind> State<Tok> {
         State {
             lexer,
             nodes: self.nodes.take(),
-            errors: Default::default(),
+            errors: std::mem::replace(&mut self.errors, vec![]),
             new_errors: Default::default(),
         }
     }
@@ -128,6 +39,7 @@ impl<Tok: TokenKind> State<Tok> {
     {
         let lexer: Lexer<Tok> = other.lexer().transform();
         self.lexer = lexer;
+        self.errors = std::mem::replace(&mut other.errors, vec![]);
         self.nodes = other.nodes.take();
     }
 
@@ -143,7 +55,7 @@ impl<Tok: TokenKind> State<Tok> {
         &mut self.lexer
     }
 
-    pub fn error(&mut self, e: Error<Tok>) {
+    pub fn error(&mut self, e: Box<dyn ToReport + Send>) {
         self.new_errors.push(e);
     }
 
@@ -152,7 +64,7 @@ impl<Tok: TokenKind> State<Tok> {
             .extend(self.new_errors.drain(..).map(|e| (id, e)));
     }
 
-    pub fn parse(lexer: Lexer<Tok>, parser: impl Parser<Tok>) -> ParseResult<Tok> {
+    pub fn parse(lexer: Lexer<Tok>, parser: impl Parser<Tok>) -> ParseResult {
         let mut state = Self::new(lexer);
         let ctx = Context::default();
         let root = parser.parse(&mut state, &ctx);
@@ -168,25 +80,25 @@ impl<Tok: TokenKind> State<Tok> {
     }
 }
 
-#[derive(Debug)]
-pub struct ParseResult<Tok: TokenKind> {
+//#[derive(Debug)]
+pub struct ParseResult {
     pub root: NodeId,
     pub nodes: Arena,
-    pub errors: Vec<(NodeId, Error<Tok>)>,
+    pub errors: Vec<(NodeId, Box<dyn ToReport + Send>)>,
 }
 
-impl<Tok: TokenKind> ParseResult<Tok> {
-    pub fn display<'s, 'n>(&'n self, str: &'s str) -> DisplayParseResult<'s, 'n, Tok> {
+impl ParseResult {
+    pub fn display<'s, 'n>(&'n self, str: &'s str) -> DisplayParseResult<'s, 'n> {
         DisplayParseResult { str, result: self }
     }
 }
 
-pub struct DisplayParseResult<'s, 'n, Tok: TokenKind> {
+pub struct DisplayParseResult<'s, 'n> {
     str: &'s str,
-    result: &'n ParseResult<Tok>,
+    result: &'n ParseResult,
 }
 
-impl<'s, 'n, Tok: TokenKind> fmt::Display for DisplayParseResult<'s, 'n, Tok> {
+impl<'s, 'n> fmt::Display for DisplayParseResult<'s, 'n> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let arena = &self.result.nodes;
         let node = arena.get(self.result.root).display(self.str, arena);
@@ -198,7 +110,7 @@ impl<'s, 'n, Tok: TokenKind> fmt::Display for DisplayParseResult<'s, 'n, Tok> {
         }
 
         for (node_id, error) in self.result.errors.iter() {
-            writeln!(f, "{} @ {:?}", error.display(self.str), node_id)?;
+            writeln!(f, "{} @ {:?}", error.to_report(self.str), node_id)?;
         }
         Ok(())
     }

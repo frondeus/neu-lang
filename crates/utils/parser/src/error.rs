@@ -1,8 +1,13 @@
 use crate::{Spanned, TokenKind};
 use std::fmt;
 
+pub trait ToReport {
+    fn to_report(&self, str: &str) -> String;
+    fn boxed(self) -> Box<Self> where Self: Sized { Box::new(self) }
+}
+
 #[derive(Clone)]
-pub enum Error<Tok: TokenKind> {
+pub enum ParseError<Tok: TokenKind> {
     Expected {
         found: Option<Spanned<Tok>>,
         expected: Vec<Tok>,
@@ -12,13 +17,13 @@ pub enum Error<Tok: TokenKind> {
     },
 }
 
-impl<Tok: TokenKind> Error<Tok> {
-    pub fn display<'a, 's>(&'a self, str: &'s str) -> DisplayError<'a, 's, Tok> {
-        DisplayError { error: self, str }
+impl<Tok: TokenKind> ToReport for ParseError<Tok> {
+    fn to_report(&self, str: &str) -> String {
+        DisplayError { error: self, str }.to_string()
     }
 }
 
-impl<Tok: TokenKind> fmt::Debug for Error<Tok> {
+impl<Tok: TokenKind> fmt::Debug for ParseError<Tok> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::ExpectedEOF { found } => write!(f, r#""Expected EOF but found {:?}""#, found),
@@ -59,25 +64,25 @@ fn format_expected<Tok: TokenKind>(expected: &[Tok], f: &mut fmt::Formatter<'_>)
 
 pub struct DisplayError<'a, 's, Tok: TokenKind> {
     str: &'s str,
-    error: &'a Error<Tok>,
+    error: &'a ParseError<Tok>,
 }
 
 impl<'a, 's, Tok: TokenKind> fmt::Display for DisplayError<'a, 's, Tok> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.error {
-            Error::ExpectedEOF { found } => write!(
+            ParseError::ExpectedEOF { found } => write!(
                 f,
                 r#"Expected EOF but found {}"#,
                 found.display(self.str, false)
             ),
-            Error::Expected {
+            ParseError::Expected {
                 found: None,
                 expected,
             } => {
                 format_expected(&expected, f)?;
                 write!(f, " but found EOF")
             }
-            Error::Expected {
+            ParseError::Expected {
                 found: Some(found),
                 expected,
             } => {

@@ -1,7 +1,7 @@
 use crate::Nodes;
 use neu_parser::*;
 
-pub fn separated<Token: TokenKind>(
+pub fn separated<Token: TokenKind + 'static>(
     parser: impl Parser<Token> + Clone,
     separator: Token,
     close_token: Token,

@@ -19,6 +19,7 @@ mod context;
 mod error;
 mod parser;
 mod parsers;
+mod arena;
 mod state;
 mod children;
 
@@ -35,6 +36,7 @@ pub use context::*;
 pub use error::*;
 pub use parser::*;
 pub use parsers::*;
+pub use arena::*;
 pub use state::*;
 
 pub use node::*;
