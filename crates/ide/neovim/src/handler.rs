@@ -183,7 +183,7 @@ impl NeovimHandler {
                         {
                             Some(Diagnostic::new(
                                 &current_bf,
-                                error.to_report(&buf).to_string(),
+                                error.to_report(&buf),
                                 *line,
                                 *col_start,
                                 DiagnosticType::Error,
@@ -215,7 +215,7 @@ impl NeovimHandler {
                         diagnostics.push(Diagnostic::new(
                             &current_bf,
                             error //.display(&buf)
-                                .to_string(),
+                                .to_report(&buf).to_string(),
                             *line,
                             *col_start,
                             DiagnosticType::Error,

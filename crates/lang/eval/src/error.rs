@@ -1,4 +1,5 @@
 use derive_more::Display;
+use neu_diagnostics::ToReport;
 
 #[derive(Debug, Display)]
 pub enum Error {
@@ -10,4 +11,10 @@ pub enum Error {
 
     #[display(fmt = "Field not found")]
     FieldNotFound,
+}
+
+impl ToReport for Error {
+    fn to_report(&self, _str: &str) -> String {
+        self.to_string()
+    }
 }

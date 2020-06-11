@@ -63,7 +63,7 @@ pub fn on_change(buf: &str) {
                 col_end,
             } = node.span.lines_cols(&lines);
             Diagnostic::new(
-                error.to_report(&buf).to_string(),
+                error.to_report(&buf),
                 line_start,
                 col_start,
                 line_end,
@@ -91,7 +91,7 @@ pub fn on_change(buf: &str) {
             col_end,
         } = node.span.lines_cols(&lines);
         diagnostics.push(Diagnostic::new(
-            error.to_string(),
+            error.to_report(&buf).to_string(),
             line_start,
             col_start,
             line_end,

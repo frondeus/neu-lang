@@ -1,10 +1,11 @@
-use crate::{Context, Lexer, Parser, TokenKind, ToReport, NodeId, Arena};
+use crate::{Context, Lexer, Parser, TokenKind, NodeId, Arena};
 use std::fmt;
+use neu_diagnostics::{Diagnostics, Diagnostic};
 
 pub struct State<Tok: TokenKind> {
     lexer: Lexer<Tok>,
-    errors: Vec<(NodeId, Box<dyn ToReport + Send>)>,
-    new_errors: Vec<Box<dyn ToReport + Send>>,
+    errors: Diagnostics<NodeId>,
+    new_errors: Diagnostics<()>,
     nodes: Arena,
 }
 
@@ -18,6 +19,8 @@ impl<Tok: TokenKind> State<Tok> {
         }
     }
 
+    // TODO: Ideally this should take ownership but it requires major refactor in the parser.
+    //  Especially in the flow of node builder
     pub(crate) fn transform<Tok2>(&mut self) -> State<Tok2>
     where
         Tok2: TokenKind,
@@ -27,7 +30,7 @@ impl<Tok: TokenKind> State<Tok> {
         State {
             lexer,
             nodes: self.nodes.take(),
-            errors: std::mem::replace(&mut self.errors, vec![]),
+            errors: std::mem::take(&mut self.errors),
             new_errors: Default::default(),
         }
     }
@@ -39,7 +42,7 @@ impl<Tok: TokenKind> State<Tok> {
     {
         let lexer: Lexer<Tok> = other.lexer().transform();
         self.lexer = lexer;
-        self.errors = std::mem::replace(&mut other.errors, vec![]);
+        self.errors = std::mem::take(&mut other.errors);
         self.nodes = other.nodes.take();
     }
 
@@ -55,13 +58,13 @@ impl<Tok: TokenKind> State<Tok> {
         &mut self.lexer
     }
 
-    pub fn error(&mut self, e: Box<dyn ToReport + Send>) {
-        self.new_errors.push(e);
+    pub fn error(&mut self, e: Diagnostic) {
+        self.new_errors.push(((), e));
     }
 
     pub fn commit_errors(&mut self, id: NodeId) {
         self.errors
-            .extend(self.new_errors.drain(..).map(|e| (id, e)));
+            .extend(self.new_errors.drain(..).map(|(_, e)| (id, e)));
     }
 
     pub fn parse(lexer: Lexer<Tok>, parser: impl Parser<Tok>) -> ParseResult {
@@ -84,7 +87,7 @@ impl<Tok: TokenKind> State<Tok> {
 pub struct ParseResult {
     pub root: NodeId,
     pub nodes: Arena,
-    pub errors: Vec<(NodeId, Box<dyn ToReport + Send>)>,
+    pub errors: Diagnostics<NodeId>,
 }
 
 impl ParseResult {

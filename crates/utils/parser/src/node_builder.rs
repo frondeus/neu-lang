@@ -4,6 +4,7 @@ use crate::{
 };
 use std::collections::BTreeSet;
 use text_size::TextRange;
+use neu_diagnostics::Diagnostic;
 
 pub struct NodeBuilder<'a, Tok: TokenKind> {
     state: &'a mut State<Tok>,
@@ -11,7 +12,7 @@ pub struct NodeBuilder<'a, Tok: TokenKind> {
     span: TextRange,
     names: BTreeSet<Name>,
     children: Vec<NodeId>,
-    error: Option<Box<dyn ToReport + Send>>,
+    error: Option<Diagnostic>,
 }
 
 impl<'a, Tok: TokenKind> NodeBuilder<'a, Tok> {
@@ -70,7 +71,7 @@ impl<'a, Tok: TokenKind> NodeBuilder<'a, Tok> {
         self
     }
 
-    pub fn error(&mut self, error: impl ToReport + Send + 'static) -> &mut Self {
+    pub fn error(&mut self, error: impl ToReport + 'static) -> &mut Self {
         self.error = Some(error.boxed());
         self.name(Nodes::Error)
     }

@@ -44,7 +44,7 @@ impl<'v> fmt::Display for HtmlValue<'v> {
 }
 
 
-fn render_value<'v>(value: &'v Value) -> HtmlValue<'v> {
+fn render_value(value: &Value) -> HtmlValue {
     HtmlValue { value } 
 }
 
@@ -103,6 +103,5 @@ mod tests {
             result.display(input).to_string()
         })
             .unwrap();
-        //todo!();
     }
 }

@@ -8,6 +8,7 @@ edition = "2018"
 
 [dependencies]
 neu-arena = { path = "../arena" }
+neu-diagnostics = { path = "../diagnostics" }
 
 text-size = { version = "1.0.0" }
 itertools = "0.9.0"

@@ -1,6 +1,6 @@
 use crate::{Input, PeekableIterator, Spanned, TextRange};
 
-pub trait TokenKind: Clone + Copy + std::fmt::Debug + std::fmt::Display + PartialEq + Send {
+pub trait TokenKind: Clone + Copy + std::fmt::Debug + std::fmt::Display + PartialEq + Send + Sync {
     type Extra: Default + Clone;
     fn is_mergeable(self, other: Self) -> bool;
     fn lex(lexer: &mut Lexer<Self>) -> Option<(Self, TextRange)>;

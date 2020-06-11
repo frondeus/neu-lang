@@ -9,11 +9,12 @@ use neu_parser::{Arena, Node, NodeId, Children};
 use neu_syntax::Nodes;
 use std::collections::BTreeMap;
 pub use value::Value;
+use neu_diagnostics::{Diagnostics, ToReport};
 
 pub struct Eval<'a> {
     pub nodes: &'a Arena,
     pub input: &'a str,
-    pub errors: Vec<(NodeId, Error)>,
+    pub errors: Diagnostics<NodeId>
 }
 
 impl<'a> Eval<'a> {
@@ -65,7 +66,7 @@ impl<'a> Eval<'a> {
         match v {
             Some(v) => Some(v),
             None => {
-                self.errors.push((id, error));
+                self.errors.push((id, error.boxed()));
                 None
             }
         }

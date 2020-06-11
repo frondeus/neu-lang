@@ -1,10 +1,6 @@
 use crate::{Spanned, TokenKind};
 use std::fmt;
-
-pub trait ToReport {
-    fn to_report(&self, str: &str) -> String;
-    fn boxed(self) -> Box<Self> where Self: Sized { Box::new(self) }
-}
+pub(crate) use neu_diagnostics::ToReport;
 
 #[derive(Clone)]
 pub enum ParseError<Tok: TokenKind> {

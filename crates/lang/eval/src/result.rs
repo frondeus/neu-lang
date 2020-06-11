@@ -1,12 +1,11 @@
-use crate::error::Error;
 use crate::value::Value;
 use neu_parser::NodeId;
 use std::fmt;
+use neu_diagnostics::Diagnostics;
 
-#[derive(Debug)]
 pub struct EvalResult {
     pub value: Option<Value>,
-    pub errors: Vec<(NodeId, Error)>,
+    pub errors: Diagnostics<NodeId>
 }
 
 impl EvalResult {
@@ -34,7 +33,7 @@ impl<'s, 'n> fmt::Display for DisplayEvalResult<'s, 'n> {
         }
 
         for (node_id, error) in self.result.errors.iter() {
-            write!(f, "\n{} @ {:?}", error, node_id)?;
+            write!(f, "\n{} @ {:?}", error.to_report(self.str), node_id)?;
         }
 
         Ok(())
