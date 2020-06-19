@@ -3,4 +3,5 @@ members = [
     "crates/utils/*",
     "crates/lang/*",
     "crates/ide/*",
+    "crates/bins/*"
 ]

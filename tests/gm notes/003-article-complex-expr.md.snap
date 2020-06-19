@@ -8,13 +8,14 @@ Ala ma **kota**
 
 `````
 [render]
-`<p>Ala ma <strong>kota</strong></p>`
+`<h1>Pośród Pradawnych Drzew</h1>
+<table><tr><th>a</th><td>3</td></tr></table><p>Ala ma <strong>kota</strong></p>`
 
 ### No Errors ###
 
 [parser]
-ROOT @ 0..89 = `+++ sesja:a88907fd +++\ntitle = \"Po\u{15b}r\u{f3}d Pradawnych Drzew\"\na = 1 + 2\n+++\n\nAla ma **kota**`
-    ARTICLEITEM @ 0..89 = `+++ sesja:a88907fd +++\ntitle = \"Po\u{15b}r\u{f3}d Pradawnych Drzew\"\na = 1 + 2\n+++\n\nAla ma **kota**`
+ROOT @ 0..89
+    ARTICLEITEM @ 0..89
         TOKEN @ 0..3 = `+++`
         TOKEN, TRIVIA @ 3..4 = ` `
         IDENTIFIER, TOKEN @ 4..9 = `sesja`
@@ -23,7 +24,7 @@ ROOT @ 0..89 = `+++ sesja:a88907fd +++\ntitle = \"Po\u{15b}r\u{f3}d Pradawnych D
         TOKEN, TRIVIA @ 18..19 = ` `
         TOKEN @ 19..22 = `+++`
         TOKEN, TRIVIA @ 22..23 = `\n`
-        STRUCT, VALUE @ 23..69 = `title = \"Po\u{15b}r\u{f3}d Pradawnych Drzew\"\na = 1 + 2\n`
+        STRUCT, VALUE @ 23..69
             IDENTIFIER, KEY, TOKEN @ 23..28 = `title`
             TRIVIA @ 28..29 = ` `
             TOKEN @ 29..30 = `=`

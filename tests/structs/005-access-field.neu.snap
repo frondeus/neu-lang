@@ -44,17 +44,17 @@
 ]
 
 [parser]
-ROOT @ 0..64 = `{\n    foo = {\n        bar = 50,\n        baz = 60\n    }\n}.foo.bar`
-    IDENTPATH, VALUE @ 0..64 = `{\n    foo = {\n        bar = 50,\n        baz = 60\n    }\n}.foo.bar`
-        IDENTPATH, VALUE @ 0..60 = `{\n    foo = {\n        bar = 50,\n        baz = 60\n    }\n}.foo`
-            STRUCT, VALUE @ 0..56 = `{\n    foo = {\n        bar = 50,\n        baz = 60\n    }\n}`
+ROOT @ 0..64
+    IDENTPATH, VALUE @ 0..64
+        IDENTPATH, VALUE @ 0..60
+            STRUCT, VALUE @ 0..56
                 TOKEN @ 0..1 = `{`
                 TRIVIA @ 1..6 = `\n    `
                 IDENTIFIER, KEY, TOKEN @ 6..9 = `foo`
                 TRIVIA @ 9..10 = ` `
                 TOKEN @ 10..11 = `=`
                 TRIVIA @ 11..12 = ` `
-                STRUCT, VALUE @ 12..54 = `{\n        bar = 50,\n        baz = 60\n    }`
+                STRUCT, VALUE @ 12..54
                     TOKEN @ 12..13 = `{`
                     TRIVIA @ 13..22 = `\n        `
                     IDENTIFIER, KEY, TOKEN @ 22..25 = `bar`

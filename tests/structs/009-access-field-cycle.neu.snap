@@ -36,10 +36,10 @@
 ]
 
 [parser]
-ROOT @ 0..60 = `{\n    health = {\n        value = .value\n    }\n}.health.value`
-    IDENTPATH, VALUE @ 0..60 = `{\n    health = {\n        value = .value\n    }\n}.health.value`
-        IDENTPATH, VALUE @ 0..54 = `{\n    health = {\n        value = .value\n    }\n}.health`
-            STRUCT, VALUE @ 0..47 = `{\n    health = {\n        value = .value\n    }\n}`
+ROOT @ 0..60
+    IDENTPATH, VALUE @ 0..60
+        IDENTPATH, VALUE @ 0..54
+            STRUCT, VALUE @ 0..47
                 TOKEN @ 0..1 = `{`
                 TRIVIA @ 1..6 = `\n    `
                 IDENTIFIER, KEY, TOKEN @ 6..12 = `health`

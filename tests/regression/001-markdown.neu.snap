@@ -7,9 +7,9 @@
 ```
 
 [parser]
-ROOT @ 0..105 = `{\n    label = \"HP: ${ 2 + 3 }\",\n    link = \"[AB](http://google.pl)\",\n    desc = \"**foo `4` bar**\"\n}.label`
-    IDENTPATH, VALUE @ 0..105 = `{\n    label = \"HP: ${ 2 + 3 }\",\n    link = \"[AB](http://google.pl)\",\n    desc = \"**foo `4` bar**\"\n}.label`
-        STRUCT, VALUE @ 0..99 = `{\n    label = \"HP: ${ 2 + 3 }\",\n    link = \"[AB](http://google.pl)\",\n    desc = \"**foo `4` bar**\"\n}`
+ROOT @ 0..105
+    IDENTPATH, VALUE @ 0..105
+        STRUCT, VALUE @ 0..99
             TOKEN @ 0..1 = `{`
             TRIVIA @ 1..6 = `\n    `
             IDENTIFIER, KEY, TOKEN @ 6..11 = `label`

@@ -54,15 +54,15 @@
 ]
 
 [parser]
-ROOT @ 0..83 = `{\n    health = {\n        value = 10,\n        max = 13,\n    },\n    sanity = 50 + 2\n}`
-    STRUCT, VALUE @ 0..83 = `{\n    health = {\n        value = 10,\n        max = 13,\n    },\n    sanity = 50 + 2\n}`
+ROOT @ 0..83
+    STRUCT, VALUE @ 0..83
         TOKEN @ 0..1 = `{`
         TRIVIA @ 1..6 = `\n    `
         IDENTIFIER, KEY, TOKEN @ 6..12 = `health`
         TRIVIA @ 12..13 = ` `
         TOKEN @ 13..14 = `=`
         TRIVIA @ 14..15 = ` `
-        STRUCT, VALUE @ 15..60 = `{\n        value = 10,\n        max = 13,\n    }`
+        STRUCT, VALUE @ 15..60
             TOKEN @ 15..16 = `{`
             TRIVIA @ 16..25 = `\n        `
             IDENTIFIER, KEY, TOKEN @ 25..30 = `value`

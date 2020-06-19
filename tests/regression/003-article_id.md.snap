@@ -1,0 +1,51 @@
+`````
++++ campaign:a81c23d3 +++
+title = "Maski Nyarlathotepa"
+where = "NY, London, Cair, Kenya, Australia, Shanghai"
++++
+
+++ end ++
+
+
+`````
+
+[parser]
+ROOT @ 0..125
+    ARTICLEITEM @ 0..125
+        TOKEN @ 0..3 = `+++`
+        TOKEN, TRIVIA @ 3..4 = ` `
+        IDENTIFIER, TOKEN @ 4..12 = `campaign`
+        TOKEN @ 12..13 = `:`
+        ARTICLEITEMID, TOKEN @ 13..21 = `a81c23d3`
+        TOKEN, TRIVIA @ 21..22 = ` `
+        TOKEN @ 22..25 = `+++`
+        TOKEN, TRIVIA @ 25..26 = `\n`
+        STRUCT, VALUE @ 26..111
+            IDENTIFIER, KEY, TOKEN @ 26..31 = `title`
+            TRIVIA @ 31..32 = ` `
+            TOKEN @ 32..33 = `=`
+            TRIVIA @ 33..34 = ` `
+            STRING, VALUE @ 34..55 = `\"Maski Nyarlathotepa\"`
+                TOKEN @ 34..35 = `\"`
+                STRVALUE, TOKEN @ 35..54 = `Maski Nyarlathotepa`
+                TOKEN @ 54..55 = `\"`
+            TOKEN @ 55..56 = `\n`
+            IDENTIFIER, KEY, TOKEN @ 56..61 = `where`
+            TRIVIA @ 61..62 = ` `
+            TOKEN @ 62..63 = `=`
+            TRIVIA @ 63..64 = ` `
+            STRING, VALUE @ 64..110 = `\"NY, London, Cair, Kenya, Australia, Shanghai\"`
+                TOKEN @ 64..65 = `\"`
+                STRVALUE, TOKEN @ 65..109 = `NY, London, Cair, Kenya, Australia, Shanghai`
+                TOKEN @ 109..110 = `\"`
+            TOKEN @ 110..111 = `\n`
+        TOKEN @ 111..114 = `+++`
+        ARTICLEBODY, MARKDOWN, VALUE @ 114..125 = `\n\n++ end ++`
+            MD_PARAGRAPH, MD_VALUE @ 116..125 = `++ end ++`
+                MD_TEXT @ 116..125 = `++ end ++`
+
+
+### No Errors ###
+
+
+[.render]

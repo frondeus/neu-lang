@@ -102,17 +102,17 @@
 ]
 
 [parser]
-ROOT @ 0..187 = `{\n    primary = {\n        con = 50,\n        size = 60\n    },\n    health = {\n        max = (primary.con + primary.size) / 10,\n        value = .max\n    },\n    sanity = 50 + 2\n}.health.value`
-    IDENTPATH, VALUE @ 0..187 = `{\n    primary = {\n        con = 50,\n        size = 60\n    },\n    health = {\n        max = (primary.con + primary.size) / 10,\n        value = .max\n    },\n    sanity = 50 + 2\n}.health.value`
-        IDENTPATH, VALUE @ 0..181 = `{\n    primary = {\n        con = 50,\n        size = 60\n    },\n    health = {\n        max = (primary.con + primary.size) / 10,\n        value = .max\n    },\n    sanity = 50 + 2\n}.health`
-            STRUCT, VALUE @ 0..174 = `{\n    primary = {\n        con = 50,\n        size = 60\n    },\n    health = {\n        max = (primary.con + primary.size) / 10,\n        value = .max\n    },\n    sanity = 50 + 2\n}`
+ROOT @ 0..187
+    IDENTPATH, VALUE @ 0..187
+        IDENTPATH, VALUE @ 0..181
+            STRUCT, VALUE @ 0..174
                 TOKEN @ 0..1 = `{`
                 TRIVIA @ 1..6 = `\n    `
                 IDENTIFIER, KEY, TOKEN @ 6..13 = `primary`
                 TRIVIA @ 13..14 = ` `
                 TOKEN @ 14..15 = `=`
                 TRIVIA @ 15..16 = ` `
-                STRUCT, VALUE @ 16..59 = `{\n        con = 50,\n        size = 60\n    }`
+                STRUCT, VALUE @ 16..59
                     TOKEN @ 16..17 = `{`
                     TRIVIA @ 17..26 = `\n        `
                     IDENTIFIER, KEY, TOKEN @ 26..29 = `con`
@@ -135,7 +135,7 @@ ROOT @ 0..187 = `{\n    primary = {\n        con = 50,\n        size = 60\n    }
                 TRIVIA @ 71..72 = ` `
                 TOKEN @ 72..73 = `=`
                 TRIVIA @ 73..74 = ` `
-                STRUCT, VALUE @ 74..151 = `{\n        max = (primary.con + primary.size) / 10,\n        value = .max\n    }`
+                STRUCT, VALUE @ 74..151
                     TOKEN @ 74..75 = `{`
                     TRIVIA @ 75..84 = `\n        `
                     IDENTIFIER, KEY, TOKEN @ 84..87 = `max`

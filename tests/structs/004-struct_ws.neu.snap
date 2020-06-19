@@ -38,8 +38,8 @@
 ]
 
 [parser]
-ROOT @ 0..48 = `{\n    health = 10\n    - 2,\n    sanity = 50 + 2\n}`
-    STRUCT, VALUE @ 0..48 = `{\n    health = 10\n    - 2,\n    sanity = 50 + 2\n}`
+ROOT @ 0..48
+    STRUCT, VALUE @ 0..48
         TOKEN @ 0..1 = `{`
         TRIVIA @ 1..6 = `\n    `
         IDENTIFIER, KEY, TOKEN @ 6..12 = `health`

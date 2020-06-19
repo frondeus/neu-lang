@@ -114,14 +114,23 @@ impl<'s, 'n, 'a> fmt::Display for DisplayNode<'s, 'n, 'a> {
             write!(f, "{:width$}", " ", width = width)?;
         }
 
-        let span = &self.str[self.node.span].escape_default();
-        writeln!(
+        write!(
             f,
-            "{} @ {:?} = `{}`",
+            "{} @ {:?}",
             self.node.names.iter().join(", ").to_uppercase(),
             self.node.span,
-            span
         )?;
+
+        let span = &self.str[self.node.span];
+        if self.node.children.is_empty() || span.lines().count() <= 1 || span.len() < 40 {
+            write!(
+                f,
+                " = `{}`",
+                span.escape_default()
+            )?;
+        }
+        writeln!(f)?;
+
         let c_width = width + 4;
         for child in self
             .node

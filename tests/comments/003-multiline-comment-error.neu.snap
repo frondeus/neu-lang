@@ -36,8 +36,8 @@
 ]
 
 [parser]
-ROOT @ 0..63 = `{\n    health = 4, /* foo }\n    bar */\n    sanity = 10, /* baz\n}`
-    STRUCT, VALUE @ 0..63 = `{\n    health = 4, /* foo }\n    bar */\n    sanity = 10, /* baz\n}`
+ROOT @ 0..63
+    STRUCT, VALUE @ 0..63
         TOKEN @ 0..1 = `{`
         TRIVIA @ 1..6 = `\n    `
         IDENTIFIER, KEY, TOKEN @ 6..12 = `health`

@@ -1,6 +1,7 @@
 use neu_parser::{Arena, ArenaExt};
 use std::fmt;
 
+#[derive(Debug)]
 pub struct RenderResult {
     pub output: String,
 }

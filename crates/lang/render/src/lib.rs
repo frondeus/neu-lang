@@ -1,8 +1,8 @@
 use crate::result::RenderResult;
-use neu_parser::{NodeId, Arena, Children};
-use neu_syntax::Nodes;
+use neu_parser::Arena;
 use neu_eval::{eval, Value};
 use std::fmt;
+use neu_syntax::ast::ArticleItem;
 
 mod result;
 
@@ -32,6 +32,9 @@ impl<'v> fmt::Display for HtmlValue<'v> {
             },
             Value::Struct(s) => {
                 write!(f, "{{")?;
+                if !s.is_empty() {
+                    writeln!(f)?;
+                }
                 let c_width = width + 4;
                 for (k, v) in s.iter() {
                     writeln!(f, "{:width$}{} = {:#width$},", " ", k, v, width = c_width)?;
@@ -48,22 +51,32 @@ fn render_value(value: &Value) -> HtmlValue {
     HtmlValue { value } 
 }
 
-fn _render(id: NodeId, nodes: &mut Arena, input: &str) -> Option<RenderResult> {
+fn _render(article_item: ArticleItem, nodes: &mut Arena, input: &str) -> Option<RenderResult> {
     let mut output = String::default();
-    let node = nodes.get(id);
-    let mut children = Children::new(node.children.iter().copied(), nodes);
-    let (_, article) = children.find_node(Nodes::ArticleItem)?;
-    let mut children = Children::new(article.children.iter().copied(), nodes);
-    let (strukt, _) = children.find_node(Nodes::Struct)?;
 
-    let (_, body) = children.find_node(Nodes::ArticleBody)?;
-    let mut body = body.clone();
+    let article_item = article_item.anchor_body(nodes);
 
-    body.parent = Some(strukt);
-    let body = nodes.add(body);
+    let strukt_eval = eval(article_item.strukt?, nodes, input);
+    let mut strukt = strukt_eval.value?.into_struct()?;
 
-    let body_eval = eval(body, nodes, input);
+    let body_eval = eval(article_item.body?, nodes, input);
     let body = body_eval.value?;
+
+
+    if let Some(title) = strukt.remove("title") {
+        output.push_str(&format!("<h1>{}</h1>\n", render_value(&title)));
+    }
+
+    if !strukt.is_empty() {
+        output.push_str("<table>");
+        for (key, value) in strukt {
+            output.push_str("<tr>");
+            output.push_str(&format!("<th>{}</th>", key));
+            output.push_str(&format!("<td>{}</td>", render_value(&value)));
+            output.push_str("</tr>");
+        }
+        output.push_str("</table>");
+    }
 
     output.push_str(&format!("{}", render_value(&body)));
 
@@ -73,8 +86,8 @@ fn _render(id: NodeId, nodes: &mut Arena, input: &str) -> Option<RenderResult> {
 }
 
 
-pub fn render(id: NodeId, nodes: &mut Arena, input: &str) -> RenderResult {
-    _render(id, nodes, input).unwrap_or_else(|| {
+pub fn render(article_item: ArticleItem, nodes: &mut Arena, input: &str) -> RenderResult {
+    _render(article_item, nodes, input).unwrap_or_else(|| {
         RenderResult {
             output: "Couldn't render, found errors".to_string()
         }
@@ -96,7 +109,8 @@ mod tests {
             let lexer = Lexer::new(input);
 
             let mut res = State::parse(lexer, parser());
-            let result = render(res.root, &mut res.arena, input);
+            let article_item = ArticleItem::build(res.root, &res.arena);
+            let result = render(article_item, &mut res.arena, input);
 
             result.display(input, &res.arena).to_string()
         })

@@ -85,10 +85,10 @@
 ]
 
 [parser]
-ROOT @ 0..137 = `{\n    con = 50,\n    size = 60,\n    health = {\n        max = (con + size) / 10,\n        value = 19\n    },\n    sanity = 50 + 2\n}.health.max`
-    IDENTPATH, VALUE @ 0..137 = `{\n    con = 50,\n    size = 60,\n    health = {\n        max = (con + size) / 10,\n        value = 19\n    },\n    sanity = 50 + 2\n}.health.max`
-        IDENTPATH, VALUE @ 0..133 = `{\n    con = 50,\n    size = 60,\n    health = {\n        max = (con + size) / 10,\n        value = 19\n    },\n    sanity = 50 + 2\n}.health`
-            STRUCT, VALUE @ 0..126 = `{\n    con = 50,\n    size = 60,\n    health = {\n        max = (con + size) / 10,\n        value = 19\n    },\n    sanity = 50 + 2\n}`
+ROOT @ 0..137
+    IDENTPATH, VALUE @ 0..137
+        IDENTPATH, VALUE @ 0..133
+            STRUCT, VALUE @ 0..126
                 TOKEN @ 0..1 = `{`
                 TRIVIA @ 1..6 = `\n    `
                 IDENTIFIER, KEY, TOKEN @ 6..9 = `con`
@@ -109,7 +109,7 @@ ROOT @ 0..137 = `{\n    con = 50,\n    size = 60,\n    health = {\n        max =
                 TRIVIA @ 41..42 = ` `
                 TOKEN @ 42..43 = `=`
                 TRIVIA @ 43..44 = ` `
-                STRUCT, VALUE @ 44..103 = `{\n        max = (con + size) / 10,\n        value = 19\n    }`
+                STRUCT, VALUE @ 44..103
                     TOKEN @ 44..45 = `{`
                     TRIVIA @ 45..54 = `\n        `
                     IDENTIFIER, KEY, TOKEN @ 54..57 = `max`

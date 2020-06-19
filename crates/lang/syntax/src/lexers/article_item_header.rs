@@ -64,26 +64,20 @@ impl TokenKind for Token {
             return Some((Token::Colon, input.chomp(1)));
         }
 
-        if peeked.is_ascii_hexdigit() {
-            let rest = i
-                .chars()
-                .take_while(|c| c.is_ascii_hexdigit() || *c == '_')
-                .count();
+        if i.chars().take(8).all(|c| c.is_ascii_hexdigit() || c == '_') {
+            let rest = i.chars().take(8).count();
 
-            return Some((
-                if rest == 8 {
-                    Token::ItemId
-                } else {
-                    Token::Identifier
-                },
-                input.chomp(rest),
-            ));
+            if rest == 8 {
+                return Some((Token::ItemId, input.chomp(rest)));
+            }
         }
 
         if peeked.is_ascii_alphabetic() {
             let rest = i
                 .chars()
-                .take_while(|c| c.is_ascii_alphabetic() || *c == '_')
+                .take_while(|c| {
+                    c.is_ascii_alphabetic() || *c == '_'
+                })
                 .count();
 
             return Some((Token::Identifier, input.chomp(rest)));

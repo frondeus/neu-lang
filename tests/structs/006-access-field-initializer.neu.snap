@@ -101,17 +101,17 @@
 ]
 
 [parser]
-ROOT @ 0..183 = `{\n    primary = {\n        con = 50,\n        size = 60\n    },\n    health = {\n        max = (primary.con + primary.size) / 10,\n        value = 19\n    },\n    sanity = 50 + 2\n}.health.max`
-    IDENTPATH, VALUE @ 0..183 = `{\n    primary = {\n        con = 50,\n        size = 60\n    },\n    health = {\n        max = (primary.con + primary.size) / 10,\n        value = 19\n    },\n    sanity = 50 + 2\n}.health.max`
-        IDENTPATH, VALUE @ 0..179 = `{\n    primary = {\n        con = 50,\n        size = 60\n    },\n    health = {\n        max = (primary.con + primary.size) / 10,\n        value = 19\n    },\n    sanity = 50 + 2\n}.health`
-            STRUCT, VALUE @ 0..172 = `{\n    primary = {\n        con = 50,\n        size = 60\n    },\n    health = {\n        max = (primary.con + primary.size) / 10,\n        value = 19\n    },\n    sanity = 50 + 2\n}`
+ROOT @ 0..183
+    IDENTPATH, VALUE @ 0..183
+        IDENTPATH, VALUE @ 0..179
+            STRUCT, VALUE @ 0..172
                 TOKEN @ 0..1 = `{`
                 TRIVIA @ 1..6 = `\n    `
                 IDENTIFIER, KEY, TOKEN @ 6..13 = `primary`
                 TRIVIA @ 13..14 = ` `
                 TOKEN @ 14..15 = `=`
                 TRIVIA @ 15..16 = ` `
-                STRUCT, VALUE @ 16..59 = `{\n        con = 50,\n        size = 60\n    }`
+                STRUCT, VALUE @ 16..59
                     TOKEN @ 16..17 = `{`
                     TRIVIA @ 17..26 = `\n        `
                     IDENTIFIER, KEY, TOKEN @ 26..29 = `con`
@@ -134,7 +134,7 @@ ROOT @ 0..183 = `{\n    primary = {\n        con = 50,\n        size = 60\n    }
                 TRIVIA @ 71..72 = ` `
                 TOKEN @ 72..73 = `=`
                 TRIVIA @ 73..74 = ` `
-                STRUCT, VALUE @ 74..149 = `{\n        max = (primary.con + primary.size) / 10,\n        value = 19\n    }`
+                STRUCT, VALUE @ 74..149
                     TOKEN @ 74..75 = `{`
                     TRIVIA @ 75..84 = `\n        `
                     IDENTIFIER, KEY, TOKEN @ 84..87 = `max`

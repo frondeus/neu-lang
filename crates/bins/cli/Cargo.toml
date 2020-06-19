@@ -1,0 +1,21 @@
+[package]
+authors = ["Wojciech Polak <frondeus@gmail.com>"]
+edition = "2018"
+name = "neu-cli"
+version = "0.1.0"
+
+[dependencies]
+neu-parser = { path = "../../utils/parser" }
+neu-syntax = { path = "../../lang/syntax" }
+neu-eval = { path = "../../lang/eval" }
+neu-render = { path = "../../lang/render" }
+
+anyhow = "1.0.31"
+log = "0.4.8"
+env_logger = "0.7.1"
+clap = "3.0.0-beta.1"
+glob = "0.3.0"
+
+[dev-dependencies]
+assert_fs = "1.0.0"
+
