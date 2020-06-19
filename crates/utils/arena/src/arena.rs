@@ -28,13 +28,9 @@ impl<Node: fmt::Debug> fmt::Debug for Arena<Node> {
 }
 
 impl<N: Node> Arena<N> {
-    pub fn take(&mut self) -> Self {
-        let nodes = std::mem::take(&mut self.nodes);
-        let components = std::mem::take(&mut self.components);
-        Self {
-            nodes,
-            components
-        }
+    pub fn merge(&mut self, mut other: Self) {
+        self.nodes.append(&mut other.nodes);
+        self.components.append(&mut other.components);
     }
 
     pub fn add(&mut self, node: N) -> NodeId {

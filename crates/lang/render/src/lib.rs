@@ -98,7 +98,7 @@ mod tests {
             let lexer = Lexer::new(input);
 
             let mut res = State::parse(lexer, parser());
-            let result = render(res.root, &mut res.nodes, input);
+            let result = render(res.root, &mut res.arena, input);
 
             result.display(input).to_string()
         })

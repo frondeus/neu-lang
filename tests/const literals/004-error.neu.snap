@@ -19,5 +19,6 @@ Expected one of number, `true`, `false`, `-`, `!`, `"`, `(`, `{`, `[`, identifie
 [eval]
 None
 
-### No Errors ###
+### Errors ###
+Expected one of number, `true`, `false`, `-`, `!`, `"`, `(`, `{`, `[`, identifier but found `???` @ N0
 

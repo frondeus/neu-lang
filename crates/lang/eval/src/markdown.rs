@@ -29,7 +29,7 @@ impl<'a> Eval<'a> {
         }
 
         if node.is(Nodes::Md_CodeBlock) {
-            let mut children = Children::new(node.children.iter().copied(), self.nodes);
+            let mut children = Children::new(node.children.iter().copied(), self.arena);
             str.push_str("<pre><code");
 
             if let Some((_, node)) = children.find_node(Nodes::Md_CodeBlockLang) {
@@ -41,7 +41,7 @@ impl<'a> Eval<'a> {
         }
 
         if node.is(Nodes::Md_Image) {
-            let mut children = Children::new(node.children.iter().copied(), self.nodes);
+            let mut children = Children::new(node.children.iter().copied(), self.arena);
             str.push_str("<img");
             if let Some((_, node)) = children.find_node(Nodes::Md_ImageSrc) {
                 let text = &self.input[node.span];
@@ -59,7 +59,7 @@ impl<'a> Eval<'a> {
         }
 
         if node.is(Nodes::Md_Link) {
-            let mut children = Children::new(node.children.iter().copied(), self.nodes);
+            let mut children = Children::new(node.children.iter().copied(), self.arena);
             str.push_str("<a");
             if let Some((_, node)) = children.find_node(Nodes::Md_LinkUrl) {
                 let text = &self.input[node.span];
@@ -90,7 +90,7 @@ impl<'a> Eval<'a> {
         }
 
         if node.is(Nodes::Interpolated) {
-            let mut children = Children::new(node.children.iter().copied(), self.nodes);
+            let mut children = Children::new(node.children.iter().copied(), self.arena);
             let (value_id, _) = children.find_node(Nodes::Value)?;
             let value = self.eager_eval(value_id, true)?;
 
@@ -100,7 +100,7 @@ impl<'a> Eval<'a> {
         }
 
         for id in node.children.iter() {
-            let child = self.nodes.get(id);
+            let child = self.arena.get(id);
             self.eval_md(str, child)?;
         }
 

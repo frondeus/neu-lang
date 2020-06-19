@@ -1,7 +1,10 @@
-with import <nixpkgs> {}; {
-  neuLangEnv = stdenv.mkDerivation {
-    name = "neu-lang-env";
-    buildInputs = [ gcc git colordiff ];
-  };
+let
+  pkgs = import <nixpkgs> {};
+in
+pkgs.mkShell {
+  buildInputs = with pkgs; [
+    gcc 
+    git 
+    colordiff 
+  ];
 }
-

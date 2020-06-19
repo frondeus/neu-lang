@@ -5,12 +5,12 @@ use crate::NodeId;
 use std::collections::hash_map::Entry;
 use mopa::Any;
 
-pub trait Resource: Any + Send + Sync + 'static + Debug {}
+pub trait Resource: Any + Send + Sync + 'static {}
 
-impl<T> Resource for T where T: Any + Send + Sync + Debug {}
+impl<T> Resource for T where T: Any + Send + Sync {}
 
-pub trait Component : Send + Sync + 'static + Debug {}
-impl<T> Component for T where T: Any + Send + Sync + Debug {}
+pub trait Component : Send + Sync + 'static {}
+impl<T> Component for T where T: Any + Send + Sync {}
 
 mod __resource_mopafy_scope {
     #![allow(clippy::all)]
@@ -20,12 +20,16 @@ mod __resource_mopafy_scope {
     mopafy!(Resource);
 }
 
-#[derive(Default, Debug)]
-pub(crate) struct Components {
+#[derive(Default)]
+pub struct Components {
     storage: HashMap<TypeId, Box<dyn Resource>>
 }
 
 impl Components {
+    pub fn append(&mut self, other: &mut Self) {
+        self.storage.extend(other.storage.drain());
+    }
+
     pub fn insert<C: Component>(&mut self, id: NodeId, component: C) {
         let storage = self.entry::<HashMap<NodeId, C>>()
             .or_insert_with(move || {
@@ -111,7 +115,6 @@ mod tests {
         components.insert(IDS[1], t) ;
 
         let res: &Box<dyn Foo> = components.get(IDS[0]).expect("dyn Foo");
-        dbg!(&components);
         assert_eq!("Foo", res.foo());
     }
 
@@ -123,7 +126,6 @@ mod tests {
         components.insert(IDS[1], Type("Bar"));
         components.insert(IDS[1], Error("Bar"));
 
-        dbg!(&components);
         assert_eq!(&Type("Foo"), components.get(IDS[0]).expect("Some type"));
         assert_eq!(&Type("Bar"), components.get(IDS[1]).expect("Some type"));
         assert_eq!(&Error("Bar"), components.get(IDS[1]).expect("Some error"));
@@ -137,7 +139,6 @@ mod tests {
         components.insert(IDS[1], Type("Bar"));
         components.insert(IDS[1], Error("Bar"));
 
-        dbg!(&components);
         let mut types = components.iter::<Type>()
             .collect::<Vec<_>>();
         types.sort_by_key(|c| c.0);

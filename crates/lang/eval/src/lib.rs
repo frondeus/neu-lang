@@ -9,20 +9,22 @@ use neu_parser::{Arena, Node, NodeId, Children};
 use neu_syntax::Nodes;
 use std::collections::BTreeMap;
 pub use value::Value;
-use neu_diagnostics::{Diagnostics, ToReport};
+use neu_diagnostics::{Diagnostics, ToReport, Diagnostic};
 
 pub struct Eval<'a> {
-    pub nodes: &'a Arena,
+    pub arena: &'a Arena,
+    pub new_arena: Arena,
     pub input: &'a str,
-    pub errors: Diagnostics<NodeId>
+    //pub errors: Diagnostics<NodeId>
 }
 
 impl<'a> Eval<'a> {
-    pub fn new(nodes: &'a Arena, input: &'a str) -> Self {
+    pub fn new(arena: &'a Arena, input: &'a str) -> Self {
         Self {
-            nodes,
+            arena,
+            new_arena: Default::default(),
             input,
-            errors: vec![],
+            //errors: vec![],
         }
     }
 
@@ -66,7 +68,8 @@ impl<'a> Eval<'a> {
         match v {
             Some(v) => Some(v),
             None => {
-                self.errors.push((id, error.boxed()));
+                let err: Diagnostic = error.boxed();
+                self.new_arena.add_component(id, err);
                 None
             }
         }
@@ -75,9 +78,9 @@ impl<'a> Eval<'a> {
     fn eval_identifier(&mut self, id: NodeId, node: &Node) -> Option<Value> {
         let text = &self.input[node.span];
         let top = self
-            .nodes
+            .arena
             .ancestors(id)
-            .filter(|ancestor| self.nodes.get(ancestor).is(Nodes::Struct))
+            .filter(|ancestor| self.arena.get(ancestor).is(Nodes::Struct))
             .last();
         let top = self.expect_some(id, top, Error::ContextNotFound)?;
         let top = self.eval(top)?;
@@ -86,7 +89,7 @@ impl<'a> Eval<'a> {
     }
 
     fn eval_ident_path(&mut self, node: &Node) -> Option<Value> {
-        let mut children = Children::new(node.children.iter().copied(), self.nodes);
+        let mut children = Children::new(node.children.iter().copied(), self.arena);
         let (left_id, _) = children.find_node(Nodes::Value)?;
         let left = self.eager_eval(left_id, false)?;
         let _ = children.find_node(Nodes::Op)?;
@@ -105,9 +108,9 @@ impl<'a> Eval<'a> {
     ) -> Option<Value> {
         let text = &self.input[value.span];
         let current = self
-            .nodes
+            .arena
             .ancestors(op_id)
-            .find(|ancestor| self.nodes.get(ancestor).is(Nodes::Struct));
+            .find(|ancestor| self.arena.get(ancestor).is(Nodes::Struct));
         let current = self.expect_some(op_id, current, Error::ContextNotFound)?;
         let current = self.eval(current)?;
         let mut map = self.expect_some(op_id, current.into_struct(), Error::ValueNotStruct)?;
@@ -115,7 +118,7 @@ impl<'a> Eval<'a> {
     }
 
     fn eval_unary(&mut self, node: &Node) -> Option<Value> {
-        let mut children = Children::new(node.children.iter().copied(), self.nodes);
+        let mut children = Children::new(node.children.iter().copied(), self.arena);
         let (op_id, op) = children.find_node(Nodes::Op)?;
         let text_op = &self.input[op.span];
 
@@ -134,7 +137,7 @@ impl<'a> Eval<'a> {
     }
 
     fn eval_binary(&mut self, node: &Node) -> Option<Value> {
-        let mut children = Children::new(node.children.iter().copied(), self.nodes);
+        let mut children = Children::new(node.children.iter().copied(), self.arena);
         let (left, _) = children.find_node(Nodes::Value)?;
         let left = self.eager_eval(left, false)?;
         let (_, op) = children.find_node(Nodes::Op)?;
@@ -152,7 +155,7 @@ impl<'a> Eval<'a> {
     }
 
     pub fn eval(&mut self, id: NodeId) -> Option<Value> {
-        let node = self.nodes.get(id);
+        let node = self.arena.get(id);
 
         if node.is(Nodes::Root) {
             return node
@@ -165,7 +168,7 @@ impl<'a> Eval<'a> {
             return None;
         }
 
-        let mut children = Children::new(node.children.iter().copied(), self.nodes);
+        let mut children = Children::new(node.children.iter().copied(), self.arena);
         let text = &self.input[node.span];
 
         if node.is(Nodes::Identifier) {
@@ -219,7 +222,7 @@ impl<'a> Eval<'a> {
             let mut s = String::new();
             while let Some((_, value)) = children.find_node(Nodes::StrValue) {
                 if value.is(Nodes::Interpolated) {
-                    let mut children = Children::new(value.children.iter().copied(), self.nodes);
+                    let mut children = Children::new(value.children.iter().copied(), self.arena);
                     let (value_id, _) = children.find_node(Nodes::Value)?;
                     let value = self.eager_eval(value_id, true)?;
                     s += &value.to_string();
@@ -238,12 +241,14 @@ impl<'a> Eval<'a> {
     }
 }
 
-pub fn eval(id: NodeId, nodes: &Arena, input: &str) -> EvalResult {
-    let mut eval = Eval::new(nodes, input);
+pub fn eval(id: NodeId, arena: &mut Arena, input: &str) -> EvalResult {
+    let mut eval = Eval::new(arena, input);
     let value = eval.eval(id).and_then(|val| eval.into_eager(val, true));
+    let new_arena = eval.new_arena;
+    arena.merge(new_arena);
     EvalResult {
-        value,
-        errors: eval.errors,
+        value
+        //errors: eval.errors,
     }
 }
 
@@ -258,10 +263,10 @@ mod tests {
         test_runner::test_snapshots("neu", "eval", |input| {
             let lexer = Lexer::new(input);
 
-            let res = State::parse(lexer, parser());
-            let result = eval(res.root, &res.nodes, input);
+            let mut res = State::parse(lexer, parser());
+            let result = eval(res.root, &mut res.arena, input);
 
-            result.display(input).to_string()
+            result.display(input, &res.arena).to_string()
         })
         .unwrap();
     }

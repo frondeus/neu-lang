@@ -1,21 +1,19 @@
-use crate::{Context, Lexer, Parser, TokenKind, NodeId, Arena};
+use crate::{Context, Lexer, Parser, TokenKind, NodeId, Arena, ArenaExt};
 use std::fmt;
 use neu_diagnostics::{Diagnostics, Diagnostic};
 
 pub struct State<Tok: TokenKind> {
     lexer: Lexer<Tok>,
-    errors: Diagnostics<NodeId>,
-    new_errors: Diagnostics<()>,
-    nodes: Arena,
+    new_errors: Diagnostics,
+    arena: Arena,
 }
 
 impl<Tok: TokenKind> State<Tok> {
     fn new(lexer: Lexer<Tok>) -> Self {
         Self {
             lexer,
-            errors: Default::default(),
             new_errors: Default::default(),
-            nodes: Default::default(),
+            arena: Default::default(),
         }
     }
 
@@ -29,8 +27,7 @@ impl<Tok: TokenKind> State<Tok> {
         let lexer: Lexer<Tok2> = self.lexer.transform();
         State {
             lexer,
-            nodes: self.nodes.take(),
-            errors: std::mem::take(&mut self.errors),
+            arena: std::mem::take(&mut self.arena),
             new_errors: Default::default(),
         }
     }
@@ -42,12 +39,11 @@ impl<Tok: TokenKind> State<Tok> {
     {
         let lexer: Lexer<Tok> = other.lexer().transform();
         self.lexer = lexer;
-        self.errors = std::mem::take(&mut other.errors);
-        self.nodes = other.nodes.take();
+        self.arena = std::mem::take(&mut other.arena);
     }
 
     pub fn nodes(&mut self) -> &mut Arena {
-        &mut self.nodes
+        &mut self.arena
     }
 
     pub fn lexer(&self) -> &Lexer<Tok> {
@@ -59,12 +55,13 @@ impl<Tok: TokenKind> State<Tok> {
     }
 
     pub fn error(&mut self, e: Diagnostic) {
-        self.new_errors.push(((), e));
+        self.new_errors.push(e);
     }
 
     pub fn commit_errors(&mut self, id: NodeId) {
-        self.errors
-            .extend(self.new_errors.drain(..).map(|(_, e)| (id, e)));
+        for error in self.new_errors.drain(..) {
+            self.arena.add_component(id, error);
+        }
     }
 
     pub fn parse(lexer: Lexer<Tok>, parser: impl Parser<Tok>) -> ParseResult {
@@ -72,22 +69,18 @@ impl<Tok: TokenKind> State<Tok> {
         let ctx = Context::default();
         let root = parser.parse(&mut state, &ctx);
         let root = state.nodes().add(root);
-        let nodes = state.nodes;
-        let errors = state.errors;
+        let arena = state.arena;
 
         ParseResult {
             root,
-            nodes,
-            errors,
+            arena,
         }
     }
 }
 
-//#[derive(Debug)]
 pub struct ParseResult {
     pub root: NodeId,
-    pub nodes: Arena,
-    pub errors: Diagnostics<NodeId>,
+    pub arena: Arena,
 }
 
 impl ParseResult {
@@ -103,16 +96,17 @@ pub struct DisplayParseResult<'s, 'n> {
 
 impl<'s, 'n> fmt::Display for DisplayParseResult<'s, 'n> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let arena = &self.result.nodes;
+        let arena = &self.result.arena;
         let node = arena.get(self.result.root).display(self.str, arena);
         node.fmt(f)?;
-        if self.result.errors.is_empty() {
+        let errors = self.result.arena.errors();
+        if errors.is_empty() {
             writeln!(f, "\n\n### No Errors ###")?;
         } else {
             writeln!(f, "\n\n### Errors ###")?;
         }
 
-        for (node_id, error) in self.result.errors.iter() {
+        for (node_id, error) in errors.into_iter() {
             writeln!(f, "{} @ {:?}", error.to_report(self.str), node_id)?;
         }
         Ok(())

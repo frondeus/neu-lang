@@ -3,7 +3,7 @@ mod span_ext;
 
 use crate::diagnostic::{Diagnostic, DiagnosticType};
 use crate::span_ext::{LinesCols, TextRangeExt};
-use neu_parser::State;
+use neu_parser::{State, ArenaExt};
 use neu_syntax::{lexers::neu::Lexer, parsers::neu::parser};
 use wasm_bindgen::prelude::*;
 use web_sys::console;
@@ -47,15 +47,15 @@ pub fn on_change(buf: &str) {
     let lines = buf.lines().map(|s| s.to_string()).collect::<Vec<_>>();
 
     let parse_result = State::parse(Lexer::new(buf), parser());
-    //log(&format!("{:?}", &parse_result));
+    let mut arena = parse_result.arena;
 
     clear_diagnostics();
 
-    let mut diagnostics = parse_result
-        .errors
-        .iter()
+    let diagnostics = arena
+        .errors()
+        .into_iter()
         .map(|(id, error)| {
-            let node = parse_result.nodes.get(id);
+            let node = arena.get(id);
             let LinesCols {
                 line_start,
                 line_end,
@@ -75,29 +75,11 @@ pub fn on_change(buf: &str) {
 
     let root = parse_result.root;
 
-    let root_eval_result = neu_eval::eval(root, &parse_result.nodes, &buf);
+    let root_eval_result = neu_eval::eval(root, &mut arena, &buf);
     //log(&format!("{}", &root_eval_result.display(buf)));
 
     if let Some(value) = root_eval_result.value {
         write_eval(format!("= {}", &value));
-    }
-
-    for (id, error) in root_eval_result.errors.iter() {
-        let node = parse_result.nodes.get(id);
-        let LinesCols {
-            line_start,
-            line_end,
-            col_start,
-            col_end,
-        } = node.span.lines_cols(&lines);
-        diagnostics.push(Diagnostic::new(
-            error.to_report(&buf).to_string(),
-            line_start,
-            col_start,
-            line_end,
-            col_end,
-            DiagnosticType::Error,
-        ));
     }
 
     for diagnostic in diagnostics {

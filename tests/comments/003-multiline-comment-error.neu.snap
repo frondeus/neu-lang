@@ -73,5 +73,9 @@ Expected `}` but found EOF @ N22
 [eval]
 None
 
-### No Errors ###
+### Errors ###
+Expected identifier but found `/*` @ N17
+Expected `=` but found `baz` @ N19
+Expected one of number, `true`, `false`, `-`, `!`, `"`, `(`, `{`, `[`, identifier but found `}` @ N21
+Expected `}` but found EOF @ N22
 

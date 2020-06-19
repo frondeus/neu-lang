@@ -5,4 +5,4 @@ pub trait ToReport: Send + Sync {
 
 pub type Diagnostic = Box<dyn ToReport>;
 
-pub type Diagnostics<T> = Vec<(T, Diagnostic)>;
+pub type Diagnostics = Vec<Diagnostic>;

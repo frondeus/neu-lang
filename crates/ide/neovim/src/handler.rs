@@ -14,6 +14,7 @@ use std::future::Future;
 use std::sync::Arc;
 use tokio::io::Stdout;
 use tokio::sync::RwLock;
+use neu_parser::ArenaExt;
 
 #[derive(Clone, Default)]
 pub struct NeovimHandler {
@@ -103,27 +104,38 @@ impl NeovimHandler {
 
                     State::parse(Lexer::new(&buf), parser())
                 };
+
+                writeln!(&mut dbg_buffer, "{}\n\n", parse_result.display(&buf))?;
+
                 let root = parse_result.root;
+                let mut arena = parse_result.arena;
 
                 // Eval
                 current_bf.clear_namespace(highlight_ns, 0, -1).await?;
 
-                let root_eval_result = neu_eval::eval(root, &parse_result.nodes, &buf);
+                let root_eval_result = neu_eval::eval(root, &mut arena, &buf);
                 {
-                    for (id, node) in parse_result.nodes.enumerate() {
-                        if !node.is(Nodes::Error) {
-                            if !node.is(Nodes::Value) {
-                                continue;
+                    let nodes: Vec<_> = arena.enumerate()
+                        .filter_map(|(id, node)| {
+                            if !node.is(Nodes::Error) {
+                                if !node.is(Nodes::Value) {
+                                    return None;
+                                }
+                                if node.children.is_empty() {
+                                    return None;
+                                }
+                                if node.is_any(&[Nodes::Struct, Nodes::Array]) {
+                                    return None;
+                                }
                             }
-                            if node.children.is_empty() {
-                                continue;
-                            }
-                            if node.is_any(&[Nodes::Struct, Nodes::Array]) {
-                                continue;
-                            }
-                        }
-                        let eval_result = neu_eval::eval(id, &parse_result.nodes, &buf);
+                            Some(id)
+                        })
+                        .collect();
+
+                    for id in nodes {
+                        let eval_result = neu_eval::eval(id, &mut arena, &buf);
                         if let Some(value) = eval_result.value {
+                            let node = arena.get(id);
                             if let Some(LineCols { line, .. }) = node.span.lines_cols(&lines).last()
                             {
                                 //dbg!(dbg_buffer, (line, &value));
@@ -148,7 +160,7 @@ impl NeovimHandler {
 
                 // Highlighting
 
-                for node in parse_result.nodes.iter().rev() {
+                for node in arena.iter().rev() {
                     if let Some(hl_group) = node.highlight() {
                         for LineCols {
                             line,
@@ -172,11 +184,11 @@ impl NeovimHandler {
                 // Errors
                 let current_w = api.get_current_win().await?;
 
-                let mut diagnostics = parse_result
-                    .errors
-                    .iter()
+                let diagnostics = arena
+                    .errors()
+                    .into_iter()
                     .filter_map(|(id, error)| {
-                        let node = parse_result.nodes.get(id);
+                        let node = arena.get(id);
                         if let Some(LineCols {
                             line, col_start, ..
                         }) = node.span.lines_cols(&lines).last()
@@ -193,35 +205,6 @@ impl NeovimHandler {
                         }
                     })
                     .collect::<Vec<Diagnostic>>();
-
-                for (id, error) in root_eval_result.errors.iter() {
-                    let node = parse_result.nodes.get(id);
-                    if let Some(LineCols {
-                        line,
-                        col_start,
-                        col_end,
-                    }) = node.span.lines_cols(&lines).last()
-                    {
-                        current_bf
-                            .add_highlight(
-                                highlight_ns,
-                                "Error",
-                                *line,
-                                *col_start as i64,
-                                *col_end as i64,
-                            )
-                            .await?;
-
-                        diagnostics.push(Diagnostic::new(
-                            &current_bf,
-                            error //.display(&buf)
-                                .to_report(&buf).to_string(),
-                            *line,
-                            *col_start,
-                            DiagnosticType::Error,
-                        ));
-                    }
-                }
 
                 for diagnostic in diagnostics.iter() {
                     api.call_function(
@@ -269,9 +252,8 @@ impl NeovimHandler {
                 //writeln!(&mut dbg_buffer, "{}", buf)?;
                 //writeln!(&mut dbg_buffer, "```\n")?;
                 //writeln!(&mut dbg_buffer, "{:#?}\n", tokens)?;
-                writeln!(&mut dbg_buffer, "{}\n\n", parse_result.display(&buf))?;
-                writeln!(&mut dbg_buffer, "{}\n\n", root_eval_result.display(&buf))?;
-                dbg!(dbg_buffer, parse_result.nodes);
+                writeln!(&mut dbg_buffer, "{}\n\n", root_eval_result.display(&buf, &arena))?;
+                dbg!(dbg_buffer, arena);
 
                 let debug_lines = dbg_buffer.lines().map(|l| l.to_string()).collect_vec();
                 debug_bf.set_lines(0, -1, false, debug_lines).await?;
