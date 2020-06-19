@@ -1,7 +1,6 @@
 use crate::value::Value;
-use neu_parser::{NodeId, Arena, ArenaExt};
+use neu_parser::{Arena, ArenaExt};
 use std::fmt;
-use neu_diagnostics::Diagnostic;
 
 pub struct EvalResult {
     pub value: Option<Value>,

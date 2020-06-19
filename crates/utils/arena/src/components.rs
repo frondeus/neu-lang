@@ -1,4 +1,3 @@
-use std::fmt::Debug;
 use std::collections::HashMap;
 use std::any::TypeId;
 use crate::NodeId;
@@ -83,6 +82,7 @@ impl Components {
 
 #[cfg(test)]
 mod tests {
+    use std::fmt::Debug;
     use super::*;
 
     #[derive(Debug, PartialEq)]

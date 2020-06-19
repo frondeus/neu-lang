@@ -9,7 +9,7 @@ use neu_parser::{Arena, Node, NodeId, Children};
 use neu_syntax::Nodes;
 use std::collections::BTreeMap;
 pub use value::Value;
-use neu_diagnostics::{Diagnostics, ToReport, Diagnostic};
+use neu_diagnostics::{ToReport, Diagnostic};
 
 pub struct Eval<'a> {
     pub arena: &'a Arena,

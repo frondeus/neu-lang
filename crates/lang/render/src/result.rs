@@ -1,43 +1,38 @@
-use neu_parser::NodeId;
+use neu_parser::{Arena, ArenaExt};
 use std::fmt;
-use derive_more::Display;
-
-#[derive(Display)]
-#[display(fmt = "")]
-pub enum Error {
-
-}
 
 pub struct RenderResult {
     pub output: String,
-    pub errors: Vec<(NodeId, Error)>
 }
 
 impl RenderResult {
-    pub fn display<'s, 'n>(&'n self, str: &'s str) -> DisplayRenderResult<'s, 'n> {
-        DisplayRenderResult { str, result: self }
+    pub fn display<'s, 'n>(&'n self, str: &'s str, arena: &'s Arena) -> DisplayRenderResult<'s, 'n> {
+        DisplayRenderResult { str, result: self, arena }
     }
 }
 
 pub struct DisplayRenderResult<'s, 'n> {
     #[allow(dead_code)]
     str: &'s str,
-    result: &'n RenderResult
+    result: &'n RenderResult,
+    arena: &'s Arena
 }
 
 impl<'s, 'n> fmt::Display for DisplayRenderResult<'s, 'n> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "`{}`", self.result.output)?;
-        if self.result.errors.is_empty() {
+
+        let errors = self.arena.errors();
+
+        if errors.is_empty() {
             write!(f, "\n\n### No Errors ###")?;
         } else {
             write!(f, "\n\n### Errors ###")?;
         }
 
-        for (node_id, error) in self.result.errors.iter() {
-            write!(f, "\n{} @ {:?}", error, node_id)?;
+        for (node_id, error) in errors.iter() {
+            write!(f, "\n{} @ {:?}", error.to_report(self.str), node_id)?;
         }
-
         Ok(())
     }
 }

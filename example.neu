@@ -2,7 +2,7 @@
     foo = [1, 2, 3, 4],
     primary = {
         size = 40, // Example of a comment 
-        constitution = 60s,
+        constitution = 70s,
     }, 
     health = {
         label = "HP: ${"${.max}"}", // here is a comment, however after a comment there may be evaluation result

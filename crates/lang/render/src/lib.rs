@@ -68,8 +68,7 @@ fn _render(id: NodeId, nodes: &mut Arena, input: &str) -> Option<RenderResult> {
     output.push_str(&format!("{}", render_value(&body)));
 
     Some(RenderResult {
-        output,
-        errors: vec![]
+        output
     })
 }
 
@@ -77,8 +76,7 @@ fn _render(id: NodeId, nodes: &mut Arena, input: &str) -> Option<RenderResult> {
 pub fn render(id: NodeId, nodes: &mut Arena, input: &str) -> RenderResult {
     _render(id, nodes, input).unwrap_or_else(|| {
         RenderResult {
-            output: "Something went very wrong".to_string(),
-            errors: vec![]
+            output: "Couldn't render, found errors".to_string()
         }
     })
 }
@@ -100,7 +98,7 @@ mod tests {
             let mut res = State::parse(lexer, parser());
             let result = render(res.root, &mut res.arena, input);
 
-            result.display(input).to_string()
+            result.display(input, &res.arena).to_string()
         })
             .unwrap();
     }
