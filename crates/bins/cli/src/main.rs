@@ -14,13 +14,13 @@ struct Opts {
     dist: PathBuf
 }
 
-fn build(root: &Path) -> Result<()> {
+fn build(root: &Path, dist: &Path) -> Result<()> {
     use neu_parser::State;
     use neu_syntax::{lexers::article_item_file::Lexer,
                      parsers::article_item::parser};
     use neu_render::render;
 
-    let articles_path = root.join(".neu").join("articles");
+    let articles_path = root.join(dist).join("articles");
     std::fs::create_dir_all(&articles_path)?;
 
     for entry in glob::glob(&format!("{}/**/*.md", root.display()))? {
@@ -60,9 +60,9 @@ fn main() -> Result<()> {
 
     let path = opts.path;
 
-    let root = find_in_ancestors(path, opts.dist)?;
+    let root = find_in_ancestors(path, &opts.dist)?;
 
-    build(&root)?;
+    build(&root, &opts.dist)?;
 
     Ok(())
 }
