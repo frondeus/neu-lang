@@ -11,7 +11,7 @@ ROOT @ 0..20 = ` \"10 = ${5 + 2 + +}\"`
         INTERPOLATED, STRVALUE @ 7..19 = `${5 + 2 + +}`
             TOKEN @ 7..9 = `${`
             BINARY, VALUE @ 9..18 = `5 + 2 + +`
-                BINARY, VALUE @ 9..14 = `5 + 2`
+                BINARY, VALUE @ 9..15 = `5 + 2 `
                     NUMBER, TOKEN, VALUE @ 9..10 = `5`
                     TRIVIA @ 10..11 = ` `
                     OP, TOKEN @ 11..12 = `+`

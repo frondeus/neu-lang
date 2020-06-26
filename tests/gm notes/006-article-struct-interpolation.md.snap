@@ -109,7 +109,7 @@ ROOT @ 0..223
                     MD_TEXT @ 200..204 = `kota`
                 MD_TEXT @ 206..207 = `.`
             MD_VALUE @ 209..223 = ````\n.stats\n````
-                INTERPOLATED, ROOT @ 213..219 = `.stats`
+                INTERPOLATED, ROOT @ 213..220 = `.stats\n`
                     UNARY, VALUE @ 213..219 = `.stats`
                         OP, TOKEN @ 213..214 = `.`
                         IDENTIFIER, TOKEN, VALUE @ 214..219 = `stats`

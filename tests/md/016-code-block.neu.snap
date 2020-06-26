@@ -31,7 +31,7 @@ ROOT @ 0..197
     MARKDOWN, VALUE @ 0..197
         TOKEN @ 0..4 = `md#\"`
         MD_VALUE @ 5..88
-            INTERPOLATED, ROOT @ 9..84
+            INTERPOLATED, ROOT @ 9..85
                 STRUCT, VALUE @ 9..84
                     TOKEN @ 9..10 = `{`
                     TRIVIA @ 10..15 = `\n    `
@@ -47,7 +47,7 @@ ROOT @ 0..197
                         TOKEN @ 38..39 = `=`
                         TRIVIA @ 39..40 = ` `
                         BINARY, VALUE @ 40..54 = `(60 + 70) / 10`
-                            PARENS, VALUE @ 40..49 = `(60 + 70)`
+                            PARENS, VALUE @ 40..50 = `(60 + 70) `
                                 TOKEN @ 40..41 = `(`
                                 BINARY, VALUE @ 41..48 = `60 + 70`
                                     NUMBER, TOKEN, VALUE @ 41..43 = `60`
@@ -77,7 +77,7 @@ ROOT @ 0..197
         MD_PARAGRAPH, MD_VALUE @ 90..107 = `Here should eval\n`
             MD_TEXT @ 90..106 = `Here should eval`
         MD_VALUE @ 107..123 = ````neu\n5 + 2\n````
-            INTERPOLATED, ROOT @ 114..119 = `5 + 2`
+            INTERPOLATED, ROOT @ 114..120 = `5 + 2\n`
                 BINARY, VALUE @ 114..119 = `5 + 2`
                     NUMBER, TOKEN, VALUE @ 114..115 = `5`
                     TRIVIA @ 115..116 = ` `
@@ -88,7 +88,7 @@ ROOT @ 0..197
         MD_PARAGRAPH, MD_VALUE @ 125..142 = `Here is intended\n`
             MD_TEXT @ 125..141 = `Here is intended`
         MD_VALUE @ 147..153 = `2 + 5\n`
-            INTERPOLATED, ROOT @ 147..152 = `2 + 5`
+            INTERPOLATED, ROOT @ 147..153 = `2 + 5\n`
                 BINARY, VALUE @ 147..152 = `2 + 5`
                     NUMBER, TOKEN, VALUE @ 147..148 = `2`
                     TRIVIA @ 148..149 = ` `

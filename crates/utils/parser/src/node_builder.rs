@@ -146,9 +146,6 @@ impl<'a, Tok: TokenKind> NodeBuilder<'a, Tok> {
         } = self;
         for child in &children {
             let child_node = &state.nodes().get(*child);
-            if child_node.is(Nodes::Trivia) {
-                continue;
-            }
             span = span.cover(child_node.span);
         }
 

@@ -3,7 +3,7 @@
 ```
 
 [parser]
-ROOT @ 0..6 = ` \"foo\"`
+ROOT @ 0..7 = ` \"foo\" `
     TRIVIA @ 0..1 = ` `
     STRING, VALUE @ 1..6 = `\"foo\"`
         TOKEN @ 1..2 = `\"`

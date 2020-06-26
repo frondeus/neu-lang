@@ -117,7 +117,7 @@ ROOT @ 0..137
                     TOKEN @ 58..59 = `=`
                     TRIVIA @ 59..60 = ` `
                     BINARY, VALUE @ 60..77 = `(con + size) / 10`
-                        PARENS, VALUE @ 60..72 = `(con + size)`
+                        PARENS, VALUE @ 60..73 = `(con + size) `
                             TOKEN @ 60..61 = `(`
                             BINARY, VALUE @ 61..71 = `con + size`
                                 IDENTIFIER, TOKEN, VALUE @ 61..64 = `con`
