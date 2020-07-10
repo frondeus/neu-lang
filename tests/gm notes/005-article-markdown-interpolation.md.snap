@@ -76,13 +76,13 @@ ROOT @ 0..195
             NUMBER, TOKEN, VALUE @ 154..155 = `5`
             TOKEN @ 155..156 = `\n`
         TOKEN @ 156..159 = `+++`
-        ARTICLEBODY, MARKDOWN, VALUE @ 159..195 = `\n\nAla ma **kota**.\n\n```\n4 + .age\n````
-            MD_PARAGRAPH, MD_VALUE @ 161..178 = `Ala ma **kota**.\n`
+        ARTICLEBODY @ 159..195 = `\n\nAla ma **kota**.\n\n```\n4 + .age\n````
+            MARKDOWN, MD_PARAGRAPH, MD_VALUE, VALUE @ 161..178 = `Ala ma **kota**.\n`
                 MD_TEXT @ 161..168 = `Ala ma `
                 MD_STRONG @ 168..176 = `**kota**`
                     MD_TEXT @ 170..174 = `kota`
                 MD_TEXT @ 176..177 = `.`
-            MD_VALUE @ 179..195 = ````\n4 + .age\n````
+            MARKDOWN, MD_VALUE, VALUE @ 179..195 = ````\n4 + .age\n````
                 INTERPOLATED, ROOT @ 183..191 = `4 + .age`
                     BINARY, VALUE @ 183..191 = `4 + .age`
                         NUMBER, TOKEN, VALUE @ 183..184 = `4`

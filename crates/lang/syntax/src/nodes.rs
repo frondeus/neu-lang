@@ -36,6 +36,7 @@ nodes! {
         Md_Emphasis,
         Md_Strong,
         Md_SoftBreak,
+        Md_HardBreak,
         Md_Rule,
         Md_BlockQuote,
         Md_UnorderedList,

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Gm-Notes</title>
+    <style>
+        html { box-sizing: border-box; height: 100%; padding: 0; margin: 0; }
+        *, *:before, *:after { box-sizing: inherit; padding: 0; margin: 0; }
+        body, #main { height: 100%; }
+        li { margin-left: 2em; }
+        p { margin-top: 1em; }
+        .app {
+            display: flex;
+            height: 100%;
+            background: #eee;
+            color: #333;
+        }
+        .app > * { height: 100%; }
+        .index { flex: 1; overflow: auto; }
+        .index-entry { padding: 1em; }
+        .index-entry:hover { background: #ddd; cursor: pointer; }
+        .article { padding: 1em; flex: 4; overflow: auto; }
+        .article-item {
+            margin: 1em;
+            padding-left: 1em;
+            border-left: 4px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+    <div id="main"></div>
+
+    <script src="/static/react.development.js" crossorigin></script>
+    <script src="/static/react-dom.development.js" crossorigin></script>
+
+    <script type="text/javascript">
+        'use strict';
+
+        const { useState, useEffect, createElement } = React;
+        const e = createElement;
+
+        function Article({kind, id}) {
+            const [html, setHtml] = useState("Loading...");
+
+            useEffect(() => {
+                window.history.pushState("", "", `/${kind}/${id}`);
+            }, [ kind, id ]);
+
+
+            useEffect(() => {
+                fetch(`/neu/articles/${kind}/${id}.html`)
+                    .then(response => response.text())
+                    .then(data => { setHtml(data); });
+            }, [ kind, id ]);
+
+            useEffect(() => {
+                fetch('/neu/index.json')
+                    .then(response => response.json())
+                    .then(data => {
+                        let meta = data.find(val => val.kind === kind && val.id === id);
+                        document.title = `${meta.title}`;
+                    });
+                // TODO: Replace with article metadata? Or at least cache http
+            }, [ kind, id ]);
+
+            return e('div', { className: 'article' }, [
+                e('div', { key: "html", dangerouslySetInnerHTML: { __html: html } })
+            ]);
+        }
+
+        function IndexEntry({setArticle, entry}) {
+            return e('div', {
+                className: 'index-entry',
+                onClick: () => { setArticle({ kind: entry.kind, id: entry.id}) }
+            }, entry.title);
+        }
+
+        function Index({setArticle}) {
+            const [index, setIndex] = useState([]);
+
+            const once = true;
+
+            useEffect(() => {
+                fetch('/neu/index.json')
+                .then(response => response.json())
+                .then(data => { setIndex(data); });
+            }, [ once ]);
+
+            const children = index.map((entry, idx) =>
+                e(IndexEntry, {setArticle, entry, key: idx.toString()})
+            );
+
+            return e('div', { className: 'index' }, children);
+        }
+
+        function App() {
+            const path = location.pathname.split('/').slice(1);
+            const defaultArticle = { kind: 'index', id: '00000000'};
+            const initArticle = path.length === 2 ? { kind: path[0], id: path[1] } : defaultArticle;
+            const [article, setArticle] = useState(initArticle);
+            return e('div', { className: 'app' }, [
+                    e(Index, {key:"idx", setArticle}),
+                    e(Article, {key: "article", ...article}),
+                ]);
+        }
+
+        const domContainer = document.querySelector('#main');
+        let dom = e(App);
+        console.log('Dom', dom);
+        ReactDOM.render(dom, domContainer);
+    </script>
+</body>
+</html>

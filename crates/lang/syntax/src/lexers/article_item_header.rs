@@ -6,6 +6,9 @@ pub enum Token {
     #[display(fmt = "`+++`")]
     ThreePlus,
 
+    #[display(fmt = "`++`")]
+    PlusPlus,
+
     #[display("` `, `\t`")]
     InlineWhitespace,
 
@@ -51,6 +54,10 @@ impl TokenKind for Token {
 
         if i.starts_with("+++") {
             return Some((Token::ThreePlus, input.chomp(3)));
+        }
+
+        if i.starts_with("++") {
+            return Some((Token::PlusPlus, input.chomp(2)));
         }
 
         if i.starts_with('\n') {

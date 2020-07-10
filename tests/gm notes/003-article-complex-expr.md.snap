@@ -46,8 +46,8 @@ ROOT @ 0..89
                 NUMBER, TOKEN, VALUE @ 67..68 = `2`
             TOKEN @ 68..69 = `\n`
         TOKEN @ 69..72 = `+++`
-        ARTICLEBODY, MARKDOWN, VALUE @ 72..89 = `\n\nAla ma **kota**`
-            MD_PARAGRAPH, MD_VALUE @ 74..89 = `Ala ma **kota**`
+        ARTICLEBODY @ 72..89 = `\n\nAla ma **kota**`
+            MARKDOWN, MD_PARAGRAPH, MD_VALUE, VALUE @ 74..89 = `Ala ma **kota**`
                 MD_TEXT @ 74..81 = `Ala ma `
                 MD_STRONG @ 81..89 = `**kota**`
                     MD_TEXT @ 83..87 = `kota`

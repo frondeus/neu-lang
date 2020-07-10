@@ -65,8 +65,8 @@ ROOT @ 0..164
                 TOKEN @ 146..147 = `\"`
             TOKEN @ 147..148 = `\n`
         TOKEN @ 148..151 = `+++`
-        ARTICLEBODY, MARKDOWN, VALUE @ 151..164 = `\n\nAla ma kota`
-            MD_PARAGRAPH, MD_VALUE @ 153..164 = `Ala ma kota`
+        ARTICLEBODY @ 151..164 = `\n\nAla ma kota`
+            MARKDOWN, MD_PARAGRAPH, MD_VALUE, VALUE @ 153..164 = `Ala ma kota`
                 MD_TEXT @ 153..164 = `Ala ma kota`
 
 

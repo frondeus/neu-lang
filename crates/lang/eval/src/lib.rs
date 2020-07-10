@@ -212,8 +212,13 @@ impl<'a> Eval<'a> {
 
         if node.is(Nodes::Markdown) {
             let mut s = String::new();
-            while let Some((_, value)) = children.find_node(Nodes::Md_Value) {
-                self.eval_md(&mut s, value)?;
+            if node.is(Nodes::Md_Value) {
+                self.eval_md(&mut s, node)?;
+            }
+            else {
+                while let Some((_, value)) = children.find_node(Nodes::Md_Value) {
+                    self.eval_md(&mut s, value)?;
+                }
             }
             return Some(Value::String(s));
         }

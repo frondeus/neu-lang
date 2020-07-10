@@ -222,7 +222,13 @@ fn parse_event<'a, Token>(
                 }),
             );
         }
-        Event::Html(_span) => todo!("Html"),
+        Event::Html(cow) => {
+            let range = get_range(str, &cow, span, from);
+            builder.parse(node(move |builder| {
+                builder.name(Nodes::Md_Html);
+                builder.set_span(range);
+            }));
+        },
         Event::FootnoteReference(_span) => todo!("FootnoteReference"),
         Event::SoftBreak => {
             builder.parse(node(|builder| {
@@ -230,7 +236,12 @@ fn parse_event<'a, Token>(
                 builder.set_span(span);
             }));
         }
-        Event::HardBreak => todo!("HardBreak"),
+        Event::HardBreak => {
+            builder.parse(node(|builder| {
+                builder.name(Nodes::Md_HardBreak);
+                builder.set_span(span);
+            }))
+        },
         Event::Rule => {
             builder.parse(node(|builder| {
                 builder.name(Nodes::Md_Rule);

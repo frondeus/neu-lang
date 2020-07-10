@@ -40,26 +40,28 @@ fn main_item() -> impl Parser<FileToken> {
 fn main_item_body() -> impl Parser<BodyToken> {
     node(|builder| {
         builder.name(Nodes::ArticleBody);
-        builder.name(Nodes::Markdown);
-        builder.name(Nodes::Value);
-        builder.parse(
-            // Copierd from inner_md_string();
-            node(|builder| {
-                builder.name(Nodes::Virtual);
-                builder.name(Nodes::Md_Value);
-                let i = builder.state().lexer().input().clone();
-                if let Some(BodyToken::Text) = builder.peek_token() {
-                    markdown(builder, i);
+        // This should be in inner parser
+        loop {
+            match builder.peek_token() {
+                None => break,
+                Some(BodyToken::Text) => {
+                    builder.parse(node(|builder| {
+                        let i = builder.state().lexer().input().clone();
+                        builder.name(Nodes::Md_Value);
+                        builder.name(Nodes::Value);
+                        builder.name(Nodes::Markdown);
+                        builder.name(Nodes::Virtual);
+                        markdown(builder, i);
+                    }));
+                },
+                Some(BodyToken::PlusPlus) => {
+                    builder.parse(item());
+                },
+                Some(token) => {
+                    builder.parse(expected(&[BodyToken::Text, BodyToken::PlusPlus]));
                 }
-            })
-        );
-        //let i = builder.state().lexer().input().clone();
-        //match builder.peek_token() {
-            //None => (),
-            //Some(BodyToken::Text) => {
-                //markdown(builder, i);
-            //}
-        //}
+            }
+        }
     })
 }
 
@@ -99,6 +101,75 @@ fn main_item_header() -> impl Parser<HeaderToken> {
             ));
         }));
         builder.parse(token(HeaderToken::ThreePlus));
+    })
+}
+
+fn item() -> impl Parser<BodyToken> {
+    node(|builder| {
+        builder.name(Nodes::ArticleItem);
+        builder.parse(token(BodyToken::PlusPlus));
+        let ctx = Context::default();
+        builder.parse_mode(&ctx, item_header());
+        let ctx = Context::default();
+        builder.parse_mode(&ctx, item_body());
+        builder.parse(token(BodyToken::PlusPlusEnd));
+    })
+}
+
+fn item_header() -> impl Parser<HeaderToken> {
+    node(|builder| {
+        builder.name(Nodes::Virtual);
+        builder.parse(req_trivia(HeaderToken::InlineWhitespace));
+        builder.parse(named(
+            tokens(vec![HeaderToken::Identifier, HeaderToken::ItemId]),
+            Nodes::Identifier,
+        ));
+        builder.parse(token(HeaderToken::Colon));
+        builder.parse(named(token(HeaderToken::ItemId), Nodes::ArticleItemId));
+        builder.parse(req_trivia(HeaderToken::InlineWhitespace));
+        builder.parse(token(HeaderToken::PlusPlus));
+        builder.parse(opt_ws());
+        builder.parse(req_trivia(HeaderToken::NewLine));
+        builder.parse(node(|builder| {
+            builder.name(Nodes::Value);
+            builder.name(Nodes::Struct);
+            builder.parse(separated(
+                node(|builder| {
+                    builder.name(Nodes::Virtual);
+
+                    let leading_trivia = leading_trivia();
+                    let trailing_trivia = trailing_trivia();
+
+                    let ctx = Context {
+                        leading_trivia: Some(&leading_trivia),
+                        trailing_trivia: Some(&trailing_trivia),
+                    };
+                    builder.parse_mode(&ctx, struct_key_val());
+                }),
+                HeaderToken::NewLine,
+                HeaderToken::ThreePlus,
+                true,
+            ));
+        }));
+        builder.parse(token(HeaderToken::ThreePlus));
+    })
+}
+
+fn item_body() -> impl Parser<BodyToken> {
+    node(|builder| {
+        builder.name(Nodes::ArticleBody);
+        builder.parse(
+            node(|builder| {
+                builder.name(Nodes::Virtual);
+                let i = builder.state().lexer().input().clone();
+                if let Some(BodyToken::Text) = builder.peek_token() {
+                    builder.name(Nodes::Md_Value);
+                    builder.name(Nodes::Markdown);
+                    builder.name(Nodes::Value);
+                    markdown(builder, i);
+                }
+            })
+        );
     })
 }
 
