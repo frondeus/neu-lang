@@ -57,8 +57,11 @@ fn main_item_body() -> impl Parser<BodyToken> {
                 Some(BodyToken::PlusPlus) => {
                     builder.parse(item());
                 },
+                Some(BodyToken::OpenBl) => {
+                    builder.parse(item_bl());
+                },
                 Some(token) => {
-                    builder.parse(expected(&[BodyToken::Text, BodyToken::PlusPlus]));
+                    builder.parse(expected(&[BodyToken::Text, BodyToken::PlusPlus, BodyToken::OpenBl]));
                 }
             }
         }
@@ -170,6 +173,26 @@ fn item_body() -> impl Parser<BodyToken> {
                 }
             })
         );
+    })
+}
+
+fn item_bl() -> impl Parser<BodyToken> {
+    node(|builder| {
+        builder.name(Nodes::ArticleRef);
+        builder.parse(token(BodyToken::OpenBl));
+        let ctx = Context::default();
+        builder.parse_mode(&ctx, node(|builder| {
+            builder.name(Nodes::Virtual);
+            builder.parse(req_trivia(HeaderToken::InlineWhitespace));
+            builder.parse(named(
+                tokens(vec![HeaderToken::Identifier, HeaderToken::ItemId]),
+                Nodes::Identifier,
+            ));
+            builder.parse(token(HeaderToken::Colon));
+            builder.parse(named(token(HeaderToken::ItemId), Nodes::ArticleItemId));
+            builder.parse(req_trivia(HeaderToken::InlineWhitespace));
+        }));
+        builder.parse(token(BodyToken::CloseBl));
     })
 }
 

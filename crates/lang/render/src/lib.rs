@@ -98,6 +98,13 @@ fn _render(article_item: ArticleItem, nodes: &mut Arena, input: &str) -> Option<
             output.push_str(rendered.output.as_str());
             output.push_str("</div>");
         }
+        //else if body.is(Nodes::ArticleRef) {
+
+        //}
+        else {
+            let s = format!(r#"<div class="todo">{:?}</div>"#, body);
+            output.push_str(&s);
+        }
     }
 
     Some(RenderResult {

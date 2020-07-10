@@ -26,7 +26,8 @@ nodes! {
     Item {
         ArticleItem,
         ArticleItemId,
-        ArticleBody
+        ArticleBody,
+        ArticleRef
     },
     Markdown {
         Markdown,

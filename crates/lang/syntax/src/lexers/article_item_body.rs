@@ -10,7 +10,13 @@ pub enum Token {
     PlusPlusEnd,
 
     #[display("`++`")]
-    PlusPlus
+    PlusPlus,
+
+    #[display("`[+`")]
+    OpenBl,
+
+    #[display("`+]`")]
+    CloseBl,
 }
 
 pub type Lexer<T = Token> = neu_parser::Lexer<T>;
@@ -39,6 +45,14 @@ impl TokenKind for Token {
 
         if i.starts_with("++") {
             return Some((Token::PlusPlus, input.chomp(2)));
+        }
+
+        if i.starts_with("[+") {
+            return Some((Token::OpenBl, input.chomp(2)));
+        }
+
+        if i.starts_with("+]") {
+            return Some((Token::CloseBl, input.chomp(2)));
         }
 
         Some((Token::Text, input.chomp(1)))
