@@ -1,22 +1,25 @@
 use crate::{Components, Node, NodeId, Component, Ancestors};
 use std::fmt;
 use std::borrow::Borrow;
+use std::collections::HashMap;
+use std::sync::Arc;
 
-pub struct Arena<Node> {
+#[derive(PartialEq, Eq)]
+pub struct Arena<Node, Err> {
     nodes: Vec<Node>,
-    components: Components
+    errors: HashMap<NodeId, Err>
 }
 
-impl<N> Default for Arena<N> {
+impl<N, E> Default for Arena<N, E> {
     fn default() -> Self {
         Self {
             nodes: Default::default(),
-            components: Default::default(),
+            errors: Default::default(),
         }
     }
 }
 
-impl<Node: fmt::Debug> fmt::Debug for Arena<Node> {
+impl<Node: fmt::Debug, Err> fmt::Debug for Arena<Node, Err> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         writeln!(f, "Arena")?;
         for (i, n) in self.nodes.iter().enumerate() {
@@ -27,10 +30,10 @@ impl<Node: fmt::Debug> fmt::Debug for Arena<Node> {
     }
 }
 
-impl<N: Node> Arena<N> {
+impl<N: Node, E> Arena<N, E> {
     pub fn merge(&mut self, mut other: Self) {
         self.nodes.append(&mut other.nodes);
-        self.components.append(&mut other.components);
+        self.errors.extend(other.errors.into_iter());
     }
 
     pub fn add(&mut self, node: N) -> NodeId {
@@ -44,19 +47,19 @@ impl<N: Node> Arena<N> {
         id
     }
 
-    pub fn add_component(&mut self, id: NodeId, c: impl Component) {
-        self.components.insert(id, c);
+    pub fn add_err(&mut self, id: NodeId, c: E) {
+        self.errors.insert(id, c);
     }
 
-    pub fn component<C: Component>(&self, id: NodeId) -> Option<&C> {
-        self.components.get(id)
+    pub fn component(&self, id: NodeId) -> Option<&E> {
+        self.errors.get(&id)
     }
 
-    pub fn components<C: Component>(&self) -> impl Iterator<Item = (NodeId, &C)> {
-        self.components.iter()
+    pub fn components(&self) -> impl Iterator<Item = (NodeId, &E)> {
+        self.errors.iter().map(|(id, e)| (*id, e))
     }
 
-    pub fn ancestors(&self, id: NodeId) -> Ancestors<N> {
+    pub fn ancestors(&self, id: NodeId) -> Ancestors<N, E> {
         Ancestors {
             current: Some(id),
             arena: self,

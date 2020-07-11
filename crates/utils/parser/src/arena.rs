@@ -2,8 +2,8 @@ pub use neu_arena::{NodeId};
 use crate::Node;
 use neu_diagnostics::Diagnostic;
 
-pub type Arena<N = Node> = neu_arena::Arena<N>;
-pub type Ancestors<'a, N = Node> = neu_arena::Ancestors<'a, N>;
+pub type Arena<N = Node, E = Diagnostic> = neu_arena::Arena<N, E>;
+pub type Ancestors<'a, N = Node, E = Diagnostic> = neu_arena::Ancestors<'a, N, E>;
 
 impl neu_arena::Node for Node {
     fn parent(&self) -> Option<NodeId> {

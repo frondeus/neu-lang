@@ -20,6 +20,7 @@
         .index { flex: 1; overflow: auto; }
         .index-entry { padding: 1em; }
         .index-entry:hover { background: #ddd; cursor: pointer; }
+        .index-entry.active { background: #ccc; }
         .article { padding: 1em; flex: 4; overflow: auto; }
         .article-item {
             margin: 1em;
@@ -43,11 +44,7 @@
 
         function Article({kind, id}) {
             const [html, setHtml] = useState("Loading...");
-
-            useEffect(() => {
-                window.history.pushState("", "", `/${kind}/${id}`);
-            }, [ kind, id ]);
-
+            const [hasTitle, setTitle] = useState(false);
 
             useEffect(() => {
                 fetch(`/neu/articles/${kind}/${id}.html`)
@@ -60,7 +57,15 @@
                     .then(response => response.json())
                     .then(data => {
                         let meta = data.find(val => val.kind === kind && val.id === id);
-                        document.title = `${meta.title}`;
+                        if(meta) {
+                            document.title = `${meta.title}`;
+                            if(hasTitle) {
+                                window.history.pushState("", meta.title, `/${kind}/${id}`);
+                            } else {
+                                window.history.replaceState("", meta.title, `/${kind}/${id}`);
+                                setTitle(true);
+                            }
+                        }
                     });
                 // TODO: Replace with article metadata? Or at least cache http
             }, [ kind, id ]);
@@ -70,14 +75,15 @@
             ]);
         }
 
-        function IndexEntry({setArticle, entry}) {
+        function IndexEntry({article, setArticle, entry}) {
+            const isActive = article.kind === entry.kind && article.id === entry.id;
             return e('div', {
-                className: 'index-entry',
+                className: 'index-entry' + (isActive ? ' active' : ''),
                 onClick: () => { setArticle({ kind: entry.kind, id: entry.id}) }
             }, entry.title);
         }
 
-        function Index({setArticle}) {
+        function Index({article, setArticle}) {
             const [index, setIndex] = useState([]);
 
             const once = true;
@@ -89,7 +95,7 @@
             }, [ once ]);
 
             const children = index.map((entry, idx) =>
-                e(IndexEntry, {setArticle, entry, key: idx.toString()})
+                e(IndexEntry, {article, setArticle, entry, key: idx.toString()})
             );
 
             return e('div', { className: 'index' }, children);
@@ -99,9 +105,10 @@
             const path = location.pathname.split('/').slice(1);
             const defaultArticle = { kind: 'index', id: '00000000'};
             const initArticle = path.length === 2 ? { kind: path[0], id: path[1] } : defaultArticle;
+
             const [article, setArticle] = useState(initArticle);
             return e('div', { className: 'app' }, [
-                    e(Index, {key:"idx", setArticle}),
+                    e(Index, {key:"idx", article, setArticle}),
                     e(Article, {key: "article", ...article}),
                 ]);
         }

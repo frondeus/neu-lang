@@ -26,6 +26,7 @@
 ** Gm notes [0/2]
 *** TODO Generate json
 *** TODO Markdown article
+*** TODO Generate subarticle
 ** Neovim [0/3]
 *** TODO Add autocompletion
 *** TODO Add intentions

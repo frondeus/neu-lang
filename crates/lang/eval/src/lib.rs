@@ -69,7 +69,7 @@ impl<'a> Eval<'a> {
             Some(v) => Some(v),
             None => {
                 let err: Diagnostic = error.boxed();
-                self.new_arena.add_component(id, err);
+                self.new_arena.add_err(id, err);
                 None
             }
         }

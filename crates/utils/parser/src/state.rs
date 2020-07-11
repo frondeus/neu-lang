@@ -60,7 +60,7 @@ impl<Tok: TokenKind> State<Tok> {
 
     pub fn commit_errors(&mut self, id: NodeId) {
         for error in self.new_errors.drain(..) {
-            self.arena.add_component(id, error);
+            self.arena.add_err(id, error);
         }
     }
 
@@ -73,11 +73,12 @@ impl<Tok: TokenKind> State<Tok> {
 
         ParseResult {
             root,
-            arena,
+            arena
         }
     }
 }
 
+//#[derive(PartialEq, Eq, Clone)]
 pub struct ParseResult {
     pub root: NodeId,
     pub arena: Arena,
