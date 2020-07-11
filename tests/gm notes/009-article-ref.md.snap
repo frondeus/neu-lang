@@ -1,0 +1,101 @@
+`````
++++ sesja:a88907fd +++
+title = "Pośród Pradawnych Drzew"
++++
+
+1
+
+[+ chrono:0123abcd +]
+
+2
+
+++ chrono:0123abcd ++
+title = "Chronologia sesji"
++++
+
+3
+
+++ end ++
+
+4
+
+`````
+
+[build]
+
+[render]
+`<h1>Pośród Pradawnych Drzew</h1>
+<p>1</p><div class="article-item" id="chrono_0123abcd" ><h1>Chronologia sesji</h1>
+<p>3</p></div>
+<p>2</p><div class="article-item" id="chrono_0123abcd" ><h1>Chronologia sesji</h1>
+<p>3</p></div>
+<p>4</p>`
+
+### No Errors ###
+
+[parser]
+ROOT @ 0..163
+    ARTICLEITEM @ 0..163
+        TOKEN @ 0..3 = `+++`
+        TOKEN, TRIVIA @ 3..4 = ` `
+        IDENTIFIER, TOKEN @ 4..9 = `sesja`
+        TOKEN @ 9..10 = `:`
+        ARTICLEITEMID, TOKEN @ 10..18 = `a88907fd`
+        TOKEN, TRIVIA @ 18..19 = ` `
+        TOKEN @ 19..22 = `+++`
+        TOKEN, TRIVIA @ 22..23 = `\n`
+        STRUCT, VALUE @ 23..59 = `title = \"Po\u{15b}r\u{f3}d Pradawnych Drzew\"\n`
+            IDENTIFIER, KEY, TOKEN @ 23..28 = `title`
+            TRIVIA @ 28..29 = ` `
+            TOKEN @ 29..30 = `=`
+            TRIVIA @ 30..31 = ` `
+            STRING, VALUE @ 31..58 = `\"Po\u{15b}r\u{f3}d Pradawnych Drzew\"`
+                TOKEN @ 31..32 = `\"`
+                STRVALUE, TOKEN @ 32..57 = `Po\u{15b}r\u{f3}d Pradawnych Drzew`
+                TOKEN @ 57..58 = `\"`
+            TOKEN @ 58..59 = `\n`
+        TOKEN @ 59..62 = `+++`
+        ARTICLEBODY @ 62..163
+            MARKDOWN, MD_PARAGRAPH, MD_VALUE, VALUE @ 64..66 = `1\n`
+                MD_TEXT @ 64..65 = `1`
+            ARTICLEREF @ 67..88 = `[+ chrono:0123abcd +]`
+                TOKEN @ 67..69 = `[+`
+                TOKEN, TRIVIA @ 69..70 = ` `
+                IDENTIFIER, TOKEN @ 70..76 = `chrono`
+                TOKEN @ 76..77 = `:`
+                ARTICLEITEMID, TOKEN @ 77..85 = `0123abcd`
+                TOKEN, TRIVIA @ 85..86 = ` `
+                TOKEN @ 86..88 = `+]`
+            MARKDOWN, MD_PARAGRAPH, MD_VALUE, VALUE @ 90..92 = `2\n`
+                MD_TEXT @ 90..91 = `2`
+            ARTICLEITEM @ 93..160
+                TOKEN @ 93..95 = `++`
+                TOKEN, TRIVIA @ 95..96 = ` `
+                IDENTIFIER, TOKEN @ 96..102 = `chrono`
+                TOKEN @ 102..103 = `:`
+                ARTICLEITEMID, TOKEN @ 103..111 = `0123abcd`
+                TOKEN, TRIVIA @ 111..112 = ` `
+                TOKEN @ 112..114 = `++`
+                TOKEN, TRIVIA @ 114..115 = `\n`
+                STRUCT, VALUE @ 115..143 = `title = \"Chronologia sesji\"\n`
+                    IDENTIFIER, KEY, TOKEN @ 115..120 = `title`
+                    TRIVIA @ 120..121 = ` `
+                    TOKEN @ 121..122 = `=`
+                    TRIVIA @ 122..123 = ` `
+                    STRING, VALUE @ 123..142 = `\"Chronologia sesji\"`
+                        TOKEN @ 123..124 = `\"`
+                        STRVALUE, TOKEN @ 124..141 = `Chronologia sesji`
+                        TOKEN @ 141..142 = `\"`
+                    TOKEN @ 142..143 = `\n`
+                TOKEN @ 143..146 = `+++`
+                ARTICLEBODY @ 146..150 = `\n\n3\n`
+                    MARKDOWN, MD_PARAGRAPH, MD_VALUE, VALUE @ 148..150 = `3\n`
+                        MD_TEXT @ 148..149 = `3`
+                TOKEN @ 151..160 = `++ end ++`
+            MARKDOWN, MD_PARAGRAPH, MD_VALUE, VALUE @ 162..163 = `4`
+                MD_TEXT @ 162..163 = `4`
+
+
+### No Errors ###
+
+

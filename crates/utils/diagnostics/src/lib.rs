@@ -8,6 +8,6 @@ pub trait ToReport: Send + Sync {
     }
 }
 
-pub type Diagnostic = Box<dyn ToReport>;
+pub type Diagnostic = String;
 
 pub type Diagnostics = Vec<Diagnostic>;

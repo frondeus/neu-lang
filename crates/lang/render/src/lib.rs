@@ -1,16 +1,16 @@
-use crate::result::RenderResult;
 use neu_eval::eval;
 use neu_parser::{Arena, NodeId};
-use neu_syntax::ast::{ArticleItem, ArticleRef};
+use neu_syntax::ast::{ArticleItem, ArticleRef, Ast};
 use neu_syntax::Nodes;
+use crate::db::Renderer;
 
 mod result;
 
 mod html;
 
-mod db;
+pub mod db;
 
-fn _render(article_item: ArticleItem, nodes: &mut Arena, input: &str) -> Option<RenderResult> {
+fn _render(db: &dyn Renderer, article_item: ArticleItem, nodes: &mut Arena, input: &str) -> Option<String> {
     let mut output = String::default();
 
     article_item.anchor_body(nodes);
@@ -30,7 +30,7 @@ fn _render(article_item: ArticleItem, nodes: &mut Arena, input: &str) -> Option<
             output.push_str(&format!("<td>{}</td>", html::render_value(&value)));
             output.push_str("</tr>");
         }
-        output.push_str("</table>");
+        output.push_str("</table>\n");
     }
 
     let body = article_item.body?;
@@ -47,52 +47,51 @@ fn _render(article_item: ArticleItem, nodes: &mut Arena, input: &str) -> Option<
             let markdown = markdown_eval.value?;
             output.push_str(&format!("{}", html::render_value(&markdown)));
         } else if body.is(Nodes::ArticleItem) {
-            output.push_str(r#"<div class="article-item">"#);
-            let article_item = ArticleItem::build(body_id, nodes);
-            let rendered = _render(article_item, nodes, input)?;
-            output.push_str(rendered.output.as_str());
-            output.push_str("</div>");
+            let article_item = ArticleItem::from_syntax(body_id, nodes).expect("body is ArticleItem");
+            let kind = article_item.identifier(nodes, input).unwrap_or("???");
+            let id = article_item.item_id(nodes, input).unwrap_or("???");
+            output.push_str(&format!(r#"<div class="article-item" id="{}_{}" >"#, kind, id));
+            let rendered = _render(db, article_item, nodes, input)?;
+            output.push_str(rendered.as_str());
+            output.push_str("</div>\n");
         } else if body.is(Nodes::ArticleRef) {
-            //TODO:
-            let article_ref = ArticleRef::build(body_id, nodes);
+            let article_ref = ArticleRef::from_syntax(body_id, nodes).expect("body is ArticleRef");
             let kind = article_ref.identifier(nodes, input).unwrap_or("???");
             let id = article_ref.item_id(nodes, input).unwrap_or("???");
-            let s = format!(
-                r#"<div class="todo"><a href="/{}/{}">{:?}</a></div>"#,
-                kind, id, body
-            );
-            output.push_str(&s);
+            //output.push_str(r#"<div class="article-item">"#);
+            output.push_str(&format!(r#"<div class="article-item" id="{}_{}" >"#, kind, id));
+            let rendered = db.render_item(kind.into(), id.into());
+            output.push_str(&rendered.output);
+            output.push_str("</div>\n");
         } else {
             let s = format!(r#"<div class="todo">{:?}</div>"#, body);
             output.push_str(&s);
         }
     }
 
-    Some(RenderResult { output })
-}
-
-pub fn render(article_item: ArticleItem, nodes: &mut Arena, input: &str) -> RenderResult {
-    _render(article_item, nodes, input).unwrap_or_else(|| RenderResult {
-        output: "Couldn't render, found errors".to_string(),
-    })
+    Some(output)
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use neu_parser::State;
-    use neu_syntax::{lexers::article_item_file::Lexer, parsers::article_item::parser};
+
+    #[salsa::database(crate::db::RendererDatabase)]
+    #[derive(Default)]
+    struct TestDb { storage: salsa::Storage<Self> }
+
+    impl salsa::Database for TestDb {}
 
     #[test]
     fn render_tests() {
         test_runner::test_snapshots("md", "render", |input| {
-            let lexer = Lexer::new(input);
+            let mut db = TestDb::default();
+            let path: String = "test".into();
+            db.set_all_mds(Some(path.clone()).into_iter().collect());
+            db.set_input_md(path.clone(), input.into());
+            let result = db.render_md(path);
 
-            let mut res = State::parse(lexer, parser());
-            let article_item = ArticleItem::from_root(res.root, &res.arena);
-            let result = render(article_item, &mut res.arena, input);
-
-            result.display(input, &res.arena).to_string()
+            result.display(input).to_string()
         })
         .unwrap();
     }

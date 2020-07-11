@@ -4,18 +4,17 @@ use std::fmt;
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub struct RenderResult {
     pub output: String,
+    pub arena: Arena,
 }
 
 impl RenderResult {
     pub fn display<'s, 'n>(
         &'n self,
         str: &'s str,
-        arena: &'s Arena,
     ) -> DisplayRenderResult<'s, 'n> {
         DisplayRenderResult {
             str,
             result: self,
-            arena,
         }
     }
 }
@@ -24,14 +23,13 @@ pub struct DisplayRenderResult<'s, 'n> {
     #[allow(dead_code)]
     str: &'s str,
     result: &'n RenderResult,
-    arena: &'s Arena,
 }
 
 impl<'s, 'n> fmt::Display for DisplayRenderResult<'s, 'n> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "`{}`", self.result.output)?;
 
-        let errors = self.arena.errors();
+        let errors = self.result.arena.errors();
 
         if errors.is_empty() {
             write!(f, "\n\n### No Errors ###")?;
@@ -40,7 +38,7 @@ impl<'s, 'n> fmt::Display for DisplayRenderResult<'s, 'n> {
         }
 
         for (node_id, error) in errors.iter() {
-            write!(f, "\n{} @ {:?}", error.to_report(self.str), node_id)?;
+            write!(f, "\n{} @ {:?}", error, node_id)?;
         }
         Ok(())
     }

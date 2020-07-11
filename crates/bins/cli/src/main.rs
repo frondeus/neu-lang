@@ -3,11 +3,12 @@ use clap::Clap;
 use env_logger::Env;
 use neu_cli::find_in_ancestors;
 use neu_eval::eval;
-use neu_syntax::ast::ArticleItem;
+use neu_syntax::ast::{ArticleItem};
 use serde::Serialize;
 use std::collections::BTreeMap;
 use std::io::Write;
 use std::path::{Path, PathBuf};
+use neu_render::db::Renderer;
 
 #[derive(Debug, Clap)]
 struct Opts {
@@ -18,7 +19,7 @@ struct Opts {
 }
 
 #[derive(Debug, Serialize)]
-#[allow(dead_code)] // TODO:
+#[allow(dead_code)] // TODO: Finish me
 enum Tree {
     Dir(String, Vec<Tree>),
     File(usize),
@@ -65,69 +66,85 @@ struct IndexEntry {
     path: String,
 }
 
-fn build_article(entry: &Path, articles_path: &Path, index: &mut Vec<IndexEntry>) -> Result<()> {
-    use neu_parser::State;
-    use neu_render::render;
-    use neu_syntax::{lexers::article_item_file::Lexer, parsers::article_item::parser};
+fn build_article(db: &mut dyn Renderer, (kind, id, path, article_item): (String, String, String, ArticleItem), articles_path: &Path, index: &mut Vec<IndexEntry>) -> Result<()> {
+    log::debug!("Rendering {}:{}", kind, id);
+    let kind_path = articles_path.join(&kind);
+    std::fs::create_dir_all(&kind_path)?;
 
-    let file = std::fs::read_to_string(entry)?;
-    let input = &file;
-    let lexer = Lexer::new(input);
-    let mut parsed = State::parse(lexer, parser());
-    let article_item = ArticleItem::from_root(parsed.root, &parsed.arena);
+    let input = db.input_md(path.clone());
+    let mut parsed = db.parse_md_syntax(path.clone());
 
-    if let (Some(ident), Some(id)) = (
-        article_item.identifier(&parsed.arena, input),
-        article_item.item_id(&parsed.arena, input),
-    ) {
-        log::info!("Rendering {}:{}", ident, id);
-        let ident_path = articles_path.join(ident);
-        std::fs::create_dir_all(&ident_path)?;
+    let strukt = article_item
+         .strukt
+         .map(|strukt| eval(strukt, &mut parsed.arena, &input))
+         .and_then(|strukt_eval| strukt_eval.value)
+         .and_then(|value| value.into_struct());
 
-        article_item.anchor_body(&mut parsed.arena);
+     let title = strukt
+         .as_ref()
+         .and_then(|value| value.get("title"))
+         .map(ToString::to_string)
+         .unwrap_or_else(|| "???".to_string());
 
-        let strukt = article_item
-            .strukt
-            .map(|strukt| eval(strukt, &mut parsed.arena, input))
-            .and_then(|strukt_eval| strukt_eval.value)
-            .and_then(|value| value.into_struct());
+    let title = title.trim_matches('"');
+    log::info!("Rendering {}:{} - {}", kind, id, title);
+    let item_path = kind_path.join(&format!("{}.html", id));
 
-        let title = strukt
-            .as_ref()
-            .and_then(|value| value.get("title"))
-            .map(ToString::to_string)
-            .unwrap_or_else(|| "???".to_string());
+    /*
+    This is both bug and a feature.
+    If i can make my js to scroll to requested subarticle then ill leave it as it is.
 
-        let title = title.trim_matches('"');
-        log::debug!("Title: {}", title);
+    Why this is a bug:
+    Each subarticle renders whole article.
+    So if in one article i have 100 subarticles, it renders 100 x 100 subarticles.
 
-        let rendered = render(article_item, &mut parsed.arena, input);
+    On the other hand is quite handy. My WCU takes around 1.4 MB of 61 subarticles.
+    */
+    let rendered = db.render_md(path);
 
-        let item_path = ident_path.join(&format!("{}.html", id));
-        log::debug!("To {}", item_path.display());
+    log::debug!("To {}", item_path.display());
 
-        let mut file = std::fs::File::create(&item_path)?;
-        file.write_all(rendered.output.as_bytes())?;
+    let mut file = std::fs::File::create(&item_path)?;
+    file.write_all(rendered.output.as_bytes())?;
 
-        index.push(IndexEntry {
-            kind: ident.into(),
-            id: id.into(),
-            title: title.into(),
-            path: item_path.display().to_string(),
-        });
-    }
+    index.push(IndexEntry {
+        kind,
+        id,
+        title: title.into(),
+        path: item_path.display().to_string(),
+    });
 
     Ok(())
 }
+
 
 fn build(root: &Path, dist: &Path) -> Result<()> {
     let articles_path = root.join(dist).join("articles");
     std::fs::create_dir_all(&articles_path)?;
 
+    let mut db = Database::default();
+
     let mut index = vec![];
 
-    for entry in glob::glob(&format!("{}/**/*.md", root.display()))? {
-        build_article(&entry?, &articles_path, &mut index)?;
+    let articles = glob::glob(&format!("{}/**/*.md", root.display()))?
+        .map(|entry| entry.map_err(anyhow::Error::from))
+        .collect::<Result<Vec<_>>>();
+    let articles = articles?;
+
+    db.set_all_mds(articles.iter().map(|path| path.display().to_string()).collect());
+
+    for entry in &articles {
+        let entry_str = entry.display().to_string();
+
+        let file = std::fs::read_to_string(entry)?;
+        let input = &file;
+        db.set_input_md(entry_str.clone(), input.clone());
+    }
+
+    let parsed_articles = db.parse_all_mds();
+
+    for parsed in parsed_articles {
+        build_article(&mut db, parsed, &articles_path, &mut index)?;
     }
 
     let index: Index = index.into();
@@ -138,10 +155,15 @@ fn build(root: &Path, dist: &Path) -> Result<()> {
     Ok(())
 }
 
+#[salsa::database(neu_render::db::RendererDatabase)]
+#[derive(Default)]
+struct Database { storage: salsa::Storage<Self> }
+impl salsa::Database for Database {}
+
 fn main() -> Result<()> {
     let opts: Opts = Opts::parse();
 
-    env_logger::from_env(Env::default().default_filter_or("info")).init();
+    env_logger::from_env(Env::default().default_filter_or("info,salsa=warn")).init();
 
     log::debug!("{:?}", opts);
 

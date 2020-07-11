@@ -1,21 +1,36 @@
 'use strict';
 
 // API
-function GetIndex(setIndex, by) {
+function GetIndex(setIndex, by, searched) {
     fetch('/neu/index.json')
         .then(response => response.json())
         .then(data => {
+            let result;
+            searched = searched ?? "";
+            searched = searched.toLowerCase();
+            let filter = value =>
+                value.title.toLowerCase().includes(searched) ||
+                value.kind.toLowerCase().includes(searched) ||
+                value.id.toLowerCase().includes(searched)
+            ;
             if(!by) {
-                setIndex(data.data);
+                result = data.data.filter(filter);
             } else {
                 const idx = data[by];
-                let full_idx = [];
+                result = [];
                 for (const entry in idx) {
                     const entry_idx = idx[entry].map(i => data.data[i]);
-                    full_idx.push([entry, entry_idx]);
+                    result.push([entry, entry_idx]);
                 }
-                setIndex(full_idx);
+                result = result.map(group => {
+                    group[1] = group[1].filter(filter);
+                    return group;
+                })
+                .filter(group => group[1].length > 0);
             }
+
+
+            setIndex(result);
         });
 }
 
@@ -46,6 +61,14 @@ function Article({kind, id}) {
     }, [ kind, id ]);
 
     useEffect(() => {
+        const div_id = `${kind}_${id}`;
+        const div = document.getElementById(div_id);
+        if(div && div.classList.contains('article-item')) {
+            div.scrollIntoView();
+        }
+    });
+
+    useEffect(() => {
         GetIndex(data => {
             let meta = data.find(val => val.kind === kind && val.id === id);
             if(meta) {
@@ -66,10 +89,13 @@ function Article({kind, id}) {
     ]);
 }
 
-function IndexLabel({label}) {
+function IndexLabel({label, count}) {
     return e('div', {
         className: 'index-label'
-    }, label);
+    }, [
+        e('span', { key: 'label'}, label),
+        e('span', { key: 'count'}, `(${count})`),
+    ]);
 }
 
 function IndexEntryLabel({entry}) {
@@ -89,37 +115,52 @@ function IndexEntry({article, setArticle, entry}) {
     ]);
 }
 
+function IndexSearch({searched, setSearched }) {
+    return e('input', {
+        type: 'text',
+        className: 'index-search',
+        placeholder: 'Search',
+        value: searched,
+        onChange: event => { setSearched(event.target.value); }
+    });
+}
+
 function Index({article, setArticle, tab}) {
     const [index, setIndex] = useState([]);
-
-    const once = true;
+    const [searched, setSearched] = useState("");
 
     useEffect(() => {
-        GetIndex(setIndex, tab[1]);
-    }, [ once, tab ]);
+        GetIndex(setIndex, tab[1], searched);
+    }, [ tab, searched ]);
 
     const children = index.flatMap(group => [
-        e(IndexLabel, {key: group[0], label: group[0] }),
+        e(IndexLabel, {key: group[0], label: group[0], count: group[1].length }),
         ... group[1].map((entry, idx) => e(IndexEntry, { article, setArticle, entry, key: `${group[0]}-${idx}` }))
     ]);
 
-    return e('div', { className: 'index' }, children);
+    return e('div', { className: 'index' }, [
+        e(IndexSearch, { searched, setSearched, key: '$search' }),
+        ...children
+    ]);
 }
 
-function SidebarTab({ label, isActive, idx, setTab }) {
+function SidebarTab({ label, isActive, onClick }) {
     return e('div', {
         className: 'sidebar-tab' + (isActive ? ' active' : ''),
-        onClick: () => {
-            setTab([idx, label]);
-        }
+        onClick: () => { onClick(); }
     }, label)
 }
 
 function SidebarTabbar({tab, setTab}) {
-    const tabs = ['project', 'abc', 'kind', 'history'];
+    const tabs = ['recent', 'abc', 'kind'];
 
     const children = tabs.map((label, idx) =>
-        e(SidebarTab, { label: label, key: label, setTab, idx, isActive: idx === tab[0] })
+        e(SidebarTab, {
+            label: label,
+            key: label,
+            onClick: () => { setTab([idx, label]); },
+            isActive: idx === tab[0]
+        })
     );
 
     return e('div', {
@@ -128,7 +169,7 @@ function SidebarTabbar({tab, setTab}) {
 }
 
 function LeftSidebar({article, setArticle}) {
-    const [tab, setTab] = useState([1, 'abc']);
+    const [tab, setTab] = useState([2, 'abc']);
 
     return e('div', {
         className: 'left-sidebar',
@@ -139,11 +180,33 @@ function LeftSidebar({article, setArticle}) {
 }
 
 function App() {
-    const path = location.pathname.split('/').slice(1);
     const defaultArticle = { kind: 'index', id: '00000000'};
-    const initArticle = path.length === 2 ? { kind: path[0], id: path[1] } : defaultArticle;
+    const fromPath = path => {
+        const members = path.split('/').slice(1);
+        return members.length === 2 ? { kind: members[0], id: members[1] } : defaultArticle;
+    };
+    const [article, setArticle] = useState(fromPath(location.pathname));
 
-    const [article, setArticle] = useState(initArticle);
+    useEffect(() => {
+        function interceptClickEvent(e) {
+            const target = e.target || e.srcElement;
+            if (target.tagName === 'A') {
+                const href = target.getAttribute('href');
+
+                if(href.startsWith("/")) {
+                    console.log('Href', href);
+                    e.preventDefault();
+                    setArticle(fromPath(href));
+                }
+            }
+        }
+
+        if(document.addEventListener) {
+            document.addEventListener('click', interceptClickEvent);
+        } else if (document.attachEvent) {
+            document.attachEvent('onclick', interceptClickEvent);
+        }
+    }, [true]);
 
     return e('div', { className: 'app' }, [
         e(LeftSidebar, { key: "left-sidebar", article, setArticle}),

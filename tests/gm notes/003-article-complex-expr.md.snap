@@ -9,7 +9,8 @@ Ala ma **kota**
 `````
 [render]
 `<h1>Pośród Pradawnych Drzew</h1>
-<table class="side-table"><tr><th>a</th><td>3</td></tr></table><p>Ala ma <strong>kota</strong></p>`
+<table class="side-table"><tr><th>a</th><td>3</td></tr></table>
+<p>Ala ma <strong>kota</strong></p>`
 
 ### No Errors ###
 

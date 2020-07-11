@@ -23,7 +23,8 @@ Ala ma **kota**.
 <table class="side-table"><tr><th>chrono</th><td>20.06.1925</td></tr><tr><th>desc</th><td>Sesja jednostrzałowa dla Macek II RP</td></tr><tr><th>stats</th><td>{
     age = 5,
     hp = 15,
- }</td></tr><tr><th>when</th><td>20.10.2019</td></tr></table><p>Ala ma <strong>kota</strong>.</p><pre><code>{
+ }</td></tr><tr><th>when</th><td>20.10.2019</td></tr></table>
+<p>Ala ma <strong>kota</strong>.</p><pre><code>{
     age = 5,
     hp = 15,
  }</code></pre>`

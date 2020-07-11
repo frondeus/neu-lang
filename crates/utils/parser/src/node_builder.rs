@@ -70,7 +70,9 @@ impl<'a, Tok: TokenKind> NodeBuilder<'a, Tok> {
     }
 
     pub fn error(&mut self, error: impl ToReport + 'static) -> &mut Self {
-        self.error = Some(error.boxed());
+        let input = self.state.lexer().input().all_str();
+        let err = error.to_report(input);
+        self.error = Some(err);
         self.name(Nodes::Error)
     }
 

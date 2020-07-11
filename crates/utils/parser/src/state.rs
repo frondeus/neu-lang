@@ -71,11 +71,12 @@ impl<Tok: TokenKind> State<Tok> {
         let root = state.nodes().add(root);
         let arena = state.arena;
 
-        ParseResult { root, arena }
+        ParseResult { root, arena, }
     }
 }
 
 //#[derive(PartialEq, Eq, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ParseResult {
     pub root: NodeId,
     pub arena: Arena,
@@ -105,7 +106,7 @@ impl<'s, 'n> fmt::Display for DisplayParseResult<'s, 'n> {
         }
 
         for (node_id, error) in errors.into_iter() {
-            writeln!(f, "{} @ {:?}", error.to_report(self.str), node_id)?;
+            writeln!(f, "{} @ {:?}", error, node_id)?;
         }
         Ok(())
     }

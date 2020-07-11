@@ -8,8 +8,9 @@ body, #main { height: 100%; overflow: hidden; }
     color: #333;
 }
 .app > * { height: 100%; }
-.sidebar {
+.left-sidebar {
     height: 100%;
+    flex: 1;
     display: flex;
     flex-direction: column;
 }
@@ -17,18 +18,20 @@ body, #main { height: 100%; overflow: hidden; }
     display: grid;
     grid-gap: 0.5em;
     grid-auto-flow: column;
-    padding: 0.5em;
+    padding: 0.0em 1em;
     background: #ddd;
 }
 .sidebar-tab {
     background: #ccc;
     padding: 0.5em;
+    text-align: center;
 }
 .sidebar-tab:hover { background: #bbb; cursor: pointer; }
 .sidebar-tab.active {
-    background: #aaa;
+    background: #eee;
 }
-.index { height: calc(100% - 3em); overflow: auto; }
+.index { height: 100%; overflow: auto; }
+.index-search { width: 100%; padding: 1em; }
 .index-entry { padding: 1em; display: flex; justify-content: space-between; align-items: center; }
 .index-entry:hover { background: #ddd; cursor: pointer; }
 .index-entry:hover .index-entry-label, .index-entry.active .index-entry-label { opacity: 1; }
@@ -41,7 +44,7 @@ body, #main { height: 100%; overflow: hidden; }
     border-radius: 4px;
 }
 .index-label { padding: 1em; font-weight: bold; }
-.article { padding: 1em; flex: 4; overflow: auto; }
+.article { padding: 1em; flex: 3; overflow: auto; }
 .article-item {
     margin: 1em;
     padding-left: 1em;

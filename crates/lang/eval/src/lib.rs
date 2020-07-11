@@ -68,7 +68,8 @@ impl<'a> Eval<'a> {
         match v {
             Some(v) => Some(v),
             None => {
-                let err: Diagnostic = error.boxed();
+                let input = self.input;
+                let err: Diagnostic = error.to_report(input);
                 self.new_arena.add_err(id, err);
                 None
             }
@@ -258,7 +259,7 @@ pub fn eval(id: NodeId, arena: &mut Arena, input: &str) -> EvalResult {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use neu_parser::State;
+    use neu_parser::{State, ParseResult};
     use neu_syntax::{lexers::neu::Lexer, parsers::neu::parser};
 
     #[test]
@@ -266,7 +267,7 @@ mod tests {
         test_runner::test_snapshots("neu", "eval", |input| {
             let lexer = Lexer::new(input);
 
-            let mut res = State::parse(lexer, parser());
+            let mut res: ParseResult = State::parse(lexer, parser());
             let result = eval(res.root, &mut res.arena, input);
 
             result.display(input, &res.arena).to_string()

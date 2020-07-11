@@ -22,8 +22,10 @@ Ale kota nie ma
 
 [render]
 `<h1>Pośród Pradawnych Drzew</h1>
-<table class="side-table"><tr><th>chrono</th><td>20.06.1925</td></tr><tr><th>desc</th><td>Sesja jednostrzałowa dla Macek II RP</td></tr><tr><th>when</th><td>20.10.2019</td></tr></table><p>Ala ma kota</p><div class="article-item"><h1>Chronologia sesji</h1>
-<p>Kot ma ale</p></div><p>Ale kota nie ma</p>`
+<table class="side-table"><tr><th>chrono</th><td>20.06.1925</td></tr><tr><th>desc</th><td>Sesja jednostrzałowa dla Macek II RP</td></tr><tr><th>when</th><td>20.10.2019</td></tr></table>
+<p>Ala ma kota</p><div class="article-item" id="chrono_0123abcd" ><h1>Chronologia sesji</h1>
+<p>Kot ma ale</p></div>
+<p>Ale kota nie ma</p>`
 
 ### No Errors ###
 

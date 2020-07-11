@@ -3,7 +3,7 @@ mod span_ext;
 
 use crate::diagnostic::{Diagnostic, DiagnosticType};
 use crate::span_ext::{LinesCols, TextRangeExt};
-use neu_parser::{ArenaExt, State};
+use neu_parser::{ArenaExt, State, ParseResult};
 use neu_syntax::{lexers::neu::Lexer, parsers::neu::parser};
 use wasm_bindgen::prelude::*;
 use web_sys::console;
@@ -46,7 +46,7 @@ extern "C" {
 pub fn on_change(buf: &str) {
     let lines = buf.lines().map(|s| s.to_string()).collect::<Vec<_>>();
 
-    let parse_result = State::parse(Lexer::new(buf), parser());
+    let parse_result: ParseResult = State::parse(Lexer::new(buf), parser());
     let mut arena = parse_result.arena;
 
     clear_diagnostics();
@@ -63,7 +63,7 @@ pub fn on_change(buf: &str) {
                 col_end,
             } = node.span.lines_cols(&lines);
             Diagnostic::new(
-                error.to_report(&buf),
+                error,//.to_report(&buf),
                 line_start,
                 col_start,
                 line_end,

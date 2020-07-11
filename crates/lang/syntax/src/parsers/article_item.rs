@@ -228,14 +228,14 @@ fn opt_ws() -> impl Parser<HeaderToken> {
 mod tests {
     use super::parser;
     use crate::lexers::article_item_file::Lexer;
-    use neu_parser::State;
+    use neu_parser::{State, ParseResult};
 
     #[test]
     fn article_parser_tests() {
         test_runner::test_snapshots("md", "parser", |input| {
             let lexer = Lexer::new(input);
 
-            let res = State::parse(lexer, parser());
+            let res: ParseResult = State::parse(lexer, parser());
 
             format!("{}", res.display(input))
         })

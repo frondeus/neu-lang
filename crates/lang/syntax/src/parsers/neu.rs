@@ -223,7 +223,7 @@ pub(crate) fn leading_trivia() -> impl Parser<Token> {
 mod tests {
     use super::parser;
     use crate::lexers::neu::{Lexer, Token};
-    use neu_parser::{Spanned, State};
+    use neu_parser::{Spanned, State, ParseResult};
 
     #[test]
     fn lexer_tests() {
@@ -243,7 +243,7 @@ mod tests {
         test_runner::test_snapshots("neu", "parser", |input| {
             let lexer = Lexer::new(input);
 
-            let res = State::parse(lexer, parser());
+            let res: ParseResult = State::parse(lexer, parser());
 
             format!("{}", res.display(input))
         })

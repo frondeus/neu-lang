@@ -38,7 +38,7 @@ impl<'s, 'n> fmt::Display for DisplayEvalResult<'s, 'n> {
         }
 
         for (node_id, error) in errors.iter() {
-            write!(f, "\n{} @ {:?}", error.to_report(self.str), node_id)?;
+            write!(f, "\n{} @ {:?}", error, node_id)?;
         }
 
         Ok(())

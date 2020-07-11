@@ -3,7 +3,7 @@ use std::borrow::Borrow;
 use std::collections::HashMap;
 use std::fmt;
 
-#[derive(PartialEq, Eq)]
+#[derive(PartialEq, Eq, Clone)]
 pub struct Arena<Node, Err> {
     nodes: Vec<Node>,
     errors: HashMap<NodeId, Err>,

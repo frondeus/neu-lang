@@ -6,7 +6,7 @@ use crate::Neovim;
 use anyhow::{bail, Result};
 use async_trait::async_trait;
 use itertools::Itertools;
-use neu_parser::ArenaExt;
+use neu_parser::{ArenaExt, ParseResult};
 use neu_syntax::Nodes;
 use nvim_rs::rpc::IntoVal;
 use nvim_rs::{compat::tokio::Compat, Handler};
@@ -98,7 +98,7 @@ impl NeovimHandler {
                 let lines = current_bf.get_lines(0, -1, false).await?;
                 let buf = lines.iter().join("\n");
 
-                let parse_result = {
+                let parse_result: ParseResult = {
                     use neu_parser::State;
                     use neu_syntax::{lexers::neu::Lexer, parsers::neu::parser};
 
@@ -196,7 +196,7 @@ impl NeovimHandler {
                         {
                             Some(Diagnostic::new(
                                 &current_bf,
-                                error.to_report(&buf),
+                                error,//.to_report(&buf),
                                 *line,
                                 *col_start,
                                 DiagnosticType::Error,
