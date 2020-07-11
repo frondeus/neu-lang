@@ -228,7 +228,7 @@ fn parse_event<'a, Token>(
                 builder.name(Nodes::Md_Html);
                 builder.set_span(range);
             }));
-        },
+        }
         Event::FootnoteReference(_span) => todo!("FootnoteReference"),
         Event::SoftBreak => {
             builder.parse(node(|builder| {
@@ -236,12 +236,10 @@ fn parse_event<'a, Token>(
                 builder.set_span(span);
             }));
         }
-        Event::HardBreak => {
-            builder.parse(node(|builder| {
-                builder.name(Nodes::Md_HardBreak);
-                builder.set_span(span);
-            }))
-        },
+        Event::HardBreak => builder.parse(node(|builder| {
+            builder.name(Nodes::Md_HardBreak);
+            builder.set_span(span);
+        })),
         Event::Rule => {
             builder.parse(node(|builder| {
                 builder.name(Nodes::Md_Rule);

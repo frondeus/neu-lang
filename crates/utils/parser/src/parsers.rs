@@ -1,7 +1,5 @@
+use crate::{Context, Name, Node, NodeBuilder, OptionExt, ParseError, Parser, State, TokenKind};
 use crate::{CoreNodes as Nodes, CoreNodes};
-use crate::{
-    Context, ParseError, Name, Node, NodeBuilder, OptionExt, Parser, State, TokenKind,
-};
 use std::cell::RefCell;
 use std::marker::PhantomData;
 
@@ -61,7 +59,6 @@ where
     pub fn parser(&self) -> impl Parser<Tok> + Clone {
         let opt = self.clone();
         move |state: &mut State<Tok>, ctx: &Context<Tok>| {
-
             let mut builder = NodeBuilder::new(state, ctx);
             builder.parse(opt.next.clone()); // Left
 
@@ -175,7 +172,9 @@ pub fn any_token<Tok: TokenKind>() -> impl Parser<Tok> {
     })
 }
 
-pub fn token<Tok: TokenKind + Send + 'static>(expected: impl Into<Option<Tok>>) -> impl Parser<Tok> {
+pub fn token<Tok: TokenKind + Send + 'static>(
+    expected: impl Into<Option<Tok>>,
+) -> impl Parser<Tok> {
     let expected = expected.into();
     let expected = expected.into_iter().collect::<Vec<_>>();
     tokens(expected)

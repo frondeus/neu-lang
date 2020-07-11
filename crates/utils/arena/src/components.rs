@@ -1,27 +1,27 @@
-use std::collections::HashMap;
-use std::any::TypeId;
 use crate::NodeId;
-use std::collections::hash_map::Entry;
 use mopa::Any;
+use std::any::TypeId;
+use std::collections::hash_map::Entry;
+use std::collections::HashMap;
 
 pub trait Resource: Any + Send + Sync + 'static {}
 
 impl<T> Resource for T where T: Any + Send + Sync {}
 
-pub trait Component : Send + Sync + 'static {}
+pub trait Component: Send + Sync + 'static {}
 impl<T> Component for T where T: Any + Send + Sync {}
 
 mod __resource_mopafy_scope {
     #![allow(clippy::all)]
 
-    use mopa::mopafy;
     use super::Resource;
+    use mopa::mopafy;
     mopafy!(Resource);
 }
 
 #[derive(Default)]
 pub struct Components {
-    storage: HashMap<TypeId, Box<dyn Resource>>
+    storage: HashMap<TypeId, Box<dyn Resource>>,
 }
 
 impl Components {
@@ -30,13 +30,12 @@ impl Components {
     }
 
     pub fn insert<C: Component>(&mut self, id: NodeId, component: C) {
-        let storage = self.entry::<HashMap<NodeId, C>>()
-            .or_insert_with(move || {
-                Box::new(HashMap::<NodeId, C>::new())
-            });
+        let storage = self
+            .entry::<HashMap<NodeId, C>>()
+            .or_insert_with(move || Box::new(HashMap::<NodeId, C>::new()));
 
         let storage = storage.as_mut();
-        let storage: &mut HashMap::<NodeId, C> = unsafe { storage.downcast_mut_unchecked() };
+        let storage: &mut HashMap<NodeId, C> = unsafe { storage.downcast_mut_unchecked() };
         storage.insert(id, component);
     }
 
@@ -45,12 +44,11 @@ impl Components {
         storage.get(&id)
     }
 
-    pub fn iter<C: Component>(&self) -> impl Iterator<Item=(NodeId, &C)> {
+    pub fn iter<C: Component>(&self) -> impl Iterator<Item = (NodeId, &C)> {
         let storage = self.fetch::<HashMap<NodeId, C>>();
-        storage.into_iter()
-            .flat_map(|s| {
-                s.iter().map(|(k, v)| (*k, v))
-            })
+        storage
+            .into_iter()
+            .flat_map(|s| s.iter().map(|(k, v)| (*k, v)))
     }
 }
 
@@ -59,9 +57,7 @@ impl Components {
         let type_id = TypeId::of::<C>();
         let c = self.storage.get(&type_id)?;
         let c = c.as_ref();
-        unsafe {
-            Some(c.downcast_ref_unchecked())
-        }
+        unsafe { Some(c.downcast_ref_unchecked()) }
     }
 
     fn entry<C: Resource>(&mut self) -> Entry<TypeId, Box<dyn Resource>> {
@@ -74,16 +70,14 @@ impl Components {
         let type_id = TypeId::of::<C>();
         let c = self.storage.get_mut(&type_id)?;
         let c = c.as_mut();
-        unsafe {
-            Some(c.downcast_mut_unchecked())
-        }
+        unsafe { Some(c.downcast_mut_unchecked()) }
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use std::fmt::Debug;
     use super::*;
+    use std::fmt::Debug;
 
     #[derive(Debug, PartialEq)]
     struct Type(&'static str);
@@ -96,10 +90,14 @@ mod tests {
     }
 
     impl Foo for Error {
-        fn foo(&self) -> &'static str { self.0 }
+        fn foo(&self) -> &'static str {
+            self.0
+        }
     }
     impl Foo for Type {
-        fn foo(&self) -> &'static str { self.0 }
+        fn foo(&self) -> &'static str {
+            self.0
+        }
     }
 
     const IDS: [NodeId; 2] = [NodeId(1234), NodeId(666)];
@@ -111,8 +109,8 @@ mod tests {
         let error = Box::new(Error("Foo")) as Box<dyn Foo>;
         let t = Box::new(Type("Bar")) as Box<dyn Foo>;
 
-        components.insert(IDS[0], error) ;
-        components.insert(IDS[1], t) ;
+        components.insert(IDS[0], error);
+        components.insert(IDS[1], t);
 
         let res: &Box<dyn Foo> = components.get(IDS[0]).expect("dyn Foo");
         assert_eq!("Foo", res.foo());
@@ -139,15 +137,12 @@ mod tests {
         components.insert(IDS[1], Type("Bar"));
         components.insert(IDS[1], Error("Bar"));
 
-        let mut types = components.iter::<Type>()
-            .collect::<Vec<_>>();
+        let mut types = components.iter::<Type>().collect::<Vec<_>>();
         types.sort_by_key(|c| c.0);
 
-        assert_eq!(&[
-            (IDS[1], &Type("Bar")),
-            (IDS[0], &Type("Foo"))
-        ], types.as_slice());
+        assert_eq!(
+            &[(IDS[1], &Type("Bar")), (IDS[0], &Type("Foo"))],
+            types.as_slice()
+        );
     }
 }
-
-

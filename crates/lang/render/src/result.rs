@@ -7,8 +7,16 @@ pub struct RenderResult {
 }
 
 impl RenderResult {
-    pub fn display<'s, 'n>(&'n self, str: &'s str, arena: &'s Arena) -> DisplayRenderResult<'s, 'n> {
-        DisplayRenderResult { str, result: self, arena }
+    pub fn display<'s, 'n>(
+        &'n self,
+        str: &'s str,
+        arena: &'s Arena,
+    ) -> DisplayRenderResult<'s, 'n> {
+        DisplayRenderResult {
+            str,
+            result: self,
+            arena,
+        }
     }
 }
 
@@ -16,7 +24,7 @@ pub struct DisplayRenderResult<'s, 'n> {
     #[allow(dead_code)]
     str: &'s str,
     result: &'n RenderResult,
-    arena: &'s Arena
+    arena: &'s Arena,
 }
 
 impl<'s, 'n> fmt::Display for DisplayRenderResult<'s, 'n> {

@@ -1,12 +1,12 @@
-use crate::{Node, NodeId, Ancestors};
-use std::fmt;
+use crate::{Ancestors, Node, NodeId};
 use std::borrow::Borrow;
 use std::collections::HashMap;
+use std::fmt;
 
 #[derive(PartialEq, Eq)]
 pub struct Arena<Node, Err> {
     nodes: Vec<Node>,
-    errors: HashMap<NodeId, Err>
+    errors: HashMap<NodeId, Err>,
 }
 
 impl<N, E> Default for Arena<N, E> {
@@ -83,4 +83,3 @@ impl<N: Node, E> Arena<N, E> {
         self.nodes.iter().enumerate().map(|(id, n)| (NodeId(id), n))
     }
 }
-

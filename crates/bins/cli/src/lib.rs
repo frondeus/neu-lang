@@ -1,11 +1,11 @@
-use anyhow::Result;
 use anyhow::anyhow;
+use anyhow::Result;
 use std::path::{Path, PathBuf};
 
 pub fn find_in_ancestors(start: Option<PathBuf>, indicator: impl AsRef<Path>) -> Result<PathBuf> {
     let mut path = match start {
         Some(s) => s,
-        None => std::env::current_dir()?
+        None => std::env::current_dir()?,
     };
 
     while !path.join(indicator.as_ref()).exists() {
@@ -20,7 +20,6 @@ pub fn find_in_ancestors(start: Option<PathBuf>, indicator: impl AsRef<Path>) ->
     log::debug!("Found directory at: {}", path.display());
     Ok(path)
 }
-
 
 #[cfg(test)]
 mod tests {

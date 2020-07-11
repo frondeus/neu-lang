@@ -1,5 +1,5 @@
 use crate::Eval;
-use neu_parser::{Name, Node, Children};
+use neu_parser::{Children, Name, Node};
 use neu_syntax::Nodes;
 use regex::Regex;
 
@@ -65,13 +65,12 @@ impl<'a> Eval<'a> {
             if let Some((_, node)) = children.find_node(Nodes::Md_LinkUrl) {
                 let text = &self.input[node.span];
                 //TODO Parse :
-                let link_regex  = Regex::new("([a-z_A-Z0-9]+):([0-9A-Fa-f]{8})").expect("Regex");
+                let link_regex = Regex::new("([a-z_A-Z0-9]+):([0-9A-Fa-f]{8})").expect("Regex");
                 if let Some(cap) = link_regex.captures(text) {
                     let kind = cap.get(1).expect("G1").as_str();
                     let id = cap.get(2).expect("G2").as_str();
                     str.push_str(&format!(r#" href="/{}/{}""#, kind, id));
-                }
-                else {
+                } else {
                     str.push_str(&format!(r#" href="{}""#, text));
                 }
             }

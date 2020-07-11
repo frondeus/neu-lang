@@ -1,6 +1,6 @@
-use crate::{Context, Lexer, Parser, TokenKind, NodeId, Arena, ArenaExt};
+use crate::{Arena, ArenaExt, Context, Lexer, NodeId, Parser, TokenKind};
+use neu_diagnostics::{Diagnostic, Diagnostics};
 use std::fmt;
-use neu_diagnostics::{Diagnostics, Diagnostic};
 
 pub struct State<Tok: TokenKind> {
     lexer: Lexer<Tok>,
@@ -71,10 +71,7 @@ impl<Tok: TokenKind> State<Tok> {
         let root = state.nodes().add(root);
         let arena = state.arena;
 
-        ParseResult {
-            root,
-            arena
-        }
+        ParseResult { root, arena }
     }
 }
 

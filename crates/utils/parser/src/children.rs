@@ -1,4 +1,4 @@
-use crate::{Arena, Name, Node, NodeId, CoreNodes};
+use crate::{Arena, CoreNodes, Name, Node, NodeId};
 
 pub struct Children<'a, I> {
     iter: I,

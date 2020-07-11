@@ -175,7 +175,8 @@ impl TokenKind for Token {
         if peeked == '!' {
             return Some((Token::OpBang, input.chomp(1)));
         }
-        if peeked == '+'  && !i.starts_with("+++") { // TODO: Dirty hack
+        if peeked == '+' && !i.starts_with("+++") {
+            // TODO: Dirty hack
             return Some((Token::OpPlus, input.chomp(1)));
         }
         if peeked == '*' {

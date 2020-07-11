@@ -2,7 +2,7 @@ use neu_eval::Value;
 use std::fmt;
 
 pub(crate) struct HtmlValue<'v> {
-    value: &'v Value
+    value: &'v Value,
 }
 
 impl<'v> fmt::Display for HtmlValue<'v> {
@@ -24,7 +24,7 @@ impl<'v> fmt::Display for HtmlValue<'v> {
                     write!(f, " ")?;
                 }
                 write!(f, "]")
-            },
+            }
             Value::Struct(s) => {
                 write!(f, "{{")?;
                 if !s.is_empty() {
@@ -35,12 +35,11 @@ impl<'v> fmt::Display for HtmlValue<'v> {
                     writeln!(f, "{:width$}{} = {:#width$},", " ", k, v, width = c_width)?;
                 }
                 write!(f, "{:width$}}}", " ", width = width)
-            },
-            Value::Lazy { .. } => unreachable!("lazy render")
+            }
+            Value::Lazy { .. } => unreachable!("lazy render"),
         }
     }
 }
-
 
 pub(crate) fn render_value(value: &Value) -> HtmlValue {
     HtmlValue { value }

@@ -1,14 +1,15 @@
 use crate::parsers::common::separated;
 use crate::parsers::markdown::markdown;
+use crate::parsers::neu::{leading_trivia, trailing_trivia};
 use crate::{
     lexers::{
         article_item_body::Token as BodyToken, article_item_file::Token as FileToken,
         article_item_header::Token as HeaderToken, neu::Token as NeuToken,
     },
-    parsers::neu, Nodes,
+    parsers::neu,
+    Nodes,
 };
 use neu_parser::*;
-use crate::parsers::neu::{leading_trivia, trailing_trivia};
 
 pub fn parser() -> impl Parser<FileToken> {
     node(|builder| {
@@ -53,15 +54,19 @@ fn main_item_body() -> impl Parser<BodyToken> {
                         builder.name(Nodes::Virtual);
                         markdown(builder, i);
                     }));
-                },
+                }
                 Some(BodyToken::PlusPlus) => {
                     builder.parse(item());
-                },
+                }
                 Some(BodyToken::OpenBl) => {
                     builder.parse(item_bl());
-                },
+                }
                 Some(_) => {
-                    builder.parse(expected(&[BodyToken::Text, BodyToken::PlusPlus, BodyToken::OpenBl]));
+                    builder.parse(expected(&[
+                        BodyToken::Text,
+                        BodyToken::PlusPlus,
+                        BodyToken::OpenBl,
+                    ]));
                 }
             }
         }
@@ -161,18 +166,16 @@ fn item_header() -> impl Parser<HeaderToken> {
 fn item_body() -> impl Parser<BodyToken> {
     node(|builder| {
         builder.name(Nodes::ArticleBody);
-        builder.parse(
-            node(|builder| {
-                builder.name(Nodes::Virtual);
-                let i = builder.state().lexer().input().clone();
-                if let Some(BodyToken::Text) = builder.peek_token() {
-                    builder.name(Nodes::Md_Value);
-                    builder.name(Nodes::Markdown);
-                    builder.name(Nodes::Value);
-                    markdown(builder, i);
-                }
-            })
-        );
+        builder.parse(node(|builder| {
+            builder.name(Nodes::Virtual);
+            let i = builder.state().lexer().input().clone();
+            if let Some(BodyToken::Text) = builder.peek_token() {
+                builder.name(Nodes::Md_Value);
+                builder.name(Nodes::Markdown);
+                builder.name(Nodes::Value);
+                markdown(builder, i);
+            }
+        }));
     })
 }
 
@@ -181,17 +184,20 @@ fn item_bl() -> impl Parser<BodyToken> {
         builder.name(Nodes::ArticleRef);
         builder.parse(token(BodyToken::OpenBl));
         let ctx = Context::default();
-        builder.parse_mode(&ctx, node(|builder| {
-            builder.name(Nodes::Virtual);
-            builder.parse(req_trivia(HeaderToken::InlineWhitespace));
-            builder.parse(named(
-                tokens(vec![HeaderToken::Identifier, HeaderToken::ItemId]),
-                Nodes::Identifier,
-            ));
-            builder.parse(token(HeaderToken::Colon));
-            builder.parse(named(token(HeaderToken::ItemId), Nodes::ArticleItemId));
-            builder.parse(req_trivia(HeaderToken::InlineWhitespace));
-        }));
+        builder.parse_mode(
+            &ctx,
+            node(|builder| {
+                builder.name(Nodes::Virtual);
+                builder.parse(req_trivia(HeaderToken::InlineWhitespace));
+                builder.parse(named(
+                    tokens(vec![HeaderToken::Identifier, HeaderToken::ItemId]),
+                    Nodes::Identifier,
+                ));
+                builder.parse(token(HeaderToken::Colon));
+                builder.parse(named(token(HeaderToken::ItemId), Nodes::ArticleItemId));
+                builder.parse(req_trivia(HeaderToken::InlineWhitespace));
+            }),
+        );
         builder.parse(token(BodyToken::CloseBl));
     })
 }

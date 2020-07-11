@@ -82,9 +82,7 @@ impl TokenKind for Token {
         if peeked.is_ascii_alphabetic() {
             let rest = i
                 .chars()
-                .take_while(|c| {
-                    c.is_ascii_alphabetic() || *c == '_'
-                })
+                .take_while(|c| c.is_ascii_alphabetic() || *c == '_')
                 .count();
 
             return Some((Token::Identifier, input.chomp(rest)));

@@ -1,5 +1,5 @@
-use neu_parser::{NodeId, Arena, Children, Node};
 use crate::Nodes;
+use neu_parser::{Arena, Children, Node, NodeId};
 
 #[derive(Debug)]
 pub struct ArticleRef {
@@ -45,24 +45,21 @@ pub struct ArticleItem {
     pub identifier: Option<NodeId>,
     pub item_id: Option<NodeId>,
     pub strukt: Option<NodeId>,
-    pub body:   Option<NodeId>
+    pub body: Option<NodeId>,
 }
 
 impl ArticleItem {
     pub fn from_root(id: NodeId, nodes: &Arena) -> Self {
         let node = nodes.get(id);
 
-        match Children::new(node.children.iter().copied(), nodes)
-            .find_node(Nodes::ArticleItem) {
+        match Children::new(node.children.iter().copied(), nodes).find_node(Nodes::ArticleItem) {
             Some((article_id, _)) => Self::build(article_id, nodes),
-            None => {
-                Self {
-                    identifier: None,
-                    item_id: None,
-                    strukt: None,
-                    body: None
-                }
-            }
+            None => Self {
+                identifier: None,
+                item_id: None,
+                strukt: None,
+                body: None,
+            },
         }
     }
     pub fn build(id: NodeId, nodes: &Arena) -> Self {
@@ -79,7 +76,7 @@ impl ArticleItem {
             identifier,
             item_id,
             strukt,
-            body
+            body,
         }
     }
 

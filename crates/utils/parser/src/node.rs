@@ -123,11 +123,7 @@ impl<'s, 'n, 'a> fmt::Display for DisplayNode<'s, 'n, 'a> {
 
         let span = &self.str[self.node.span];
         if self.node.children.is_empty() || span.lines().count() <= 1 || span.len() < 40 {
-            write!(
-                f,
-                " = `{}`",
-                span.escape_default()
-            )?;
+            write!(f, " = `{}`", span.escape_default())?;
         }
         writeln!(f)?;
 

@@ -8,7 +8,11 @@ pub struct EvalResult {
 
 impl EvalResult {
     pub fn display<'s, 'n>(&'n self, str: &'s str, arena: &'s Arena) -> DisplayEvalResult<'s, 'n> {
-        DisplayEvalResult { str, result: self, arena}
+        DisplayEvalResult {
+            str,
+            result: self,
+            arena,
+        }
     }
 }
 
@@ -16,7 +20,7 @@ pub struct DisplayEvalResult<'s, 'n> {
     #[allow(dead_code)]
     str: &'s str,
     result: &'n EvalResult,
-    arena: &'s Arena
+    arena: &'s Arena,
 }
 
 impl<'s, 'n> fmt::Display for DisplayEvalResult<'s, 'n> {

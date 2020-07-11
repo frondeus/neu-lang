@@ -3,7 +3,7 @@ mod span_ext;
 
 use crate::diagnostic::{Diagnostic, DiagnosticType};
 use crate::span_ext::{LinesCols, TextRangeExt};
-use neu_parser::{State, ArenaExt};
+use neu_parser::{ArenaExt, State};
 use neu_syntax::{lexers::neu::Lexer, parsers::neu::parser};
 use wasm_bindgen::prelude::*;
 use web_sys::console;

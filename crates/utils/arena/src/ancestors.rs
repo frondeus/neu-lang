@@ -1,4 +1,4 @@
-use crate::{NodeId, Arena, Node};
+use crate::{Arena, Node, NodeId};
 
 pub struct Ancestors<'a, Node, Err> {
     pub(crate) current: Option<NodeId>,
@@ -18,4 +18,3 @@ impl<'a, N: Node, E> Iterator for Ancestors<'a, N, E> {
         current
     }
 }
-

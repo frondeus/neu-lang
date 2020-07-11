@@ -5,8 +5,8 @@ pub struct HashCount {
 
 impl From<()> for HashCount {
     fn from(_: ()) -> Self {
-                                 Default::default()
-                                                   }
+        Default::default()
+    }
 }
 
 impl From<HashCount> for () {

@@ -1,5 +1,5 @@
-pub use neu_arena::{NodeId};
 use crate::Node;
+pub use neu_arena::NodeId;
 use neu_diagnostics::Diagnostic;
 
 pub type Arena<N = Node, E = Diagnostic> = neu_arena::Arena<N, E>;

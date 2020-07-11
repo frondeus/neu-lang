@@ -5,11 +5,11 @@ mod value;
 
 use crate::result::EvalResult;
 use error::Error;
-use neu_parser::{Arena, Node, NodeId, Children};
+use neu_diagnostics::{Diagnostic, ToReport};
+use neu_parser::{Arena, Children, Node, NodeId};
 use neu_syntax::Nodes;
 use std::collections::BTreeMap;
 pub use value::Value;
-use neu_diagnostics::{ToReport, Diagnostic};
 
 pub struct Eval<'a> {
     pub arena: &'a Arena,
@@ -214,8 +214,7 @@ impl<'a> Eval<'a> {
             let mut s = String::new();
             if node.is(Nodes::Md_Value) {
                 self.eval_md(&mut s, node)?;
-            }
-            else {
+            } else {
                 while let Some((_, value)) = children.find_node(Nodes::Md_Value) {
                     self.eval_md(&mut s, value)?;
                 }
@@ -252,8 +251,7 @@ pub fn eval(id: NodeId, arena: &mut Arena, input: &str) -> EvalResult {
     let new_arena = eval.new_arena;
     arena.merge(new_arena);
     EvalResult {
-        value
-        //errors: eval.errors,
+        value, //errors: eval.errors,
     }
 }
 

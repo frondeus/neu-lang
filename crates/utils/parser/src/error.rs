@@ -1,6 +1,6 @@
 use crate::{Spanned, TokenKind};
-use std::fmt;
 pub(crate) use neu_diagnostics::ToReport;
+use std::fmt;
 
 #[derive(Clone)]
 pub enum ParseError<Tok: TokenKind> {

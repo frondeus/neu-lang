@@ -6,6 +6,7 @@ use crate::Neovim;
 use anyhow::{bail, Result};
 use async_trait::async_trait;
 use itertools::Itertools;
+use neu_parser::ArenaExt;
 use neu_syntax::Nodes;
 use nvim_rs::rpc::IntoVal;
 use nvim_rs::{compat::tokio::Compat, Handler};
@@ -14,7 +15,6 @@ use std::future::Future;
 use std::sync::Arc;
 use tokio::io::Stdout;
 use tokio::sync::RwLock;
-use neu_parser::ArenaExt;
 
 #[derive(Clone, Default)]
 pub struct NeovimHandler {
@@ -115,7 +115,8 @@ impl NeovimHandler {
 
                 let root_eval_result = neu_eval::eval(root, &mut arena, &buf);
                 {
-                    let nodes: Vec<_> = arena.enumerate()
+                    let nodes: Vec<_> = arena
+                        .enumerate()
                         .filter_map(|(id, node)| {
                             if !node.is(Nodes::Error) {
                                 if !node.is(Nodes::Value) {
@@ -252,7 +253,11 @@ impl NeovimHandler {
                 //writeln!(&mut dbg_buffer, "{}", buf)?;
                 //writeln!(&mut dbg_buffer, "```\n")?;
                 //writeln!(&mut dbg_buffer, "{:#?}\n", tokens)?;
-                writeln!(&mut dbg_buffer, "{}\n\n", root_eval_result.display(&buf, &arena))?;
+                writeln!(
+                    &mut dbg_buffer,
+                    "{}\n\n",
+                    root_eval_result.display(&buf, &arena)
+                )?;
                 dbg!(dbg_buffer, arena);
 
                 let debug_lines = dbg_buffer.lines().map(|l| l.to_string()).collect_vec();

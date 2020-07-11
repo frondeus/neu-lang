@@ -1,10 +1,8 @@
+use crate::{Context, Name, Node, NodeId, OptionExt, Parser, PeekableIterator, State, TokenKind};
 use crate::{CoreNodes as Nodes, ToReport};
-use crate::{
-    Context, Name, Node, NodeId, OptionExt, Parser, PeekableIterator, State, TokenKind,
-};
+use neu_diagnostics::Diagnostic;
 use std::collections::BTreeSet;
 use text_size::TextRange;
-use neu_diagnostics::Diagnostic;
 
 pub struct NodeBuilder<'a, Tok: TokenKind> {
     state: &'a mut State<Tok>,
@@ -142,7 +140,7 @@ impl<'a, Tok: TokenKind> NodeBuilder<'a, Tok> {
             error,
             state,
             mut span,
-            ctx
+            ctx,
         } = self;
         for child in &children {
             let child_node = &state.nodes().get(*child);
@@ -155,11 +153,15 @@ impl<'a, Tok: TokenKind> NodeBuilder<'a, Tok> {
         if let Some(error) = error {
             state.error(error);
         }
-        (Node {
-            span,
-            names,
-            children,
-            parent: Default::default(),
-        }, state, ctx)
+        (
+            Node {
+                span,
+                names,
+                children,
+                parent: Default::default(),
+            },
+            state,
+            ctx,
+        )
     }
 }

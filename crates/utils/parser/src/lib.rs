@@ -15,13 +15,13 @@ mod lexer;
 mod peekable;
 mod spanned;
 
+mod arena;
+mod children;
 mod context;
 mod error;
 mod parser;
 mod parsers;
-mod arena;
 mod state;
-mod children;
 
 #[macro_use]
 mod node;
@@ -32,13 +32,13 @@ pub use lexer::*;
 pub use peekable::*;
 pub use spanned::*;
 
+pub use arena::*;
 pub use context::*;
 pub use error::*;
 pub use parser::*;
 pub use parsers::*;
-pub use arena::*;
 pub use state::*;
 
+pub use children::*;
 pub use node::*;
 pub use node_builder::*;
-pub use children::*;

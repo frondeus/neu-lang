@@ -1,28 +1,28 @@
 use anyhow::Result;
-use neu_cli::{find_in_ancestors};
 use clap::Clap;
 use env_logger::Env;
-use std::path::{Path, PathBuf};
-use neu_syntax::ast::ArticleItem;
-use std::io::Write;
+use neu_cli::find_in_ancestors;
 use neu_eval::eval;
+use neu_syntax::ast::ArticleItem;
 use serde::Serialize;
 use std::collections::BTreeMap;
+use std::io::Write;
+use std::path::{Path, PathBuf};
 
 #[derive(Debug, Clap)]
 struct Opts {
     path: Option<PathBuf>,
 
     #[clap(short, long, default_value = ".neu")]
-    dist: PathBuf
+    dist: PathBuf,
 }
 
 #[derive(Debug, Serialize)]
 #[allow(dead_code)] // TODO:
 enum Tree {
-    Dir (String, Vec<Tree>),
-    File (usize),
-    None
+    Dir(String, Vec<Tree>),
+    File(usize),
+    None,
 }
 
 #[derive(Debug, Serialize)]
@@ -30,7 +30,7 @@ struct Index {
     data: Vec<IndexEntry>,
     abc: BTreeMap<char, Vec<usize>>,
     kind: BTreeMap<String, Vec<usize>>,
-    project: Tree
+    project: Tree,
 }
 
 impl From<Vec<IndexEntry>> for Index {
@@ -39,22 +39,21 @@ impl From<Vec<IndexEntry>> for Index {
         let mut abc: BTreeMap<char, Vec<usize>> = BTreeMap::default();
         let project: Tree = Tree::None;
 
-        vec.iter()
-            .enumerate()
-            .for_each(|(idx, entry)| {
+        vec.iter().enumerate().for_each(|(idx, entry)| {
+            kind.entry(entry.kind.clone()).or_default().push(idx);
 
-                kind.entry(entry.kind.clone())
-                    .or_default()
-                    .push(idx);
-
-                abc.entry(entry.title.chars()
-                    .next().unwrap_or(' '))
-                    .or_default()
-                    .push(idx);
-            });
+            abc.entry(entry.title.chars().next().unwrap_or(' '))
+                .or_default()
+                .push(idx);
+        });
 
         let data = vec;
-        Self { data, abc, kind, project }
+        Self {
+            data,
+            abc,
+            kind,
+            project,
+        }
     }
 }
 
@@ -63,14 +62,13 @@ struct IndexEntry {
     kind: String,
     id: String,
     title: String,
-    path: String
+    path: String,
 }
 
 fn build_article(entry: &Path, articles_path: &Path, index: &mut Vec<IndexEntry>) -> Result<()> {
     use neu_parser::State;
-    use neu_syntax::{lexers::article_item_file::Lexer,
-                     parsers::article_item::parser};
     use neu_render::render;
+    use neu_syntax::{lexers::article_item_file::Lexer, parsers::article_item::parser};
 
     let file = std::fs::read_to_string(entry)?;
     let input = &file;
@@ -78,10 +76,9 @@ fn build_article(entry: &Path, articles_path: &Path, index: &mut Vec<IndexEntry>
     let mut parsed = State::parse(lexer, parser());
     let article_item = ArticleItem::from_root(parsed.root, &parsed.arena);
 
-
     if let (Some(ident), Some(id)) = (
         article_item.identifier(&parsed.arena, input),
-        article_item.item_id(&parsed.arena, input)
+        article_item.item_id(&parsed.arena, input),
     ) {
         log::info!("Rendering {}:{}", ident, id);
         let ident_path = articles_path.join(ident);
@@ -89,13 +86,14 @@ fn build_article(entry: &Path, articles_path: &Path, index: &mut Vec<IndexEntry>
 
         article_item.anchor_body(&mut parsed.arena);
 
-        let strukt = article_item.strukt.map(
-            |strukt| eval(strukt, &mut parsed.arena, input)
-        )
-            .and_then(|strukt_eval| { strukt_eval.value })
+        let strukt = article_item
+            .strukt
+            .map(|strukt| eval(strukt, &mut parsed.arena, input))
+            .and_then(|strukt_eval| strukt_eval.value)
             .and_then(|value| value.into_struct());
 
-        let title = strukt.as_ref()
+        let title = strukt
+            .as_ref()
             .and_then(|value| value.get("title"))
             .map(ToString::to_string)
             .unwrap_or_else(|| "???".to_string());
@@ -115,7 +113,7 @@ fn build_article(entry: &Path, articles_path: &Path, index: &mut Vec<IndexEntry>
             kind: ident.into(),
             id: id.into(),
             title: title.into(),
-            path: item_path.display().to_string()
+            path: item_path.display().to_string(),
         });
     }
 
@@ -123,7 +121,6 @@ fn build_article(entry: &Path, articles_path: &Path, index: &mut Vec<IndexEntry>
 }
 
 fn build(root: &Path, dist: &Path) -> Result<()> {
-
     let articles_path = root.join(dist).join("articles");
     std::fs::create_dir_all(&articles_path)?;
 
