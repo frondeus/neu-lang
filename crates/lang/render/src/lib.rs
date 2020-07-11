@@ -1,7 +1,7 @@
 use crate::result::RenderResult;
 use neu_parser::{Arena, Children, NodeId};
 use neu_eval::{eval, Value};
-use neu_syntax::ast::ArticleItem;
+use neu_syntax::ast::{ArticleItem, ArticleRef};
 use neu_syntax::Nodes;
 
 mod result;
@@ -25,7 +25,7 @@ fn _render(article_item: ArticleItem, nodes: &mut Arena, input: &str) -> Option<
     }
 
     if !strukt.is_empty() {
-        output.push_str("<table>");
+        output.push_str(r#"<table class="side-table">"#);
         for (key, value) in strukt {
             output.push_str("<tr>");
             output.push_str(&format!("<th>{}</th>", key));
@@ -51,9 +51,14 @@ fn _render(article_item: ArticleItem, nodes: &mut Arena, input: &str) -> Option<
             output.push_str(rendered.output.as_str());
             output.push_str("</div>");
         }
-        //else if body.is(Nodes::ArticleRef) {
-
-        //}
+        else if body.is(Nodes::ArticleRef) {
+            //TODO:
+            let article_ref = ArticleRef::build(body_id, nodes);
+            let kind = article_ref.identifier(nodes, input).unwrap_or("???");
+            let id = article_ref.item_id(nodes, input).unwrap_or("???");
+            let s = format!(r#"<div class="todo"><a href="/{}/{}">{:?}</a></div>"#, kind, id, body);
+            output.push_str(&s);
+        }
         else {
             let s = format!(r#"<div class="todo">{:?}</div>"#, body);
             output.push_str(&s);

@@ -8,25 +8,27 @@
 ** Immediate Constants [/]
 ** Unary primitives [/]
 ** Binary primitives [/]
-** Strings  [1/2]
+** Strings  [2/2]
 *** DONE More string interpolation tests
-*** TODO Handle errors in interpolated strings
+*** DONE Handle errors in interpolated strings
 ** Structs [0/2]
 *** TODO Prevent field access cycle
 *** TODO Memoization of lazy fields
 ** Arrays [0/1]
 *** TODO Access array item foo[0]
-** Markdown [1/7]
+** Markdown [2/6]
 *** DONE Markdown string interpolation
-*** TODO Inline HTML
+*** DONE Inline HTML
 *** TODO Tables
 *** TODO Footnote
 *** TODO Hard Break
 *** TODO Check mark
-** Gm notes [0/2]
-*** TODO Generate json
-*** TODO Markdown article
-*** TODO Generate subarticle
+** Gm notes [3/5]
+*** DONE Generate json
+*** DONE Markdown article
+*** DONE Generate subarticle
+*** TODO Reference article
+*** TODO Salsa
 ** Neovim [0/3]
 *** TODO Add autocompletion
 *** TODO Add intentions

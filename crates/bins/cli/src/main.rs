@@ -7,6 +7,8 @@ use neu_syntax::ast::ArticleItem;
 use std::io::Write;
 use neu_eval::eval;
 use serde::Serialize;
+use std::collections::{BTreeMap, BTreeSet};
+use std::cmp::Ordering;
 
 #[derive(Debug, Clap)]
 struct Opts {
@@ -17,10 +19,51 @@ struct Opts {
 }
 
 #[derive(Debug, Serialize)]
+enum Tree {
+    Dir (String, Vec<Tree>),
+    File (usize),
+    None
+}
+
+#[derive(Debug, Serialize)]
+struct Index {
+    data: Vec<IndexEntry>,
+    abc: BTreeMap<char, Vec<usize>>,
+    kind: BTreeMap<String, Vec<usize>>,
+    project: Tree
+}
+
+impl From<Vec<IndexEntry>> for Index {
+    fn from(vec: Vec<IndexEntry>) -> Self {
+        let mut kind: BTreeMap<String, Vec<usize>> = BTreeMap::default();
+        let mut abc: BTreeMap<char, Vec<usize>> = BTreeMap::default();
+        let mut project: Tree = Tree::None;
+
+        vec.iter()
+            .enumerate()
+            .for_each(|(idx, entry)| {
+
+                kind.entry(entry.kind.clone())
+                    .or_default()
+                    .push(idx);
+
+                abc.entry(entry.title.chars()
+                    .next().unwrap_or(' '))
+                    .or_default()
+                    .push(idx);
+            });
+
+        let data = vec;
+        Self { data, abc, kind, project }
+    }
+}
+
+#[derive(Debug, Serialize, Clone)]
 struct IndexEntry {
     kind: String,
     id: String,
-    title: String
+    title: String,
+    path: String
 }
 
 fn build_article(entry: &Path, articles_path: &Path, index: &mut Vec<IndexEntry>) -> Result<()> {
@@ -57,6 +100,7 @@ fn build_article(entry: &Path, articles_path: &Path, index: &mut Vec<IndexEntry>
             .map(ToString::to_string)
             .unwrap_or_else(|| "???".to_string());
 
+        let title = title.trim_matches('"');
         log::debug!("Title: {}", title);
 
         let rendered = render(article_item, &mut parsed.arena, input);
@@ -64,13 +108,14 @@ fn build_article(entry: &Path, articles_path: &Path, index: &mut Vec<IndexEntry>
         let item_path = ident_path.join(&format!("{}.html", id));
         log::debug!("To {}", item_path.display());
 
-        let mut file = std::fs::File::create(item_path)?;
+        let mut file = std::fs::File::create(&item_path)?;
         file.write_all(rendered.output.as_bytes())?;
 
         index.push(IndexEntry {
             kind: ident.into(),
             id: id.into(),
-            title
+            title: title.into(),
+            path: item_path.display().to_string()
         });
     }
 
@@ -85,16 +130,13 @@ fn build(root: &Path, dist: &Path) -> Result<()> {
     let mut index = vec![];
 
     for entry in glob::glob(&format!("{}/**/*.md", root.display()))? {
-        let entry = entry?;
-        build_article(&entry, &articles_path, &mut index)?;
+        build_article(&entry?, &articles_path, &mut index)?;
     }
 
+    let index: Index = index.into();
     let index_path = root.join(dist).join("index.json");
     let mut file = std::fs::File::create(index_path)?;
-    file.write_all(
-        serde_json::to_vec(&index)?.as_slice()
-        //format!("{:?}", index).as_bytes()
-    )?;
+    file.write_all(serde_json::to_vec(&index)?.as_slice())?;
 
     Ok(())
 }
