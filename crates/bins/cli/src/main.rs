@@ -7,8 +7,7 @@ use neu_syntax::ast::ArticleItem;
 use std::io::Write;
 use neu_eval::eval;
 use serde::Serialize;
-use std::collections::{BTreeMap, BTreeSet};
-use std::cmp::Ordering;
+use std::collections::BTreeMap;
 
 #[derive(Debug, Clap)]
 struct Opts {
@@ -19,6 +18,7 @@ struct Opts {
 }
 
 #[derive(Debug, Serialize)]
+#[allow(dead_code)] // TODO:
 enum Tree {
     Dir (String, Vec<Tree>),
     File (usize),
@@ -37,7 +37,7 @@ impl From<Vec<IndexEntry>> for Index {
     fn from(vec: Vec<IndexEntry>) -> Self {
         let mut kind: BTreeMap<String, Vec<usize>> = BTreeMap::default();
         let mut abc: BTreeMap<char, Vec<usize>> = BTreeMap::default();
-        let mut project: Tree = Tree::None;
+        let project: Tree = Tree::None;
 
         vec.iter()
             .enumerate()

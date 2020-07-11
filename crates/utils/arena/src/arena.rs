@@ -1,8 +1,7 @@
-use crate::{Components, Node, NodeId, Component, Ancestors};
+use crate::{Node, NodeId, Ancestors};
 use std::fmt;
 use std::borrow::Borrow;
 use std::collections::HashMap;
-use std::sync::Arc;
 
 #[derive(PartialEq, Eq)]
 pub struct Arena<Node, Err> {

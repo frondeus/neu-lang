@@ -1,5 +1,4 @@
 use warp::Filter;
-use futures::{FutureExt, StreamExt};
 use std::path::{PathBuf, Path};
 use neu_cli::find_in_ancestors;
 use clap::Clap;

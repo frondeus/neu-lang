@@ -1,19 +1,17 @@
+#![allow(dead_code)]
 use crate::result::RenderResult;
-use std::sync::Arc;
 use neu_parser::ParseResult;
 
 #[salsa::query_group(RendererDatabase)]
-pub trait Renderer {
+trait Renderer {
     //fn parse_article(&self) -> ParseResult;
     fn rendered_article(&self) -> RenderResult;
 }
 
-fn parse_article(db: &impl Renderer) -> Arc<ParseResult> {
+fn parse_article(_db: &impl Renderer) -> ParseResult {
     todo!()
 }
 
-fn rendered_article(db: &impl Renderer) -> RenderResult {
-    RenderResult {
-        output: "Couldn't render, found errors".to_string()
-    }
+fn rendered_article(_db: &impl Renderer) -> RenderResult {
+    todo!()
 }

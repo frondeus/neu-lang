@@ -60,7 +60,7 @@ fn main_item_body() -> impl Parser<BodyToken> {
                 Some(BodyToken::OpenBl) => {
                     builder.parse(item_bl());
                 },
-                Some(token) => {
+                Some(_) => {
                     builder.parse(expected(&[BodyToken::Text, BodyToken::PlusPlus, BodyToken::OpenBl]));
                 }
             }
