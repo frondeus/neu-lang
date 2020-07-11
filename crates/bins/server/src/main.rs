@@ -23,6 +23,14 @@ async fn run(root: &Path, dist: &Path) {
     let content =
         warp::path!(String / String).map(|_, _| warp::reply::html(Resources::Index.load()));
 
+    let js = warp::path!("static" / "main.js")
+        .map(|| Resources::Js.load())
+        .map(|reply| warp::reply::with_header(reply, "content-type", "text/javascript"));
+
+    let css = warp::path!("static" / "main.css")
+        .map(|| Resources::Css.load())
+        .map(|reply| warp::reply::with_header(reply, "content-type", "text/css"));
+
     let react_dev = warp::path!("static" / "react.development.js")
         .map(|| Resources::React.load())
         .map(|reply| warp::reply::with_header(reply, "content-type", "text/javascript"));
@@ -31,7 +39,13 @@ async fn run(root: &Path, dist: &Path) {
         .map(|| Resources::ReactDom.load())
         .map(|reply| warp::reply::with_header(reply, "content-type", "text/javascript"));
 
-    let routes = neu.or(react_dev).or(react_dom_dev).or(content).or(index);
+    let routes = neu
+        .or(js)
+        .or(css)
+        .or(react_dev)
+        .or(react_dom_dev)
+        .or(content)
+        .or(index);
 
     warp::serve(routes).run(([127, 0, 0, 1], 3000)).await;
 }
