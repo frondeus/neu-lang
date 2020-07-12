@@ -18,7 +18,7 @@ foo.bar + foo.baz
 [parser]
 ROOT @ 0..17 = `foo.bar + foo.baz`
     BINARY, VALUE @ 0..17 = `foo.bar + foo.baz`
-        IDENTPATH, VALUE @ 0..7 = `foo.bar`
+        IDENTPATH, VALUE @ 0..8 = `foo.bar `
             IDENTIFIER, TOKEN, VALUE @ 0..3 = `foo`
             OP, TOKEN @ 3..4 = `.`
             IDENTIFIER, TOKEN, VALUE @ 4..7 = `bar`

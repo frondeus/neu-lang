@@ -41,9 +41,11 @@ async fn run(root: &Path, dist: &Path) {
 
     let icons_eot = warp::path!("static" / "Icons-Regular.eot").map(|| Resources::IconsEot.load());
     let icons_ttf = warp::path!("static" / "Icons-Regular.ttf").map(|| Resources::IconsTTF.load());
-    let icons_woff = warp::path!("static" / "Icons-Regular.woff").map(|| Resources::IconsWOFF.load());
-    let icons_woff2 = warp::path!("static" / "Icons-Regular.woff2").map(|| Resources::IconsWOFF2.load());
-        //.map(|reply| warp::reply::with_header(reply, "content-type", "text/javascript"));
+    let icons_woff =
+        warp::path!("static" / "Icons-Regular.woff").map(|| Resources::IconsWOFF.load());
+    let icons_woff2 =
+        warp::path!("static" / "Icons-Regular.woff2").map(|| Resources::IconsWOFF2.load());
+    //.map(|reply| warp::reply::with_header(reply, "content-type", "text/javascript"));
 
     let routes = neu
         .or(js)

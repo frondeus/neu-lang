@@ -1,8 +1,8 @@
-use neu_syntax::db::{Parser, FileId};
-use neu_render::db::Renderer;
-use neu_parser::NodeId;
 use neu_diagnostics::Diagnostic;
 use neu_eval::eval;
+use neu_parser::NodeId;
+use neu_render::db::Renderer;
+use neu_syntax::db::{FileId, Parser};
 
 #[salsa::query_group(DiagnosticianDatabase)]
 pub trait Diagnostician: salsa::Database + Parser + Renderer {
@@ -10,31 +10,32 @@ pub trait Diagnostician: salsa::Database + Parser + Renderer {
 }
 
 fn all_diagnostics(db: &dyn Diagnostician) -> Vec<(FileId, NodeId, Diagnostic)> {
-    let mut diagnostics: Vec<_> = db.parse_all_neu()
+    let mut diagnostics: Vec<_> = db
+        .parse_all_neu()
         .into_iter()
         .flat_map(|(path, id)| {
             let input = db.input_neu(path.clone());
             let mut parsed = db.parse_neu_syntax(path.clone());
-            let evaled = eval(id, &mut parsed.arena, &input);
-            dbg!(&evaled);
-            parsed.arena.components()
-                .map(|(node_id, diagnostic)| {
-                    (path.clone(), node_id, diagnostic.clone())
-                })
+            let _evaled = eval(id, &mut parsed.arena, &input);
+            parsed
+                .arena
+                .components()
+                .map(|(node_id, diagnostic)| (path.clone(), node_id, diagnostic.clone()))
                 .collect::<Vec<_>>()
         })
         .collect();
 
-    let md = db.parse_all_mds()
+    let md = db
+        .parse_all_mds()
         .into_iter()
         .flat_map(|(_kind, _id, path, ast)| {
             let rendered = db.render_ast(path.clone(), ast);
 
             // render result contains ast from parser so it has both render and syntax errors.
-            rendered.arena.components()
-                .map(|(node_id, diagnostic)| {
-                    (path.clone(), node_id, diagnostic.clone())
-                })
+            rendered
+                .arena
+                .components()
+                .map(|(node_id, diagnostic)| (path.clone(), node_id, diagnostic.clone()))
                 .collect::<Vec<_>>()
         });
 
@@ -54,7 +55,6 @@ pub struct Database {
 }
 impl salsa::Database for Database {}
 
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -70,13 +70,15 @@ mod tests {
             db.set_input_neu(path, input.into());
 
             let diagnostics = db.all_diagnostics();
-            if diagnostics.is_empty() { return "No errors".into(); }
-            diagnostics.into_iter()
-                .map(|(path, id, diagnostic)| {
-                    format!("{} | {:?} | {}", path, id, diagnostic)
-                }).join("\n")
+            if diagnostics.is_empty() {
+                return "No errors".into();
+            }
+            diagnostics
+                .into_iter()
+                .map(|(path, id, diagnostic)| format!("{} | {:?} | {}", path, id, diagnostic))
+                .join("\n")
         })
-            .unwrap();
+        .unwrap();
     }
 
     #[test]
@@ -89,12 +91,14 @@ mod tests {
             db.set_input_md(path, input.into());
 
             let diagnostics = db.all_diagnostics();
-            if diagnostics.is_empty() { return "No errors".into(); }
-            diagnostics.into_iter()
-                .map(|(path, id, diagnostic)| {
-                    format!("{} | {:?} | {}", path, id, diagnostic)
-                }).join("\n")
+            if diagnostics.is_empty() {
+                return "No errors".into();
+            }
+            diagnostics
+                .into_iter()
+                .map(|(path, id, diagnostic)| format!("{} | {:?} | {}", path, id, diagnostic))
+                .join("\n")
         })
-            .unwrap();
+        .unwrap();
     }
 }

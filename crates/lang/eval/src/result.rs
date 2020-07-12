@@ -8,10 +8,7 @@ pub struct EvalResult {
 
 impl EvalResult {
     pub fn display<'s, 'n>(&'n self, str: &'s str) -> DisplayEvalResult<'s, 'n> {
-        DisplayEvalResult {
-            str,
-            result: self,
-        }
+        DisplayEvalResult { str, result: self }
     }
 }
 

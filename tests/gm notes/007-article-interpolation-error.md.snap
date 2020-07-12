@@ -83,7 +83,7 @@ ROOT @ 0..196
                     MD_TEXT @ 170..174 = `kota`
                 MD_TEXT @ 176..177 = `.`
             MARKDOWN, MD_VALUE, VALUE @ 179..196 = ````\n4 + .ages\n````
-                INTERPOLATED, ROOT @ 183..192 = `4 + .ages`
+                INTERPOLATED, ROOT @ 183..193 = `4 + .ages\n`
                     BINARY, VALUE @ 183..192 = `4 + .ages`
                         NUMBER, TOKEN, VALUE @ 183..184 = `4`
                         TRIVIA @ 184..185 = ` `

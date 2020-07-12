@@ -2,6 +2,7 @@ use anyhow::Result;
 use clap::Clap;
 use env_logger::Env;
 use neu_cli::find_in_ancestors;
+use neu_db::{Database, Diagnostician};
 use neu_eval::eval;
 use neu_render::db::Renderer;
 use neu_syntax::ast::ArticleItem;
@@ -10,7 +11,6 @@ use serde::Serialize;
 use std::collections::BTreeMap;
 use std::io::Write;
 use std::path::{Path, PathBuf};
-use neu_db::{Database, Diagnostician};
 
 #[derive(Debug, Clap)]
 struct Opts {
@@ -137,9 +137,7 @@ fn build(root: &Path, dist: &Path) -> Result<()> {
         .collect::<Result<Vec<_>>>();
     let articles = articles?;
 
-    db.set_all_neu(
-        None.into_iter().collect()
-    );
+    db.set_all_neu(None.into_iter().collect());
     db.set_all_mds(
         articles
             .iter()
@@ -168,20 +166,19 @@ fn build(root: &Path, dist: &Path) -> Result<()> {
 
     use neu_cli::span_ext::*;
     let diagnostics = db.all_diagnostics();
-    diagnostics.into_iter()
-        .for_each(|(path, id, error)| {
-            //TODO: This works only for markdown
-            let input = db.input_md(path.clone());
-            let lines = input.lines()
-                .map(ToString::to_string)
-                .collect::<Vec<_>>();
-            let parsed = db.parse_md_syntax(path.clone());
-            let node = parsed.arena.get(id);
-            if let Some(LineCols { line, col_start, .. }) =
-            node.span.lines_cols(&lines).last() {
-                eprintln!("{} | {}:{} | {}", path, line, col_start, error);
-            }
-        });
+    diagnostics.into_iter().for_each(|(path, id, error)| {
+        //TODO: This works only for markdown
+        let input = db.input_md(path.clone());
+        let lines = input.lines().map(ToString::to_string).collect::<Vec<_>>();
+        let parsed = db.parse_md_syntax(path.clone());
+        let node = parsed.arena.get(id);
+        if let Some(LineCols {
+            line, col_start, ..
+        }) = node.span.lines_cols(&lines).last()
+        {
+            eprintln!("{} | {}:{} | {}", path, line, col_start, error);
+        }
+    });
 
     Ok(())
 }

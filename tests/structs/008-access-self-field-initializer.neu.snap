@@ -143,10 +143,10 @@ ROOT @ 0..187
                     TOKEN @ 88..89 = `=`
                     TRIVIA @ 89..90 = ` `
                     BINARY, VALUE @ 90..123 = `(primary.con + primary.size) / 10`
-                        PARENS, VALUE @ 90..118 = `(primary.con + primary.size)`
+                        PARENS, VALUE @ 90..119 = `(primary.con + primary.size) `
                             TOKEN @ 90..91 = `(`
                             BINARY, VALUE @ 91..117 = `primary.con + primary.size`
-                                IDENTPATH, VALUE @ 91..102 = `primary.con`
+                                IDENTPATH, VALUE @ 91..103 = `primary.con `
                                     IDENTIFIER, TOKEN, VALUE @ 91..98 = `primary`
                                     OP, TOKEN @ 98..99 = `.`
                                     IDENTIFIER, TOKEN, VALUE @ 99..102 = `con`

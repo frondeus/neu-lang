@@ -44,10 +44,12 @@ fn _render(
         output.push_str("</table>\n");
     }
 
-    let mentions = db.all_mentions().into_iter()
-            .filter(|mention| mention.kind == kind)
-            .filter(|mention| mention.id == id)
-            .collect::<BTreeSet<_>>();
+    let mentions = db
+        .all_mentions()
+        .into_iter()
+        .filter(|mention| mention.kind == kind)
+        .filter(|mention| mention.id == id)
+        .collect::<BTreeSet<_>>();
 
     if !mentions.is_empty() {
         output.push_str(r#"<table>"#);
@@ -65,20 +67,23 @@ fn _render(
                     let strukt_eval = eval(orig_item.strukt?, &mut orig_parsed.arena, &orig_input);
                     let mut strukt = strukt_eval.value?.into_struct()?;
 
-                    let title = strukt.remove("title")
+                    let title = strukt
+                        .remove("title")
                         .map(|title| html::render_value(&title).to_string())
                         .unwrap_or_else(|| "???".into());
 
-                    output.push_str(&format!(r#"<a href="/{kind}/{id}">{title}</a>"#,
+                    output.push_str(&format!(
+                        r#"<a href="/{kind}/{id}">{title}</a>"#,
                         kind = mention.orig_kind,
                         id = mention.orig_id,
                         title = title
                     ));
-                },
+                }
                 None => {
-                    output.push_str(&format!(r#"<span class="error">Couldn't find {kind}:{id}</span>"#,
-                         kind = mention.orig_kind,
-                         id = mention.orig_id
+                    output.push_str(&format!(
+                        r#"<span class="error">Couldn't find {kind}:{id}</span>"#,
+                        kind = mention.orig_kind,
+                        id = mention.orig_id
                     ));
                 }
             }
@@ -143,9 +148,11 @@ mod tests {
     use super::*;
     use neu_syntax::db::Parser;
 
-    #[salsa::database(crate::db::RendererDatabase,
-    neu_analyze::db::AnalyzerDatabase,
-    neu_syntax::db::ParserDatabase)]
+    #[salsa::database(
+        crate::db::RendererDatabase,
+        neu_analyze::db::AnalyzerDatabase,
+        neu_syntax::db::ParserDatabase
+    )]
     #[derive(Default)]
     struct TestDb {
         storage: salsa::Storage<Self>,

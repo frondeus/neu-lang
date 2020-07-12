@@ -253,11 +253,7 @@ impl NeovimHandler {
                 //writeln!(&mut dbg_buffer, "{}", buf)?;
                 //writeln!(&mut dbg_buffer, "```\n")?;
                 //writeln!(&mut dbg_buffer, "{:#?}\n", tokens)?;
-                writeln!(
-                    &mut dbg_buffer,
-                    "{}\n\n",
-                    root_eval_result.display(&buf)
-                )?;
+                writeln!(&mut dbg_buffer, "{}\n\n", root_eval_result.display(&buf))?;
                 dbg!(dbg_buffer, arena);
 
                 let debug_lines = dbg_buffer.lines().map(|l| l.to_string()).collect_vec();

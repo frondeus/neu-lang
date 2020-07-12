@@ -1,5 +1,5 @@
 use crate::ast::{ArticleItem, Ast};
-use neu_parser::{ParseResult, State, NodeId};
+use neu_parser::{NodeId, ParseResult, State};
 use std::collections::HashSet;
 
 pub type FileId = String;
@@ -51,7 +51,6 @@ fn parse_all_neu(db: &dyn Parser) -> Vec<(FileId, NodeId)> {
         .into_iter()
         .map(|path| {
             let parsed = db.parse_neu_syntax(path.clone());
-
 
             (path, parsed.root)
         })

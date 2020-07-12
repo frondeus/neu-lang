@@ -9,22 +9,22 @@ pub enum Resources {
     IconsEot,
     IconsTTF,
     IconsWOFF,
-    IconsWOFF2
+    IconsWOFF2,
 }
 
 #[cfg(not(debug_assertions))]
 impl Resources {
     pub fn load(&self) -> &[u8] {
         match self {
-            Self::Index =>        include_bytes!("index.html"),
-            Self::React =>        include_bytes!("react.development.js"),
-            Self::ReactDom =>     include_bytes!("react-dom.development.js"),
-            Self::Js =>           include_bytes!("main.js"),
-            Self::Css =>          include_bytes!("main.css"),
-            Self::IconsEot =>     include_bytes!("Icons-Regular.eot"),
-            Self::IconsTTF =>     include_bytes!("Icons-Regular.ttf"),
-            Self::IconsWOFF =>    include_bytes!("Icons-Regular.woff"),
-            Self::IconsWOFF2 =>   include_bytes!("Icons-Regular.woff2"),
+            Self::Index => include_bytes!("index.html"),
+            Self::React => include_bytes!("react.development.js"),
+            Self::ReactDom => include_bytes!("react-dom.development.js"),
+            Self::Js => include_bytes!("main.js"),
+            Self::Css => include_bytes!("main.css"),
+            Self::IconsEot => include_bytes!("Icons-Regular.eot"),
+            Self::IconsTTF => include_bytes!("Icons-Regular.ttf"),
+            Self::IconsWOFF => include_bytes!("Icons-Regular.woff"),
+            Self::IconsWOFF2 => include_bytes!("Icons-Regular.woff2"),
         }
     }
 }
@@ -49,4 +49,3 @@ impl Resources {
         std::fs::read(path).expect("resource")
     }
 }
-

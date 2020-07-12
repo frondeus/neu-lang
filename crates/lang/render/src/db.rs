@@ -1,9 +1,9 @@
 #![allow(dead_code)]
 use crate::_render;
 use crate::result::RenderResult;
+use neu_analyze::db::Analyzer;
 use neu_syntax::ast::{ArticleItem, RootAst};
 use neu_syntax::db::{FileId, Parser};
-use neu_analyze::db::Analyzer;
 
 #[salsa::query_group(RendererDatabase)]
 pub trait Renderer: salsa::Database + Parser + Analyzer {
