@@ -64,18 +64,28 @@ html { font-size: 16px; }
 
 .side-table {
     float: right;
-    padding: 0.5em;
-    border: 1px solid #ccc;
     margin-left: 2em;
-    table-layout: fixed;
-    border-collapse: collapse;
-    max-width: 400px;
-    z-index: 1000;
     position: relative;
-    background: #eee;
+    z-index: 1000;
+    max-width: 400px;
 }
 
-th { border-right: 1px solid #ccc; text-align: right; }
+.side-table table {
+    padding: 0.5em;
+    border: 1px solid #ccc;
+    table-layout: fixed;
+    border-collapse: collapse;
+    background: #eee;
+    margin-bottom: 1em;
+    width: 100%;
+}
+
+.align-right {
+    text-align: right;
+}
+
+th { border-bottom: 1px solid #ccc; }
+th.align-right { border-right: 1px solid #ccc; }
 
 th, td { padding: 0.5em; word-wrap:break-word; }
 

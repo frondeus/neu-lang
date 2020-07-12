@@ -165,7 +165,9 @@ fn build(root: &Path, dist: &Path) -> Result<()> {
     Ok(())
 }
 
-#[salsa::database(neu_syntax::db::ParserDatabase, neu_render::db::RendererDatabase)]
+#[salsa::database(neu_syntax::db::ParserDatabase,
+neu_render::db::RendererDatabase,
+neu_analyze::db::AnalyzerDatabase)]
 #[derive(Default)]
 struct Database {
     storage: salsa::Storage<Self>,

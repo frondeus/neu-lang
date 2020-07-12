@@ -21,13 +21,17 @@ title = "Chronologia sesji"
 
 `````
 [mentions]
+chrono:0123abcd in sesja:a88907fd
+chrono:0123abcd in sesja:a88907fd
 
 [render]
 `<h1>Pośród Pradawnych Drzew</h1>
-<p>1</p><div class="article-item" id="chrono_0123abcd" ><h1>Chronologia sesji</h1>
-<p>3</p></div>
+<div class="side-table"></div><p>1</p><div class="article-item" id="chrono_0123abcd" ><h1>Chronologia sesji</h1>
+<div class="side-table"><table><tr><th>Mentioned in</th></tr><tr><td><a href="/sesja/a88907fd">Pośród Pradawnych Drzew</a></td></tr></table>
+</div><p>3</p></div>
 <p>2</p><div class="article-item" id="chrono_0123abcd" ><h1>Chronologia sesji</h1>
-<p>3</p></div>
+<div class="side-table"><table><tr><th>Mentioned in</th></tr><tr><td><a href="/sesja/a88907fd">Pośród Pradawnych Drzew</a></td></tr></table>
+</div><p>3</p></div>
 <p>4</p>`
 
 ### No Errors ###

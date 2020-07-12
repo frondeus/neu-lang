@@ -3,6 +3,7 @@ use neu_eval::eval;
 use neu_parser::{Arena, NodeId};
 use neu_syntax::ast::{ArticleItem, ArticleRef, Ast};
 use neu_syntax::Nodes;
+use std::collections::BTreeSet;
 
 mod result;
 
@@ -20,6 +21,9 @@ fn _render(
 
     article_item.anchor_body(nodes);
 
+    let kind = article_item.identifier(nodes, input).unwrap_or("???");
+    let id = article_item.item_id(nodes, input).unwrap_or("???");
+
     let strukt_eval = eval(article_item.strukt?, nodes, input);
     let mut strukt = strukt_eval.value?.into_struct()?;
 
@@ -27,16 +31,63 @@ fn _render(
         output.push_str(&format!("<h1>{}</h1>\n", html::render_value(&title)));
     }
 
+    output.push_str(r#"<div class="side-table">"#);
+
     if !strukt.is_empty() {
-        output.push_str(r#"<table class="side-table">"#);
+        output.push_str(r#"<table>"#);
         for (key, value) in strukt {
             output.push_str("<tr>");
-            output.push_str(&format!("<th>{}</th>", key));
+            output.push_str(&format!(r#"<th class="align-right">{}</th>"#, key));
             output.push_str(&format!("<td>{}</td>", html::render_value(&value)));
             output.push_str("</tr>");
         }
         output.push_str("</table>\n");
     }
+
+    let mentions = db.find_mentions().into_iter()
+            .filter(|mention| mention.kind == kind)
+            .filter(|mention| mention.id == id)
+            .collect::<BTreeSet<_>>();
+
+    if !mentions.is_empty() {
+        output.push_str(r#"<table>"#);
+        output.push_str("<tr>");
+        output.push_str("<th>Mentioned in</th>");
+        output.push_str("</tr>");
+
+        for mention in mentions {
+            let orig_item = db.find_md(mention.orig_kind.clone(), mention.orig_id.clone());
+            output.push_str("<tr><td>");
+            match orig_item {
+                Some((orig_path, orig_item)) => {
+                    let orig_input = db.input_md(orig_path.clone());
+                    let mut orig_parsed = db.parse_md_syntax(orig_path.clone());
+                    let strukt_eval = eval(orig_item.strukt?, &mut orig_parsed.arena, &orig_input);
+                    let mut strukt = strukt_eval.value?.into_struct()?;
+
+                    let title = strukt.remove("title")
+                        .map(|title| html::render_value(&title).to_string())
+                        .unwrap_or_else(|| "???".into());
+
+                    output.push_str(&format!(r#"<a href="/{kind}/{id}">{title}</a>"#,
+                        kind = mention.orig_kind,
+                        id = mention.orig_id,
+                        title = title
+                    ));
+                },
+                None => {
+                    output.push_str(&format!(r#"<span class="error">Couldn't find {kind}:{id}</span>"#,
+                         kind = mention.orig_kind,
+                         id = mention.orig_id
+                    ));
+                }
+            }
+            output.push_str("</td></tr>");
+        }
+        output.push_str("</table>\n");
+    }
+
+    output.push_str("</div>");
 
     let body = article_item.body?;
     let body = nodes
@@ -92,7 +143,9 @@ mod tests {
     use super::*;
     use neu_syntax::db::Parser;
 
-    #[salsa::database(crate::db::RendererDatabase, neu_syntax::db::ParserDatabase)]
+    #[salsa::database(crate::db::RendererDatabase,
+    neu_analyze::db::AnalyzerDatabase,
+    neu_syntax::db::ParserDatabase)]
     #[derive(Default)]
     struct TestDb {
         storage: salsa::Storage<Self>,

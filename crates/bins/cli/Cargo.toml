@@ -9,6 +9,7 @@ neu-parser = { path = "../../utils/parser" }
 neu-syntax = { path = "../../lang/syntax" }
 neu-eval = { path = "../../lang/eval" }
 neu-render = { path = "../../lang/render" }
+neu-analyze = { path = "../../lang/analyze" }
 
 anyhow = "1.0.31"
 log = "0.4.8"

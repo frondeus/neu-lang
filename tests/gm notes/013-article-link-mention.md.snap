@@ -4,26 +4,25 @@ title = "Pośród Pradawnych Drzew"
 when = "20.10.2019"
 desc = "Sesja jednostrzałowa dla Macek II RP"
 chrono = "20.06.1925"
-age = 5
 +++
 
-Ala ma **kota**.
-
-+]
+Ala ma kota [Test](test:1234abcd)
 
 `````
 
+[mentions]
+test:1234abcd in sesja:a88907fd
+
 [render]
 `<h1>Pośród Pradawnych Drzew</h1>
-<div class="side-table"><table><tr><th class="align-right">age</th><td>5</td></tr><tr><th class="align-right">chrono</th><td>20.06.1925</td></tr><tr><th class="align-right">desc</th><td>Sesja jednostrzałowa dla Macek II RP</td></tr><tr><th class="align-right">when</th><td>20.10.2019</td></tr></table>
-</div><p>Ala ma <strong>kota</strong>.</p><div class="error">Expected one of Text, PlusPlus, OpenBl but found `+]`</div>`
+<div class="side-table"><table><tr><th class="align-right">chrono</th><td>20.06.1925</td></tr><tr><th class="align-right">desc</th><td>Sesja jednostrzałowa dla Macek II RP</td></tr><tr><th class="align-right">when</th><td>20.10.2019</td></tr></table>
+</div><p>Ala ma kota <a href="/test/1234abcd">Test</a></p>`
 
-### Errors ###
-Expected one of Text, PlusPlus, OpenBl but found `+]` @ N57
+### No Errors ###
 
 [parser]
-ROOT @ 0..181
-    ARTICLEITEM @ 0..181
+ROOT @ 0..186
+    ARTICLEITEM @ 0..186
         TOKEN @ 0..3 = `+++`
         TOKEN, TRIVIA @ 3..4 = ` `
         IDENTIFIER, TOKEN @ 4..9 = `sesja`
@@ -32,7 +31,7 @@ ROOT @ 0..181
         TOKEN, TRIVIA @ 18..19 = ` `
         TOKEN @ 19..22 = `+++`
         TOKEN, TRIVIA @ 22..23 = `\n`
-        STRUCT, VALUE @ 23..156
+        STRUCT, VALUE @ 23..148
             IDENTIFIER, KEY, TOKEN @ 23..28 = `title`
             TRIVIA @ 28..29 = ` `
             TOKEN @ 29..30 = `=`
@@ -69,23 +68,15 @@ ROOT @ 0..181
                 STRVALUE, TOKEN @ 136..146 = `20.06.1925`
                 TOKEN @ 146..147 = `\"`
             TOKEN @ 147..148 = `\n`
-            IDENTIFIER, KEY, TOKEN @ 148..151 = `age`
-            TRIVIA @ 151..152 = ` `
-            TOKEN @ 152..153 = `=`
-            TRIVIA @ 153..154 = ` `
-            NUMBER, TOKEN, VALUE @ 154..155 = `5`
-            TOKEN @ 155..156 = `\n`
-        TOKEN @ 156..159 = `+++`
-        ARTICLEBODY @ 159..181 = `\n\nAla ma **kota**.\n\n+]`
-            MARKDOWN, MD_PARAGRAPH, MD_VALUE, VALUE @ 161..178 = `Ala ma **kota**.\n`
-                MD_TEXT @ 161..168 = `Ala ma `
-                MD_STRONG @ 168..176 = `**kota**`
-                    MD_TEXT @ 170..174 = `kota`
-                MD_TEXT @ 176..177 = `.`
-            ERROR @ 179..181 = `+]`
+        TOKEN @ 148..151 = `+++`
+        ARTICLEBODY @ 151..186 = `\n\nAla ma kota [Test](test:1234abcd)`
+            MARKDOWN, MD_PARAGRAPH, MD_VALUE, VALUE @ 153..186 = `Ala ma kota [Test](test:1234abcd)`
+                MD_TEXT @ 153..165 = `Ala ma kota `
+                MD_INLINELINK, MD_LINK @ 165..186 = `[Test](test:1234abcd)`
+                    MD_LINKURL @ 172..185 = `test:1234abcd`
+                    MD_TEXT @ 166..170 = `Test`
 
 
-### Errors ###
-Expected one of Text, PlusPlus, OpenBl but found `+]` @ N57
+### No Errors ###
 
 

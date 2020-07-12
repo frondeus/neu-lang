@@ -3,9 +3,10 @@ use crate::_render;
 use crate::result::RenderResult;
 use neu_syntax::ast::{ArticleItem, RootAst};
 use neu_syntax::db::{FileId, Parser};
+use neu_analyze::db::Analyzer;
 
 #[salsa::query_group(RendererDatabase)]
-pub trait Renderer: salsa::Database + Parser {
+pub trait Renderer: salsa::Database + Parser + Analyzer {
     fn render_md(&self, path: FileId) -> RenderResult;
     fn render_item(&self, kind: String, id: String) -> RenderResult;
 }
