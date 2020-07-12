@@ -39,38 +39,7 @@ fn main_item() -> impl Parser<FileToken> {
 }
 
 fn main_item_body() -> impl Parser<BodyToken> {
-    node(|builder| {
-        builder.name(Nodes::ArticleBody);
-        // This should be in inner parser
-        loop {
-            match builder.peek_token() {
-                None => break,
-                Some(BodyToken::Text) => {
-                    builder.parse(node(|builder| {
-                        let i = builder.state().lexer().input().clone();
-                        builder.name(Nodes::Md_Value);
-                        builder.name(Nodes::Value);
-                        builder.name(Nodes::Markdown);
-                        builder.name(Nodes::Virtual);
-                        markdown(builder, i);
-                    }));
-                }
-                Some(BodyToken::PlusPlus) => {
-                    builder.parse(item());
-                }
-                Some(BodyToken::OpenBl) => {
-                    builder.parse(item_bl());
-                }
-                Some(_) => {
-                    builder.parse(expected(&[
-                        BodyToken::Text,
-                        BodyToken::PlusPlus,
-                        BodyToken::OpenBl,
-                    ]));
-                }
-            }
-        }
-    })
+    item_body(false)
 }
 
 fn main_item_header() -> impl Parser<HeaderToken> {
@@ -119,7 +88,7 @@ fn item() -> impl Parser<BodyToken> {
         let ctx = Context::default();
         builder.parse_mode(&ctx, item_header());
         let ctx = Context::default();
-        builder.parse_mode(&ctx, item_body());
+        builder.parse_mode(&ctx, item_body(true));
         builder.parse(token(BodyToken::PlusPlusEnd));
     })
 }
@@ -163,19 +132,38 @@ fn item_header() -> impl Parser<HeaderToken> {
     })
 }
 
-fn item_body() -> impl Parser<BodyToken> {
-    node(|builder| {
+fn item_body(ends: bool) -> impl Parser<BodyToken> {
+    node(move |builder| {
         builder.name(Nodes::ArticleBody);
-        builder.parse(node(|builder| {
-            builder.name(Nodes::Virtual);
-            let i = builder.state().lexer().input().clone();
-            if let Some(BodyToken::Text) = builder.peek_token() {
-                builder.name(Nodes::Md_Value);
-                builder.name(Nodes::Markdown);
-                builder.name(Nodes::Value);
-                markdown(builder, i);
+        loop {
+            match builder.peek_token() {
+                None => break,
+                Some(BodyToken::PlusPlusEnd) if ends => break,
+                Some(BodyToken::Text) => {
+                    builder.parse(node(|builder| {
+                        let i = builder.state().lexer().input().clone();
+                        builder.name(Nodes::Md_Value);
+                        builder.name(Nodes::Value);
+                        builder.name(Nodes::Markdown);
+                        builder.name(Nodes::Virtual);
+                        markdown(builder, i);
+                    }));
+                }
+                Some(BodyToken::PlusPlus) => {
+                    builder.parse(item());
+                }
+                Some(BodyToken::OpenBl) => {
+                    builder.parse(item_bl());
+                }
+                Some(_) => {
+                    builder.parse(expected(&[
+                        BodyToken::Text,
+                        BodyToken::PlusPlus,
+                        BodyToken::OpenBl,
+                    ]));
+                }
             }
-        }));
+        }
     })
 }
 
@@ -228,7 +216,7 @@ fn opt_ws() -> impl Parser<HeaderToken> {
 mod tests {
     use super::parser;
     use crate::lexers::article_item_file::Lexer;
-    use neu_parser::{State, ParseResult};
+    use neu_parser::{ParseResult, State};
 
     #[test]
     fn article_parser_tests() {

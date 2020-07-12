@@ -3,12 +3,13 @@ use clap::Clap;
 use env_logger::Env;
 use neu_cli::find_in_ancestors;
 use neu_eval::eval;
-use neu_syntax::ast::{ArticleItem};
+use neu_render::db::Renderer;
+use neu_syntax::ast::ArticleItem;
+use neu_syntax::db::Parser;
 use serde::Serialize;
 use std::collections::BTreeMap;
 use std::io::Write;
 use std::path::{Path, PathBuf};
-use neu_render::db::Renderer;
 
 #[derive(Debug, Clap)]
 struct Opts {
@@ -66,7 +67,12 @@ struct IndexEntry {
     path: String,
 }
 
-fn build_article(db: &mut dyn Renderer, (kind, id, path, article_item): (String, String, String, ArticleItem), articles_path: &Path, index: &mut Vec<IndexEntry>) -> Result<()> {
+fn build_article(
+    db: &mut dyn Renderer,
+    (kind, id, path, article_item): (String, String, String, ArticleItem),
+    articles_path: &Path,
+    index: &mut Vec<IndexEntry>,
+) -> Result<()> {
     log::debug!("Rendering {}:{}", kind, id);
     let kind_path = articles_path.join(&kind);
     std::fs::create_dir_all(&kind_path)?;
@@ -75,16 +81,16 @@ fn build_article(db: &mut dyn Renderer, (kind, id, path, article_item): (String,
     let mut parsed = db.parse_md_syntax(path.clone());
 
     let strukt = article_item
-         .strukt
-         .map(|strukt| eval(strukt, &mut parsed.arena, &input))
-         .and_then(|strukt_eval| strukt_eval.value)
-         .and_then(|value| value.into_struct());
+        .strukt
+        .map(|strukt| eval(strukt, &mut parsed.arena, &input))
+        .and_then(|strukt_eval| strukt_eval.value)
+        .and_then(|value| value.into_struct());
 
-     let title = strukt
-         .as_ref()
-         .and_then(|value| value.get("title"))
-         .map(ToString::to_string)
-         .unwrap_or_else(|| "???".to_string());
+    let title = strukt
+        .as_ref()
+        .and_then(|value| value.get("title"))
+        .map(ToString::to_string)
+        .unwrap_or_else(|| "???".to_string());
 
     let title = title.trim_matches('"');
     log::info!("Rendering {}:{} - {}", kind, id, title);
@@ -117,7 +123,6 @@ fn build_article(db: &mut dyn Renderer, (kind, id, path, article_item): (String,
     Ok(())
 }
 
-
 fn build(root: &Path, dist: &Path) -> Result<()> {
     let articles_path = root.join(dist).join("articles");
     std::fs::create_dir_all(&articles_path)?;
@@ -131,7 +136,12 @@ fn build(root: &Path, dist: &Path) -> Result<()> {
         .collect::<Result<Vec<_>>>();
     let articles = articles?;
 
-    db.set_all_mds(articles.iter().map(|path| path.display().to_string()).collect());
+    db.set_all_mds(
+        articles
+            .iter()
+            .map(|path| path.display().to_string())
+            .collect(),
+    );
 
     for entry in &articles {
         let entry_str = entry.display().to_string();
@@ -155,9 +165,11 @@ fn build(root: &Path, dist: &Path) -> Result<()> {
     Ok(())
 }
 
-#[salsa::database(neu_render::db::RendererDatabase)]
+#[salsa::database(neu_syntax::db::ParserDatabase, neu_render::db::RendererDatabase)]
 #[derive(Default)]
-struct Database { storage: salsa::Storage<Self> }
+struct Database {
+    storage: salsa::Storage<Self>,
+}
 impl salsa::Database for Database {}
 
 fn main() -> Result<()> {

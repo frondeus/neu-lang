@@ -5,7 +5,7 @@ pub enum Resources {
     React,
     ReactDom,
     Js,
-    Css
+    Css,
 }
 
 #[cfg(not(debug_assertions))]

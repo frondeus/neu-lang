@@ -6,34 +6,24 @@ desc = "Sesja jednostrzałowa dla Macek II RP"
 chrono = "20.06.1925"
 +++
 
-Ala ma kota
-
-++ chrono:0123abcd ++
-title = "Chronologia sesji"
-+++
-
-Kot ma ale
-
-++ end ++
-
-Ale kota nie ma
+<form name="form">
+    <input type="text" name="name"/>
+</form>
 
 `````
-
-[mentions]
 
 [render]
 `<h1>Pośród Pradawnych Drzew</h1>
 <table class="side-table"><tr><th>chrono</th><td>20.06.1925</td></tr><tr><th>desc</th><td>Sesja jednostrzałowa dla Macek II RP</td></tr><tr><th>when</th><td>20.10.2019</td></tr></table>
-<p>Ala ma kota</p><div class="article-item" id="chrono_0123abcd" ><h1>Chronologia sesji</h1>
-<p>Kot ma ale</p></div>
-<p>Ale kota nie ma</p>`
+<form name="form">
+    <input type="text" name="name"/>
+</form>`
 
 ### No Errors ###
 
 [parser]
-ROOT @ 0..259
-    ARTICLEITEM @ 0..259
+ROOT @ 0..216
+    ARTICLEITEM @ 0..216
         TOKEN @ 0..3 = `+++`
         TOKEN, TRIVIA @ 3..4 = ` `
         IDENTIFIER, TOKEN @ 4..9 = `sesja`
@@ -80,35 +70,10 @@ ROOT @ 0..259
                 TOKEN @ 146..147 = `\"`
             TOKEN @ 147..148 = `\n`
         TOKEN @ 148..151 = `+++`
-        ARTICLEBODY @ 151..259
-            MARKDOWN, MD_PARAGRAPH, MD_VALUE, VALUE @ 153..165 = `Ala ma kota\n`
-                MD_TEXT @ 153..164 = `Ala ma kota`
-            ARTICLEITEM @ 166..242
-                TOKEN @ 166..168 = `++`
-                TOKEN, TRIVIA @ 168..169 = ` `
-                IDENTIFIER, TOKEN @ 169..175 = `chrono`
-                TOKEN @ 175..176 = `:`
-                ARTICLEITEMID, TOKEN @ 176..184 = `0123abcd`
-                TOKEN, TRIVIA @ 184..185 = ` `
-                TOKEN @ 185..187 = `++`
-                TOKEN, TRIVIA @ 187..188 = `\n`
-                STRUCT, VALUE @ 188..216 = `title = \"Chronologia sesji\"\n`
-                    IDENTIFIER, KEY, TOKEN @ 188..193 = `title`
-                    TRIVIA @ 193..194 = ` `
-                    TOKEN @ 194..195 = `=`
-                    TRIVIA @ 195..196 = ` `
-                    STRING, VALUE @ 196..215 = `\"Chronologia sesji\"`
-                        TOKEN @ 196..197 = `\"`
-                        STRVALUE, TOKEN @ 197..214 = `Chronologia sesji`
-                        TOKEN @ 214..215 = `\"`
-                    TOKEN @ 215..216 = `\n`
-                TOKEN @ 216..219 = `+++`
-                ARTICLEBODY @ 219..232 = `\n\nKot ma ale\n`
-                    MARKDOWN, MD_PARAGRAPH, MD_VALUE, VALUE @ 221..232 = `Kot ma ale\n`
-                        MD_TEXT @ 221..231 = `Kot ma ale`
-                TOKEN @ 233..242 = `++ end ++`
-            MARKDOWN, MD_PARAGRAPH, MD_VALUE, VALUE @ 244..259 = `Ale kota nie ma`
-                MD_TEXT @ 244..259 = `Ale kota nie ma`
+        ARTICLEBODY @ 151..216
+            MARKDOWN, MD_HTML, MD_VALUE, VALUE @ 153..172 = `<form name=\"form\">\n`
+            MARKDOWN, MD_HTML, MD_VALUE, VALUE @ 172..209 = `    <input type=\"text\" name=\"name\"/>\n`
+            MARKDOWN, MD_HTML, MD_VALUE, VALUE @ 209..216 = `</form>`
 
 
 ### No Errors ###

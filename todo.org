@@ -23,7 +23,7 @@
 *** TODO Footnote
 *** TODO Hard Break
 *** TODO Check mark
-** Gm notes [5/7]
+** Gm notes [5/9]
 *** DONE Generate json
 *** DONE Markdown article
 *** DONE Generate subarticle
@@ -31,6 +31,8 @@
 *** DONE Salsa
 *** TODO Mentions
 *** TODO Salsa eval
+*** TODO Watch
+*** TODO Webhook for html
 ** Neovim [0/4]
 *** TODO Add autocompletion
 *** TODO Add intentions

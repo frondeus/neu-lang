@@ -104,10 +104,24 @@ function IndexEntryLabel({entry}) {
     }, `${entry.kind}`);
 }
 
-function IndexEntry({article, setArticle, entry}) {
+function IndexEntry({article, setArticle, entry, scrollState}) {
     const isActive = article.kind === entry.kind && article.id === entry.id;
+    const [scrolled, setScrolled] = scrollState;
+
+    useEffect(() => {
+        if(isActive && !scrolled) {
+            const div_id = `${entry.kind}_${entry.id}_idx`;
+            const div = document.getElementById(div_id);
+            if(div && div.classList.contains('index-entry')) {
+                div.scrollIntoView();
+                setScrolled(true);
+            }
+        }
+    }, [isActive, scrolled]);
+
     return e('div', {
         className: 'index-entry' + (isActive ? ' active' : ''),
+        id: `${entry.kind}_${entry.id}_idx`,
         onClick: () => { setArticle({ kind: entry.kind, id: entry.id}) }
     }, [
         e('span', {key: 'title' }, entry.title),
@@ -128,6 +142,7 @@ function IndexSearch({searched, setSearched }) {
 function Index({article, setArticle, tab}) {
     const [index, setIndex] = useState([]);
     const [searched, setSearched] = useState("");
+    const scrollState = useState(false);
 
     useEffect(() => {
         GetIndex(setIndex, tab[1], searched);
@@ -135,7 +150,8 @@ function Index({article, setArticle, tab}) {
 
     const children = index.flatMap(group => [
         e(IndexLabel, {key: group[0], label: group[0], count: group[1].length }),
-        ... group[1].map((entry, idx) => e(IndexEntry, { article, setArticle, entry, key: `${group[0]}-${idx}` }))
+        ... group[1].map((entry, idx) =>
+            e(IndexEntry, { scrollState, article, setArticle, entry, key: `${group[0]}-${idx}` }))
     ]);
 
     return e('div', { className: 'index' }, [
@@ -152,16 +168,29 @@ function SidebarTab({ label, isActive, onClick }) {
 }
 
 function SidebarTabbar({tab, setTab}) {
-    const tabs = ['recent', 'abc', 'kind'];
+    const tabNames = ['abc', 'kind'];
 
-    const children = tabs.map((label, idx) =>
-        e(SidebarTab, {
-            label: label,
-            key: label,
-            onClick: () => { setTab([idx, label]); },
-            isActive: idx === tab[0]
-        })
+    const buildTab = (label, idx, onClick) => e(SidebarTab, {
+        label: label,
+        key: label,
+        onClick,
+        isActive: idx === tab[0]
+    });
+
+
+    const tabs = tabNames.map((label, idx) =>
+        buildTab(label, idx + 1, () => { setTab([idx + 1, label]); })
     );
+
+    const children = [
+        buildTab('recent', 0, () =>  {
+
+        }),
+        ...tabs,
+        buildTab('hide', 1 + tabs.length, () =>  {
+
+        }),
+    ];
 
     return e('div', {
         className: 'sidebar-tabbar'
@@ -169,7 +198,7 @@ function SidebarTabbar({tab, setTab}) {
 }
 
 function LeftSidebar({article, setArticle}) {
-    const [tab, setTab] = useState([2, 'abc']);
+    const [tab, setTab] = useState([1, 'abc']);
 
     return e('div', {
         className: 'left-sidebar',

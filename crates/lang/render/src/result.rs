@@ -8,14 +8,8 @@ pub struct RenderResult {
 }
 
 impl RenderResult {
-    pub fn display<'s, 'n>(
-        &'n self,
-        str: &'s str,
-    ) -> DisplayRenderResult<'s, 'n> {
-        DisplayRenderResult {
-            str,
-            result: self,
-        }
+    pub fn display<'s, 'n>(&'n self, str: &'s str) -> DisplayRenderResult<'s, 'n> {
+        DisplayRenderResult { str, result: self }
     }
 }
 

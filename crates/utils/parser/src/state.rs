@@ -71,7 +71,7 @@ impl<Tok: TokenKind> State<Tok> {
         let root = state.nodes().add(root);
         let arena = state.arena;
 
-        ParseResult { root, arena, }
+        ParseResult { root, arena }
     }
 }
 

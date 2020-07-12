@@ -1,7 +1,12 @@
 html { box-sizing: border-box; height: 100%; padding: 0; margin: 0; }
 *, *:before, *:after { box-sizing: inherit; padding: 0; margin: 0; }
 body, #main { height: 100%; overflow: hidden; }
+html { font-size: 16px; }
 .app {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.3;
     display: flex;
     height: 100%;
     background: #eee;
@@ -49,13 +54,70 @@ body, #main { height: 100%; overflow: hidden; }
     margin: 1em;
     padding-left: 1em;
     border-left: 4px solid #ddd;
+    overflow: hidden;
+    position: relative;
 }
 
 
 .todo { background: pink; color: white; padding: 1em; margin-top: 4px; }
-.side-table { float: right; position: relative; padding: 0.5em; border: 1px solid #ccc; }
-th { padding: 0.5em; border-right: 1px solid #ccc; text-align: right; }
-td { padding: 0.5em; }
+.error { background: red; color: white; padding: 1em; margin-top: 4px; }
+
+.side-table {
+    float: right;
+    padding: 0.5em;
+    border: 1px solid #ccc;
+    margin-left: 2em;
+    table-layout: fixed;
+    border-collapse: collapse;
+    max-width: 400px;
+    z-index: 1000;
+    position: relative;
+    background: #eee;
+}
+
+th { border-right: 1px solid #ccc; text-align: right; }
+
+th, td { padding: 0.5em; word-wrap:break-word; }
+
 li { margin-left: 2em; }
 p,ul { margin-top: 1em; }
-h1, h2, h3 { margin-top: 1em; }
+/*h1, h2, h3 { margin-top: 1em; }*/
+h1, h2, h3 {
+    font-family: Arial, Helvetica, sans-serif;
+    font-weight: bold;
+}
+h1 { font-size: 4rem; }
+h2 { font-size: 3rem; }
+h3 { font-size: 2rem; }
+blockquote.dark {
+    background: #222;
+}
+
+blockquote {
+    background: #ddd;
+    margin: 1.5em 10px;
+    padding: 2em 0.5em 0.5em 0.5em;
+    white-space: pre-wrap;
+    position: relative;
+    overflow: visible;
+}
+
+blockquote.dark:before {
+    color: #eee;
+}
+
+blockquote:before {
+    content:"\201C";
+    position: absolute;
+    top: -0.5rem;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    font: 6em/1.08em 'PT Sans', sans-serif;
+    width: 3rem;
+    height: 2rem;
+}
+
+blockquote p {
+    display: inline;
+}

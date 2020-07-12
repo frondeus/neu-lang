@@ -223,7 +223,7 @@ pub(crate) fn leading_trivia() -> impl Parser<Token> {
 mod tests {
     use super::parser;
     use crate::lexers::neu::{Lexer, Token};
-    use neu_parser::{Spanned, State, ParseResult};
+    use neu_parser::{ParseResult, Spanned, State};
 
     #[test]
     fn lexer_tests() {

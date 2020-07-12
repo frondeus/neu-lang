@@ -3,7 +3,7 @@ mod span_ext;
 
 use crate::diagnostic::{Diagnostic, DiagnosticType};
 use crate::span_ext::{LinesCols, TextRangeExt};
-use neu_parser::{ArenaExt, State, ParseResult};
+use neu_parser::{ArenaExt, ParseResult, State};
 use neu_syntax::{lexers::neu::Lexer, parsers::neu::parser};
 use wasm_bindgen::prelude::*;
 use web_sys::console;
@@ -63,7 +63,7 @@ pub fn on_change(buf: &str) {
                 col_end,
             } = node.span.lines_cols(&lines);
             Diagnostic::new(
-                error,//.to_report(&buf),
+                error, //.to_report(&buf),
                 line_start,
                 col_start,
                 line_end,

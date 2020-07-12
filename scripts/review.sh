@@ -37,3 +37,5 @@ for file in ./tests/**/*.new; do
   fi
 done
 echo "All processed"
+
+./scripts/delete-orig.sh

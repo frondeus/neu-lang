@@ -196,7 +196,7 @@ impl NeovimHandler {
                         {
                             Some(Diagnostic::new(
                                 &current_bf,
-                                error,//.to_report(&buf),
+                                error, //.to_report(&buf),
                                 *line,
                                 *col_start,
                                 DiagnosticType::Error,

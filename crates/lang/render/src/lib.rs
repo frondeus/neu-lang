@@ -1,8 +1,8 @@
+use crate::db::Renderer;
 use neu_eval::eval;
 use neu_parser::{Arena, NodeId};
 use neu_syntax::ast::{ArticleItem, ArticleRef, Ast};
 use neu_syntax::Nodes;
-use crate::db::Renderer;
 
 mod result;
 
@@ -10,7 +10,12 @@ mod html;
 
 pub mod db;
 
-fn _render(db: &dyn Renderer, article_item: ArticleItem, nodes: &mut Arena, input: &str) -> Option<String> {
+fn _render(
+    db: &dyn Renderer,
+    article_item: ArticleItem,
+    nodes: &mut Arena,
+    input: &str,
+) -> Option<String> {
     let mut output = String::default();
 
     article_item.anchor_body(nodes);
@@ -42,15 +47,23 @@ fn _render(db: &dyn Renderer, article_item: ArticleItem, nodes: &mut Arena, inpu
         .collect::<Vec<NodeId>>();
     for body_id in body {
         let body = nodes.get(body_id);
-        if body.is(Nodes::Markdown) {
+        if body.is(Nodes::Error) {
+            let err = nodes.component(body_id).expect("Error");
+            let s = format!(r#"<div class="error">{}</div>"#, err);
+            output.push_str(&s);
+        } else if body.is(Nodes::Markdown) {
             let markdown_eval = eval(body_id, nodes, input);
             let markdown = markdown_eval.value?;
             output.push_str(&format!("{}", html::render_value(&markdown)));
         } else if body.is(Nodes::ArticleItem) {
-            let article_item = ArticleItem::from_syntax(body_id, nodes).expect("body is ArticleItem");
+            let article_item =
+                ArticleItem::from_syntax(body_id, nodes).expect("body is ArticleItem");
             let kind = article_item.identifier(nodes, input).unwrap_or("???");
             let id = article_item.item_id(nodes, input).unwrap_or("???");
-            output.push_str(&format!(r#"<div class="article-item" id="{}_{}" >"#, kind, id));
+            output.push_str(&format!(
+                r#"<div class="article-item" id="{}_{}" >"#,
+                kind, id
+            ));
             let rendered = _render(db, article_item, nodes, input)?;
             output.push_str(rendered.as_str());
             output.push_str("</div>\n");
@@ -58,8 +71,10 @@ fn _render(db: &dyn Renderer, article_item: ArticleItem, nodes: &mut Arena, inpu
             let article_ref = ArticleRef::from_syntax(body_id, nodes).expect("body is ArticleRef");
             let kind = article_ref.identifier(nodes, input).unwrap_or("???");
             let id = article_ref.item_id(nodes, input).unwrap_or("???");
-            //output.push_str(r#"<div class="article-item">"#);
-            output.push_str(&format!(r#"<div class="article-item" id="{}_{}" >"#, kind, id));
+            output.push_str(&format!(
+                r#"<div class="article-item" id="{}_{}" >"#,
+                kind, id
+            ));
             let rendered = db.render_item(kind.into(), id.into());
             output.push_str(&rendered.output);
             output.push_str("</div>\n");
@@ -75,10 +90,13 @@ fn _render(db: &dyn Renderer, article_item: ArticleItem, nodes: &mut Arena, inpu
 #[cfg(test)]
 mod tests {
     use super::*;
+    use neu_syntax::db::Parser;
 
-    #[salsa::database(crate::db::RendererDatabase)]
+    #[salsa::database(crate::db::RendererDatabase, neu_syntax::db::ParserDatabase)]
     #[derive(Default)]
-    struct TestDb { storage: salsa::Storage<Self> }
+    struct TestDb {
+        storage: salsa::Storage<Self>,
+    }
 
     impl salsa::Database for TestDb {}
 

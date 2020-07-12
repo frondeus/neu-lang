@@ -3,8 +3,12 @@ use neu_parser::{Arena, Children, Node, NodeId, ParseResult};
 
 pub trait RootAst: Default + Ast {
     //fn from_root_syntax(id: NodeId, nodes: &Arena) -> Self where Self: Sized {
-    fn from_root_syntax(ParseResult { root, arena , ..}: &ParseResult) -> Self where Self: Sized {
-        arena.get(root)
+    fn from_root_syntax(ParseResult { root, arena, .. }: &ParseResult) -> Self
+    where
+        Self: Sized,
+    {
+        arena
+            .get(root)
             .children
             .iter()
             .filter_map(|id| Self::from_syntax(*id, arena))
@@ -16,7 +20,9 @@ pub trait RootAst: Default + Ast {
 impl<A> RootAst for A where A: Default + Ast {}
 
 pub trait Ast {
-    fn from_syntax(id: NodeId, nodes: &Arena) -> Option<Self> where Self: Sized;
+    fn from_syntax(id: NodeId, nodes: &Arena) -> Option<Self>
+    where
+        Self: Sized;
 }
 
 #[derive(Debug)]
@@ -28,7 +34,9 @@ pub struct ArticleRef {
 impl Ast for ArticleRef {
     fn from_syntax(id: NodeId, nodes: &Arena) -> Option<Self> {
         let node = nodes.get(id);
-        if !node.is(Nodes::ArticleRef) { return None; }
+        if !node.is(Nodes::ArticleRef) {
+            return None;
+        }
 
         let mut children = Children::new(node.children.iter().copied(), nodes);
 
@@ -68,7 +76,9 @@ pub struct ArticleItem {
 impl Ast for ArticleItem {
     fn from_syntax(id: NodeId, nodes: &Arena) -> Option<Self> {
         let node = nodes.get(id);
-        if !node.is(Nodes::ArticleItem) { return None; }
+        if !node.is(Nodes::ArticleItem) {
+            return None;
+        }
 
         let mut children = Children::new(node.children.iter().copied(), nodes);
 
