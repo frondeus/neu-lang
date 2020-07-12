@@ -16,20 +16,22 @@
 *** TODO Memoization of lazy fields
 ** Arrays [0/1]
 *** TODO Access array item foo[0]
-** Markdown [2/6]
+** Markdown [2/7]
 *** DONE Markdown string interpolation
 *** DONE Inline HTML
 *** TODO Tables
 *** TODO Footnote
 *** TODO Hard Break
 *** TODO Check mark
-** Gm notes [6/9]
+*** TODO Treat markdown like structure instead of forcing html render
+** Gm notes [6/8]
 *** DONE Generate json
 *** DONE Markdown article
 *** DONE Generate subarticle
 *** DONE Reference article
 *** DONE Salsa
 *** DONE Mentions
+*** Mentions - iterae thru ALL markdown not only root
 *** TODO Salsa eval
 *** TODO Watch
 ** GUI
