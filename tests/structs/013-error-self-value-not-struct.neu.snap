@@ -15,12 +15,9 @@ ROOT @ 0..4 = `.bar`
         IDENTIFIER, TOKEN, VALUE @ 1..4 = `bar`
 
 
-### No Errors ###
-
-
 [eval]
 None
 
-### Errors ###
-Couldn't find any structure for field access @ N0
+[errors]
+test.neu | N0 | Couldn't find any structure for field access
 

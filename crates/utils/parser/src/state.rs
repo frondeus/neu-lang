@@ -1,4 +1,4 @@
-use crate::{Arena, ArenaExt, Context, Lexer, NodeId, Parser, TokenKind};
+use crate::{Arena, Context, Lexer, NodeId, Parser, TokenKind};
 use neu_diagnostics::{Diagnostic, Diagnostics};
 use std::fmt;
 
@@ -98,16 +98,6 @@ impl<'s, 'n> fmt::Display for DisplayParseResult<'s, 'n> {
         let arena = &self.result.arena;
         let node = arena.get(self.result.root).display(self.str, arena);
         node.fmt(f)?;
-        let errors = self.result.arena.errors();
-        if errors.is_empty() {
-            writeln!(f, "\n\n### No Errors ###")?;
-        } else {
-            writeln!(f, "\n\n### Errors ###")?;
-        }
-
-        for (node_id, error) in errors.into_iter() {
-            writeln!(f, "{} @ {:?}", error, node_id)?;
-        }
         Ok(())
     }
 }

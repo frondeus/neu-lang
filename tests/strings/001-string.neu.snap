@@ -12,11 +12,6 @@ ROOT @ 0..6 = ` \"foo\"`
     TRIVIA @ 6..7 = ` `
 
 
-### No Errors ###
-
-
 [eval]
 `"foo"`
-
-### No Errors ###
 

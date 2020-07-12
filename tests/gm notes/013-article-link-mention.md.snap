@@ -9,6 +9,8 @@ chrono = "20.06.1925"
 Ala ma kota [Test](test:1234abcd)
 
 `````
+[errors]
+No errors
 
 [mentions]
 test:1234abcd in sesja:a88907fd
@@ -17,8 +19,6 @@ test:1234abcd in sesja:a88907fd
 `<h1>Pośród Pradawnych Drzew</h1>
 <div class="side-table"><table><tr><th class="align-right">chrono</th><td>20.06.1925</td></tr><tr><th class="align-right">desc</th><td>Sesja jednostrzałowa dla Macek II RP</td></tr><tr><th class="align-right">when</th><td>20.10.2019</td></tr></table>
 </div><p>Ala ma kota <a href="/test/1234abcd">Test</a></p>`
-
-### No Errors ###
 
 [parser]
 ROOT @ 0..186
@@ -75,8 +75,5 @@ ROOT @ 0..186
                 MD_INLINELINK, MD_LINK @ 165..186 = `[Test](test:1234abcd)`
                     MD_LINKURL @ 172..185 = `test:1234abcd`
                     MD_TEXT @ 166..170 = `Test`
-
-
-### No Errors ###
 
 

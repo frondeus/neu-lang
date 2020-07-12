@@ -21,11 +21,6 @@ ROOT @ 0..13 = `true == false`
         BOOLEAN, TOKEN, VALUE @ 8..13 = `false`
 
 
-### No Errors ###
-
-
 [eval]
 `false`
-
-### No Errors ###
 

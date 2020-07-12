@@ -10,6 +10,7 @@ use serde::Serialize;
 use std::collections::BTreeMap;
 use std::io::Write;
 use std::path::{Path, PathBuf};
+use neu_db::{Database, Diagnostician};
 
 #[derive(Debug, Clap)]
 struct Opts {
@@ -136,6 +137,9 @@ fn build(root: &Path, dist: &Path) -> Result<()> {
         .collect::<Result<Vec<_>>>();
     let articles = articles?;
 
+    db.set_all_neu(
+        None.into_iter().collect()
+    );
     db.set_all_mds(
         articles
             .iter()
@@ -162,17 +166,25 @@ fn build(root: &Path, dist: &Path) -> Result<()> {
     let mut file = std::fs::File::create(index_path)?;
     file.write_all(serde_json::to_vec(&index)?.as_slice())?;
 
+    use neu_cli::span_ext::*;
+    let diagnostics = db.all_diagnostics();
+    diagnostics.into_iter()
+        .for_each(|(path, id, error)| {
+            //TODO: This works only for markdown
+            let input = db.input_md(path.clone());
+            let lines = input.lines()
+                .map(ToString::to_string)
+                .collect::<Vec<_>>();
+            let parsed = db.parse_md_syntax(path.clone());
+            let node = parsed.arena.get(id);
+            if let Some(LineCols { line, col_start, .. }) =
+            node.span.lines_cols(&lines).last() {
+                eprintln!("{} | {}:{} | {}", path, line, col_start, error);
+            }
+        });
+
     Ok(())
 }
-
-#[salsa::database(neu_syntax::db::ParserDatabase,
-neu_render::db::RendererDatabase,
-neu_analyze::db::AnalyzerDatabase)]
-#[derive(Default)]
-struct Database {
-    storage: salsa::Storage<Self>,
-}
-impl salsa::Database for Database {}
 
 fn main() -> Result<()> {
     let opts: Opts = Opts::parse();

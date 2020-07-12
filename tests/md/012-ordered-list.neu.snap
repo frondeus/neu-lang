@@ -20,11 +20,6 @@ ROOT @ 0..33 = `md\"\n1. Apple\n2. Orange\n3. Grape\n\"`
         TOKEN @ 32..33 = `\"`
 
 
-### No Errors ###
-
-
 [eval]
 `"<ol><li>Apple</li><li>Orange</li><li>Grape</li></ol>"`
-
-### No Errors ###
 

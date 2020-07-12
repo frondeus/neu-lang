@@ -270,7 +270,7 @@ mod tests {
             let mut res: ParseResult = State::parse(lexer, parser());
             let result = eval(res.root, &mut res.arena, input);
 
-            result.display(input, &res.arena).to_string()
+            result.display(input).to_string()
         })
         .unwrap();
     }

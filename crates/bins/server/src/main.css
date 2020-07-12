@@ -1,3 +1,38 @@
+/* Material icons */
+
+@font-face {
+    font-family: 'Material Icons';
+    font-style: normal;
+    font-weight: 400;
+    src: url(/static/Icons-Regular.eot); /* For IE6-8 */
+    src: local('Material Icons'), local('MaterialIcons-Regular'),
+    url(/static/Icons-Regular.woff2) format('woff2'),
+    url(/static/Icons-Regular.woff) format('woff'),
+    url(/static/Icons-Regular.ttf) format('truetype');
+}
+
+.material-icons {
+    font-family: 'Material Icons';
+    font-weight: normal;
+    font-style: normal;
+    font-size: 24px;  /* Preferred icon size */
+    display: inline-block;
+    line-height: 1;
+    text-transform: none;
+    letter-spacing: normal;
+    word-wrap: normal;
+    white-space: nowrap;
+    direction: ltr;
+
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    -moz-osx-font-smoothing: grayscale;
+    font-feature-settings: 'liga';
+}
+
+
+/* Css */
+
 html { box-sizing: border-box; height: 100%; padding: 0; margin: 0; }
 *, *:before, *:after { box-sizing: inherit; padding: 0; margin: 0; }
 body, #main { height: 100%; overflow: hidden; }
@@ -13,12 +48,25 @@ html { font-size: 16px; }
     color: #333;
 }
 .app > * { height: 100%; }
-.left-sidebar {
+.left-sidebar.expanded {
     height: 100%;
     flex: 1;
     display: flex;
     flex-direction: column;
 }
+.left-sidebar.minimized {
+    width: 4em;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+}
+.sidebar-burger {
+    position: fixed;
+    background: #ddd;
+    padding: 0.5em;
+    text-align: center;
+}
+.sidebar-burger:hover { background: #bbb; cursor: pointer; }
 .sidebar-tabbar {
     display: grid;
     grid-gap: 0.5em;

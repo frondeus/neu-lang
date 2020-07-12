@@ -57,9 +57,6 @@ ROOT @ 0..105
         IDENTIFIER, TOKEN, VALUE @ 100..105 = `label`
 
 
-### No Errors ###
-
-
 [.eval]
 None
 

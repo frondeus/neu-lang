@@ -15,11 +15,11 @@ Ala ma **kota**.
 
 `````
 
+[errors]
+test.md | N62 | Field not found
+
 [render]
 `Couldn't render, found errors`
-
-### Errors ###
-Field not found @ N62
 
 [parser]
 ROOT @ 0..196
@@ -93,8 +93,5 @@ ROOT @ 0..196
                             OP, TOKEN @ 187..188 = `.`
                             IDENTIFIER, TOKEN, VALUE @ 188..192 = `ages`
                     TRIVIA @ 192..193 = `\n`
-
-
-### No Errors ###
 
 

@@ -1,0 +1,147 @@
+`````
++++ monster:10971bd3 +++
+title = "Gla'aki, Mieszkaniec Jeziora"
+S = 200
+KON = 300
+BC = 450
+INT = 150
+MOC = 140
+PW = 75
+MO = "+7K6"
+Krzepa = 8
+PM = 28
+Ruch = 6
+Ataki = 1
++++
+Manifestacja Wielkiego Przedwiecznego Gla’akiego. Chce przemienić ludzi w swoje sługi, które odnajdą i zniszczą fragment jego kryształowego więzienia.
+
+Walka: Gla’aki atakuje za pomocą kolców, uderzając nimi lub
+wystrzeliwując je w ofiarę.
+
+Walka 100% (50/20) obrażenia 3K10
+
+Pancerz: 40 punktów twardej skorupy; każdy kolec ma 4 punkty Pancerza i 6 PW.
+
+Zaklęcia: Gla’aki zna większość zaklęć i przekazuje wiele z nich swoim niewolniczym wyznawcom.
+
+Utrata Poczytalności: 1K3/1K20 PP za ujrzenie Gla’akiego.
+
+
+`````
+[errors]
+No errors
+
+[render]
+`<h1>Gla'aki, Mieszkaniec Jeziora</h1>
+<div class="side-table"><table><tr><th class="align-right">Ataki</th><td>1</td></tr><tr><th class="align-right">BC</th><td>450</td></tr><tr><th class="align-right">INT</th><td>150</td></tr><tr><th class="align-right">KON</th><td>300</td></tr><tr><th class="align-right">Krzepa</th><td>8</td></tr><tr><th class="align-right">MO</th><td>+7K6</td></tr><tr><th class="align-right">MOC</th><td>140</td></tr><tr><th class="align-right">PM</th><td>28</td></tr><tr><th class="align-right">PW</th><td>75</td></tr><tr><th class="align-right">Ruch</th><td>6</td></tr><tr><th class="align-right">S</th><td>200</td></tr></table>
+</div><p>Manifestacja Wielkiego Przedwiecznego Gla’akiego. Chce przemienić ludzi w swoje sługi, które odnajdą i zniszczą fragment jego kryształowego więzienia.</p><p>Walka: Gla’aki atakuje za pomocą kolców, uderzając nimi lub
+wystrzeliwując je w ofiarę.</p><p>Walka 100% (50/20) obrażenia 3K10</p><p>Pancerz: 40 punktów twardej skorupy; każdy kolec ma 4 punkty Pancerza i 6 PW.</p><p>Zaklęcia: Gla’aki zna większość zaklęć i przekazuje wiele z nich swoim niewolniczym wyznawcom.</p><p>Utrata Poczytalności: 1K3/1K20 PP za ujrzenie Gla’akiego.</p>`
+
+[parser]
+ROOT @ 0..731
+    ARTICLEITEM @ 0..731
+        TOKEN @ 0..3 = `+++`
+        TOKEN, TRIVIA @ 3..4 = ` `
+        IDENTIFIER, TOKEN @ 4..11 = `monster`
+        TOKEN @ 11..12 = `:`
+        ARTICLEITEMID, TOKEN @ 12..20 = `10971bd3`
+        TOKEN, TRIVIA @ 20..21 = ` `
+        TOKEN @ 21..24 = `+++`
+        TOKEN, TRIVIA @ 24..25 = `\n`
+        STRUCT, VALUE @ 25..169
+            IDENTIFIER, KEY, TOKEN @ 25..30 = `title`
+            TRIVIA @ 30..31 = ` `
+            TOKEN @ 31..32 = `=`
+            TRIVIA @ 32..33 = ` `
+            STRING, VALUE @ 33..63 = `\"Gla\'aki, Mieszkaniec Jeziora\"`
+                TOKEN @ 33..34 = `\"`
+                STRVALUE, TOKEN @ 34..62 = `Gla\'aki, Mieszkaniec Jeziora`
+                TOKEN @ 62..63 = `\"`
+            TOKEN @ 63..64 = `\n`
+            IDENTIFIER, KEY, TOKEN @ 64..65 = `S`
+            TRIVIA @ 65..66 = ` `
+            TOKEN @ 66..67 = `=`
+            TRIVIA @ 67..68 = ` `
+            NUMBER, TOKEN, VALUE @ 68..71 = `200`
+            TOKEN @ 71..72 = `\n`
+            IDENTIFIER, KEY, TOKEN @ 72..75 = `KON`
+            TRIVIA @ 75..76 = ` `
+            TOKEN @ 76..77 = `=`
+            TRIVIA @ 77..78 = ` `
+            NUMBER, TOKEN, VALUE @ 78..81 = `300`
+            TOKEN @ 81..82 = `\n`
+            IDENTIFIER, KEY, TOKEN @ 82..84 = `BC`
+            TRIVIA @ 84..85 = ` `
+            TOKEN @ 85..86 = `=`
+            TRIVIA @ 86..87 = ` `
+            NUMBER, TOKEN, VALUE @ 87..90 = `450`
+            TOKEN @ 90..91 = `\n`
+            IDENTIFIER, KEY, TOKEN @ 91..94 = `INT`
+            TRIVIA @ 94..95 = ` `
+            TOKEN @ 95..96 = `=`
+            TRIVIA @ 96..97 = ` `
+            NUMBER, TOKEN, VALUE @ 97..100 = `150`
+            TOKEN @ 100..101 = `\n`
+            IDENTIFIER, KEY, TOKEN @ 101..104 = `MOC`
+            TRIVIA @ 104..105 = ` `
+            TOKEN @ 105..106 = `=`
+            TRIVIA @ 106..107 = ` `
+            NUMBER, TOKEN, VALUE @ 107..110 = `140`
+            TOKEN @ 110..111 = `\n`
+            IDENTIFIER, KEY, TOKEN @ 111..113 = `PW`
+            TRIVIA @ 113..114 = ` `
+            TOKEN @ 114..115 = `=`
+            TRIVIA @ 115..116 = ` `
+            NUMBER, TOKEN, VALUE @ 116..118 = `75`
+            TOKEN @ 118..119 = `\n`
+            IDENTIFIER, KEY, TOKEN @ 119..121 = `MO`
+            TRIVIA @ 121..122 = ` `
+            TOKEN @ 122..123 = `=`
+            TRIVIA @ 123..124 = ` `
+            STRING, VALUE @ 124..130 = `\"+7K6\"`
+                TOKEN @ 124..125 = `\"`
+                STRVALUE, TOKEN @ 125..129 = `+7K6`
+                TOKEN @ 129..130 = `\"`
+            TOKEN @ 130..131 = `\n`
+            IDENTIFIER, KEY, TOKEN @ 131..137 = `Krzepa`
+            TRIVIA @ 137..138 = ` `
+            TOKEN @ 138..139 = `=`
+            TRIVIA @ 139..140 = ` `
+            NUMBER, TOKEN, VALUE @ 140..141 = `8`
+            TOKEN @ 141..142 = `\n`
+            IDENTIFIER, KEY, TOKEN @ 142..144 = `PM`
+            TRIVIA @ 144..145 = ` `
+            TOKEN @ 145..146 = `=`
+            TRIVIA @ 146..147 = ` `
+            NUMBER, TOKEN, VALUE @ 147..149 = `28`
+            TOKEN @ 149..150 = `\n`
+            IDENTIFIER, KEY, TOKEN @ 150..154 = `Ruch`
+            TRIVIA @ 154..155 = ` `
+            TOKEN @ 155..156 = `=`
+            TRIVIA @ 156..157 = ` `
+            NUMBER, TOKEN, VALUE @ 157..158 = `6`
+            TOKEN @ 158..159 = `\n`
+            IDENTIFIER, KEY, TOKEN @ 159..164 = `Ataki`
+            TRIVIA @ 164..165 = ` `
+            TOKEN @ 165..166 = `=`
+            TRIVIA @ 166..167 = ` `
+            NUMBER, TOKEN, VALUE @ 167..168 = `1`
+            TOKEN @ 168..169 = `\n`
+        TOKEN @ 169..172 = `+++`
+        ARTICLEBODY @ 172..731
+            MARKDOWN, MD_PARAGRAPH, MD_VALUE, VALUE @ 173..338 = `Manifestacja Wielkiego Przedwiecznego Gla\u{2019}akiego. Chce przemienic\u{301} ludzi w swoje s\u{142}ugi, kto\u{301}re odnajda\u{328} i zniszcza\u{328} fragment jego kryszta\u{142}owego wie\u{328}zienia.\n`
+                MD_TEXT @ 173..337 = `Manifestacja Wielkiego Przedwiecznego Gla\u{2019}akiego. Chce przemienic\u{301} ludzi w swoje s\u{142}ugi, kto\u{301}re odnajda\u{328} i zniszcza\u{328} fragment jego kryszta\u{142}owego wie\u{328}zienia.`
+            MARKDOWN, MD_PARAGRAPH, MD_VALUE, VALUE @ 339..439
+                MD_TEXT @ 339..406 = `Walka: Gla\u{2019}aki atakuje za pomoca\u{328} kolco\u{301}w, uderzaja\u{328}c nimi lub`
+                MD_SOFTBREAK @ 406..407 = `\n`
+                MD_TEXT @ 407..438 = `wystrzeliwuja\u{328}c je w ofiare\u{328}.`
+            MARKDOWN, MD_PARAGRAPH, MD_VALUE, VALUE @ 440..476 = `Walka 100% (50/20) obraz\u{307}enia 3K10\n`
+                MD_TEXT @ 440..475 = `Walka 100% (50/20) obraz\u{307}enia 3K10`
+            MARKDOWN, MD_PARAGRAPH, MD_VALUE, VALUE @ 477..559 = `Pancerz: 40 punkto\u{301}w twardej skorupy; kaz\u{307}dy kolec ma 4 punkty Pancerza i 6 PW.\n`
+                MD_TEXT @ 477..558 = `Pancerz: 40 punkto\u{301}w twardej skorupy; kaz\u{307}dy kolec ma 4 punkty Pancerza i 6 PW.`
+            MARKDOWN, MD_PARAGRAPH, MD_VALUE, VALUE @ 560..669 = `Zakle\u{328}cia: Gla\u{2019}aki zna wie\u{328}kszos\u{301}c\u{301} zakle\u{328}c\u{301} i przekazuje wiele z nich swoim niewolniczym wyznawcom.\n`
+                MD_TEXT @ 560..668 = `Zakle\u{328}cia: Gla\u{2019}aki zna wie\u{328}kszos\u{301}c\u{301} zakle\u{328}c\u{301} i przekazuje wiele z nich swoim niewolniczym wyznawcom.`
+            MARKDOWN, MD_PARAGRAPH, MD_VALUE, VALUE @ 670..731 = `Utrata Poczytalnos\u{301}ci: 1K3/1K20 PP za ujrzenie Gla\u{2019}akiego.`
+                MD_TEXT @ 670..731 = `Utrata Poczytalnos\u{301}ci: 1K3/1K20 PP za ujrzenie Gla\u{2019}akiego.`
+
+

@@ -30,7 +30,7 @@ impl TokenKind for Token {
         if i.is_empty() {
             return None;
         }
-        let pat = format!("{:#<width$}", "\"", width = hash + 1);
+        let pat = format!("\"{}", "#".repeat(hash));
         if i.starts_with(&pat) {
             return Some((Token::Close, input.chomp(pat.len())));
         }

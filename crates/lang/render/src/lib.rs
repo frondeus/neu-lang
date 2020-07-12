@@ -44,7 +44,7 @@ fn _render(
         output.push_str("</table>\n");
     }
 
-    let mentions = db.find_mentions().into_iter()
+    let mentions = db.all_mentions().into_iter()
             .filter(|mention| mention.kind == kind)
             .filter(|mention| mention.id == id)
             .collect::<BTreeSet<_>>();

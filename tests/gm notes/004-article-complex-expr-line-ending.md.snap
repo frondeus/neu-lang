@@ -8,6 +8,8 @@ a = 1
 Ala ma **kota**
 
 `````
+[errors]
+No errors
 
 [parser]
 ROOT @ 0..93
@@ -47,8 +49,5 @@ ROOT @ 0..93
                 MD_TEXT @ 78..85 = `Ala ma `
                 MD_STRONG @ 85..93 = `**kota**`
                     MD_TEXT @ 87..91 = `kota`
-
-
-### No Errors ###
 
 

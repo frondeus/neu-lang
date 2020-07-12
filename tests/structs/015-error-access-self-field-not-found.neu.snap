@@ -51,12 +51,9 @@ ROOT @ 0..32 = `{\n    foo = 10,\n    bar = .baz\n}`
         TOKEN @ 31..32 = `}`
 
 
-### No Errors ###
-
-
 [eval]
 None
 
-### Errors ###
-Field not found @ N14
+[errors]
+test.neu | N14 | Field not found
 

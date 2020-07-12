@@ -65,7 +65,7 @@ impl ArticleRef {
     }
 }
 
-#[derive(Debug, Default, Clone, PartialEq, Eq)]
+#[derive(Debug, Default, Clone, PartialEq, Eq, Hash)]
 pub struct ArticleItem {
     pub identifier: Option<NodeId>,
     pub item_id: Option<NodeId>,

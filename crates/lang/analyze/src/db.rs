@@ -3,10 +3,10 @@ use neu_syntax::db::Parser;
 
 #[salsa::query_group(AnalyzerDatabase)]
 pub trait Analyzer: salsa::Database + Parser {
-    fn find_mentions(&self) -> Vec<Mention>;
+    fn all_mentions(&self) -> Vec<Mention>;
 }
 
-fn find_mentions(db: &dyn Analyzer) -> Vec<Mention> {
+fn all_mentions(db: &dyn Analyzer) -> Vec<Mention> {
     let parsed = db.parse_all_mds();
 
     let mut mentions = vec![];

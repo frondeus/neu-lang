@@ -66,6 +66,3 @@ ROOT @ 0..60
         IDENTIFIER, TOKEN, VALUE @ 55..60 = `value`
 
 
-### No Errors ###
-
-

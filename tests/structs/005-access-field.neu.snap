@@ -79,11 +79,6 @@ ROOT @ 0..64
         IDENTIFIER, TOKEN, VALUE @ 61..64 = `bar`
 
 
-### No Errors ###
-
-
 [eval]
 `50`
-
-### No Errors ###
 

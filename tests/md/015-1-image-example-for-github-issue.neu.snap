@@ -13,11 +13,6 @@ ROOT @ 0..68 = `md#\"![alt text](https://github.com/icon48.png \"Logo Title Text
         TOKEN @ 66..68 = `\"#`
 
 
-### No Errors ###
-
-
 [eval]
 `"<p><img src=\"https://github.com/icon48.png\">alt text</img></p>"`
-
-### No Errors ###
 

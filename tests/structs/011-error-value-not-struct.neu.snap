@@ -17,12 +17,9 @@ ROOT @ 0..5 = `4.bar`
         IDENTIFIER, TOKEN, VALUE @ 2..5 = `bar`
 
 
-### No Errors ###
-
-
 [eval]
 None
 
-### Errors ###
-Expression is not a struct @ N0
+[errors]
+test.neu | N0 | Expression is not a struct
 

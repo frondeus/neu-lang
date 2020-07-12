@@ -15,11 +15,6 @@ ROOT @ 0..2 = `-5`
         NUMBER, TOKEN, VALUE @ 1..2 = `5`
 
 
-### No Errors ###
-
-
 [eval]
 `-5`
-
-### No Errors ###
 

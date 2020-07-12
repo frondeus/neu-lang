@@ -21,11 +21,6 @@ ROOT @ 0..5 = `4 + 2`
         NUMBER, TOKEN, VALUE @ 4..5 = `2`
 
 
-### No Errors ###
-
-
 [eval]
 `6`
-
-### No Errors ###
 

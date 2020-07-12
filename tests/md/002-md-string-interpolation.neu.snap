@@ -19,11 +19,6 @@ ROOT @ 0..21 = `md\"*foo `1 + 2` bar*\"`
         TOKEN @ 20..21 = `\"`
 
 
-### No Errors ###
-
-
 [eval]
 `"<p><em>foo <pre><code>3</code></pre> bar</em></p>"`
-
-### No Errors ###
 

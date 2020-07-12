@@ -104,11 +104,6 @@ ROOT @ 0..197
         TOKEN @ 195..197 = `\"#`
 
 
-### No Errors ###
-
-
 [eval]
 `"<pre><code>{\n    health = {\n        max = 13,\n        value = 13,\n    },\n }</code></pre><p>Here should eval</p><pre><code>7</code></pre><p>Here is intended</p><pre><code>7</code></pre><p>But here shouldn\'t</p><pre><code class=\"language-example\">5 + 2\n</code></pre>"`
-
-### No Errors ###
 

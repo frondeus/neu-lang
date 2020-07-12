@@ -20,11 +20,6 @@ ROOT @ 0..21 = `md\"foo\n\n> bar\n> baz\n\"`
         TOKEN @ 20..21 = `\"`
 
 
-### No Errors ###
-
-
 [eval]
 `"<p>foo</p><blockquote><p>bar\nbaz</p></blockquote>"`
-
-### No Errors ###
 

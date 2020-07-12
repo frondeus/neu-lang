@@ -15,11 +15,6 @@ ROOT @ 0..13 = `md\"*foo*\nbar\"`
         TOKEN @ 12..13 = `\"`
 
 
-### No Errors ###
-
-
 [eval]
 `"<p><em>foo</em>\nbar</p>"`
-
-### No Errors ###
 

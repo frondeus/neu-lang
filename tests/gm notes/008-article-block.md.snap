@@ -19,6 +19,8 @@ Kot ma ale
 Ale kota nie ma
 
 `````
+[errors]
+No errors
 
 [mentions]
 chrono:0123abcd in sesja:a88907fd
@@ -30,8 +32,6 @@ chrono:0123abcd in sesja:a88907fd
 <div class="side-table"><table><tr><th>Mentioned in</th></tr><tr><td><a href="/sesja/a88907fd">Pośród Pradawnych Drzew</a></td></tr></table>
 </div><p>Kot ma ale</p></div>
 <p>Ale kota nie ma</p>`
-
-### No Errors ###
 
 [parser]
 ROOT @ 0..259
@@ -111,8 +111,5 @@ ROOT @ 0..259
                 TOKEN @ 233..242 = `++ end ++`
             MARKDOWN, MD_PARAGRAPH, MD_VALUE, VALUE @ 244..259 = `Ale kota nie ma`
                 MD_TEXT @ 244..259 = `Ale kota nie ma`
-
-
-### No Errors ###
 
 

@@ -256,7 +256,7 @@ impl NeovimHandler {
                 writeln!(
                     &mut dbg_buffer,
                     "{}\n\n",
-                    root_eval_result.display(&buf, &arena)
+                    root_eval_result.display(&buf)
                 )?;
                 dbg!(dbg_buffer, arena);
 

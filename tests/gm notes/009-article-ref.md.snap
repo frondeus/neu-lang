@@ -20,6 +20,9 @@ title = "Chronologia sesji"
 4
 
 `````
+[errors]
+No errors
+
 [mentions]
 chrono:0123abcd in sesja:a88907fd
 chrono:0123abcd in sesja:a88907fd
@@ -33,8 +36,6 @@ chrono:0123abcd in sesja:a88907fd
 <div class="side-table"><table><tr><th>Mentioned in</th></tr><tr><td><a href="/sesja/a88907fd">Pośród Pradawnych Drzew</a></td></tr></table>
 </div><p>3</p></div>
 <p>4</p>`
-
-### No Errors ###
 
 [parser]
 ROOT @ 0..163
@@ -97,8 +98,5 @@ ROOT @ 0..163
                 TOKEN @ 151..160 = `++ end ++`
             MARKDOWN, MD_PARAGRAPH, MD_VALUE, VALUE @ 162..163 = `4`
                 MD_TEXT @ 162..163 = `4`
-
-
-### No Errors ###
 
 

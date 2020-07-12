@@ -11,11 +11,6 @@ ROOT @ 0..9 = `md\"*foo*\"`
         TOKEN @ 8..9 = `\"`
 
 
-### No Errors ###
-
-
 [eval]
 `"<p><em>foo</em></p>"`
-
-### No Errors ###
 

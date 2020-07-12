@@ -96,9 +96,6 @@ ROOT @ 0..83
         TOKEN @ 82..83 = `}`
 
 
-### No Errors ###
-
-
 [eval]
 `{
     health = {
@@ -107,6 +104,4 @@ ROOT @ 0..83
     },
     sanity = 52,
  }`
-
-### No Errors ###
 

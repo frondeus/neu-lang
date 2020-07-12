@@ -2,6 +2,9 @@
  "10 = ${5 + 2 + +}"
 ```
 
+[errors]
+test.neu | N13 | Expected one of number, `true`, `false`, `-`, `!`, `"`, `(`, `{`, `[`, identifier but found `+`
+
 [parser]
 ROOT @ 0..20 = ` \"10 = ${5 + 2 + +}\"`
     TRIVIA @ 0..1 = ` `
@@ -25,13 +28,6 @@ ROOT @ 0..20 = ` \"10 = ${5 + 2 + +}\"`
         TOKEN @ 19..20 = `\"`
 
 
-### Errors ###
-Expected one of number, `true`, `false`, `-`, `!`, `"`, `(`, `{`, `[`, identifier but found `+` @ N13
-
-
 [eval]
 None
-
-### Errors ###
-Expected one of number, `true`, `false`, `-`, `!`, `"`, `(`, `{`, `[`, identifier but found `+` @ N13
 

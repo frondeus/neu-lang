@@ -106,8 +106,10 @@ impl TokenKind for Token {
             return Some((Token::LineEnd, input.chomp(1)));
         }
 
-        if peeked.is_whitespace() {
-            let rest = i.chars().take_while(|c| c.is_whitespace()).count();
+        let is_whitespace = |c: &char| *c == ' ' || *c == '\t';
+
+        if is_whitespace(&peeked) {
+            let rest = i.chars().take_while(is_whitespace).count();
 
             return Some((Token::Whitespace, input.chomp(rest)));
         }

@@ -35,11 +35,6 @@ ROOT @ 0..327
         TOKEN @ 325..327 = `\"#`
 
 
-### No Errors ###
-
-
 [eval]
 `"<p>Here\'s our logo (hover to see the title text):</p><p>Inline-style:\n<img src=\"https://github.com/adam-p/markdown-here/raw/master/src/common/images/icon48.png\">alt text</img></p><p>Reference-style:\n<img src=\"https://github.com/adam-p/markdown-here/raw/master/src/common/images/icon48.png\">alt text</img></p>"`
-
-### No Errors ###
 

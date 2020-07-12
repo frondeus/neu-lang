@@ -29,12 +29,9 @@ ROOT @ 0..14 = `.bar + foo.baz`
                 IDENTIFIER, TOKEN, VALUE @ 11..14 = `baz`
 
 
-### No Errors ###
-
-
 [eval]
 None
 
-### Errors ###
-Couldn't find any structure for field access @ N0
+[errors]
+test.neu | N0 | Couldn't find any structure for field access
 

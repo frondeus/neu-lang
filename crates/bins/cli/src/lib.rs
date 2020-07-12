@@ -2,6 +2,8 @@ use anyhow::anyhow;
 use anyhow::Result;
 use std::path::{Path, PathBuf};
 
+pub mod span_ext;
+
 pub fn find_in_ancestors(start: Option<PathBuf>, indicator: impl AsRef<Path>) -> Result<PathBuf> {
     let mut path = match start {
         Some(s) => s,

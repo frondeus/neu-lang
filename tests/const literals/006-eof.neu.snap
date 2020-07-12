@@ -2,6 +2,9 @@
 5 5
 ```
 
+[errors]
+test.neu | N2 | Expected EOF but found `5`
+
 [lexer]
 [
     "Number `5`",
@@ -14,9 +17,5 @@ ROOT @ 0..3 = `5 5`
     NUMBER, TOKEN, VALUE @ 0..1 = `5`
     TRIVIA @ 1..2 = ` `
     ERROR, TOKEN @ 2..3 = `5`
-
-
-### Errors ###
-Expected EOF but found `5` @ N2
 
 

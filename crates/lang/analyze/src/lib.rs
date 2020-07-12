@@ -65,7 +65,6 @@ fn find_mentions(
     input: &str,
     mentions: &mut Vec<Mention>,
 ) -> Option<()> {
-    //article_item.anchor_body(nodes);
     let orig_kind = article_item.identifier(nodes, input).unwrap_or("???");
     let orig_id = article_item.item_id(nodes, input).unwrap_or("???");
 
@@ -124,14 +123,14 @@ mod tests {
     impl salsa::Database for TestDb {}
 
     #[test]
-    fn render_tests() {
+    fn analyze_tests() {
         test_runner::test_snapshots("md", "mentions", |input| {
             let mut db = TestDb::default();
             let path: String = "test".into();
             db.set_all_mds(Some(path.clone()).into_iter().collect());
             db.set_input_md(path, input.into());
 
-            db.find_mentions()
+            db.all_mentions()
                 .into_iter()
                 .map(|mention| mention.to_string())
                 .join("\n")

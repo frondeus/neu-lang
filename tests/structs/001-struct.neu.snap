@@ -48,14 +48,9 @@ ROOT @ 0..36 = `{\n    health = 10,\n    sanity = 50\n}`
         TOKEN @ 35..36 = `}`
 
 
-### No Errors ###
-
-
 [eval]
 `{
     health = 10,
     sanity = 50,
  }`
-
-### No Errors ###
 

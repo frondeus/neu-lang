@@ -22,11 +22,6 @@ ROOT @ 0..28 = `md\"\n# foo\nabcd\n## bar\ndefg\n\"`
         TOKEN @ 27..28 = `\"`
 
 
-### No Errors ###
-
-
 [eval]
 `"<h1>foo</h1><p>abcd</p><h2>bar</h2><p>defg</p>"`
-
-### No Errors ###
 

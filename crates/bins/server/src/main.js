@@ -39,6 +39,12 @@ function GetIndex(setIndex, by, searched) {
 const { useState, useEffect, createElement } = React;
 const e = createElement;
 
+const SidebarTabs = [
+    { icon: 'translate', by: 'abc' },
+    { icon: 'view_stream', by: 'kind' }
+];
+
+
 function Article({kind, id}) {
     const [html, setHtml] = useState("Loading...");
     const [hasTitle, setTitle] = useState(false);
@@ -161,15 +167,13 @@ function Index({article, setArticle, tab}) {
 }
 
 function SidebarTab({ label, isActive, onClick }) {
-    return e('div', {
-        className: 'sidebar-tab' + (isActive ? ' active' : ''),
+    return e('span', {
+        className: 'sidebar-tab material-icons' + (isActive ? ' active' : ''),
         onClick: () => { onClick(); }
     }, label)
 }
 
-function SidebarTabbar({tab, setTab}) {
-    const tabNames = ['abc', 'kind'];
-
+function SidebarTabbar({tab, setTab, setVisible}) {
     const buildTab = (label, idx, onClick) => e(SidebarTab, {
         label: label,
         key: label,
@@ -177,18 +181,17 @@ function SidebarTabbar({tab, setTab}) {
         isActive: idx === tab[0]
     });
 
-
-    const tabs = tabNames.map((label, idx) =>
-        buildTab(label, idx + 1, () => { setTab([idx + 1, label]); })
+    const tabs = SidebarTabs.map(({by, icon}, idx) =>
+        buildTab(icon, idx + 1, () => { setTab([idx + 1, by]); })
     );
 
     const children = [
-        buildTab('recent', 0, () =>  {
+        buildTab('history', 0, () =>  {
 
         }),
         ...tabs,
-        buildTab('hide', 1 + tabs.length, () =>  {
-
+        buildTab('close', 1 + tabs.length, () =>  {
+            setVisible(false);
         }),
     ];
 
@@ -199,12 +202,24 @@ function SidebarTabbar({tab, setTab}) {
 
 function LeftSidebar({article, setArticle}) {
     const [tab, setTab] = useState([1, 'abc']);
+    const [visible, setVisible] = useState(true);
+
+    if(!visible) {
+        return e('div', {
+            className: 'left-sidebar minimized',
+        }, [
+            e('i', {
+                className: 'sidebar-burger material-icons',
+                onClick: () => { setVisible(true); },
+            }, 'menu')
+        ]);
+    }
 
     return e('div', {
-        className: 'left-sidebar',
+        className: 'left-sidebar expanded',
     }, [
-        e(SidebarTabbar, { key: "tabbar", tab, setTab, }),
-        e(Index, {key:"idx", article, setArticle, tab }),
+        e(SidebarTabbar, { key: "tabbar", tab, setTab, setVisible }),
+        e(Index, {key:"idx", article, setArticle, tab })
     ]);
 }
 

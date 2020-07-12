@@ -30,6 +30,9 @@ title = "Chronologia sesji"
 
 `````
 
+[errors]
+No errors
+
 [mentions]
 test:0000aaaa in chrono:0123abcd
 test:0000aaaa in sesja:a88907fd
@@ -47,8 +50,6 @@ chrono:0123abcd in sesja:a88907fd
 </div><p>3</p></div>
 </div>
 <p>5</p>`
-
-### No Errors ###
 
 [parser]
 ROOT @ 0..216
@@ -135,8 +136,5 @@ ROOT @ 0..216
                 TOKEN @ 204..213 = `++ end ++`
             MARKDOWN, MD_PARAGRAPH, MD_VALUE, VALUE @ 215..216 = `5`
                 MD_TEXT @ 215..216 = `5`
-
-
-### No Errors ###
 
 

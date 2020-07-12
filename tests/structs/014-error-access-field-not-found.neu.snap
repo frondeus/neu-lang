@@ -39,12 +39,9 @@ ROOT @ 0..19 = `{\n    foo = 10,\n}.x`
         IDENTIFIER, TOKEN, VALUE @ 18..19 = `x`
 
 
-### No Errors ###
-
-
 [eval]
 None
 
-### Errors ###
-Field not found @ N12
+[errors]
+test.neu | N12 | Field not found
 

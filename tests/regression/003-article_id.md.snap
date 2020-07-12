@@ -5,6 +5,8 @@ where = "NY, London, Cair, Kenya, Australia, Shanghai"
 +++
 
 `````
+[errors]
+No errors
 
 [parser]
 ROOT @ 0..114
@@ -37,9 +39,6 @@ ROOT @ 0..114
                 TOKEN @ 109..110 = `\"`
             TOKEN @ 110..111 = `\n`
         TOKEN @ 111..114 = `+++`
-
-
-### No Errors ###
 
 
 [.render]

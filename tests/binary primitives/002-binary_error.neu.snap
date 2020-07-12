@@ -18,13 +18,9 @@ ROOT @ 0..7 = `true ==`
         ERROR, VALUE @ 7..7 = ``
 
 
-### Errors ###
-Expected one of number, `true`, `false`, `-`, `!`, `"`, `(`, `{`, `[`, identifier but found EOF @ N3
-
-
 [eval]
 None
 
-### Errors ###
-Expected one of number, `true`, `false`, `-`, `!`, `"`, `(`, `{`, `[`, identifier but found EOF @ N3
+[errors]
+test.neu | N3 | Expected one of number, `true`, `false`, `-`, `!`, `"`, `(`, `{`, `[`, identifier but found EOF
 

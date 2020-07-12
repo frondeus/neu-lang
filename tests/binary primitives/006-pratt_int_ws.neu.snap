@@ -32,11 +32,6 @@ ROOT @ 0..10 = `4 + 2\n * 5`
             NUMBER, TOKEN, VALUE @ 9..10 = `5`
 
 
-### No Errors ###
-
-
 [eval]
 `14`
-
-### No Errors ###
 

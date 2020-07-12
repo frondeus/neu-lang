@@ -7,12 +7,13 @@ a = 1 + 2
 Ala ma **kota**
 
 `````
+[errors]
+No errors
+
 [render]
 `<h1>Pośród Pradawnych Drzew</h1>
 <div class="side-table"><table><tr><th class="align-right">a</th><td>3</td></tr></table>
 </div><p>Ala ma <strong>kota</strong></p>`
-
-### No Errors ###
 
 [parser]
 ROOT @ 0..89
@@ -52,8 +53,5 @@ ROOT @ 0..89
                 MD_TEXT @ 74..81 = `Ala ma `
                 MD_STRONG @ 81..89 = `**kota**`
                     MD_TEXT @ 83..87 = `kota`
-
-
-### No Errors ###
 
 

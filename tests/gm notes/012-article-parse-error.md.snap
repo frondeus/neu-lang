@@ -13,13 +13,13 @@ Ala ma **kota**.
 
 `````
 
+[errors]
+test.md | N57 | Expected one of Text, PlusPlus, OpenBl but found `+]`
+
 [render]
 `<h1>Pośród Pradawnych Drzew</h1>
 <div class="side-table"><table><tr><th class="align-right">age</th><td>5</td></tr><tr><th class="align-right">chrono</th><td>20.06.1925</td></tr><tr><th class="align-right">desc</th><td>Sesja jednostrzałowa dla Macek II RP</td></tr><tr><th class="align-right">when</th><td>20.10.2019</td></tr></table>
 </div><p>Ala ma <strong>kota</strong>.</p><div class="error">Expected one of Text, PlusPlus, OpenBl but found `+]`</div>`
-
-### Errors ###
-Expected one of Text, PlusPlus, OpenBl but found `+]` @ N57
 
 [parser]
 ROOT @ 0..181
@@ -83,9 +83,5 @@ ROOT @ 0..181
                     MD_TEXT @ 170..174 = `kota`
                 MD_TEXT @ 176..177 = `.`
             ERROR @ 179..181 = `+]`
-
-
-### Errors ###
-Expected one of Text, PlusPlus, OpenBl but found `+]` @ N57
 
 

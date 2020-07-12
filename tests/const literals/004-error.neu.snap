@@ -2,6 +2,9 @@
 ???
 ```
 
+[errors]
+test.neu | N0 | Expected one of number, `true`, `false`, `-`, `!`, `"`, `(`, `{`, `[`, identifier but found `???`
+
 [lexer]
 [
     "Error `???`",
@@ -12,13 +15,6 @@ ROOT @ 0..3 = `???`
     ERROR, VALUE @ 0..3 = `???`
 
 
-### Errors ###
-Expected one of number, `true`, `false`, `-`, `!`, `"`, `(`, `{`, `[`, identifier but found `???` @ N0
-
-
 [eval]
 None
-
-### Errors ###
-Expected one of number, `true`, `false`, `-`, `!`, `"`, `(`, `{`, `[`, identifier but found `???` @ N0
 

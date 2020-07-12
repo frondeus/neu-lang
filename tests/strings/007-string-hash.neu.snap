@@ -1,0 +1,16 @@
+```
+ "foo # bar"
+```
+
+[parser]
+ROOT @ 0..12 = ` \"foo # bar\"`
+    TRIVIA @ 0..1 = ` `
+    STRING, VALUE @ 1..12 = `\"foo # bar\"`
+        TOKEN @ 1..2 = `\"`
+        STRVALUE, TOKEN @ 2..11 = `foo # bar`
+        TOKEN @ 11..12 = `\"`
+
+
+[eval]
+`"foo # bar"`
+

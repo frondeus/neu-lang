@@ -6,6 +6,12 @@
 }
 ```
 
+[errors]
+test.neu | N17 | Expected identifier but found `/*`
+test.neu | N19 | Expected `=` but found `baz`
+test.neu | N21 | Expected one of number, `true`, `false`, `-`, `!`, `"`, `(`, `{`, `[`, identifier but found `}`
+test.neu | N22 | Expected `}` but found EOF
+
 [lexer]
 [
     "OpenC `{`",
@@ -63,19 +69,6 @@ ROOT @ 0..63
         ERROR, TOKEN @ 63..63 = ``
 
 
-### Errors ###
-Expected identifier but found `/*` @ N17
-Expected `=` but found `baz` @ N19
-Expected one of number, `true`, `false`, `-`, `!`, `"`, `(`, `{`, `[`, identifier but found `}` @ N21
-Expected `}` but found EOF @ N22
-
-
 [eval]
 None
-
-### Errors ###
-Expected identifier but found `/*` @ N17
-Expected `=` but found `baz` @ N19
-Expected one of number, `true`, `false`, `-`, `!`, `"`, `(`, `{`, `[`, identifier but found `}` @ N21
-Expected `}` but found EOF @ N22
 

@@ -12,11 +12,6 @@ ROOT @ 0..11 = ` \"foo\n bar\"`
         TOKEN @ 10..11 = `\"`
 
 
-### No Errors ###
-
-
 [eval]
 `"foo\n bar"`
-
-### No Errors ###
 

@@ -1,12 +1,12 @@
 use crate::{Ancestors, Node, NodeId};
 use std::borrow::Borrow;
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 use std::fmt;
 
 #[derive(PartialEq, Eq, Clone)]
 pub struct Arena<Node, Err> {
     nodes: Vec<Node>,
-    errors: HashMap<NodeId, Err>,
+    errors: BTreeMap<NodeId, Err>,
 }
 
 impl<N, E> Default for Arena<N, E> {

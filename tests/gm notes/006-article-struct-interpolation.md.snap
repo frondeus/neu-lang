@@ -17,6 +17,8 @@ Ala ma **kota**.
 ```
 
 `````
+[errors]
+No errors
 
 [render]
 `<h1>Pośród Pradawnych Drzew</h1>
@@ -28,8 +30,6 @@ Ala ma **kota**.
     age = 5,
     hp = 15,
  }</code></pre>`
-
-### No Errors ###
 
 [parser]
 ROOT @ 0..223
@@ -115,8 +115,5 @@ ROOT @ 0..223
                         OP, TOKEN @ 213..214 = `.`
                         IDENTIFIER, TOKEN, VALUE @ 214..219 = `stats`
                     TRIVIA @ 219..220 = `\n`
-
-
-### No Errors ###
 
 

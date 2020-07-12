@@ -18,11 +18,6 @@ ROOT @ 0..17 = `md\"foo\n\n---\n\nbar\"`
         TOKEN @ 16..17 = `\"`
 
 
-### No Errors ###
-
-
 [eval]
 `"<p>foo</p><hr/><p>bar</p>"`
-
-### No Errors ###
 

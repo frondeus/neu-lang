@@ -51,9 +51,6 @@ ROOT @ 0..99
         TOKEN @ 98..99 = `}`
 
 
-### No Errors ###
-
-
 [eval]
 `{
     health = {
@@ -63,6 +60,4 @@ ROOT @ 0..99
         max = 100,
     },
  }`
-
-### No Errors ###
 
