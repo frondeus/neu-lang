@@ -16,7 +16,7 @@ fn all_diagnostics(db: &dyn Diagnostician) -> Vec<(FileId, NodeId, Diagnostic)> 
         .flat_map(|(path, id)| {
             let input = db.input_neu(path.clone());
             let mut parsed = db.parse_neu_syntax(path.clone());
-            let _evaled = eval(id, &mut parsed.arena, &input);
+            eval(id, &mut parsed.arena, &input);
             parsed
                 .arena
                 .components()

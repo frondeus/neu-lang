@@ -94,7 +94,8 @@ fn build_article(
         .unwrap_or_else(|| "???".to_string());
 
     let title = title.trim_matches('"');
-    log::info!("Rendering {}:{} - {}", kind, id, title);
+    //log::debug!("Rendering {}:{} - {}", kind, id, title);
+    log::debug!("Title - {}", title);
     let item_path = kind_path.join(&format!("{}.html", id));
 
     /*
@@ -166,19 +167,28 @@ fn build(root: &Path, dist: &Path) -> Result<()> {
 
     use neu_cli::span_ext::*;
     let diagnostics = db.all_diagnostics();
-    diagnostics.into_iter().for_each(|(path, id, error)| {
-        //TODO: This works only for markdown
-        let input = db.input_md(path.clone());
-        let lines = input.lines().map(ToString::to_string).collect::<Vec<_>>();
-        let parsed = db.parse_md_syntax(path.clone());
-        let node = parsed.arena.get(id);
-        if let Some(LineCols {
-            line, col_start, ..
-        }) = node.span.lines_cols(&lines).last()
-        {
-            eprintln!("{} | {}:{} | {}", path, line, col_start, error);
-        }
+    let diagnostics = diagnostics.into_iter()
+        .filter_map(|(path, id, error)| {
+            let input = db.input_md(path.clone());
+            let lines = input.lines().map(ToString::to_string).collect::<Vec<_>>();
+            let parsed = db.parse_md_syntax(path.clone());
+            let node = parsed.arena.get(id);
+            let path = PathBuf::from(path);
+            let path = path.strip_prefix(root).expect("Strip prefix");
+            node.span.lines_cols(&lines).last()
+                .map(|LineCols { line, col_start, .. }| format!("{} | {}:{} | {}", path.display(), line, col_start, error))
+    }).collect::<Vec<_>>();
+
+    if !diagnostics.is_empty() {
+        eprintln!("--- Diagnostics ---");
+    }
+    diagnostics.iter().for_each(|diagnostic| {
+        eprintln!("{}", diagnostic);
     });
+
+    let diagnostics_path = root.join(dist).join("diagnostics.json");
+    let mut file = std::fs::File::create(diagnostics_path)?;
+    file.write_all(serde_json::to_vec(&diagnostics)?.as_slice())?;
 
     Ok(())
 }

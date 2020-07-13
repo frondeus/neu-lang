@@ -1,21 +1,21 @@
 use derive_more::Display;
 use neu_parser::{TextRange, TokenKind};
 
-#[derive(Debug, PartialEq, Clone, Copy, Display)]
+#[derive(Display, Debug, PartialEq, Clone, Copy)]
 pub enum Token {
-    #[display("text")]
+    #[display(fmt = "text")]
     Text,
 
-    #[display("`++ end ++`")]
+    #[display(fmt = "`++ end ++`")]
     PlusPlusEnd,
 
-    #[display("`++`")]
+    #[display(fmt = "`++`")]
     PlusPlus,
 
-    #[display("`[+`")]
+    #[display(fmt = "`[+`")]
     OpenBl,
 
-    #[display("`+]`")]
+    #[display(fmt = "`+]`")]
     CloseBl,
 }
 

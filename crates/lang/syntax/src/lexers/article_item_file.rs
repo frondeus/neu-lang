@@ -6,7 +6,7 @@ pub enum Token {
     #[display(fmt = "`+++`")]
     ThreePlus,
 
-    #[display("error")]
+    #[display(fmt = "error")]
     Error,
 }
 

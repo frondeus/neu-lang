@@ -9,22 +9,22 @@ pub enum Token {
     #[display(fmt = "`++`")]
     PlusPlus,
 
-    #[display("` `, `\t`")]
+    #[display(fmt = "` `, `\t`")]
     InlineWhitespace,
 
-    #[display("`\n`, `\r\n`")]
+    #[display(fmt = "`\n`, `\r\n`")]
     NewLine,
 
-    #[display("identifier")]
+    #[display(fmt = "identifier")]
     Identifier,
 
-    #[display("`:`")]
+    #[display(fmt = "`:`")]
     Colon,
 
-    #[display("item id")]
+    #[display(fmt = "item id")]
     ItemId,
 
-    #[display("error")]
+    #[display(fmt = "error")]
     Error,
 }
 

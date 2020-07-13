@@ -37,7 +37,7 @@ fn find_mentions_in_md(
     orig_kind: &str,
     orig_id: &str,
     mentions: &mut Vec<Mention>,
-) -> Option<()> {
+) {
     let children = node.children.iter().copied().collect::<Vec<NodeId>>();
     for child_id in children {
         let child = nodes.get(child_id);
@@ -54,8 +54,8 @@ fn find_mentions_in_md(
                 }
             }
         }
+        find_mentions_in_md(_db, child, nodes, input, orig_kind, orig_id, mentions);
     }
-    Some(())
 }
 
 fn find_mentions(
@@ -90,7 +90,7 @@ fn find_mentions(
             let id = article_item.item_id(nodes, input).unwrap_or("???");
             mentions.push(Mention::new(orig_kind, orig_id, kind, id));
         } else if body.is(Nodes::Markdown) {
-            find_mentions_in_md(_db, body, nodes, input, orig_kind, orig_id, mentions)?;
+            find_mentions_in_md(_db, body, nodes, input, orig_kind, orig_id, mentions);
         }
     }
 
