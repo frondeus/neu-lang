@@ -232,6 +232,17 @@ function App() {
     const [article, setArticle] = useState(fromPath(location.pathname));
 
     useEffect(() => {
+        fetch('/neu/diagnostics.json')
+            .then(response => response.json())
+            .then(array => {
+                if(array.length > 0) {
+                    console.error('--- Diagnostics ---');
+                }
+                array.forEach(err => console.error(err));
+            });
+    });
+
+    useEffect(() => {
         function interceptClickEvent(e) {
             const target = e.target || e.srcElement;
             if (target.tagName === 'A') {
@@ -260,5 +271,4 @@ function App() {
 
 const domContainer = document.querySelector('#main');
 let dom = e(App);
-console.log('Dom', dom);
 ReactDOM.render(dom, domContainer);

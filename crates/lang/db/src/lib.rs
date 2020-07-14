@@ -43,27 +43,28 @@ fn all_diagnostics(db: &dyn Diagnostician) -> Vec<(FileId, NodeId, Diagnostic)> 
     diagnostics
 }
 
-#[salsa::database(
-    neu_syntax::db::ParserDatabase,
-    neu_render::db::RendererDatabase,
-    neu_analyze::db::AnalyzerDatabase,
-    crate::DiagnosticianDatabase
-)]
-#[derive(Default)]
-pub struct Database {
-    storage: salsa::Storage<Self>,
-}
-impl salsa::Database for Database {}
-
 #[cfg(test)]
 mod tests {
     use super::*;
     use itertools::Itertools;
 
+    #[salsa::database(
+        neu_render::db::RendererDatabase,
+        neu_analyze::db::AnalyzerDatabase,
+        neu_syntax::db::ParserDatabase,
+        DiagnosticianDatabase
+    )]
+    #[derive(Default)]
+    struct TestDb {
+        storage: salsa::Storage<Self>,
+    }
+
+    impl salsa::Database for TestDb {}
+
     #[test]
     fn neu_errors_tests() {
         test_runner::test_snapshots("neu", "errors", |input| {
-            let mut db = Database::default();
+            let mut db = TestDb::default();
             let path: String = "test.neu".into();
             db.set_all_mds(None.into_iter().collect());
             db.set_all_neu(Some(path.clone()).into_iter().collect());
@@ -84,7 +85,7 @@ mod tests {
     #[test]
     fn md_errors_tests() {
         test_runner::test_snapshots("md", "errors", |input| {
-            let mut db = Database::default();
+            let mut db = TestDb::default();
             let path: String = "test.md".into();
             db.set_all_neu(None.into_iter().collect());
             db.set_all_mds(Some(path.clone()).into_iter().collect());

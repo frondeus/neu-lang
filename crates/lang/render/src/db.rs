@@ -20,6 +20,8 @@ fn render_md(db: &dyn Renderer, path: FileId) -> RenderResult {
 }
 
 fn render_ast(db: &dyn Renderer, path: FileId, article_item: ArticleItem) -> RenderResult {
+    //log::info!("Rendering {}:{} - {}", kind, id, title);
+
     let input = db.input_md(path.clone());
     let mut parsed = db.parse_md_syntax(path);
 

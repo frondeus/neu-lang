@@ -2,7 +2,24 @@ use anyhow::anyhow;
 use anyhow::Result;
 use std::path::{Path, PathBuf};
 
+pub mod build;
+pub mod index;
+pub mod server;
 pub mod span_ext;
+pub mod watch;
+
+#[salsa::database(
+    neu_syntax::db::ParserDatabase,
+    neu_render::db::RendererDatabase,
+    neu_analyze::db::AnalyzerDatabase,
+    neu_db::DiagnosticianDatabase,
+    build::BuilderDatabase
+)]
+#[derive(Default)]
+pub struct Database {
+    storage: salsa::Storage<Self>,
+}
+impl salsa::Database for Database {}
 
 pub fn find_in_ancestors(start: Option<PathBuf>, indicator: impl AsRef<Path>) -> Result<PathBuf> {
     let mut path = match start {
