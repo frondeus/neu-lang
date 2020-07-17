@@ -49,7 +49,7 @@ fn main() -> Result<()> {
         }
         Command::Watch { path, dist } => {
             let root = find_in_ancestors(path, &dist)?;
-            watch::watch(&mut db, &root, &dist)?;
+            watch::watch(&mut db, &root, &dist, None)?;
         }
         Command::Serve { path, dist } => {
             let root = find_in_ancestors(path, &dist)?;
@@ -60,10 +60,11 @@ fn main() -> Result<()> {
                 .enable_all()
                 .build()
                 .unwrap();
+            let (tx, rx) = tokio::sync::mpsc::unbounded_channel::<()>();
             rt.spawn(async move {
-                server::run(&r, &d).await;
+                server::run(&r, &d, rx).await;
             });
-            watch::watch(&mut db, &root, &dist)?;
+            watch::watch(&mut db, &root, &dist, Some(tx))?;
         }
     }
 

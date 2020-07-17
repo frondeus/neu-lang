@@ -44,12 +44,36 @@ const SidebarTabs = [
     { icon: 'view_stream', by: 'kind' }
 ];
 
+function useHotReload() {
+    const [reload, setReload] = useState(false);
 
-function Article({kind, id}) {
+    useEffect(() => {
+        const uri = 'ws://' + location.host + '/hotreload';
+        console.log('Connect to: {}', uri);
+        const ws = new WebSocket(uri);
+        let reload = false;
+        ws.onopen = function() {
+            console.log('Hotreload active');
+        };
+        ws.onmessage = function(msg) {
+            console.log('Hotreload');
+            reload = !reload;
+            setReload(reload);
+        };
+        ws.onclose = function() {
+            console.log('Hotreload inactive')
+        };
+        return () => { ws.close(); }
+    }, [ true ]);
+    return reload;
+}
+
+function Article({kind, id, reload}) {
     const [html, setHtml] = useState("Loading...");
     const [hasTitle, setTitle] = useState(false);
 
     useEffect(() => {
+        console.log('Fetching article');
         fetch(`/neu/articles/${kind}/${id}.html`)
             .then(response => {
                 if (!response.ok) {
@@ -64,7 +88,7 @@ function Article({kind, id}) {
             .catch(err => {
                 setHtml(`Couldn't load article: ${err}`);
             });
-    }, [ kind, id ]);
+    }, [ kind, id, reload ]);
 
     useEffect(() => {
         const div_id = `${kind}_${id}`;
@@ -88,7 +112,7 @@ function Article({kind, id}) {
             }
         });
         // TODO: Replace with article metadata? Or at least cache http
-    }, [ kind, id ]);
+    }, [ kind, id, reload ]);
 
     return e('div', { className: 'article' }, [
         e('div', { key: "html", dangerouslySetInnerHTML: { __html: html } })
@@ -145,14 +169,14 @@ function IndexSearch({searched, setSearched }) {
     });
 }
 
-function Index({article, setArticle, tab}) {
+function Index({article, setArticle, tab, reload}) {
     const [index, setIndex] = useState([]);
     const [searched, setSearched] = useState("");
     const scrollState = useState(false);
 
     useEffect(() => {
         GetIndex(setIndex, tab[1], searched);
-    }, [ tab, searched ]);
+    }, [ tab, searched, reload ]);
 
     const children = index.flatMap(group => [
         e(IndexLabel, {key: group[0], label: group[0], count: group[1].length }),
@@ -200,7 +224,7 @@ function SidebarTabbar({tab, setTab, setVisible}) {
     }, children);
 }
 
-function LeftSidebar({article, setArticle}) {
+function LeftSidebar({article, setArticle, reload}) {
     const [tab, setTab] = useState([1, 'abc']);
     const [visible, setVisible] = useState(true);
 
@@ -219,7 +243,7 @@ function LeftSidebar({article, setArticle}) {
         className: 'left-sidebar expanded',
     }, [
         e(SidebarTabbar, { key: "tabbar", tab, setTab, setVisible }),
-        e(Index, {key:"idx", article, setArticle, tab })
+        e(Index, {key:"idx", article, setArticle, tab, reload })
     ]);
 }
 
@@ -231,6 +255,8 @@ function App() {
     };
     const [article, setArticle] = useState(fromPath(location.pathname));
 
+    const reload = useHotReload();
+
     useEffect(() => {
         fetch('/neu/diagnostics.json')
             .then(response => response.json())
@@ -240,7 +266,8 @@ function App() {
                 }
                 array.forEach(err => console.error(err));
             });
-    });
+    }, [ reload ]);
+
 
     useEffect(() => {
         function interceptClickEvent(e) {
@@ -264,8 +291,8 @@ function App() {
     }, [true]);
 
     return e('div', { className: 'app' }, [
-        e(LeftSidebar, { key: "left-sidebar", article, setArticle}),
-        e(Article, {key: "article", ...article}),
+        e(LeftSidebar, { key: "left-sidebar", article, setArticle, reload }),
+        e(Article, {key: "article", ...article, reload }),
     ]);
 }
 
