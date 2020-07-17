@@ -166,16 +166,7 @@ fn build_article_inner(
     log::debug!("Title - {}", title);
     let item_path = kind_path.join(&format!("{}.html", id));
 
-    /*
-    This is both bug and a feature.
-    If i can make my js to scroll to requested subarticle then ill leave it as it is.
-
-    Why this is a bug:
-    Each subarticle renders whole article.
-    So if in one article i have 100 subarticles, it renders 100 x 100 subarticles.
-
-    On the other hand is quite handy. My WCU takes around 1.4 MB of 61 subarticles.
-    */
+    // TODO: instead of rerendering it make a link to the original article.
     let rendered = db.render_md(path);
 
     log::debug!("To {}", item_path.display());
@@ -189,4 +180,45 @@ fn build_article_inner(
         title: title.into(),
         path: item_path.display().to_string(),
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use assert_fs::prelude::*;
+    use predicates::prelude::*;
+    use anyhow::Result;
+    use crate::Database;
+    use std::time::Duration;
+
+    #[test]
+    fn simple() -> Result<()> {
+        let md_file_a: PathBuf = "tests/a.md".into();
+        let md_file_b: PathBuf = "tests/b.md".into();
+
+        let temp = assert_fs::TempDir::new()?;
+        let root = temp.path();
+        let dist = PathBuf::from(".neu");
+
+        let md_a = temp.child("a.md");
+        md_a.touch()?;
+        md_a.write_file(&md_file_a)?;
+
+        let md_b = temp.child("b.md");
+        md_b.touch()?;
+        md_b.write_file(&md_file_b)?;
+
+
+        let mut db = Database::default();
+        build(&mut db, &root, &dist)?;
+
+        temp.child(".neu").assert(predicate::path::exists());
+        temp.child(".neu").child("articles").assert(predicate::path::exists());
+        temp.child(".neu").child("articles").child("test").assert(predicate::path::exists());
+        temp.child(".neu").child("articles").child("test").child("1234aaaa.html").assert(predicate::path::exists());
+        temp.child(".neu").child("articles").child("test").child("1234bbbb.html").assert(predicate::path::exists());
+
+        temp.close()?;
+        Ok(())
+    }
 }

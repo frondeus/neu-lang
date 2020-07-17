@@ -31,4 +31,5 @@ tokio = { version = "0.2.21", features = ["full"] }
 
 [dev-dependencies]
 assert_fs = "1.0.0"
+predicates = "1.0.0"
 
