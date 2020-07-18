@@ -21,7 +21,7 @@ pub struct DisplayRenderResult<'s, 'n> {
 
 impl<'s, 'n> fmt::Display for DisplayRenderResult<'s, 'n> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "`{}`", self.result.output)?;
+        write!(f, "{}", self.result.output)?;
         Ok(())
     }
 }

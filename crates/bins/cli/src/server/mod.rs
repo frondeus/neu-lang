@@ -1,12 +1,12 @@
-use std::path::Path;
-use warp::Filter;
-use futures::{StreamExt, FutureExt};
-use tokio::sync::mpsc::{UnboundedSender, UnboundedReceiver};
-use std::sync::atomic::{AtomicUsize, Ordering};
+use futures::{FutureExt, StreamExt};
 use std::collections::HashMap;
-use warp::ws::Message;
+use std::path::Path;
+use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
+use tokio::sync::mpsc::{UnboundedReceiver, UnboundedSender};
 use tokio::sync::RwLock;
+use warp::ws::Message;
+use warp::Filter;
 
 #[cfg(not(debug_assertions))]
 macro_rules! resource {
@@ -29,7 +29,7 @@ macro_rules! resource {
 
 static NEXT_USER_ID: AtomicUsize = AtomicUsize::new(1);
 
-type WsSockets =  Arc<RwLock< HashMap<usize, UnboundedSender< Result<Message, warp::Error> >> >>;
+type WsSockets = Arc<RwLock<HashMap<usize, UnboundedSender<Result<Message, warp::Error>>>>>;
 
 pub async fn run(root: &Path, dist: &Path, hot_rx: UnboundedReceiver<()>) {
     let neu = warp::path("neu").and(warp::fs::dir(root.join(dist)));
@@ -70,10 +70,9 @@ pub async fn run(root: &Path, dist: &Path, hot_rx: UnboundedReceiver<()>) {
     tokio::task::spawn(async move {
         let mut hot_rx = hot_rx;
         while hot_rx.next().await.is_some() {
-            for (_, tx) in wss.read().await
-                .iter() {
+            for (_, tx) in wss.read().await.iter() {
                 let s: String = "Reloaded".into();
-                if let Err(_e) = tx.send( Ok(Message::text(s)) ) {
+                if let Err(_e) = tx.send(Ok(Message::text(s))) {
                     log::error!("Could not send ws hotreload");
                 }
             }
@@ -82,31 +81,26 @@ pub async fn run(root: &Path, dist: &Path, hot_rx: UnboundedReceiver<()>) {
 
     let ws_sockets = warp::any().map(move || ws_sockets.clone());
 
-    let hotreload = warp::path("hotreload")
-        .and(warp::ws())
-        .and(ws_sockets)
-        .map(|ws: warp::ws::Ws, ws_sockets: WsSockets| {
-            ws.on_upgrade(move |socket| {
-                async move {
-                    let (user_ws_tx, mut user_ws_rx) = socket.split();
-                    let my_id = NEXT_USER_ID.fetch_add(1, Ordering::Relaxed);
-                    log::info!("New websocket connection: {}", my_id);
+    let hotreload = warp::path("hotreload").and(warp::ws()).and(ws_sockets).map(
+        |ws: warp::ws::Ws, ws_sockets: WsSockets| {
+            ws.on_upgrade(move |socket| async move {
+                let (user_ws_tx, mut user_ws_rx) = socket.split();
+                let my_id = NEXT_USER_ID.fetch_add(1, Ordering::Relaxed);
+                log::info!("New websocket connection: {}", my_id);
 
-                    let (tx, rx) = tokio::sync::mpsc::unbounded_channel();
-                    tokio::task::spawn(rx
-                        .forward(user_ws_tx).map(|result| {
-                        if let Err(e) = result {
-                            eprintln!("websocket send error: {}", e);
-                        }
-                    }));
-                    ws_sockets.write().await.insert(my_id, tx);
-                    while user_ws_rx.next().await.is_some() { }
-                    log::info!("websocket disconnected: {}", my_id);
-                    ws_sockets.write().await.remove(&my_id);
-
-                }
+                let (tx, rx) = tokio::sync::mpsc::unbounded_channel();
+                tokio::task::spawn(rx.forward(user_ws_tx).map(|result| {
+                    if let Err(e) = result {
+                        eprintln!("websocket send error: {}", e);
+                    }
+                }));
+                ws_sockets.write().await.insert(my_id, tx);
+                while user_ws_rx.next().await.is_some() {}
+                log::info!("websocket disconnected: {}", my_id);
+                ws_sockets.write().await.remove(&my_id);
             })
-        });
+        },
+    );
 
     let routes = neu
         .or(js)

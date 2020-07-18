@@ -19,6 +19,7 @@ use tokio::sync::RwLock;
 #[derive(Clone, Default)]
 pub struct NeovimHandler {
     state: Arc<RwLock<Option<State>>>,
+    db: Database
 }
 
 macro_rules! dbg {

@@ -21,7 +21,7 @@ Ala ma **kota**.
 No errors
 
 [render]
-`<h1>Pośród Pradawnych Drzew</h1>
+<h1>Pośród Pradawnych Drzew</h1>
 <div class="side-table"><table><tr><th class="align-right">chrono</th><td>20.06.1925</td></tr><tr><th class="align-right">desc</th><td>Sesja jednostrzałowa dla Macek II RP</td></tr><tr><th class="align-right">stats</th><td>{
     age = 5,
     hp = 15,
@@ -29,7 +29,7 @@ No errors
 </div><p>Ala ma <strong>kota</strong>.</p><pre><code>{
     age = 5,
     hp = 15,
- }</code></pre>`
+ }</code></pre>
 
 [parser]
 ROOT @ 0..223

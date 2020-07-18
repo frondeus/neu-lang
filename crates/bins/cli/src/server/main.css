@@ -133,7 +133,7 @@ html { font-size: 16px; }
 }
 
 th { border-bottom: 1px solid #ccc; }
-th.align-right { border-right: 1px solid #ccc; }
+th.align-right { border-right: 1px solid #ccc; border-bottom: 0px; }
 
 th, td { padding: 0.5em; word-wrap:break-word; }
 

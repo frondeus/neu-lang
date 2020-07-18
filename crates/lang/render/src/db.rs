@@ -13,6 +13,7 @@ pub trait Renderer: salsa::Database + Parser + Analyzer {
 }
 
 fn render_md(db: &dyn Renderer, path: FileId) -> RenderResult {
+    log::debug!("Rendering {}", &path);
     let parsed = db.parse_md_syntax(path.clone());
     let article_item = ArticleItem::from_root_syntax(&parsed);
 
@@ -25,8 +26,7 @@ fn render_ast(db: &dyn Renderer, path: FileId, article_item: ArticleItem) -> Ren
     let input = db.input_md(path.clone());
     let mut parsed = db.parse_md_syntax(path);
 
-    let rendered = _render(db, article_item, &mut parsed.arena, &input)
-        .unwrap_or_else(|| "Couldn't render, found errors".to_string());
+    let rendered = _render(db, article_item, &mut parsed.arena, &input);
 
     RenderResult {
         output: rendered,

@@ -79,7 +79,7 @@ fn build_all_inner(db: &dyn Builder, root: &Path, dist: &Path) -> Result<()> {
 
     let index = parsed_articles
         .into_iter()
-        .map(|(kind, id, path, ast)| build_article(db, kind, id, path, ast, articles_path.clone()))
+        .map(|(kind, id, path, ast)| db.build_article(kind, id, path, ast, articles_path.clone()))
         .collect::<Result<Vec<_>, IoError>>();
 
     let index: Index = index?.into();
@@ -142,10 +142,7 @@ fn build_article_inner(
     article_item: ArticleItem,
     articles_path: &Path,
 ) -> Result<IndexEntry> {
-    log::debug!("Rendering {}:{}", kind, id);
-    let kind_path = articles_path.join(&kind);
-    std::fs::create_dir_all(&kind_path)?;
-
+    //log::info!("Building {}:{}, {:?}, {:?}. {:?}", kind, id, path, article_item, articles_path);
     let input = db.input_md(path.clone());
     let mut parsed = db.parse_md_syntax(path.clone());
 
@@ -162,15 +159,16 @@ fn build_article_inner(
         .unwrap_or_else(|| "???".to_string());
 
     let title = title.trim_matches('"');
-    log::info!("Rendering {}:{} - {}", kind, id, title);
+    log::info!("Building {}:{} - {}", kind, id, title);
     log::debug!("Title - {}", title);
-    let item_path = kind_path.join(&format!("{}.html", id));
 
     // TODO: instead of rerendering it make a link to the original article.
     let rendered = db.render_md(path);
 
+    let kind_path = articles_path.join(&kind);
+    let item_path = kind_path.join(&format!("{}.html", id));
     log::debug!("To {}", item_path.display());
-
+    std::fs::create_dir_all(&kind_path)?;
     let mut file = std::fs::File::create(&item_path)?;
     file.write_all(rendered.output.as_bytes())?;
 
@@ -185,11 +183,12 @@ fn build_article_inner(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::Database;
+    use anyhow::Result;
+    use assert_fs::fixture::ChildPath;
     use assert_fs::prelude::*;
     use predicates::prelude::*;
-    use anyhow::Result;
-    use crate::Database;
-    use std::time::Duration;
+    use std::time::SystemTime;
 
     #[test]
     fn simple() -> Result<()> {
@@ -208,17 +207,80 @@ mod tests {
         md_b.touch()?;
         md_b.write_file(&md_file_b)?;
 
+        let mut db = Database::default();
+        build(&mut db, &root, &dist)?;
+
+        let res_a = temp
+            .child(".neu")
+            .child("articles")
+            .child("test")
+            .child("1234aaaa.html");
+        let res_b = temp
+            .child(".neu")
+            .child("articles")
+            .child("test")
+            .child("1234bbbb.html");
+
+        res_a.assert(predicate::path::exists());
+        res_b.assert(predicate::path::exists());
+
+        temp.close()?;
+        Ok(())
+    }
+
+    #[test]
+    fn incremental_a_changed() -> Result<()> {
+        let _ = env_logger::builder().is_test(true).try_init();
+
+        let md_file_a: PathBuf = "tests/a.md".into();
+        let md_file_a_modified: PathBuf = "tests/a-modified.md".into();
+        let md_file_b: PathBuf = "tests/b.md".into();
+
+        let temp = assert_fs::TempDir::new()?;
+        let root = temp.path();
+        let dist = PathBuf::from(".neu");
+
+        let md_a = temp.child("a.md");
+        md_a.touch()?;
+        md_a.write_file(&md_file_a)?;
+
+        let md_b = temp.child("b.md");
+        md_b.touch()?;
+        md_b.write_file(&md_file_b)?;
 
         let mut db = Database::default();
         build(&mut db, &root, &dist)?;
 
-        temp.child(".neu").assert(predicate::path::exists());
-        temp.child(".neu").child("articles").assert(predicate::path::exists());
-        temp.child(".neu").child("articles").child("test").assert(predicate::path::exists());
-        temp.child(".neu").child("articles").child("test").child("1234aaaa.html").assert(predicate::path::exists());
-        temp.child(".neu").child("articles").child("test").child("1234bbbb.html").assert(predicate::path::exists());
+        let res_a = temp
+            .child(".neu")
+            .child("articles")
+            .child("test")
+            .child("1234aaaa.html");
+        let res_b = temp
+            .child(".neu")
+            .child("articles")
+            .child("test")
+            .child("1234bbbb.html");
+
+        let a_time = modified(&res_a)?;
+        let b_time = modified(&res_b)?;
+
+        md_a.write_file(&md_file_a_modified)?;
+        let file = std::fs::read_to_string(md_a.path())?;
+        db.set_input_md(md_a.path().display().to_string(), file);
+
+        db.build_all(root.into(), dist.into())?;
+
+        assert_ne!(modified(&res_a)?, a_time);
+        assert_eq!(modified(&res_b)?, b_time);
 
         temp.close()?;
         Ok(())
+    }
+
+    fn modified(child: &ChildPath) -> Result<SystemTime> {
+        let metadata = std::fs::metadata(child.path())?;
+        let time = metadata.modified()?;
+        Ok(time)
     }
 }

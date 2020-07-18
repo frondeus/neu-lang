@@ -1,0 +1,37 @@
+`````
++++ monster:cd73e6b4 +++
+title = "Snake Man"
++++
+
+`````
+[errors]
+No errors
+
+[render]
+<h1>Snake Man</h1>
+<div class="side-table"></div>
+
+[parser]
+ROOT @ 0..48
+    ARTICLEITEM @ 0..48
+        TOKEN @ 0..3 = `+++`
+        TOKEN, TRIVIA @ 3..4 = ` `
+        IDENTIFIER, TOKEN @ 4..11 = `monster`
+        TOKEN @ 11..12 = `:`
+        ARTICLEITEMID, TOKEN @ 12..20 = `cd73e6b4`
+        TOKEN, TRIVIA @ 20..21 = ` `
+        TOKEN @ 21..24 = `+++`
+        TOKEN, TRIVIA @ 24..25 = `\n`
+        STRUCT, VALUE @ 25..45 = `title = \"Snake Man\"\n`
+            IDENTIFIER, KEY, TOKEN @ 25..30 = `title`
+            TRIVIA @ 30..31 = ` `
+            TOKEN @ 31..32 = `=`
+            TRIVIA @ 32..33 = ` `
+            STRING, VALUE @ 33..44 = `\"Snake Man\"`
+                TOKEN @ 33..34 = `\"`
+                STRVALUE, TOKEN @ 34..43 = `Snake Man`
+                TOKEN @ 43..44 = `\"`
+            TOKEN @ 44..45 = `\n`
+        TOKEN @ 45..48 = `+++`
+
+
