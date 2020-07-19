@@ -39,7 +39,7 @@ function! s:ConfigureJob(jobid)
     augroup neulang
         autocmd!
 
-        autocmd BufReadPre,FileReadPre *.neu :call s:Load()
+        autocmd BufReadPre,FileReadPre *.md :call s:Load() " *.neu
     augroup END
 endfunction
 

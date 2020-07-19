@@ -1,0 +1,66 @@
+`````
++++ sesja:a88907fd +++
+title = "Pośród Pradawnych Drzew"
+when = "20.10.2019"
+desc = "Sesja jednostrzałowa dla Macek II RP"
+chrono = "20.06.1925"
+
++++
+
+
+`````
+
+[errors]
+No errors
+
+[parser]
+ROOT @ 0..152
+    ARTICLEITEM @ 0..152
+        TOKEN @ 0..3 = `+++`
+        TOKEN, TRIVIA @ 3..4 = ` `
+        IDENTIFIER, TOKEN @ 4..9 = `sesja`
+        TOKEN @ 9..10 = `:`
+        ARTICLEITEMID, TOKEN @ 10..18 = `a88907fd`
+        TOKEN, TRIVIA @ 18..19 = ` `
+        TOKEN @ 19..22 = `+++`
+        TOKEN, TRIVIA @ 22..23 = `\n`
+        STRUCT, VALUE @ 23..149
+            IDENTIFIER, KEY, TOKEN @ 23..28 = `title`
+            TRIVIA @ 28..29 = ` `
+            TOKEN @ 29..30 = `=`
+            TRIVIA @ 30..31 = ` `
+            STRING, VALUE @ 31..58 = `\"Po\u{15b}r\u{f3}d Pradawnych Drzew\"`
+                TOKEN @ 31..32 = `\"`
+                STRVALUE, TOKEN @ 32..57 = `Po\u{15b}r\u{f3}d Pradawnych Drzew`
+                TOKEN @ 57..58 = `\"`
+            TOKEN @ 58..59 = `\n`
+            IDENTIFIER, KEY, TOKEN @ 59..63 = `when`
+            TRIVIA @ 63..64 = ` `
+            TOKEN @ 64..65 = `=`
+            TRIVIA @ 65..66 = ` `
+            STRING, VALUE @ 66..78 = `\"20.10.2019\"`
+                TOKEN @ 66..67 = `\"`
+                STRVALUE, TOKEN @ 67..77 = `20.10.2019`
+                TOKEN @ 77..78 = `\"`
+            TOKEN @ 78..79 = `\n`
+            IDENTIFIER, KEY, TOKEN @ 79..83 = `desc`
+            TRIVIA @ 83..84 = ` `
+            TOKEN @ 84..85 = `=`
+            TRIVIA @ 85..86 = ` `
+            STRING, VALUE @ 86..125 = `\"Sesja jednostrza\u{142}owa dla Macek II RP\"`
+                TOKEN @ 86..87 = `\"`
+                STRVALUE, TOKEN @ 87..124 = `Sesja jednostrza\u{142}owa dla Macek II RP`
+                TOKEN @ 124..125 = `\"`
+            TOKEN @ 125..126 = `\n`
+            IDENTIFIER, KEY, TOKEN @ 126..132 = `chrono`
+            TRIVIA @ 132..133 = ` `
+            TOKEN @ 133..134 = `=`
+            TRIVIA @ 134..135 = ` `
+            STRING, VALUE @ 135..147 = `\"20.06.1925\"`
+                TOKEN @ 135..136 = `\"`
+                STRVALUE, TOKEN @ 136..146 = `20.06.1925`
+                TOKEN @ 146..147 = `\"`
+            TOKEN @ 147..149 = `\n\n`
+        TOKEN @ 149..152 = `+++`
+
+

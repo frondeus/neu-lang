@@ -1,6 +1,7 @@
 use crate::build::Builder;
 use anyhow::Result;
 use ignore::gitignore::GitignoreBuilder;
+use neu_syntax::db::{FileId, FileKind};
 use notify::DebouncedEvent;
 use std::path::Path;
 use tokio::sync::mpsc::UnboundedSender;
@@ -47,15 +48,16 @@ pub fn watch(
                 if !matches.is_ignore() && path.exists() {
                     println!("\n\n\nChanged: {:?}", path);
                     let path_str = path.display().to_string();
+                    let file_id: FileId = (path_str, FileKind::Md);
                     //TODO: Only mds for now
                     let mut all_mds = db.all_mds();
-                    if !all_mds.contains(&path_str) {
+                    if !all_mds.contains(&file_id) {
                         println!("File did not existed");
-                        all_mds.insert(path_str.clone());
+                        all_mds.insert(file_id.clone());
                         db.set_all_mds(all_mds);
                     }
                     let file = std::fs::read_to_string(path)?;
-                    db.set_input_md(path_str, file);
+                    db.set_input(file_id, file);
                     db.build_all(root.into(), dist.into())?;
                     hotreload();
                 }
@@ -64,11 +66,11 @@ pub fn watch(
                 let is_dir = path.is_dir();
                 let matches = gitignore.matched_path_or_any_parents(&path, is_dir);
                 if !matches.is_ignore() && !path.exists() {
-                    let path_str = path.display().to_string();
+                    let file_id = (path.display().to_string(), FileKind::Md);
                     let mut all_mds = db.all_mds();
-                    if all_mds.contains(&path_str) {
+                    if all_mds.contains(&file_id) {
                         println!("\n\n\nRemoved: {:?}", path);
-                        all_mds.remove(&path_str);
+                        all_mds.remove(&file_id);
                         db.set_all_mds(all_mds);
                         db.build_all(root.into(), dist.into())?;
                         hotreload();

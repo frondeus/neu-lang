@@ -1,7 +1,8 @@
 use crate::db::Renderer;
-use neu_eval::{eval, Value};
+use neu_eval::Value;
 use neu_parser::{Arena, NodeId};
 use neu_syntax::ast::{ArticleItem, ArticleRef, Ast};
+use neu_syntax::db::FileId;
 use neu_syntax::Nodes;
 use std::collections::{BTreeMap, BTreeSet};
 
@@ -10,6 +11,12 @@ mod result;
 mod html;
 
 pub mod db;
+
+fn eval(db: &dyn Renderer, file: FileId, id: NodeId, nodes: &mut Arena) -> Option<Value> {
+    let result = db.eval(file, id);
+    nodes.merge(result.arena);
+    result.value
+}
 
 fn render_strukt(strukt: BTreeMap<String, Value>) -> String {
     let mut output = String::new();
@@ -26,7 +33,12 @@ fn render_strukt(strukt: BTreeMap<String, Value>) -> String {
     output
 }
 
-fn render_mentions(db: &dyn Renderer, kind: Option<&str>, id: Option<&str>) -> String {
+fn render_mentions(
+    db: &dyn Renderer,
+    kind: Option<&str>,
+    id: Option<&str>,
+    nodes: &mut Arena,
+) -> String {
     match (kind, id) {
         (Some(kind), Some(id)) => {
             let mut output = String::new();
@@ -48,14 +60,10 @@ fn render_mentions(db: &dyn Renderer, kind: Option<&str>, id: Option<&str>) -> S
                     output.push_str("<tr><td>");
                     match orig_item {
                         Some((orig_path, orig_item)) => {
-                            let orig_input = db.input_md(orig_path.clone());
-                            let mut orig_parsed = db.parse_md_syntax(orig_path.clone());
-
                             let title = orig_item
                                 .strukt
                                 .and_then(|strukt| {
-                                    let title = eval(strukt, &mut orig_parsed.arena, &orig_input)
-                                        .value?
+                                    let title = eval(db, orig_path, strukt, nodes)?
                                         .into_struct()?
                                         .remove("title")?;
                                     Some(html::render_value(&title).to_string())
@@ -89,6 +97,7 @@ fn render_mentions(db: &dyn Renderer, kind: Option<&str>, id: Option<&str>) -> S
 
 fn render_body(
     db: &dyn Renderer,
+    file_id: FileId,
     article_item: &ArticleItem,
     nodes: &mut Arena,
     input: &str,
@@ -108,8 +117,7 @@ fn render_body(
                 let s = format!(r#"<div class="error">{}</div>"#, err);
                 output.push_str(&s);
             } else if body.is(Nodes::Markdown) {
-                let markdown_eval = eval(body_id, nodes, input);
-                if let Some(markdown) = markdown_eval.value {
+                if let Some(markdown) = eval(db, file_id.clone(), body_id, nodes) {
                     output.push_str(&format!("{}", html::render_value(&markdown)));
                 }
             } else if body.is(Nodes::ArticleItem) {
@@ -121,7 +129,7 @@ fn render_body(
                     r#"<div class="article-item" id="{}_{}" >"#,
                     kind, id
                 ));
-                let rendered = _render(db, article_item, nodes, input);
+                let rendered = _render(db, file_id.clone(), article_item, nodes, input);
                 output.push_str(rendered.as_str());
                 output.push_str("</div>\n");
             } else if body.is(Nodes::ArticleRef) {
@@ -148,20 +156,21 @@ fn render_body(
     }
 }
 
-fn _render(db: &dyn Renderer, article_item: ArticleItem, nodes: &mut Arena, input: &str) -> String {
+fn _render(
+    db: &dyn Renderer,
+    file_id: FileId,
+    article_item: ArticleItem,
+    nodes: &mut Arena,
+    input: &str,
+) -> String {
     let mut output = String::default();
-
-    article_item.anchor_body(nodes);
 
     let kind = article_item.identifier(nodes, input);
     let id = article_item.item_id(nodes, input);
 
     let mut strukt = article_item
         .strukt
-        .and_then(|strukt| {
-            let strukt_eval = eval(strukt, nodes, &input);
-            strukt_eval.value?.into_struct()
-        })
+        .and_then(|strukt| eval(db, file_id.clone(), strukt, nodes)?.into_struct())
         .unwrap_or_default();
 
     if let Some(title) = strukt.remove("title") {
@@ -171,11 +180,11 @@ fn _render(db: &dyn Renderer, article_item: ArticleItem, nodes: &mut Arena, inpu
     output.push_str(r#"<div class="side-table">"#);
 
     output.push_str(&render_strukt(strukt));
-    output.push_str(&render_mentions(db, kind, id));
+    output.push_str(&render_mentions(db, kind, id, nodes));
 
     output.push_str("</div>");
 
-    output.push_str(&render_body(db, &article_item, nodes, input));
+    output.push_str(&render_body(db, file_id, &article_item, nodes, input));
 
     output
 }
@@ -183,10 +192,11 @@ fn _render(db: &dyn Renderer, article_item: ArticleItem, nodes: &mut Arena, inpu
 #[cfg(test)]
 mod tests {
     use super::*;
-    use neu_syntax::db::Parser;
+    use neu_syntax::db::{FileKind, Parser};
 
     #[salsa::database(
         crate::db::RendererDatabase,
+        neu_eval::db::EvaluatorDatabase,
         neu_analyze::db::AnalyzerDatabase,
         neu_syntax::db::ParserDatabase
     )]
@@ -201,9 +211,9 @@ mod tests {
     fn render_tests() {
         test_runner::test_snapshots("md", "render", |input| {
             let mut db = TestDb::default();
-            let path: String = "test".into();
+            let path: FileId = ("test".into(), FileKind::Md);
             db.set_all_mds(Some(path.clone()).into_iter().collect());
-            db.set_input_md(path.clone(), input.into());
+            db.set_input(path.clone(), input.into());
             let result = db.render_md(path);
 
             result.display(input).to_string()

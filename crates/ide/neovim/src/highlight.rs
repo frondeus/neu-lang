@@ -15,10 +15,18 @@ impl NodeHighlight for Node {
             Some("Boolean")
         } else if self.is(Nodes::Op) {
             Some("Operator")
-        } else if self.is_any(&[Nodes::String, Nodes::Markdown]) {
-            Some("String")
-        } else if self.is_any(&[Nodes::Md_Emphasis, Nodes::Md_Strong]) {
+        } else if self.is(Nodes::ArticleBody) {
+            Some("None")
+        } else if self.is_any(&[
+            Nodes::Md_Emphasis,
+            Nodes::Md_Strong,
+            Nodes::Md_H1,
+            Nodes::Md_H2,
+            Nodes::Md_H3,
+        ]) {
             Some("Operator")
+        } else if self.is_any(&[Nodes::String, Nodes::Markdown]) && !self.is(Nodes::Md_Value) {
+            Some("String")
         } else if self.is(Nodes::Md_Link) {
             Some("Underlined")
         } else if self.is(Nodes::Identifier) {

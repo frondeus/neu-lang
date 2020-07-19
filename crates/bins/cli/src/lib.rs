@@ -11,6 +11,7 @@ pub mod watch;
 #[salsa::database(
     neu_syntax::db::ParserDatabase,
     neu_render::db::RendererDatabase,
+    neu_eval::db::EvaluatorDatabase,
     neu_analyze::db::AnalyzerDatabase,
     neu_db::DiagnosticianDatabase,
     build::BuilderDatabase

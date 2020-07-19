@@ -1,10 +1,9 @@
 use crate::index::{Index, IndexEntry};
 use anyhow::Result;
 use neu_db::Diagnostician;
-use neu_eval::eval;
 use neu_render::db::Renderer;
 use neu_syntax::ast::ArticleItem;
-use neu_syntax::db::{ArticleId, FileId, Kind, Parser};
+use neu_syntax::db::{ArticleId, FileId, FileKind, Kind, Parser};
 use std::io::Write;
 use std::path::{Path, PathBuf};
 use thiserror::Error;
@@ -52,16 +51,16 @@ pub(crate) fn scan_all(db: &mut dyn Builder, root: &Path) -> Result<()> {
     db.set_all_mds(
         articles
             .iter()
-            .map(|path| path.display().to_string())
+            .map(|path| (path.display().to_string(), FileKind::Md))
             .collect(),
     );
 
     for entry in &articles {
-        let entry_str = entry.display().to_string();
+        let file_id = (entry.display().to_string(), FileKind::Md);
 
         let file = std::fs::read_to_string(entry)?;
         let input = &file;
-        db.set_input_md(entry_str.clone(), input.clone());
+        db.set_input(file_id.clone(), input.clone());
     }
     Ok(())
 }
@@ -92,11 +91,11 @@ fn build_all_inner(db: &dyn Builder, root: &Path, dist: &Path) -> Result<()> {
     let diagnostics = diagnostics
         .into_iter()
         .filter_map(|(path, id, error)| {
-            let input = db.input_md(path.clone());
+            let input = db.input(path.clone());
             let lines = input.lines().map(ToString::to_string).collect::<Vec<_>>();
-            let parsed = db.parse_md_syntax(path.clone());
+            let parsed = db.parse_syntax(path.clone());
             let node = parsed.arena.get(id);
-            let path = PathBuf::from(path);
+            let path = PathBuf::from(path.0);
             let path = path.strip_prefix(root).expect("Strip prefix");
             node.span.lines_cols(&lines).last().map(
                 |LineCols {
@@ -143,12 +142,9 @@ fn build_article_inner(
     articles_path: &Path,
 ) -> Result<IndexEntry> {
     //log::info!("Building {}:{}, {:?}, {:?}. {:?}", kind, id, path, article_item, articles_path);
-    let input = db.input_md(path.clone());
-    let mut parsed = db.parse_md_syntax(path.clone());
-
     let strukt = article_item
         .strukt
-        .map(|strukt| eval(strukt, &mut parsed.arena, &input))
+        .map(|strukt| db.eval(path.clone(), strukt))
         .and_then(|strukt_eval| strukt_eval.value)
         .and_then(|value| value.into_struct());
 
@@ -267,7 +263,7 @@ mod tests {
 
         md_a.write_file(&md_file_a_modified)?;
         let file = std::fs::read_to_string(md_a.path())?;
-        db.set_input_md(md_a.path().display().to_string(), file);
+        db.set_input((md_a.path().display().to_string(), FileKind::Md), file);
 
         db.build_all(root.into(), dist.into())?;
 

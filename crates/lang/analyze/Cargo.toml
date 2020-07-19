@@ -8,6 +8,7 @@ edition = "2018"
 
 [dependencies]
 neu-parser = { path = "../../utils/parser" }
+neu-canceled = { path = "../../utils/canceled" }
 neu-syntax = { path = "../syntax" }
 
 itertools = "0.9.0"

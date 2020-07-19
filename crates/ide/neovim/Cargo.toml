@@ -10,8 +10,12 @@ edition = "2018"
 neu-parser = { path = "../../utils/parser" }
 neu-syntax = { path = "../../lang/syntax" }
 neu-eval = { path = "../../lang/eval" }
+neu-render = { path = "../../lang/render" }
+neu-analyze = { path = "../../lang/analyze" }
+neu-db = { path = "../../lang/db" }
+neu-canceled = { path = "../../utils/canceled" }
 
-nvim-rs = { git = "https://github.com/frondeus/nvim-rs.git", branch = "wpo_buffer_clone", features = ["use_tokio"] }
+nvim-rs = { git = "https://github.com/KillTheMule/nvim-rs.git", branch = "master", features = ["use_tokio"] }
 tokio = "0.2.17"
 async-trait = "0.1.30"
 rmpv = "0.4.4"
@@ -20,3 +24,7 @@ itertools = "0.9.0"
 log = "0.4.8"
 env_logger = "0.7.1"
 derive_more = "0.99.5"
+salsa = "0.15.0"
+futures = "0.3.5"
+human-panic = "1.0.3"
+crossbeam = "0.7.3"

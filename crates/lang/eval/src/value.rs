@@ -2,7 +2,7 @@ use neu_parser::NodeId;
 use std::collections::BTreeMap;
 use std::fmt;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Value {
     Number(i64),
     Boolean(bool),

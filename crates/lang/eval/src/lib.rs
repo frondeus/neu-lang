@@ -3,7 +3,8 @@ mod markdown;
 mod result;
 mod value;
 
-use crate::result::EvalResult;
+pub mod db;
+
 use error::Error;
 use neu_diagnostics::{Diagnostic, ToReport};
 use neu_parser::{Arena, Children, Node, NodeId};
@@ -246,29 +247,29 @@ impl<'a> Eval<'a> {
     }
 }
 
-pub fn eval(id: NodeId, arena: &mut Arena, input: &str) -> EvalResult {
-    let mut eval = Eval::new(arena, input);
-    let value = eval.eval(id).and_then(|val| eval.into_eager(val, true));
-    let new_arena = eval.new_arena;
-    arena.merge(new_arena);
-    EvalResult {
-        value, //errors: eval.errors,
-    }
-}
-
 #[cfg(test)]
 mod tests {
-    use super::*;
-    use neu_parser::{ParseResult, State};
-    use neu_syntax::{lexers::neu::Lexer, parsers::neu::parser};
+    use crate::db::Evaluator;
+    use neu_syntax::db::{FileId, FileKind, Parser};
+
+    #[salsa::database(crate::db::EvaluatorDatabase, neu_syntax::db::ParserDatabase)]
+    #[derive(Default)]
+    struct TestDb {
+        storage: salsa::Storage<Self>,
+    }
+
+    impl salsa::Database for TestDb {}
 
     #[test]
     fn eval_tests() {
         test_runner::test_snapshots("neu", "eval", |input| {
-            let lexer = Lexer::new(input);
-
-            let mut res: ParseResult = State::parse(lexer, parser());
-            let result = eval(res.root, &mut res.arena, input);
+            let mut db = TestDb::default();
+            let path: FileId = ("test".into(), FileKind::Neu);
+            db.set_all_mds(None.into_iter().collect());
+            db.set_all_neu(Some(path.clone()).into_iter().collect());
+            db.set_input(path.clone(), input.into());
+            let parsed = db.parse_syntax(path.clone());
+            let result = db.eval(path, parsed.root);
 
             result.display(input).to_string()
         })

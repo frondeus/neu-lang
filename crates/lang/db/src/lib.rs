@@ -1,5 +1,5 @@
+use neu_canceled::Canceled;
 use neu_diagnostics::Diagnostic;
-use neu_eval::eval;
 use neu_parser::NodeId;
 use neu_render::db::Renderer;
 use neu_syntax::db::{FileId, Parser};
@@ -10,14 +10,15 @@ pub trait Diagnostician: salsa::Database + Parser + Renderer {
 }
 
 fn all_diagnostics(db: &dyn Diagnostician) -> Vec<(FileId, NodeId, Diagnostic)> {
+    Canceled::cancel_if(db.salsa_runtime());
+
     let mut diagnostics: Vec<_> = db
         .parse_all_neu()
         .into_iter()
         .flat_map(|(path, id)| {
-            let input = db.input_neu(path.clone());
-            let mut parsed = db.parse_neu_syntax(path.clone());
-            eval(id, &mut parsed.arena, &input);
-            parsed
+            // eva result contains ast from parser so it has both eval and syntax errors.
+            let evaled = db.eval(path.clone(), id);
+            evaled
                 .arena
                 .components()
                 .map(|(node_id, diagnostic)| (path.clone(), node_id, diagnostic.clone()))
@@ -47,9 +48,11 @@ fn all_diagnostics(db: &dyn Diagnostician) -> Vec<(FileId, NodeId, Diagnostic)> 
 mod tests {
     use super::*;
     use itertools::Itertools;
+    use neu_syntax::db::FileKind;
 
     #[salsa::database(
         neu_render::db::RendererDatabase,
+        neu_eval::db::EvaluatorDatabase,
         neu_analyze::db::AnalyzerDatabase,
         neu_syntax::db::ParserDatabase,
         DiagnosticianDatabase
@@ -65,10 +68,10 @@ mod tests {
     fn neu_errors_tests() {
         test_runner::test_snapshots("neu", "errors", |input| {
             let mut db = TestDb::default();
-            let path: String = "test.neu".into();
+            let path: FileId = ("test.neu".into(), FileKind::Neu);
             db.set_all_mds(None.into_iter().collect());
             db.set_all_neu(Some(path.clone()).into_iter().collect());
-            db.set_input_neu(path, input.into());
+            db.set_input(path, input.into());
 
             let diagnostics = db.all_diagnostics();
             if diagnostics.is_empty() {
@@ -76,7 +79,7 @@ mod tests {
             }
             diagnostics
                 .into_iter()
-                .map(|(path, id, diagnostic)| format!("{} | {:?} | {}", path, id, diagnostic))
+                .map(|(path, id, diagnostic)| format!("{} | {:?} | {}", path.0, id, diagnostic))
                 .join("\n")
         })
         .unwrap();
@@ -86,10 +89,10 @@ mod tests {
     fn md_errors_tests() {
         test_runner::test_snapshots("md", "errors", |input| {
             let mut db = TestDb::default();
-            let path: String = "test.md".into();
+            let path: FileId = ("test.md".into(), FileKind::Md);
             db.set_all_neu(None.into_iter().collect());
             db.set_all_mds(Some(path.clone()).into_iter().collect());
-            db.set_input_md(path, input.into());
+            db.set_input(path, input.into());
 
             let diagnostics = db.all_diagnostics();
             if diagnostics.is_empty() {
@@ -97,7 +100,7 @@ mod tests {
             }
             diagnostics
                 .into_iter()
-                .map(|(path, id, diagnostic)| format!("{} | {:?} | {}", path, id, diagnostic))
+                .map(|(path, id, diagnostic)| format!("{} | {:?} | {}", path.0, id, diagnostic))
                 .join("\n")
         })
         .unwrap();

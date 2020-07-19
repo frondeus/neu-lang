@@ -1,9 +1,11 @@
 use crate::value::Value;
+use neu_parser::Arena;
 use std::fmt;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub struct EvalResult {
     pub value: Option<Value>,
+    pub arena: Arena,
 }
 
 impl EvalResult {

@@ -101,7 +101,7 @@ fn find_mentions(
 mod tests {
     use super::*;
     use itertools::Itertools;
-    use neu_syntax::db::Parser;
+    use neu_syntax::db::{FileId, FileKind, Parser};
     use std::fmt;
 
     impl fmt::Display for Mention {
@@ -126,9 +126,9 @@ mod tests {
     fn analyze_tests() {
         test_runner::test_snapshots("md", "mentions", |input| {
             let mut db = TestDb::default();
-            let path: String = "test".into();
+            let path: FileId = ("test".into(), FileKind::Md);
             db.set_all_mds(Some(path.clone()).into_iter().collect());
-            db.set_input_md(path, input.into());
+            db.set_input(path, input.into());
 
             db.all_mentions()
                 .into_iter()

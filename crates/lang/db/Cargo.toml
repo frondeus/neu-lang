@@ -11,6 +11,7 @@ neu-syntax = { path = "../syntax" }
 neu-eval = { path = "../eval" }
 neu-render = { path = "../render" }
 neu-analyze = { path = "../analyze" }
+neu-canceled = { path = "../../utils/canceled" }
 
 neu-parser = { path = "../../utils/parser" }
 neu-diagnostics = { path = "../../utils/diagnostics" }

@@ -61,8 +61,10 @@ impl TokenKind for Token {
         }
 
         if i.starts_with('\n') {
-            return Some((Token::NewLine, input.chomp(1)));
+            let rest = i.chars().take_while(|c| *c == '\n').count();
+            return Some((Token::NewLine, input.chomp(rest)));
         }
+
         if i.starts_with("\r\n") {
             return Some((Token::NewLine, input.chomp(2)));
         }

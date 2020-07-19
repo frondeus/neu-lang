@@ -24,7 +24,7 @@
 *** TODO Hard Break
 *** TODO Check mark
 *** TODO Treat markdown like structure instead of forcing html render
-** Gm notes [7/9]
+** Gm notes [8/9]
 *** DONE Generate json
 *** DONE Markdown article
 *** DONE Generate subarticle
@@ -32,15 +32,15 @@
 *** DONE Salsa
 *** DONE Mentions
 *** DONE Mentions - iterae thru ALL markdown not only root
-*** TODO Watch
+*** DONE Watch
 *** TODO Salsa eval
 ** GUI
-*** TODO Webhook for html
-** Neovim [0/5]
+*** DONE Webhook for html
+** Neovim [1/5]
 *** TODO Add autocompletion
 *** TODO Add intentions
 *** TODO Add expand selections
-*** TODO Salsa
+*** DONE Salsa
 *** TODO Gm notes
 ** TODO Tuples [/]
 ** TODO Type system

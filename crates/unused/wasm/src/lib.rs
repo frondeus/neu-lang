@@ -47,7 +47,7 @@ pub fn on_change(buf: &str) {
     let lines = buf.lines().map(|s| s.to_string()).collect::<Vec<_>>();
 
     let parse_result: ParseResult = State::parse(Lexer::new(buf), parser());
-    let mut arena = parse_result.arena;
+    let arena = parse_result.arena;
 
     clear_diagnostics();
 
@@ -73,14 +73,14 @@ pub fn on_change(buf: &str) {
         })
         .collect::<Vec<Diagnostic>>();
 
-    let root = parse_result.root;
+    //let root = parse_result.root;
 
-    let root_eval_result = neu_eval::eval(root, &mut arena, &buf);
+    //let root_eval_result = neu_eval::eval(root, &mut arena, &buf);
     //log(&format!("{}", &root_eval_result.display(buf)));
 
-    if let Some(value) = root_eval_result.value {
-        write_eval(format!("= {}", &value));
-    }
+    //if let Some(value) = root_eval_result.value {
+    //write_eval(format!("= {}", &value));
+    //}
 
     for diagnostic in diagnostics {
         write_diagnostic(diagnostic);
