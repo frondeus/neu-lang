@@ -17,10 +17,11 @@ fn all_diagnostics(db: &dyn Diagnostician) -> Vec<(FileId, NodeId, Diagnostic)> 
         .into_iter()
         .flat_map(|(path, id)| {
             // eva result contains ast from parser so it has both eval and syntax errors.
+            let parsed = db.parse_syntax(path);
             let evaled = db.eval(path, id);
-            evaled
-                .arena
-                .components()
+
+            parsed.errors.iter()
+                .chain(evaled.errors.iter())
                 .map(|(node_id, diagnostic)| (path, node_id, diagnostic.clone()))
                 .collect::<Vec<_>>()
         })
@@ -30,12 +31,13 @@ fn all_diagnostics(db: &dyn Diagnostician) -> Vec<(FileId, NodeId, Diagnostic)> 
         .parse_all_mds()
         .into_iter()
         .flat_map(|(_kind, _id, path, ast)| {
+            let parsed = db.parse_syntax(path);
+            let evaled = db.eval(path, ast.id);
             let rendered = db.render_ast(path, ast);
 
-            // render result contains ast from parser so it has both render and syntax errors.
-            rendered
-                .arena
-                .components()
+            parsed.errors.iter()
+                .chain(evaled.errors.iter())
+                .chain(rendered.errors.iter())
                 .map(|(node_id, diagnostic)| (path, node_id, diagnostic.clone()))
                 .collect::<Vec<_>>()
         });

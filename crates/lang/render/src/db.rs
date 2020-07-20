@@ -26,18 +26,13 @@ fn render_md(db: &dyn Renderer, path: FileId) -> Arc<RenderResult> {
 
 fn render_ast(db: &dyn Renderer, path: FileId, article_item: ArticleItem) -> Arc<RenderResult> {
     Canceled::cancel_if(db.salsa_runtime());
-    //log::info!("Rendering {}:{} - {}", kind, id, title);
-
-    let input = db.input(path);
     let parsed = db.parse_syntax(path);
-    let mut arena = parsed.arena.clone();
 
-    let rendered = _render(db, path, article_item, &mut arena, &input);
+    let mut result = RenderResult::default();
 
-    Arc::new(RenderResult {
-        output: rendered,
-        arena,
-    })
+    _render(db, path, article_item, &parsed, &mut result);
+
+    Arc::new(result)
 }
 
 fn render_item(db: &dyn Renderer, kind: String, id: String) -> Arc<RenderResult> {
@@ -49,7 +44,7 @@ fn render_item(db: &dyn Renderer, kind: String, id: String) -> Arc<RenderResult>
         None => {
             return Arc::new(RenderResult {
                 output: format!("Couldn't render, article {}:{} not found", kind, id),
-                arena: Default::default(),
+                ..Default::default()
             });
         }
     };

@@ -1,11 +1,12 @@
 use crate::{Arena, Context, Lexer, NodeId, Parser, TokenKind};
-use neu_diagnostics::{Diagnostic, Diagnostics};
+use neu_diagnostics::{Diagnostic, DiagnosticVec, Diagnostics};
 use std::fmt;
 
 pub struct State<Tok: TokenKind> {
     lexer: Lexer<Tok>,
-    new_errors: Diagnostics,
+    new_errors: DiagnosticVec,
     arena: Arena,
+    errors: Diagnostics<NodeId>
 }
 
 impl<Tok: TokenKind> State<Tok> {
@@ -14,6 +15,7 @@ impl<Tok: TokenKind> State<Tok> {
             lexer,
             new_errors: Default::default(),
             arena: Default::default(),
+            errors: Default::default()
         }
     }
 
@@ -28,6 +30,7 @@ impl<Tok: TokenKind> State<Tok> {
         State {
             lexer,
             arena: std::mem::take(&mut self.arena),
+            errors: std::mem::take(&mut self.errors),
             new_errors: Default::default(),
         }
     }
@@ -40,6 +43,7 @@ impl<Tok: TokenKind> State<Tok> {
         let lexer: Lexer<Tok> = other.lexer().transform();
         self.lexer = lexer;
         self.arena = std::mem::take(&mut other.arena);
+        self.errors = std::mem::take(&mut other.errors);
     }
 
     pub fn nodes(&mut self) -> &mut Arena {
@@ -60,7 +64,7 @@ impl<Tok: TokenKind> State<Tok> {
 
     pub fn commit_errors(&mut self, id: NodeId) {
         for error in self.new_errors.drain(..) {
-            self.arena.add_err(id, error);
+            self.errors.add(id, error);
         }
     }
 
@@ -70,8 +74,9 @@ impl<Tok: TokenKind> State<Tok> {
         let root = parser.parse(&mut state, &ctx);
         let root = state.nodes().add(root);
         let arena = state.arena;
+        let errors = state.errors;
 
-        ParseResult { root, arena }
+        ParseResult { root, arena, errors }
     }
 }
 
@@ -80,6 +85,7 @@ impl<Tok: TokenKind> State<Tok> {
 pub struct ParseResult {
     pub root: NodeId,
     pub arena: Arena,
+    pub errors: Diagnostics<NodeId>
 }
 
 impl ParseResult {

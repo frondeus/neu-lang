@@ -1,10 +1,10 @@
-use neu_parser::Arena;
+use neu_parser::{NodeId, Diagnostics};
 use std::fmt;
 
-#[derive(Debug, PartialEq, Eq, Clone)]
+#[derive(Debug, Default, PartialEq, Eq, Clone)]
 pub struct RenderResult {
     pub output: String,
-    pub arena: Arena,
+    pub errors: Diagnostics<NodeId>
 }
 
 impl RenderResult {

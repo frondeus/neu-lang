@@ -1,7 +1,7 @@
 use crate::Nodes;
 use neu_parser::{Arena, Children, Node, NodeId, ParseResult};
 
-pub trait RootAst: Default + Ast {
+pub trait RootAst: Ast {
     //fn from_root_syntax(id: NodeId, nodes: &Arena) -> Self where Self: Sized {
     fn from_root_syntax(ParseResult { root, arena, .. }: &ParseResult) -> Self
     where
@@ -13,11 +13,11 @@ pub trait RootAst: Default + Ast {
             .iter()
             .filter_map(|id| Self::from_syntax(*id, arena))
             .next()
-            .unwrap_or_default()
+            .unwrap_or_else(|| Self::default(*root))
     }
-}
 
-impl<A> RootAst for A where A: Default + Ast {}
+    fn default(id: NodeId) -> Self where Self: Sized;
+}
 
 pub trait Ast {
     fn from_syntax(id: NodeId, nodes: &Arena) -> Option<Self>
@@ -65,12 +65,19 @@ impl ArticleRef {
     }
 }
 
-#[derive(Debug, Default, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct ArticleItem {
+    pub id: NodeId,
     pub identifier: Option<NodeId>,
     pub item_id: Option<NodeId>,
     pub strukt: Option<NodeId>,
     pub body: Option<NodeId>,
+}
+
+impl RootAst for ArticleItem {
+    fn default(id: NodeId) -> Self {
+        Self { id, identifier: None, item_id: None, strukt: None, body: None }
+    }
 }
 
 impl Ast for ArticleItem {
@@ -88,6 +95,7 @@ impl Ast for ArticleItem {
         let body = children.find_node(Nodes::ArticleBody).map(get_id);
 
         Some(Self {
+            id,
             identifier,
             item_id,
             strukt,

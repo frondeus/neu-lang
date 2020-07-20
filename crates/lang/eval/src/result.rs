@@ -1,11 +1,12 @@
 use crate::value::Value;
-use neu_parser::Arena;
+use neu_parser::{NodeId};
 use std::fmt;
+use neu_diagnostics::Diagnostics;
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub struct EvalResult {
     pub value: Option<Value>,
-    pub arena: Arena,
+    pub errors: Diagnostics<NodeId>
 }
 
 impl EvalResult {

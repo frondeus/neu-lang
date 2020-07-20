@@ -1,11 +1,11 @@
 use crate::{Arena, Node, NodeId};
 
-pub struct Ancestors<'a, Node, Err> {
+pub struct Ancestors<'a, Node> {
     pub(crate) current: Option<NodeId>,
-    pub(crate) arena: &'a Arena<Node, Err>,
+    pub(crate) arena: &'a Arena<Node>,
 }
 
-impl<'a, N: Node, E> Iterator for Ancestors<'a, N, E> {
+impl<'a, N: Node> Iterator for Ancestors<'a, N> {
     type Item = NodeId;
 
     fn next(&mut self) -> Option<Self::Item> {

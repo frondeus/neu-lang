@@ -19,9 +19,7 @@ pub fn parser() -> impl Parser<FileToken> {
             Some(FileToken::ThreePlus) => {
                 builder.parse(main_item());
             }
-            Some(FileToken::Error) => {
-                //todo!("In theory this may be a classic md file so ignore it now.")
-            }
+            Some(FileToken::Error) => { }
         }
         builder.parse(token(None));
     })

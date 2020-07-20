@@ -101,7 +101,7 @@ fn find_mentions(
 mod tests {
     use super::*;
     use itertools::Itertools;
-    use neu_syntax::db::{FileId, FileKind, Parser};
+    use neu_syntax::db::{FileKind, Parser};
     use std::fmt;
     use std::sync::Arc;
 
@@ -127,7 +127,6 @@ mod tests {
     fn analyze_tests() {
         test_runner::test_snapshots("md", "mentions", |input| {
             let mut db = TestDb::default();
-            //let path: FileId = ("test".into(), FileKind::Md);
             let path = db.file_id(("test".into(), FileKind::Md));
             db.set_all_mds(Arc::new(Some(path.clone()).into_iter().collect()));
             db.set_input(path, Arc::new(input.into()));

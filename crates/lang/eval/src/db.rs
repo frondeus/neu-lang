@@ -36,10 +36,9 @@ fn eval(db: &dyn Evaluator, file: FileId, id: NodeId) -> Arc<EvalResult> {
     let parsed = db.anchored(file);
     let mut eval = Eval::new(&parsed.arena, &input);
     let value = eval.eval(id).and_then(|val| eval.into_eager(val, true));
-    let mut arena = eval.new_arena;
-    arena.merge_errors(&parsed.arena);
+    let errors = eval.errors;
     Arc::new(EvalResult {
-        value, //errors: eval.errors,
-        arena,
+        value,
+        errors
     })
 }

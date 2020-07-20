@@ -6,7 +6,7 @@ mod value;
 pub mod db;
 
 use error::Error;
-use neu_diagnostics::{Diagnostic, ToReport};
+use neu_diagnostics::{Diagnostic, ToReport, Diagnostics};
 use neu_parser::{Arena, Children, Node, NodeId};
 use neu_syntax::Nodes;
 use std::collections::BTreeMap;
@@ -14,18 +14,16 @@ pub use value::Value;
 
 pub struct Eval<'a> {
     pub arena: &'a Arena,
-    pub new_arena: Arena,
+    pub errors: Diagnostics<NodeId>,
     pub input: &'a str,
-    //pub errors: Diagnostics<NodeId>
 }
 
 impl<'a> Eval<'a> {
     pub fn new(arena: &'a Arena, input: &'a str) -> Self {
         Self {
             arena,
-            new_arena: Default::default(),
+            errors: Default::default(),
             input,
-            //errors: vec![],
         }
     }
 
@@ -71,7 +69,7 @@ impl<'a> Eval<'a> {
             None => {
                 let input = self.input;
                 let err: Diagnostic = error.to_report(input);
-                self.new_arena.add_err(id, err);
+                self.errors.add(id, err);
                 None
             }
         }
@@ -250,7 +248,7 @@ impl<'a> Eval<'a> {
 #[cfg(test)]
 mod tests {
     use crate::db::Evaluator;
-    use neu_syntax::db::{FileId, FileKind, Parser};
+    use neu_syntax::db::{FileKind, Parser};
     use std::sync::Arc;
 
     #[salsa::database(crate::db::EvaluatorDatabase, neu_syntax::db::ParserDatabase)]
