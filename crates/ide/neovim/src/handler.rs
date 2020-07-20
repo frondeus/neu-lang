@@ -11,7 +11,7 @@ use neu_canceled::Canceled;
 use neu_db::Diagnostician;
 use neu_eval::db::Evaluator;
 use neu_parser::{Arena, Node};
-use neu_syntax::db::{FileId, FileKind, Parser};
+use neu_syntax::db::{FileKind, Parser};
 use neu_syntax::Nodes;
 use nvim_rs::rpc::IntoVal;
 use nvim_rs::{compat::tokio::Compat, Handler};
@@ -111,7 +111,7 @@ impl NeovimHandler {
                 let current_bf = api.get_current_buf().await?;
                 let current_name = current_bf.get_name().await?;
                 dbg!(dbg_buffer, &current_name);
-                let file_id: FileId = (current_name, FileKind::Md);
+                let file_id = (current_name, FileKind::Md);
 
                 let my_tx = self.tx.clone();
                 {
@@ -132,13 +132,14 @@ impl NeovimHandler {
                     }
                 };
                 Canceled::cancel_if(db.salsa_runtime());
+                let file_id = db.file_id(file_id);
 
-                let buf = db.input(file_id.clone());
+                let buf = db.input(file_id);
                 let lines = buf.lines().map(|l| l.to_string()).collect::<Vec<_>>();
 
                 //let rendered = db.render_md(file_id.clone());
 
-                let result = db.parse_syntax(file_id.clone());
+                let result = db.parse_syntax(file_id);
 
                 writeln!(&mut dbg_buffer, "{}\n\n", result.display(&buf))?;
 
@@ -146,7 +147,7 @@ impl NeovimHandler {
 
                 current_bf.clear_namespace(highlight_ns, 0, -1).await?;
 
-                let result = db.eval(file_id.clone(), root);
+                let _eval_result = db.eval(file_id, root);
                 let arena: &Arena = &result.arena;
 
                 // Highlighting
@@ -203,13 +204,14 @@ impl NeovimHandler {
                     })
                     .collect();
 
-                let mut futures = nodes.into_iter()
-                    .filter_map(|id| Some((id, db.eval(file_id.clone(), id).value? )))
+                let mut futures = nodes
+                    .into_iter()
+                    .filter_map(|id| Some((id, db.eval(file_id, id).value.clone()?)))
                     .map(|(id, value)| (arena.get(id), value))
                     .filter_map(|(node, value)| {
                         Some((node.span.lines_cols(&lines).last()?.line, value))
                     })
-                    .map(|(line, value)|
+                    .map(|(line, value)| {
                         api.call_function(
                             "nvim_buf_set_virtual_text",
                             vec![
@@ -223,7 +225,8 @@ impl NeovimHandler {
                                 Value::Map(vec![]),
                             ],
                         )
-                    ).collect_vec();
+                    })
+                    .collect_vec();
 
                 // Errors
                 let current_w = api.get_current_win().await?;
@@ -248,23 +251,21 @@ impl NeovimHandler {
                     })
                     .collect::<Vec<Diagnostic>>();
 
-                futures.extend(diagnostics
-                    .iter()
-                    .map(|diagnostic| {
-                        api.call_function(
-                            "nvim_buf_set_virtual_text",
-                            vec![
-                                current_bf.into_val(),        // buffer
-                                highlight_ns.into_val(),      // ns
-                                diagnostic.line().into_val(), // line
-                                Value::Array(vec![Value::Array(vec![
-                                    Value::String(diagnostic.text().into()),
-                                    Value::String("Error".into()),
-                                ])]),
-                                Value::Map(vec![]),
-                            ],
-                        )
-                    }));
+                futures.extend(diagnostics.iter().map(|diagnostic| {
+                    api.call_function(
+                        "nvim_buf_set_virtual_text",
+                        vec![
+                            current_bf.into_val(),        // buffer
+                            highlight_ns.into_val(),      // ns
+                            diagnostic.line().into_val(), // line
+                            Value::Array(vec![Value::Array(vec![
+                                Value::String(diagnostic.text().into()),
+                                Value::String("Error".into()),
+                            ])]),
+                            Value::Map(vec![]),
+                        ],
+                    )
+                }));
 
                 let list = "setloclist";
 

@@ -14,9 +14,10 @@ fn all_mentions(db: &dyn Analyzer) -> Vec<Mention> {
 
     let mut mentions = vec![];
     for (_kind, _id, path, article_item) in parsed {
-        let input = db.input(path.clone());
-        let mut parsed = db.parse_syntax(path);
-        let _ = crate::find_mentions(db, article_item, &mut parsed.arena, &input, &mut mentions);
+        let input = db.input(path);
+        let parsed = db.parse_syntax(path);
+        let mut arena = parsed.arena.clone();
+        let _ = crate::find_mentions(db, article_item, &mut arena, &input, &mut mentions);
     }
 
     mentions

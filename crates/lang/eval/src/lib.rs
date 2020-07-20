@@ -251,6 +251,7 @@ impl<'a> Eval<'a> {
 mod tests {
     use crate::db::Evaluator;
     use neu_syntax::db::{FileId, FileKind, Parser};
+    use std::sync::Arc;
 
     #[salsa::database(crate::db::EvaluatorDatabase, neu_syntax::db::ParserDatabase)]
     #[derive(Default)]
@@ -264,10 +265,10 @@ mod tests {
     fn eval_tests() {
         test_runner::test_snapshots("neu", "eval", |input| {
             let mut db = TestDb::default();
-            let path: FileId = ("test".into(), FileKind::Neu);
-            db.set_all_mds(None.into_iter().collect());
-            db.set_all_neu(Some(path.clone()).into_iter().collect());
-            db.set_input(path.clone(), input.into());
+            let path = db.file_id(("test".into(), FileKind::Neu));
+            db.set_all_mds(Default::default());
+            db.set_all_neu(Arc::new(Some(path.clone()).into_iter().collect()));
+            db.set_input(path.clone(), Arc::new(input.into()));
             let parsed = db.parse_syntax(path.clone());
             let result = db.eval(path, parsed.root);
 

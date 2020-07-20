@@ -1,7 +1,7 @@
 use neu_canceled::Canceled;
+use neu_syntax::db::FileIdData;
 use nvim_rs::compat::tokio::Compat;
 use tokio::io::Stdout;
-use neu_syntax::db::FileId;
 
 pub mod diagnostic;
 pub mod handler;
@@ -40,7 +40,7 @@ pub type Snapshot = salsa::Snapshot<Database>;
 pub type SnapshotTx = tokio::sync::mpsc::UnboundedSender<Snapshot>;
 
 pub enum Message {
-    Modified(FileId, String),
+    Modified(FileIdData, String),
     GetSnapshot(tokio::sync::mpsc::UnboundedSender<Snapshot>),
 }
 

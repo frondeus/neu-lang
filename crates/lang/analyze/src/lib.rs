@@ -103,6 +103,7 @@ mod tests {
     use itertools::Itertools;
     use neu_syntax::db::{FileId, FileKind, Parser};
     use std::fmt;
+    use std::sync::Arc;
 
     impl fmt::Display for Mention {
         fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -126,9 +127,10 @@ mod tests {
     fn analyze_tests() {
         test_runner::test_snapshots("md", "mentions", |input| {
             let mut db = TestDb::default();
-            let path: FileId = ("test".into(), FileKind::Md);
-            db.set_all_mds(Some(path.clone()).into_iter().collect());
-            db.set_input(path, input.into());
+            //let path: FileId = ("test".into(), FileKind::Md);
+            let path = db.file_id(("test".into(), FileKind::Md));
+            db.set_all_mds(Arc::new(Some(path.clone()).into_iter().collect()));
+            db.set_input(path, Arc::new(input.into()));
 
             db.all_mentions()
                 .into_iter()

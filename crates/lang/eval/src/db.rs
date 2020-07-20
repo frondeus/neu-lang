@@ -5,16 +5,18 @@ use neu_canceled::Canceled;
 use neu_parser::{NodeId, ParseResult};
 use neu_syntax::ast::{ArticleItem, Ast};
 use neu_syntax::db::{FileId, Parser};
+use std::sync::Arc;
 
 #[salsa::query_group(EvaluatorDatabase)]
 pub trait Evaluator: salsa::Database + Parser {
-    fn eval(&self, file: FileId, id: NodeId) -> EvalResult;
-    fn anchored(&self, file: FileId) -> ParseResult;
+    fn eval(&self, file: FileId, id: NodeId) -> Arc<EvalResult>;
+    fn anchored(&self, file: FileId) -> Arc<ParseResult>;
 }
 
-fn anchored(db: &dyn Evaluator, file: FileId) -> ParseResult {
+fn anchored(db: &dyn Evaluator, file: FileId) -> Arc<ParseResult> {
     Canceled::cancel_if(db.salsa_runtime());
-    let mut parsed = db.parse_syntax(file);
+    let parsed = db.parse_syntax(file);
+    let mut parsed = (*parsed).clone();
     let items = parsed
         .arena
         .enumerate()
@@ -25,20 +27,19 @@ fn anchored(db: &dyn Evaluator, file: FileId) -> ParseResult {
     items.into_iter().for_each(|ast| {
         ast.anchor_body(&mut parsed.arena);
     });
-    parsed
+    Arc::new(parsed)
 }
 
-fn eval(db: &dyn Evaluator, file: FileId, id: NodeId) -> EvalResult {
+fn eval(db: &dyn Evaluator, file: FileId, id: NodeId) -> Arc<EvalResult> {
     Canceled::cancel_if(db.salsa_runtime());
-    let input = db.input(file.clone());
+    let input = db.input(file);
     let parsed = db.anchored(file);
-    let mut arena = parsed.arena;
-    let mut eval = Eval::new(&arena, &input);
+    let mut eval = Eval::new(&parsed.arena, &input);
     let value = eval.eval(id).and_then(|val| eval.into_eager(val, true));
-    let new_arena = eval.new_arena;
-    arena.merge(new_arena);
-    EvalResult {
+    let mut arena = eval.new_arena;
+    arena.merge_errors(&parsed.arena);
+    Arc::new(EvalResult {
         value, //errors: eval.errors,
         arena,
-    }
+    })
 }

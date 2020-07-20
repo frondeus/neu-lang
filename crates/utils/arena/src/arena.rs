@@ -29,12 +29,13 @@ impl<Node: fmt::Debug, Err> fmt::Debug for Arena<Node, Err> {
     }
 }
 
-impl<N: Node, E> Arena<N, E> {
-    pub fn merge(&mut self, mut other: Self) {
-        self.nodes.append(&mut other.nodes);
-        self.errors.extend(other.errors.into_iter());
+impl<N: Node + Clone, E: Clone> Arena<N, E> {
+    pub fn merge_errors(&mut self, other: &Self) {
+        self.errors.extend(other.errors.clone().into_iter());
     }
+}
 
+impl<N: Node, E> Arena<N, E> {
     pub fn add(&mut self, node: N) -> NodeId {
         let len = self.nodes.len();
         let id = NodeId(len);

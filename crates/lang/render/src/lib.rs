@@ -14,8 +14,8 @@ pub mod db;
 
 fn eval(db: &dyn Renderer, file: FileId, id: NodeId, nodes: &mut Arena) -> Option<Value> {
     let result = db.eval(file, id);
-    nodes.merge(result.arena);
-    result.value
+    nodes.merge_errors(&result.arena);
+    result.value.clone()
 }
 
 fn render_strukt(strukt: BTreeMap<String, Value>) -> String {
@@ -117,7 +117,7 @@ fn render_body(
                 let s = format!(r#"<div class="error">{}</div>"#, err);
                 output.push_str(&s);
             } else if body.is(Nodes::Markdown) {
-                if let Some(markdown) = eval(db, file_id.clone(), body_id, nodes) {
+                if let Some(markdown) = eval(db, file_id, body_id, nodes) {
                     output.push_str(&format!("{}", html::render_value(&markdown)));
                 }
             } else if body.is(Nodes::ArticleItem) {
@@ -129,7 +129,7 @@ fn render_body(
                     r#"<div class="article-item" id="{}_{}" >"#,
                     kind, id
                 ));
-                let rendered = _render(db, file_id.clone(), article_item, nodes, input);
+                let rendered = _render(db, file_id, article_item, nodes, input);
                 output.push_str(rendered.as_str());
                 output.push_str("</div>\n");
             } else if body.is(Nodes::ArticleRef) {
@@ -170,7 +170,7 @@ fn _render(
 
     let mut strukt = article_item
         .strukt
-        .and_then(|strukt| eval(db, file_id.clone(), strukt, nodes)?.into_struct())
+        .and_then(|strukt| eval(db, file_id, strukt, nodes)?.into_struct())
         .unwrap_or_default();
 
     if let Some(title) = strukt.remove("title") {
@@ -193,6 +193,7 @@ fn _render(
 mod tests {
     use super::*;
     use neu_syntax::db::{FileKind, Parser};
+    use std::sync::Arc;
 
     #[salsa::database(
         crate::db::RendererDatabase,
@@ -211,9 +212,9 @@ mod tests {
     fn render_tests() {
         test_runner::test_snapshots("md", "render", |input| {
             let mut db = TestDb::default();
-            let path: FileId = ("test".into(), FileKind::Md);
-            db.set_all_mds(Some(path.clone()).into_iter().collect());
-            db.set_input(path.clone(), input.into());
+            let path = db.file_id(("test".into(), FileKind::Md));
+            db.set_all_mds(Arc::new(Some(path.clone()).into_iter().collect()));
+            db.set_input(path.clone(), Arc::new(input.into()));
             let result = db.render_md(path);
 
             result.display(input).to_string()

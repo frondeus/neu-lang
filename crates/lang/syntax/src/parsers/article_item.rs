@@ -20,7 +20,7 @@ pub fn parser() -> impl Parser<FileToken> {
                 builder.parse(main_item());
             }
             Some(FileToken::Error) => {
-                todo!("In theory this may be a classic md file so ignore it now.")
+                //todo!("In theory this may be a classic md file so ignore it now.")
             }
         }
         builder.parse(token(None));
