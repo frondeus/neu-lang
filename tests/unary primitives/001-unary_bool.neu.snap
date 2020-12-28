@@ -9,10 +9,13 @@
 ]
 
 [parser]
-ROOT @ 0..5 = `!true`
-    UNARY, VALUE @ 0..5 = `!true`
-        OP, TOKEN @ 0..1 = `!`
-        BOOLEAN, TOKEN, VALUE @ 1..5 = `true`
+
+--- GREEN TREE ---
+Root @ 0..5
+    Value, Unary @ 0..5
+        UnaryOp, token @ 0..1 `!`
+        Value, Boolean, token @ 1..5 `true`
+--- END ---
 
 
 [eval]

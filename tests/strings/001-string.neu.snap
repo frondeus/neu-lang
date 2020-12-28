@@ -3,13 +3,15 @@
 ```
 
 [parser]
-ROOT @ 0..7 = ` \"foo\" `
-    TRIVIA @ 0..1 = ` `
-    STRING, VALUE @ 1..6 = `\"foo\"`
-        TOKEN @ 1..2 = `\"`
-        STRVALUE, TOKEN @ 2..5 = `foo`
-        TOKEN @ 5..6 = `\"`
-    TRIVIA @ 6..7 = ` `
+
+--- GREEN TREE ---
+Root @ 0..7
+    Value, String @ 0..7
+        token @ 0..2 `"` ; leading: ` `
+        InnerString @ 2..5
+            token @ 2..5 `foo`
+        token @ 5..7 `"` ; trailing: ` `
+--- END ---
 
 
 [eval]

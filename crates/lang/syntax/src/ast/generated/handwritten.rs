@@ -1,38 +1,16 @@
-use neu_parser::nodes;
-use neu_parser::Name;
+#![allow(dead_code)]
+use super::*;
+use microtree::nodes;
 
+#[allow(non_upper_case_globals)]
+#[allow(dead_code)]
+impl Nodes {
+    pub const Number: Name = Name::new("number");
+    pub const Identifier: Name = Name::new("identifier");
+}
 nodes! {
-    Neu {
-        Value,
-        Parens,
-        Number,
-        Boolean,
-        String,
-        Interpolated,
-
-        StrValue,
-
-        Unary,
-        Binary,
-        Op,
-
-        Struct,
-        Identifier,
-        Key,
-
-        Array,
-        IdentPath
-    },
-    Item {
-        ArticleItem,
-        ArticleItemId,
-        ArticleBody,
-        ArticleRef
-    },
+    Nodes,
     Markdown {
-        Markdown,
-        Md_Value,
-
         Md_Paragraph,
         Md_Emphasis,
         Md_Strong,
@@ -76,5 +54,16 @@ nodes! {
 
         Md_Text,
         Md_Html
+}
+}
+
+pub struct Identifier(Red);
+impl Ast for Identifier {
+    fn new(node: Red) -> Option<Self> {
+        todo!()
+    }
+
+    fn red(&self) -> Red {
+        todo!()
     }
 }

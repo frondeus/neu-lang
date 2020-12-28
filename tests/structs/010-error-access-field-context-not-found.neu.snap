@@ -16,19 +16,20 @@ foo.bar + foo.baz
 ]
 
 [parser]
-ROOT @ 0..17 = `foo.bar + foo.baz`
-    BINARY, VALUE @ 0..17 = `foo.bar + foo.baz`
-        IDENTPATH, VALUE @ 0..8 = `foo.bar `
-            IDENTIFIER, TOKEN, VALUE @ 0..3 = `foo`
-            OP, TOKEN @ 3..4 = `.`
-            IDENTIFIER, TOKEN, VALUE @ 4..7 = `bar`
-            TRIVIA @ 7..8 = ` `
-        OP, TOKEN @ 8..9 = `+`
-        TRIVIA @ 9..10 = ` `
-        IDENTPATH, VALUE @ 10..17 = `foo.baz`
-            IDENTIFIER, TOKEN, VALUE @ 10..13 = `foo`
-            OP, TOKEN @ 13..14 = `.`
-            IDENTIFIER, TOKEN, VALUE @ 14..17 = `baz`
+
+--- GREEN TREE ---
+Root @ 0..17
+    Value, Binary @ 0..17
+        Value, IdentPath @ 0..8
+            Value, identifier, token @ 0..3 `foo`
+            BinaryOp, token @ 3..4 `.`
+            Value, identifier, token @ 4..8 `bar` ; trailing: ` `
+        BinaryOp, token @ 8..10 `+` ; trailing: ` `
+        Value, IdentPath @ 10..17
+            Value, identifier, token @ 10..13 `foo`
+            BinaryOp, token @ 13..14 `.`
+            Value, identifier, token @ 14..17 `baz`
+--- END ---
 
 
 [eval]

@@ -10,45 +10,37 @@
 `````
 
 [parser]
-ROOT @ 0..99
-    STRUCT, VALUE @ 0..99
-        TOKEN @ 0..1 = `{`
-        TRIVIA @ 1..6 = `\n    `
-        IDENTIFIER, KEY, TOKEN @ 6..12 = `health`
-        TRIVIA @ 12..13 = ` `
-        TOKEN @ 13..14 = `=`
-        TRIVIA @ 14..15 = ` `
-        STRUCT, VALUE @ 15..97
-            TOKEN @ 15..16 = `{`
-            TRIVIA @ 16..25 = `\n        `
-            IDENTIFIER, KEY, TOKEN @ 25..28 = `max`
-            TRIVIA @ 28..29 = ` `
-            TOKEN @ 29..30 = `=`
-            TRIVIA @ 30..31 = ` `
-            NUMBER, TOKEN, VALUE @ 31..34 = `100`
-            TOKEN @ 34..35 = `,`
-            TRIVIA @ 35..44 = `\n        `
-            IDENTIFIER, KEY, TOKEN @ 44..48 = `desc`
-            TRIVIA @ 48..49 = ` `
-            TOKEN @ 49..50 = `=`
-            TRIVIA @ 50..51 = ` `
-            STRUCT, VALUE @ 51..91
-                TOKEN @ 51..52 = `{`
-                TRIVIA @ 52..65 = `\n            `
-                IDENTIFIER, KEY, TOKEN @ 65..68 = `baz`
-                TRIVIA @ 68..69 = ` `
-                TOKEN @ 69..70 = `=`
-                TRIVIA @ 70..71 = ` `
-                IDENTPATH, VALUE @ 71..81 = `health.max`
-                    IDENTIFIER, TOKEN, VALUE @ 71..77 = `health`
-                    OP, TOKEN @ 77..78 = `.`
-                    IDENTIFIER, TOKEN, VALUE @ 78..81 = `max`
-                TRIVIA @ 81..90 = `\n        `
-                TOKEN @ 90..91 = `}`
-            TRIVIA @ 91..96 = `\n    `
-            TOKEN @ 96..97 = `}`
-        TRIVIA @ 97..98 = `\n`
-        TOKEN @ 98..99 = `}`
+
+--- GREEN TREE ---
+Root @ 0..99
+    Value, Strukt @ 0..99
+        token @ 0..1 `{`
+        StruktPair @ 1..97
+            Key, identifier, token @ 1..13 `health` ; leading: `\n    ` ; trailing: ` `
+            token @ 13..15 `=` ; trailing: ` `
+            Value, Strukt @ 15..97
+                token @ 15..16 `{`
+                StruktPair @ 16..34
+                    Key, identifier, token @ 16..29 `max` ; leading: `\n        ` ; trailing: ` `
+                    token @ 29..31 `=` ; trailing: ` `
+                    Value, number, token @ 31..34 `100`
+                token @ 34..35 `,`
+                StruktPair @ 35..91
+                    Key, identifier, token @ 35..49 `desc` ; leading: `\n        ` ; trailing: ` `
+                    token @ 49..51 `=` ; trailing: ` `
+                    Value, Strukt @ 51..91
+                        token @ 51..52 `{`
+                        StruktPair @ 52..81
+                            Key, identifier, token @ 52..69 `baz` ; leading: `\n            ` ; trailing: ` `
+                            token @ 69..71 `=` ; trailing: ` `
+                            Value, IdentPath @ 71..81
+                                Value, identifier, token @ 71..77 `health`
+                                BinaryOp, token @ 77..78 `.`
+                                Value, identifier, token @ 78..81 `max`
+                        token @ 81..91 `}` ; leading: `\n        `
+                token @ 91..97 `}` ; leading: `\n    `
+        token @ 97..99 `}` ; leading: `\n`
+--- END ---
 
 
 [eval]

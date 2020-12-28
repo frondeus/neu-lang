@@ -9,10 +9,13 @@
 ]
 
 [parser]
-ROOT @ 0..2 = `-5`
-    UNARY, VALUE @ 0..2 = `-5`
-        OP, TOKEN @ 0..1 = `-`
-        NUMBER, TOKEN, VALUE @ 1..2 = `5`
+
+--- GREEN TREE ---
+Root @ 0..2
+    Value, Unary @ 0..2
+        UnaryOp, token @ 0..1 `-`
+        Value, number, token @ 1..2 `5`
+--- END ---
 
 
 [eval]

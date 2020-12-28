@@ -19,7 +19,7 @@
     "Number `4`",
     "Comma `,`",
     "Whitespace ` `",
-    "Comment `/* foo }\n    bar */`",
+    "BlockComment `/* foo }\n    bar */`",
     "LineEnd `\n`",
     "Whitespace `    `",
     "Identifier `sanity`",
@@ -29,33 +29,29 @@
     "Number `10`",
     "Comma `,`",
     "Whitespace ` `",
-    "Comment `/* baz\n    */`",
+    "BlockComment `/* baz\n    */`",
     "LineEnd `\n`",
     "CloseC `}`",
 ]
 
 [parser]
-ROOT @ 0..70
-    STRUCT, VALUE @ 0..70
-        TOKEN @ 0..1 = `{`
-        TRIVIA @ 1..6 = `\n    `
-        IDENTIFIER, KEY, TOKEN @ 6..12 = `health`
-        TRIVIA @ 12..13 = ` `
-        TOKEN @ 13..14 = `=`
-        TRIVIA @ 14..15 = ` `
-        NUMBER, TOKEN, VALUE @ 15..16 = `4`
-        TOKEN @ 16..17 = `,`
-        TRIVIA @ 17..37 = ` /* foo }\n    bar */`
-        TRIVIA @ 37..42 = `\n    `
-        IDENTIFIER, KEY, TOKEN @ 42..48 = `sanity`
-        TRIVIA @ 48..49 = ` `
-        TOKEN @ 49..50 = `=`
-        TRIVIA @ 50..51 = ` `
-        NUMBER, TOKEN, VALUE @ 51..53 = `10`
-        TOKEN @ 53..54 = `,`
-        TRIVIA @ 54..68 = ` /* baz\n    */`
-        TRIVIA @ 68..69 = `\n`
-        TOKEN @ 69..70 = `}`
+
+--- GREEN TREE ---
+Root @ 0..70
+    Value, Strukt @ 0..70
+        token @ 0..1 `{`
+        StruktPair @ 1..16
+            Key, identifier, token @ 1..13 `health` ; leading: `\n    ` ; trailing: ` `
+            token @ 13..15 `=` ; trailing: ` `
+            Value, number, token @ 15..16 `4`
+        token @ 16..37 `,` ; trailing: ` /* foo }\n    bar */`
+        StruktPair @ 37..53
+            Key, identifier, token @ 37..49 `sanity` ; leading: `\n    ` ; trailing: ` `
+            token @ 49..51 `=` ; trailing: ` `
+            Value, number, token @ 51..53 `10`
+        token @ 53..68 `,` ; trailing: ` /* baz\n    */`
+        token @ 68..70 `}` ; leading: `\n`
+--- END ---
 
 
 [eval]

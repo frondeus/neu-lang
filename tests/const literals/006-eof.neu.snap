@@ -13,9 +13,11 @@ test.neu | N2 | Expected EOF but found `5`
 ]
 
 [parser]
-ROOT @ 0..3 = `5 5`
-    NUMBER, TOKEN, VALUE @ 0..1 = `5`
-    TRIVIA @ 1..2 = ` `
-    ERROR, TOKEN @ 2..3 = `5`
+
+--- GREEN TREE ---
+Root @ 0..3
+    Value, number, token @ 0..2 `5` ; trailing: ` `
+    error @ 2..3 `5`
+--- END ---
 
 

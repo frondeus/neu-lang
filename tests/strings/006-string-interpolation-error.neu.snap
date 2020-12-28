@@ -6,26 +6,25 @@
 test.neu | N13 | Expected one of number, `true`, `false`, `-`, `!`, `"`, `(`, `{`, `[`, identifier but found `+`
 
 [parser]
-ROOT @ 0..20 = ` \"10 = ${5 + 2 + +}\"`
-    TRIVIA @ 0..1 = ` `
-    STRING, VALUE @ 1..20 = `\"10 = ${5 + 2 + +}\"`
-        TOKEN @ 1..2 = `\"`
-        STRVALUE, TOKEN @ 2..7 = `10 = `
-        INTERPOLATED, STRVALUE @ 7..19 = `${5 + 2 + +}`
-            TOKEN @ 7..9 = `${`
-            BINARY, VALUE @ 9..18 = `5 + 2 + +`
-                BINARY, VALUE @ 9..15 = `5 + 2 `
-                    NUMBER, TOKEN, VALUE @ 9..10 = `5`
-                    TRIVIA @ 10..11 = ` `
-                    OP, TOKEN @ 11..12 = `+`
-                    TRIVIA @ 12..13 = ` `
-                    NUMBER, TOKEN, VALUE @ 13..14 = `2`
-                    TRIVIA @ 14..15 = ` `
-                OP, TOKEN @ 15..16 = `+`
-                TRIVIA @ 16..17 = ` `
-                ERROR, VALUE @ 17..18 = `+`
-            TOKEN @ 18..19 = `}`
-        TOKEN @ 19..20 = `\"`
+
+--- GREEN TREE ---
+Root @ 0..20
+    Value, String @ 0..20
+        token @ 0..2 `"` ; leading: ` `
+        InnerString @ 2..19
+            token @ 2..7 `10 = `
+            Interpolated @ 7..19
+                token @ 7..9 `${`
+                Value, Binary @ 9..18
+                    Value, Binary @ 9..15
+                        Value, number, token @ 9..11 `5` ; trailing: ` `
+                        BinaryOp, token @ 11..13 `+` ; trailing: ` `
+                        Value, number, token @ 13..15 `2` ; trailing: ` `
+                    BinaryOp, token @ 15..17 `+` ; trailing: ` `
+                    Value, error @ 17..18 `+`
+                token @ 18..19 `}`
+        token @ 19..20 `"`
+--- END ---
 
 
 [eval]

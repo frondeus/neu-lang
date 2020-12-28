@@ -1,38 +1,25 @@
 use derive_more::Display;
-use neu_parser::{TextRange, TokenKind};
+use microtree_parser::TokenKind;
+use logos::Logos;
 
-#[derive(Debug, PartialEq, Clone, Copy, Display)]
+#[derive(Debug, PartialEq, Clone, Copy, Display, Logos)]
 pub enum Token {
     #[display(fmt = "`+++`")]
+    #[token("+++")]
     ThreePlus,
 
     #[display(fmt = "error")]
+    #[error]
     Error,
 }
 
-pub type Lexer<T = Token> = neu_parser::Lexer<T>;
+pub type Lexer<'s, T = Token> = microtree_parser::Lexer<'s, T>;
 
-impl TokenKind for Token {
-    type Extra = ();
-
-    fn is_mergeable(self, other: Self) -> bool {
+impl<'s> TokenKind<'s> for Token {
+    fn mergeable(self, other: Self) -> bool {
         match (self, other) {
             (Self::Error, Self::Error) => true,
             _ => false,
         }
-    }
-
-    fn lex(lexer: &mut Lexer<Self>) -> Option<(Self, TextRange)> {
-        let input = lexer.input_mut();
-        let i = input.as_ref();
-
-        if i.is_empty() {
-            return None;
-        }
-        if i.starts_with("+++") {
-            return Some((Token::ThreePlus, input.chomp(3)));
-        }
-
-        Some((Token::Error, input.chomp(1)))
     }
 }

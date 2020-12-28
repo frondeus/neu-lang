@@ -28,24 +28,22 @@
 ]
 
 [parser]
-ROOT @ 0..36 = `{\n    health = 10,\n    sanity = 50\n}`
-    STRUCT, VALUE @ 0..36 = `{\n    health = 10,\n    sanity = 50\n}`
-        TOKEN @ 0..1 = `{`
-        TRIVIA @ 1..6 = `\n    `
-        IDENTIFIER, KEY, TOKEN @ 6..12 = `health`
-        TRIVIA @ 12..13 = ` `
-        TOKEN @ 13..14 = `=`
-        TRIVIA @ 14..15 = ` `
-        NUMBER, TOKEN, VALUE @ 15..17 = `10`
-        TOKEN @ 17..18 = `,`
-        TRIVIA @ 18..23 = `\n    `
-        IDENTIFIER, KEY, TOKEN @ 23..29 = `sanity`
-        TRIVIA @ 29..30 = ` `
-        TOKEN @ 30..31 = `=`
-        TRIVIA @ 31..32 = ` `
-        NUMBER, TOKEN, VALUE @ 32..34 = `50`
-        TRIVIA @ 34..35 = `\n`
-        TOKEN @ 35..36 = `}`
+
+--- GREEN TREE ---
+Root @ 0..36
+    Value, Strukt @ 0..36
+        token @ 0..1 `{`
+        StruktPair @ 1..17
+            Key, identifier, token @ 1..13 `health` ; leading: `\n    ` ; trailing: ` `
+            token @ 13..15 `=` ; trailing: ` `
+            Value, number, token @ 15..17 `10`
+        token @ 17..18 `,`
+        StruktPair @ 18..34
+            Key, identifier, token @ 18..30 `sanity` ; leading: `\n    ` ; trailing: ` `
+            token @ 30..32 `=` ; trailing: ` `
+            Value, number, token @ 32..34 `50`
+        token @ 34..36 `}` ; leading: `\n`
+--- END ---
 
 
 [eval]

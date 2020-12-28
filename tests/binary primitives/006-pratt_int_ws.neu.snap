@@ -18,18 +18,17 @@
 ]
 
 [parser]
-ROOT @ 0..10 = `4 + 2\n * 5`
-    BINARY, VALUE @ 0..10 = `4 + 2\n * 5`
-        NUMBER, TOKEN, VALUE @ 0..1 = `4`
-        TRIVIA @ 1..2 = ` `
-        OP, TOKEN @ 2..3 = `+`
-        TRIVIA @ 3..4 = ` `
-        BINARY, VALUE @ 4..10 = `2\n * 5`
-            NUMBER, TOKEN, VALUE @ 4..5 = `2`
-            TRIVIA @ 5..7 = `\n `
-            OP, TOKEN @ 7..8 = `*`
-            TRIVIA @ 8..9 = ` `
-            NUMBER, TOKEN, VALUE @ 9..10 = `5`
+
+--- GREEN TREE ---
+Root @ 0..10
+    Value, Binary @ 0..10
+        Value, number, token @ 0..2 `4` ; trailing: ` `
+        BinaryOp, token @ 2..4 `+` ; trailing: ` `
+        Value, Binary @ 4..10
+            Value, number, token @ 4..5 `2`
+            BinaryOp, token @ 5..9 `*` ; leading: `\n ` ; trailing: ` `
+            Value, number, token @ 9..10 `5`
+--- END ---
 
 
 [eval]

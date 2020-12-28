@@ -67,7 +67,34 @@ struct Entry<'a> {
     modified: SystemTime,
 }
 
-pub fn test_snapshots(ext: &str, section_name: &str, f: impl Fn(&str) -> String) -> Result<()> {
+pub fn test_snapshots(ext: &'static str,
+                      section_name: &'static str,
+                      f: impl 'static + Fn(&str) -> String + Send) -> Result<()> {
+
+    const TIMEOUT: u32 = 60_000;
+    use pulse::{Signal, TimeoutError};
+    let (signal_start, pulse_start) = Signal::new();
+    let (signal_end, pulse_end) = Signal::new();
+
+    let guard = std::thread::spawn(move || {
+        pulse_start.pulse();
+        let result = test_snapshots_inner(ext, section_name, f);
+        pulse_end.pulse();
+        result
+    });
+
+    signal_start.wait().unwrap();
+    match signal_end.wait_timeout_ms(TIMEOUT) {
+        Err(TimeoutError::Timeout) => {
+            panic!("Timed out");
+        },
+        _ => ()
+    }
+
+    guard.join().unwrap()
+}
+
+fn test_snapshots_inner(ext: &str, section_name: &str, f: impl Fn(&str) -> String) -> Result<()> {
     let section_regex = Regex::new(r"^\s*\[([[:alpha:]\.-_]+)\]\s*$")?;
     let path = go_to_root()?;
     let mut successes = 0;

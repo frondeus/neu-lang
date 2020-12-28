@@ -1,243 +1,129 @@
 use crate::HashCount;
 use derive_more::Display;
-use neu_parser::{TextRange, TokenKind};
+use microtree_parser::TokenKind;
+use logos::Logos;
 
-#[derive(Debug, PartialEq, Clone, Copy, Display)]
+#[derive(Debug, PartialEq, Clone, Copy, Display, Logos)]
+#[logos(extras = HashCount)]
 pub enum Token {
     #[display(fmt = "error")]
+    #[error]
     Error,
 
     #[display(fmt = "` `, `\t`")]
+    #[regex(r#"[ \t]+"#)]
     Whitespace,
 
     #[display(fmt = "`\n`, `\r\n`")]
+    #[regex(r#"(\r?\n)+"#)]
     LineEnd,
 
-    #[display(fmt = "comment")]
-    Comment,
+    #[display(fmt = "inline comment")]
+    #[regex(r#"//[^\n]*"#)]
+    InlineComment,
+
+    #[display(fmt = "block comment")]
+    #[token("/*", |lex| {
+        lex.remainder()
+           .find("*/")
+           .map(|i| lex.bump(i + 2))
+           .is_some()
+    })]
+    BlockComment,
 
     #[display(fmt = "number")]
+    #[regex(r#"[0-9]+"#)]
     Number,
 
     #[display(fmt = "`true`")]
+    #[token("true")]
     True,
 
     #[display(fmt = "`false`")]
+    #[token("false")]
     False,
 
     #[display(fmt = "`-`")]
+    #[token("-")]
     OpMinus,
 
     #[display(fmt = "`!`")]
+    #[token("!")]
     OpBang,
 
     #[display(fmt = "`+`")]
+    #[token("+")]
     OpPlus,
 
     #[display(fmt = "`*`")]
+    #[token("*")]
     OpStar,
 
     #[display(fmt = "`/`")]
+    #[token("/")]
     OpSlash,
 
     #[display(fmt = "`==`")]
+    #[token("==")]
     OpDEqual,
 
     #[display(fmt = "`=`")]
+    #[token("=")]
     OpAssign,
 
     #[display(fmt = "identifier")]
+    #[regex("[a-zA-Z_]+[a-zA-Z_0-9]*")]
     Identifier,
 
     #[display(fmt = "`(`")]
+    #[token("(")]
     OpenP,
 
     #[display(fmt = "`)`")]
+    #[token(")")]
     CloseP,
 
     #[display(fmt = "`{{`")]
+    #[token("{")]
     OpenC,
 
     #[display(fmt = "`\"`")]
+    #[token("\"")]
     DoubleQuote,
 
-    #[display(fmt = "`md`")]
+    #[display(fmt = "`md\"`")]
+    #[token(r#"md""#)]
     MdQuote,
 
     #[display(fmt = "`}}`")]
+    #[token("}")]
     CloseC,
 
     #[display(fmt = "`[`")]
+    #[token("[")]
     OpenB,
 
     #[display(fmt = "`]`")]
+    #[token("]")]
     CloseB,
 
     #[display(fmt = "`,`")]
+    #[token(",")]
     Comma,
 
     #[display(fmt = "`.`")]
+    #[token(".")]
     OpDot,
 }
 
-pub type Lexer<T = Token> = neu_parser::Lexer<T>;
+pub type Lexer<'s, T = Token> = microtree_parser::Lexer<'s, T>;
 
-impl TokenKind for Token {
-    type Extra = HashCount;
-
-    fn is_mergeable(self, other: Self) -> bool {
+impl<'s> TokenKind<'s> for Token {
+    fn mergeable(self, other: Self) -> bool {
         match (self, other) {
             (Self::Error, Self::Error) => true,
             (Self::LineEnd, Self::LineEnd) => true,
             _ => false,
         }
-    }
-
-    fn lex(lexer: &mut Lexer<Self>) -> Option<(Self, TextRange)> {
-        let hash = lexer.extra.count;
-        let input = lexer.input_mut();
-        let i = input.as_ref();
-        let peeked = i.chars().next()?;
-
-        if i.starts_with("\r\n") {
-            return Some((Token::LineEnd, input.chomp(2)));
-        }
-        if i.starts_with('\n') {
-            return Some((Token::LineEnd, input.chomp(1)));
-        }
-
-        let is_whitespace = |c: &char| *c == ' ' || *c == '\t';
-
-        if is_whitespace(&peeked) {
-            let rest = i.chars().take_while(is_whitespace).count();
-
-            return Some((Token::Whitespace, input.chomp(rest)));
-        }
-        if peeked.is_ascii_digit() {
-            let rest = i.chars().take_while(|c| c.is_ascii_digit()).count();
-
-            return Some((Token::Number, input.chomp(rest)));
-        }
-
-        if i.starts_with("/*") {
-            let mut peeked = peeked;
-            let mut i = &i[2..];
-            let mut rest = 2;
-            while !i.starts_with("*/") {
-                i = &i[peeked.len_utf8()..];
-                rest += 1;
-                peeked = match i.chars().next() {
-                    Some(p) => p,
-                    None => return Some((Token::Error, input.chomp(2))),
-                }
-            }
-            rest += 2;
-            return Some((Token::Comment, input.chomp(rest)));
-        }
-
-        if i.starts_with("//") {
-            let rest = i.chars().take_while(|c| *c != '\n').count();
-            return Some((Token::Comment, input.chomp(rest)));
-        }
-
-        if i.starts_with("==") {
-            return Some((Token::OpDEqual, input.chomp(2)));
-        }
-
-        if i.starts_with("true") {
-            return Some((Token::True, input.chomp(4)));
-        }
-
-        if i.starts_with("false") {
-            return Some((Token::False, input.chomp(5)));
-        }
-
-        if i.starts_with("md") {
-            let mut rest = 2;
-            let mut hash = 0;
-            loop {
-                let i = &i[rest..];
-                if i.starts_with('"') {
-                    let range = input.chomp(rest + 1);
-                    lexer.extra.count = hash;
-                    return Some((Token::MdQuote, range));
-                }
-                if i.starts_with('#') {
-                    rest += 1;
-                    hash += 1;
-                    continue;
-                }
-                break;
-            }
-        }
-
-        if peeked == '-' {
-            return Some((Token::OpMinus, input.chomp(1)));
-        }
-        if peeked == '!' {
-            return Some((Token::OpBang, input.chomp(1)));
-        }
-        if peeked == '+' && !i.starts_with("+++") {
-            // TODO: Dirty hack
-            return Some((Token::OpPlus, input.chomp(1)));
-        }
-        if peeked == '*' {
-            return Some((Token::OpStar, input.chomp(1)));
-        }
-        if peeked == '/' {
-            return Some((Token::OpSlash, input.chomp(1)));
-        }
-        if peeked == '=' {
-            return Some((Token::OpAssign, input.chomp(1)));
-        }
-        if peeked == '.' {
-            return Some((Token::OpDot, input.chomp(1)));
-        }
-
-        if peeked == ',' {
-            return Some((Token::Comma, input.chomp(1)));
-        }
-
-        if peeked == '(' {
-            return Some((Token::OpenP, input.chomp(1)));
-        }
-        if peeked == ')' {
-            return Some((Token::CloseP, input.chomp(1)));
-        }
-        if peeked == '{' {
-            return Some((Token::OpenC, input.chomp(1)));
-        }
-        if peeked == '}' {
-            return Some((Token::CloseC, input.chomp(1)));
-        }
-        if peeked == '[' {
-            return Some((Token::OpenB, input.chomp(1)));
-        }
-        if peeked == ']' {
-            return Some((Token::CloseB, input.chomp(1)));
-        }
-
-        if hash > 0 {
-            let pat = format!("{:#<width$}", "\"", width = hash + 1);
-            if i.starts_with(&pat) {
-                let range = input.chomp(pat.len());
-                lexer.extra.count = 0;
-                return Some((Token::DoubleQuote, range));
-            }
-        }
-
-        if peeked == '"' {
-            return Some((Token::DoubleQuote, input.chomp(1)));
-        }
-
-        if peeked.is_ascii_alphabetic() {
-            let rest = i
-                .chars()
-                .take_while(|c| c.is_ascii_alphanumeric() || *c == '_')
-                .count();
-            return Some((Token::Identifier, input.chomp(rest)));
-        }
-
-        Some((Token::Error, input.chomp(1)))
     }
 }

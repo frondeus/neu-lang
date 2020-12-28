@@ -1,40 +1,28 @@
 use crate::HashCount;
 use derive_more::Display;
-use neu_parser::{TextRange, TokenKind};
+use microtree_parser::TokenKind;
+use logos::Logos;
 
-#[derive(Debug, PartialEq, Clone, Copy, Display)]
+#[derive(Debug, PartialEq, Clone, Copy, Display, Logos)]
+#[logos(extras = HashCount)]
 pub enum Token {
+    #[display(fmt = "`\"`")]
+    #[regex(r#"#*""#)]
+    Close,
+
+    #[error]
     #[display(fmt = "text")]
     Text,
 
-    #[display(fmt = "`\"`")]
-    Close,
 }
 
-pub type Lexer<T = Token> = neu_parser::Lexer<T>;
+pub type Lexer<'s, T = Token> = microtree_parser::Lexer<'s, T>;
 
-impl TokenKind for Token {
-    type Extra = HashCount;
-
-    fn is_mergeable(self, other: Self) -> bool {
+impl<'s> TokenKind<'s> for Token {
+    fn mergeable(self, other: Self) -> bool {
         match (self, other) {
             (Self::Text, Self::Text) => true,
             _ => false,
         }
-    }
-
-    fn lex(lexer: &mut Lexer<Self>) -> Option<(Self, TextRange)> {
-        let hash = lexer.extra.count;
-        let input = lexer.input_mut();
-        let i = input.as_ref();
-        if i.is_empty() {
-            return None;
-        }
-        let pat = format!("\"{}", "#".repeat(hash));
-        if i.starts_with(&pat) {
-            return Some((Token::Close, input.chomp(pat.len())));
-        }
-
-        Some((Token::Text, input.chomp(1)))
     }
 }

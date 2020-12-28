@@ -1,0 +1,48 @@
+{
+        "tokens": {
+                "OpenP": "(",
+                "CloseP": ")",
+                "OpenB": "[",
+                "CloseB": "]",
+                "OpenC": "{",
+                "CloseC": "}",
+                "OpenI": "${",
+                "CloseI": "close_i",
+                "OpenBl": "[+",
+                "CloseBl": "+]",
+                "Number": "number",
+                "True": "true",
+                "False": "false",
+                "OpMinus": "-",
+                "OpBang": "!",
+                "OpDot": ".",
+                "OpStar": "*",
+                "OpPlus": "+",
+                "OpSlash": "/",
+                "OpDEqual": "==",
+                "MdQuote": "md_quote",
+                "DQuote": "d_quote",
+                "Comma": ",",
+                "Identifier": "identifier",
+                "OpAssign": "=",
+                "Text": "text",
+                "ThreePlus": "+++",
+                "ItemIdent": "item_identifier",
+                "OpColon": ":",
+                "ItemId": "item_id",
+                "LineEnding": "ln",
+                "PlusPlusEnd": "++ end ++",
+                "PlusPlus": "++"
+        },
+        "handwritten": [
+        "Identifier"
+        ],
+        "handwritten_": [
+                "Number",
+                "MdQuote",
+                "DQuote",
+                "MdValue",
+                "Text",
+                "CloseI"
+        ]
+}

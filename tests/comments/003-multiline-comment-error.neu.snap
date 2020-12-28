@@ -24,7 +24,7 @@ test.neu | N22 | Expected `}` but found EOF
     "Number `4`",
     "Comma `,`",
     "Whitespace ` `",
-    "Comment `/* foo }\n    bar */`",
+    "BlockComment `/* foo }\n    bar */`",
     "LineEnd `\n`",
     "Whitespace `    `",
     "Identifier `sanity`",
@@ -42,31 +42,27 @@ test.neu | N22 | Expected `}` but found EOF
 ]
 
 [parser]
-ROOT @ 0..63
-    STRUCT, VALUE @ 0..63
-        TOKEN @ 0..1 = `{`
-        TRIVIA @ 1..6 = `\n    `
-        IDENTIFIER, KEY, TOKEN @ 6..12 = `health`
-        TRIVIA @ 12..13 = ` `
-        TOKEN @ 13..14 = `=`
-        TRIVIA @ 14..15 = ` `
-        NUMBER, TOKEN, VALUE @ 15..16 = `4`
-        TOKEN @ 16..17 = `,`
-        TRIVIA @ 17..37 = ` /* foo }\n    bar */`
-        TRIVIA @ 37..42 = `\n    `
-        IDENTIFIER, KEY, TOKEN @ 42..48 = `sanity`
-        TRIVIA @ 48..49 = ` `
-        TOKEN @ 49..50 = `=`
-        TRIVIA @ 50..51 = ` `
-        NUMBER, TOKEN, VALUE @ 51..53 = `10`
-        TOKEN @ 53..54 = `,`
-        TRIVIA @ 54..55 = ` `
-        ERROR, IDENTIFIER, KEY, TOKEN @ 55..57 = `/*`
-        TRIVIA @ 57..58 = ` `
-        ERROR, TOKEN @ 58..61 = `baz`
-        TRIVIA @ 61..62 = `\n`
-        ERROR, VALUE @ 62..63 = `}`
-        ERROR, TOKEN @ 63..63 = ``
+
+--- GREEN TREE ---
+Root @ 0..63
+    Value, Strukt @ 0..63
+        token @ 0..1 `{`
+        StruktPair @ 1..16
+            Key, identifier, token @ 1..13 `health` ; leading: `\n    ` ; trailing: ` `
+            token @ 13..15 `=` ; trailing: ` `
+            Value, number, token @ 15..16 `4`
+        token @ 16..37 `,` ; trailing: ` /* foo }\n    bar */`
+        StruktPair @ 37..53
+            Key, identifier, token @ 37..49 `sanity` ; leading: `\n    ` ; trailing: ` `
+            token @ 49..51 `=` ; trailing: ` `
+            Value, number, token @ 51..53 `10`
+        token @ 53..55 `,` ; trailing: ` `
+        StruktPair @ 55..61
+            Key, identifier, error @ 55..57 `/*`
+            error @ 57..58 ` `
+            Value, identifier, token @ 58..61 `baz`
+        token @ 61..63 `}` ; leading: `\n`
+--- END ---
 
 
 [eval]

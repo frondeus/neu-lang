@@ -22,21 +22,21 @@
 ]
 
 [parser]
-ROOT @ 0..19 = `{\n    foo = 10,\n}.x`
-    IDENTPATH, VALUE @ 0..19 = `{\n    foo = 10,\n}.x`
-        STRUCT, VALUE @ 0..17 = `{\n    foo = 10,\n}`
-            TOKEN @ 0..1 = `{`
-            TRIVIA @ 1..6 = `\n    `
-            IDENTIFIER, KEY, TOKEN @ 6..9 = `foo`
-            TRIVIA @ 9..10 = ` `
-            TOKEN @ 10..11 = `=`
-            TRIVIA @ 11..12 = ` `
-            NUMBER, TOKEN, VALUE @ 12..14 = `10`
-            TOKEN @ 14..15 = `,`
-            TRIVIA @ 15..16 = `\n`
-            TOKEN @ 16..17 = `}`
-        OP, TOKEN @ 17..18 = `.`
-        IDENTIFIER, TOKEN, VALUE @ 18..19 = `x`
+
+--- GREEN TREE ---
+Root @ 0..19
+    Value, IdentPath @ 0..19
+        Value, Strukt @ 0..17
+            token @ 0..1 `{`
+            StruktPair @ 1..14
+                Key, identifier, token @ 1..10 `foo` ; leading: `\n    ` ; trailing: ` `
+                token @ 10..12 `=` ; trailing: ` `
+                Value, number, token @ 12..14 `10`
+            token @ 14..15 `,`
+            token @ 15..17 `}` ; leading: `\n`
+        BinaryOp, token @ 17..18 `.`
+        Value, identifier, token @ 18..19 `x`
+--- END ---
 
 
 [eval]

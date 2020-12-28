@@ -12,13 +12,14 @@
 ]
 
 [parser]
-ROOT @ 0..5 = `4 + 2`
-    BINARY, VALUE @ 0..5 = `4 + 2`
-        NUMBER, TOKEN, VALUE @ 0..1 = `4`
-        TRIVIA @ 1..2 = ` `
-        OP, TOKEN @ 2..3 = `+`
-        TRIVIA @ 3..4 = ` `
-        NUMBER, TOKEN, VALUE @ 4..5 = `2`
+
+--- GREEN TREE ---
+Root @ 0..5
+    Value, Binary @ 0..5
+        Value, number, token @ 0..2 `4` ; trailing: ` `
+        BinaryOp, token @ 2..4 `+` ; trailing: ` `
+        Value, number, token @ 4..5 `2`
+--- END ---
 
 
 [eval]

@@ -12,13 +12,14 @@ true == false
 ]
 
 [parser]
-ROOT @ 0..13 = `true == false`
-    BINARY, VALUE @ 0..13 = `true == false`
-        BOOLEAN, TOKEN, VALUE @ 0..4 = `true`
-        TRIVIA @ 4..5 = ` `
-        OP, TOKEN @ 5..7 = `==`
-        TRIVIA @ 7..8 = ` `
-        BOOLEAN, TOKEN, VALUE @ 8..13 = `false`
+
+--- GREEN TREE ---
+Root @ 0..13
+    Value, Binary @ 0..13
+        Value, Boolean, token @ 0..5 `true` ; trailing: ` `
+        BinaryOp, token @ 5..8 `==` ; trailing: ` `
+        Value, Boolean, token @ 8..13 `false`
+--- END ---
 
 
 [eval]

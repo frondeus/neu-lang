@@ -44,39 +44,34 @@
 ]
 
 [parser]
-ROOT @ 0..64
-    IDENTPATH, VALUE @ 0..64
-        IDENTPATH, VALUE @ 0..60
-            STRUCT, VALUE @ 0..56
-                TOKEN @ 0..1 = `{`
-                TRIVIA @ 1..6 = `\n    `
-                IDENTIFIER, KEY, TOKEN @ 6..9 = `foo`
-                TRIVIA @ 9..10 = ` `
-                TOKEN @ 10..11 = `=`
-                TRIVIA @ 11..12 = ` `
-                STRUCT, VALUE @ 12..54
-                    TOKEN @ 12..13 = `{`
-                    TRIVIA @ 13..22 = `\n        `
-                    IDENTIFIER, KEY, TOKEN @ 22..25 = `bar`
-                    TRIVIA @ 25..26 = ` `
-                    TOKEN @ 26..27 = `=`
-                    TRIVIA @ 27..28 = ` `
-                    NUMBER, TOKEN, VALUE @ 28..30 = `50`
-                    TOKEN @ 30..31 = `,`
-                    TRIVIA @ 31..40 = `\n        `
-                    IDENTIFIER, KEY, TOKEN @ 40..43 = `baz`
-                    TRIVIA @ 43..44 = ` `
-                    TOKEN @ 44..45 = `=`
-                    TRIVIA @ 45..46 = ` `
-                    NUMBER, TOKEN, VALUE @ 46..48 = `60`
-                    TRIVIA @ 48..53 = `\n    `
-                    TOKEN @ 53..54 = `}`
-                TRIVIA @ 54..55 = `\n`
-                TOKEN @ 55..56 = `}`
-            OP, TOKEN @ 56..57 = `.`
-            IDENTIFIER, TOKEN, VALUE @ 57..60 = `foo`
-        OP, TOKEN @ 60..61 = `.`
-        IDENTIFIER, TOKEN, VALUE @ 61..64 = `bar`
+
+--- GREEN TREE ---
+Root @ 0..64
+    Value, IdentPath @ 0..64
+        Value, IdentPath @ 0..60
+            Value, Strukt @ 0..56
+                token @ 0..1 `{`
+                StruktPair @ 1..54
+                    Key, identifier, token @ 1..10 `foo` ; leading: `\n    ` ; trailing: ` `
+                    token @ 10..12 `=` ; trailing: ` `
+                    Value, Strukt @ 12..54
+                        token @ 12..13 `{`
+                        StruktPair @ 13..30
+                            Key, identifier, token @ 13..26 `bar` ; leading: `\n        ` ; trailing: ` `
+                            token @ 26..28 `=` ; trailing: ` `
+                            Value, number, token @ 28..30 `50`
+                        token @ 30..31 `,`
+                        StruktPair @ 31..48
+                            Key, identifier, token @ 31..44 `baz` ; leading: `\n        ` ; trailing: ` `
+                            token @ 44..46 `=` ; trailing: ` `
+                            Value, number, token @ 46..48 `60`
+                        token @ 48..54 `}` ; leading: `\n    `
+                token @ 54..56 `}` ; leading: `\n`
+            BinaryOp, token @ 56..57 `.`
+            Value, identifier, token @ 57..60 `foo`
+        BinaryOp, token @ 60..61 `.`
+        Value, identifier, token @ 61..64 `bar`
+--- END ---
 
 
 [eval]

@@ -40,35 +40,28 @@ No errors
 ]
 
 [parser]
-ROOT @ 0..49
-    STRUCT, VALUE @ 0..49
-        TOKEN @ 0..1 = `{`
-        TRIVIA @ 1..6 = `\n    `
-        IDENTIFIER, KEY, TOKEN @ 6..12 = `health`
-        TRIVIA @ 12..13 = ` `
-        TOKEN @ 13..14 = `=`
-        TRIVIA @ 14..15 = ` `
-        BINARY, VALUE @ 15..26 = `10 - 2     `
-            NUMBER, TOKEN, VALUE @ 15..17 = `10`
-            TRIVIA @ 17..18 = ` `
-            OP, TOKEN @ 18..19 = `-`
-            TRIVIA @ 19..20 = ` `
-            NUMBER, TOKEN, VALUE @ 20..21 = `2`
-            TRIVIA @ 21..26 = `     `
-        TOKEN @ 26..27 = `,`
-        TRIVIA @ 27..32 = `\n    `
-        IDENTIFIER, KEY, TOKEN @ 32..38 = `sanity`
-        TRIVIA @ 38..39 = ` `
-        TOKEN @ 39..40 = `=`
-        TRIVIA @ 40..41 = ` `
-        BINARY, VALUE @ 41..47 = `50 + 2`
-            NUMBER, TOKEN, VALUE @ 41..43 = `50`
-            TRIVIA @ 43..44 = ` `
-            OP, TOKEN @ 44..45 = `+`
-            TRIVIA @ 45..46 = ` `
-            NUMBER, TOKEN, VALUE @ 46..47 = `2`
-        TRIVIA @ 47..48 = `\n`
-        TOKEN @ 48..49 = `}`
+
+--- GREEN TREE ---
+Root @ 0..49
+    Value, Strukt @ 0..49
+        token @ 0..1 `{`
+        StruktPair @ 1..26
+            Key, identifier, token @ 1..13 `health` ; leading: `\n    ` ; trailing: ` `
+            token @ 13..15 `=` ; trailing: ` `
+            Value, Binary @ 15..26
+                Value, number, token @ 15..18 `10` ; trailing: ` `
+                BinaryOp, token @ 18..20 `-` ; trailing: ` `
+                Value, number, token @ 20..26 `2` ; trailing: `     `
+        token @ 26..27 `,`
+        StruktPair @ 27..47
+            Key, identifier, token @ 27..39 `sanity` ; leading: `\n    ` ; trailing: ` `
+            token @ 39..41 `=` ; trailing: ` `
+            Value, Binary @ 41..47
+                Value, number, token @ 41..44 `50` ; trailing: ` `
+                BinaryOp, token @ 44..46 `+` ; trailing: ` `
+                Value, number, token @ 46..47 `2`
+        token @ 47..49 `}` ; leading: `\n`
+--- END ---
 
 
 [eval]

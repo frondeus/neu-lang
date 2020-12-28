@@ -102,95 +102,75 @@
 ]
 
 [parser]
-ROOT @ 0..187
-    IDENTPATH, VALUE @ 0..187
-        IDENTPATH, VALUE @ 0..181
-            STRUCT, VALUE @ 0..174
-                TOKEN @ 0..1 = `{`
-                TRIVIA @ 1..6 = `\n    `
-                IDENTIFIER, KEY, TOKEN @ 6..13 = `primary`
-                TRIVIA @ 13..14 = ` `
-                TOKEN @ 14..15 = `=`
-                TRIVIA @ 15..16 = ` `
-                STRUCT, VALUE @ 16..59
-                    TOKEN @ 16..17 = `{`
-                    TRIVIA @ 17..26 = `\n        `
-                    IDENTIFIER, KEY, TOKEN @ 26..29 = `con`
-                    TRIVIA @ 29..30 = ` `
-                    TOKEN @ 30..31 = `=`
-                    TRIVIA @ 31..32 = ` `
-                    NUMBER, TOKEN, VALUE @ 32..34 = `50`
-                    TOKEN @ 34..35 = `,`
-                    TRIVIA @ 35..44 = `\n        `
-                    IDENTIFIER, KEY, TOKEN @ 44..48 = `size`
-                    TRIVIA @ 48..49 = ` `
-                    TOKEN @ 49..50 = `=`
-                    TRIVIA @ 50..51 = ` `
-                    NUMBER, TOKEN, VALUE @ 51..53 = `60`
-                    TRIVIA @ 53..58 = `\n    `
-                    TOKEN @ 58..59 = `}`
-                TOKEN @ 59..60 = `,`
-                TRIVIA @ 60..65 = `\n    `
-                IDENTIFIER, KEY, TOKEN @ 65..71 = `health`
-                TRIVIA @ 71..72 = ` `
-                TOKEN @ 72..73 = `=`
-                TRIVIA @ 73..74 = ` `
-                STRUCT, VALUE @ 74..151
-                    TOKEN @ 74..75 = `{`
-                    TRIVIA @ 75..84 = `\n        `
-                    IDENTIFIER, KEY, TOKEN @ 84..87 = `max`
-                    TRIVIA @ 87..88 = ` `
-                    TOKEN @ 88..89 = `=`
-                    TRIVIA @ 89..90 = ` `
-                    BINARY, VALUE @ 90..123 = `(primary.con + primary.size) / 10`
-                        PARENS, VALUE @ 90..119 = `(primary.con + primary.size) `
-                            TOKEN @ 90..91 = `(`
-                            BINARY, VALUE @ 91..117 = `primary.con + primary.size`
-                                IDENTPATH, VALUE @ 91..103 = `primary.con `
-                                    IDENTIFIER, TOKEN, VALUE @ 91..98 = `primary`
-                                    OP, TOKEN @ 98..99 = `.`
-                                    IDENTIFIER, TOKEN, VALUE @ 99..102 = `con`
-                                    TRIVIA @ 102..103 = ` `
-                                OP, TOKEN @ 103..104 = `+`
-                                TRIVIA @ 104..105 = ` `
-                                IDENTPATH, VALUE @ 105..117 = `primary.size`
-                                    IDENTIFIER, TOKEN, VALUE @ 105..112 = `primary`
-                                    OP, TOKEN @ 112..113 = `.`
-                                    IDENTIFIER, TOKEN, VALUE @ 113..117 = `size`
-                            TOKEN @ 117..118 = `)`
-                            TRIVIA @ 118..119 = ` `
-                        OP, TOKEN @ 119..120 = `/`
-                        TRIVIA @ 120..121 = ` `
-                        NUMBER, TOKEN, VALUE @ 121..123 = `10`
-                    TOKEN @ 123..124 = `,`
-                    TRIVIA @ 124..133 = `\n        `
-                    IDENTIFIER, KEY, TOKEN @ 133..138 = `value`
-                    TRIVIA @ 138..139 = ` `
-                    TOKEN @ 139..140 = `=`
-                    TRIVIA @ 140..141 = ` `
-                    UNARY, VALUE @ 141..145 = `.max`
-                        OP, TOKEN @ 141..142 = `.`
-                        IDENTIFIER, TOKEN, VALUE @ 142..145 = `max`
-                    TRIVIA @ 145..150 = `\n    `
-                    TOKEN @ 150..151 = `}`
-                TOKEN @ 151..152 = `,`
-                TRIVIA @ 152..157 = `\n    `
-                IDENTIFIER, KEY, TOKEN @ 157..163 = `sanity`
-                TRIVIA @ 163..164 = ` `
-                TOKEN @ 164..165 = `=`
-                TRIVIA @ 165..166 = ` `
-                BINARY, VALUE @ 166..172 = `50 + 2`
-                    NUMBER, TOKEN, VALUE @ 166..168 = `50`
-                    TRIVIA @ 168..169 = ` `
-                    OP, TOKEN @ 169..170 = `+`
-                    TRIVIA @ 170..171 = ` `
-                    NUMBER, TOKEN, VALUE @ 171..172 = `2`
-                TRIVIA @ 172..173 = `\n`
-                TOKEN @ 173..174 = `}`
-            OP, TOKEN @ 174..175 = `.`
-            IDENTIFIER, TOKEN, VALUE @ 175..181 = `health`
-        OP, TOKEN @ 181..182 = `.`
-        IDENTIFIER, TOKEN, VALUE @ 182..187 = `value`
+
+--- GREEN TREE ---
+Root @ 0..187
+    Value, IdentPath @ 0..187
+        Value, IdentPath @ 0..181
+            Value, Strukt @ 0..174
+                token @ 0..1 `{`
+                StruktPair @ 1..59
+                    Key, identifier, token @ 1..14 `primary` ; leading: `\n    ` ; trailing: ` `
+                    token @ 14..16 `=` ; trailing: ` `
+                    Value, Strukt @ 16..59
+                        token @ 16..17 `{`
+                        StruktPair @ 17..34
+                            Key, identifier, token @ 17..30 `con` ; leading: `\n        ` ; trailing: ` `
+                            token @ 30..32 `=` ; trailing: ` `
+                            Value, number, token @ 32..34 `50`
+                        token @ 34..35 `,`
+                        StruktPair @ 35..53
+                            Key, identifier, token @ 35..49 `size` ; leading: `\n        ` ; trailing: ` `
+                            token @ 49..51 `=` ; trailing: ` `
+                            Value, number, token @ 51..53 `60`
+                        token @ 53..59 `}` ; leading: `\n    `
+                token @ 59..60 `,`
+                StruktPair @ 60..151
+                    Key, identifier, token @ 60..72 `health` ; leading: `\n    ` ; trailing: ` `
+                    token @ 72..74 `=` ; trailing: ` `
+                    Value, Strukt @ 74..151
+                        token @ 74..75 `{`
+                        StruktPair @ 75..123
+                            Key, identifier, token @ 75..88 `max` ; leading: `\n        ` ; trailing: ` `
+                            token @ 88..90 `=` ; trailing: ` `
+                            Value, Binary @ 90..123
+                                Value,  @ 90..119
+                                    token @ 90..91 `(`
+                                    Value, Binary @ 91..117
+                                        Value, IdentPath @ 91..103
+                                            Value, identifier, token @ 91..98 `primary`
+                                            BinaryOp, token @ 98..99 `.`
+                                            Value, identifier, token @ 99..103 `con` ; trailing: ` `
+                                        BinaryOp, token @ 103..105 `+` ; trailing: ` `
+                                        Value, IdentPath @ 105..117
+                                            Value, identifier, token @ 105..112 `primary`
+                                            BinaryOp, token @ 112..113 `.`
+                                            Value, identifier, token @ 113..117 `size`
+                                    token @ 117..119 `)` ; trailing: ` `
+                                BinaryOp, token @ 119..121 `/` ; trailing: ` `
+                                Value, number, token @ 121..123 `10`
+                        token @ 123..124 `,`
+                        StruktPair @ 124..145
+                            Key, identifier, token @ 124..139 `value` ; leading: `\n        ` ; trailing: ` `
+                            token @ 139..141 `=` ; trailing: ` `
+                            Value, Unary @ 141..145
+                                UnaryOp, token @ 141..142 `.`
+                                Value, identifier, token @ 142..145 `max`
+                        token @ 145..151 `}` ; leading: `\n    `
+                token @ 151..152 `,`
+                StruktPair @ 152..172
+                    Key, identifier, token @ 152..164 `sanity` ; leading: `\n    ` ; trailing: ` `
+                    token @ 164..166 `=` ; trailing: ` `
+                    Value, Binary @ 166..172
+                        Value, number, token @ 166..169 `50` ; trailing: ` `
+                        BinaryOp, token @ 169..171 `+` ; trailing: ` `
+                        Value, number, token @ 171..172 `2`
+                token @ 172..174 `}` ; leading: `\n`
+            BinaryOp, token @ 174..175 `.`
+            Value, identifier, token @ 175..181 `health`
+        BinaryOp, token @ 181..182 `.`
+        Value, identifier, token @ 182..187 `value`
+--- END ---
 
 
 [eval]

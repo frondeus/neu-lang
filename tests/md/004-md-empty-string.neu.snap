@@ -3,10 +3,13 @@ md""
 ```
 
 [parser]
-ROOT @ 0..4 = `md\"\"`
-    MARKDOWN, VALUE @ 0..4 = `md\"\"`
-        TOKEN @ 0..3 = `md\"`
-        TOKEN @ 3..4 = `\"`
+
+--- GREEN TREE ---
+Root @ 0..4
+    Value, Markdown @ 0..4
+        token @ 0..3 `md"`
+        token @ 3..4 `"`
+--- END ---
 
 
 [eval]

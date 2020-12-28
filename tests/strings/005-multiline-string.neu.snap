@@ -4,12 +4,16 @@
 ```
 
 [parser]
-ROOT @ 0..11 = ` \"foo\n bar\"`
-    TRIVIA @ 0..1 = ` `
-    STRING, VALUE @ 1..11 = `\"foo\n bar\"`
-        TOKEN @ 1..2 = `\"`
-        STRVALUE, TOKEN @ 2..10 = `foo\n bar`
-        TOKEN @ 10..11 = `\"`
+
+--- GREEN TREE ---
+Root @ 0..11
+    Value, String @ 0..11
+        token @ 0..2 `"` ; leading: ` `
+        InnerString @ 2..10
+            token @ 2..10 `foo
+ bar`
+        token @ 10..11 `"`
+--- END ---
 
 
 [eval]

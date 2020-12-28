@@ -11,8 +11,11 @@ test.neu | N0 | Expected one of number, `true`, `false`, `-`, `!`, `"`, `(`, `{`
 ]
 
 [parser]
-ROOT @ 0..3 = `???`
-    ERROR, VALUE @ 0..3 = `???`
+
+--- GREEN TREE ---
+Root @ 0..3
+    Value, error @ 0..3 `???`
+--- END ---
 
 
 [eval]

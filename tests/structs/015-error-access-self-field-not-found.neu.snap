@@ -29,26 +29,24 @@
 ]
 
 [parser]
-ROOT @ 0..32 = `{\n    foo = 10,\n    bar = .baz\n}`
-    STRUCT, VALUE @ 0..32 = `{\n    foo = 10,\n    bar = .baz\n}`
-        TOKEN @ 0..1 = `{`
-        TRIVIA @ 1..6 = `\n    `
-        IDENTIFIER, KEY, TOKEN @ 6..9 = `foo`
-        TRIVIA @ 9..10 = ` `
-        TOKEN @ 10..11 = `=`
-        TRIVIA @ 11..12 = ` `
-        NUMBER, TOKEN, VALUE @ 12..14 = `10`
-        TOKEN @ 14..15 = `,`
-        TRIVIA @ 15..20 = `\n    `
-        IDENTIFIER, KEY, TOKEN @ 20..23 = `bar`
-        TRIVIA @ 23..24 = ` `
-        TOKEN @ 24..25 = `=`
-        TRIVIA @ 25..26 = ` `
-        UNARY, VALUE @ 26..30 = `.baz`
-            OP, TOKEN @ 26..27 = `.`
-            IDENTIFIER, TOKEN, VALUE @ 27..30 = `baz`
-        TRIVIA @ 30..31 = `\n`
-        TOKEN @ 31..32 = `}`
+
+--- GREEN TREE ---
+Root @ 0..32
+    Value, Strukt @ 0..32
+        token @ 0..1 `{`
+        StruktPair @ 1..14
+            Key, identifier, token @ 1..10 `foo` ; leading: `\n    ` ; trailing: ` `
+            token @ 10..12 `=` ; trailing: ` `
+            Value, number, token @ 12..14 `10`
+        token @ 14..15 `,`
+        StruktPair @ 15..30
+            Key, identifier, token @ 15..24 `bar` ; leading: `\n    ` ; trailing: ` `
+            token @ 24..26 `=` ; trailing: ` `
+            Value, Unary @ 26..30
+                UnaryOp, token @ 26..27 `.`
+                Value, identifier, token @ 27..30 `baz`
+        token @ 30..32 `}` ; leading: `\n`
+--- END ---
 
 
 [eval]

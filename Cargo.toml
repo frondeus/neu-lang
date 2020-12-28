@@ -1,7 +1,10 @@
 [workspace]
 members = [
-    "crates/utils/*",
+    #"crates/utils/*",
+    "crates/utils/test-runner",
+    "crates/utils/canceled",
     "crates/lang/*",
     "crates/ide/*",
-    "crates/bins/*"
+    "crates/bins/*",
+    "xtask"
 ]

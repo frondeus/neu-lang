@@ -9,9 +9,11 @@
 ]
 
 [parser]
-ROOT @ 0..5 = `    5`
-    TRIVIA @ 0..4 = `    `
-    NUMBER, TOKEN, VALUE @ 4..5 = `5`
+
+--- GREEN TREE ---
+Root @ 0..5
+    Value, number, token @ 0..5 `5` ; leading: `    `
+--- END ---
 
 
 [eval]

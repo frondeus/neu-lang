@@ -1,27 +1,18 @@
-{pkgs ? import <nixpkgs> {}, lib ? pkgs.stdenv.lib }:
-pkgs.stdenv.mkDerivation rec {
-    name = "neu";
-    nativeBuildInputs = with pkgs; [ pkgconfig ];
-    buildInputs = with pkgs; [
-        gcc
-        git
-        colordiff
-        openssl.dev
+let mozillaOverlay = import ( 
+  builtins.fetchTarball https://github.com/mozilla/nixpkgs-mozilla/archive/master.tar.gz 
+  );
+  nixpkgs = import <nixpkgs> { overlays = [ mozillaOverlay ]; };
+  rust = ( nixpkgs.rustChannelOf { rustToolchain = ./rust-toolchain; }).rust.override { extensions = ["rust-src" "rustfmt-preview" "clippy-preview"]; };
 
-        # Trying Iced GUI
-        xorg.libX11
-        xorg.libXcursor
-        xorg.libXrandr
-        xorg.libXi
-        freetype
-        expat
-        gperf
-        python3
-        vulkan-headers
-        vulkan-loader
-        vulkan-tools
+in
+  with nixpkgs; pkgs.mkShell {
+    buildInputs = [
+      clang
+      cmake
+      pkg-config
+      rust
+      colordiff
     ];
-  OPENSSL_DEV = pkgs.openssl.dev;
-  LD_LIBRARY_PATH = "${lib.makeLibraryPath buildInputs}";
-}
 
+    LIBCLANG_PATH = "${llvmPackages.libclang}/lib";
+  }

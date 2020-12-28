@@ -1,0 +1,66 @@
+Value = Literal
+      | Binary
+      | IdentPath
+      | Unary
+      | Markdown
+      | String
+      | Strukt
+      | Array
+      | 'identifier'
+      | ( '(' Value ')' )
+
+
+Literal = 'number'
+        | Boolean
+
+Unary = UnaryOp Value
+UnaryOp = '-' | '!' | '.'
+
+IdentPath = left: Value '.' right: Value
+
+Binary = left: Value BinaryOp right: Value
+BinaryOp = '+' | '/' | '*' | '=='
+
+Boolean = 'true' | 'false'
+
+Markdown = 'md_quote' InnerMarkdown 'd_quote'
+
+InnerMarkdown = MdValue*
+
+MdValue = 'text'
+
+String = left_quote: 'd_quote' InnerString right_quote: 'd_quote'
+
+InnerString = InnerStringPart*
+
+InnerStringPart = 'text' | Interpolated
+
+Interpolated = '${' Value 'close_i'
+
+Strukt = '{' pairs: ( StruktPair (',' StruktPair )* ','? )? '}'
+
+StruktPair = key: Key '=' value: Value
+
+Key = 'identifier'
+
+Array = '[' values:( Value (',' Value)* ','? )?  ']'
+
+MainItem = MainItemHeader MainItemBody
+
+MainItemBody = '+++' 'ln' ArticleBody
+
+MainItemHeader = start: '+++' 'item_identifier' ':' ArticleItemId separator: '+++' 'ln' ArticleItemValues
+
+ArticleItemId = 'item_id'
+
+ArticleItemValues = values: ( StruktPair ( 'ln' StruktPair )* 'ln'? )?
+
+ArticleItem = ArticleItemHeader ArticleItemBody? '++ end ++'
+
+ArticleItemHeader = '++' 'item_identifier' ':' ArticleItemId '+++' 'ln' ArticleItemValues
+
+ArticleItemBody = '+++' 'ln' ArticleBody*
+
+ArticleBody = 'text' | ArticleItem | ArticleRef
+
+ArticleRef = '[+' 'item_identifier' ':' 'item_id' '+]'
