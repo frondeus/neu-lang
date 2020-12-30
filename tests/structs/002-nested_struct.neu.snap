@@ -54,36 +54,34 @@
 ]
 
 [parser]
-
 --- GREEN TREE ---
-Root @ 0..83
-    Value, Strukt @ 0..83
-        token @ 0..1 `{`
-        StruktPair @ 1..60
-            Key, identifier, token @ 1..13 `health` ; leading: `\n    ` ; trailing: ` `
-            token @ 13..15 `=` ; trailing: ` `
-            Value, Strukt @ 15..60
-                token @ 15..16 `{`
-                StruktPair @ 16..35
-                    Key, identifier, token @ 16..31 `value` ; leading: `\n        ` ; trailing: ` `
-                    token @ 31..33 `=` ; trailing: ` `
-                    Value, number, token @ 33..35 `10`
-                token @ 35..36 `,`
-                StruktPair @ 36..53
-                    Key, identifier, token @ 36..49 `max` ; leading: `\n        ` ; trailing: ` `
-                    token @ 49..51 `=` ; trailing: ` `
-                    Value, number, token @ 51..53 `13`
-                token @ 53..54 `,`
-                token @ 54..60 `}` ; leading: `\n    `
-        token @ 60..61 `,`
-        StruktPair @ 61..81
-            Key, identifier, token @ 61..73 `sanity` ; leading: `\n    ` ; trailing: ` `
-            token @ 73..75 `=` ; trailing: ` `
-            Value, Binary @ 75..81
-                Value, number, token @ 75..78 `50` ; trailing: ` `
-                BinaryOp, token @ 78..80 `+` ; trailing: ` `
-                Value, number, token @ 80..81 `2`
-        token @ 81..83 `}` ; leading: `\n`
+Root, Value, Strukt @ 0..83
+    token @ 0..1 = `{`
+    StruktPair @ 1..60
+        Key, identifier, token @ 1..13 = `health` ; leading: `\n    ` ; trailing: ` `
+        token @ 13..15 = `=` ; trailing: ` `
+        Value, Strukt @ 15..60
+            token @ 15..16 = `{`
+            StruktPair @ 16..35
+                Key, identifier, token @ 16..31 = `value` ; leading: `\n        ` ; trailing: ` `
+                token @ 31..33 = `=` ; trailing: ` `
+                Value, number, token @ 33..35 = `10`
+            token @ 35..36 = `,`
+            StruktPair @ 36..53
+                Key, identifier, token @ 36..49 = `max` ; leading: `\n        ` ; trailing: ` `
+                token @ 49..51 = `=` ; trailing: ` `
+                Value, number, token @ 51..53 = `13`
+            token @ 53..54 = `,`
+            token @ 54..60 = `}` ; leading: `\n    `
+    token @ 60..61 = `,`
+    StruktPair @ 61..81
+        Key, identifier, token @ 61..73 = `sanity` ; leading: `\n    ` ; trailing: ` `
+        token @ 73..75 = `=` ; trailing: ` `
+        Value, Binary @ 75..81
+            Value, number, token @ 75..78 = `50` ; trailing: ` `
+            BinaryOp, token @ 78..80 = `+` ; trailing: ` `
+            Value, number, token @ 80..81 = `2`
+    token @ 81..83 = `}` ; leading: `\n`
 --- END ---
 
 

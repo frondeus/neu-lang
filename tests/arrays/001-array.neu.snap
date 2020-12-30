@@ -15,15 +15,13 @@
 ]
 
 [parser]
-
 --- GREEN TREE ---
-Root @ 0..10
-    Value, Array @ 0..10
-        token @ 0..2 `[` ; trailing: ` `
-        Value, number, token @ 2..4 `10`
-        token @ 4..6 `,` ; trailing: ` `
-        Value, number, token @ 6..9 `50` ; trailing: ` `
-        token @ 9..10 `]`
+Root, Value, Array @ 0..10
+    token @ 0..2 = `[` ; trailing: ` `
+    Value, number, token @ 2..4 = `10`
+    token @ 4..6 = `,` ; trailing: ` `
+    Value, number, token @ 6..9 = `50` ; trailing: ` `
+    token @ 9..10 = `]`
 --- END ---
 
 

@@ -59,7 +59,7 @@ nodes! {
 
 pub struct Identifier(Red);
 impl Ast for Identifier {
-    fn new(node: Red) -> Option<Self> {
+    fn new(_node: Red) -> Option<Self> {
         todo!()
     }
 

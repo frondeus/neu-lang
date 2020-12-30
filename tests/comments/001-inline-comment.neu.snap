@@ -33,22 +33,20 @@
 ]
 
 [parser]
-
 --- GREEN TREE ---
-Root @ 0..51
-    Value, Strukt @ 0..51
-        token @ 0..1 `{`
-        StruktPair @ 1..16
-            Key, identifier, token @ 1..13 `health` ; leading: `\n    ` ; trailing: ` `
-            token @ 13..15 `=` ; trailing: ` `
-            Value, number, token @ 15..16 `4`
-        token @ 16..26 `,` ; trailing: ` // foo }`
-        StruktPair @ 26..42
-            Key, identifier, token @ 26..38 `sanity` ; leading: `\n    ` ; trailing: ` `
-            token @ 38..40 `=` ; trailing: ` `
-            Value, number, token @ 40..42 `10`
-        token @ 42..49 `,` ; trailing: ` //bar`
-        token @ 49..51 `}` ; leading: `\n`
+Root, Value, Strukt @ 0..51
+    token @ 0..1 = `{`
+    StruktPair @ 1..16
+        Key, identifier, token @ 1..13 = `health` ; leading: `\n    ` ; trailing: ` `
+        token @ 13..15 = `=` ; trailing: ` `
+        Value, number, token @ 15..16 = `4`
+    token @ 16..26 = `,` ; trailing: ` // foo }`
+    StruktPair @ 26..42
+        Key, identifier, token @ 26..38 = `sanity` ; leading: `\n    ` ; trailing: ` `
+        token @ 38..40 = `=` ; trailing: ` `
+        Value, number, token @ 40..42 = `10`
+    token @ 42..49 = `,` ; trailing: ` //bar`
+    token @ 49..51 = `}` ; leading: `\n`
 --- END ---
 
 

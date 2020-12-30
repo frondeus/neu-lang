@@ -101,72 +101,69 @@
 ]
 
 [parser]
-
 --- GREEN TREE ---
-Root @ 0..183
-    Value, IdentPath @ 0..183
-        Value, IdentPath @ 0..179
-            Value, Strukt @ 0..172
-                token @ 0..1 `{`
-                StruktPair @ 1..59
-                    Key, identifier, token @ 1..14 `primary` ; leading: `\n    ` ; trailing: ` `
-                    token @ 14..16 `=` ; trailing: ` `
-                    Value, Strukt @ 16..59
-                        token @ 16..17 `{`
-                        StruktPair @ 17..34
-                            Key, identifier, token @ 17..30 `con` ; leading: `\n        ` ; trailing: ` `
-                            token @ 30..32 `=` ; trailing: ` `
-                            Value, number, token @ 32..34 `50`
-                        token @ 34..35 `,`
-                        StruktPair @ 35..53
-                            Key, identifier, token @ 35..49 `size` ; leading: `\n        ` ; trailing: ` `
-                            token @ 49..51 `=` ; trailing: ` `
-                            Value, number, token @ 51..53 `60`
-                        token @ 53..59 `}` ; leading: `\n    `
-                token @ 59..60 `,`
-                StruktPair @ 60..149
-                    Key, identifier, token @ 60..72 `health` ; leading: `\n    ` ; trailing: ` `
-                    token @ 72..74 `=` ; trailing: ` `
-                    Value, Strukt @ 74..149
-                        token @ 74..75 `{`
-                        StruktPair @ 75..123
-                            Key, identifier, token @ 75..88 `max` ; leading: `\n        ` ; trailing: ` `
-                            token @ 88..90 `=` ; trailing: ` `
-                            Value, Binary @ 90..123
-                                Value,  @ 90..119
-                                    token @ 90..91 `(`
-                                    Value, Binary @ 91..117
-                                        Value, IdentPath @ 91..103
-                                            Value, identifier, token @ 91..98 `primary`
-                                            BinaryOp, token @ 98..99 `.`
-                                            Value, identifier, token @ 99..103 `con` ; trailing: ` `
-                                        BinaryOp, token @ 103..105 `+` ; trailing: ` `
-                                        Value, IdentPath @ 105..117
-                                            Value, identifier, token @ 105..112 `primary`
-                                            BinaryOp, token @ 112..113 `.`
-                                            Value, identifier, token @ 113..117 `size`
-                                    token @ 117..119 `)` ; trailing: ` `
-                                BinaryOp, token @ 119..121 `/` ; trailing: ` `
-                                Value, number, token @ 121..123 `10`
-                        token @ 123..124 `,`
-                        StruktPair @ 124..143
-                            Key, identifier, token @ 124..139 `value` ; leading: `\n        ` ; trailing: ` `
-                            token @ 139..141 `=` ; trailing: ` `
-                            Value, number, token @ 141..143 `19`
-                        token @ 143..149 `}` ; leading: `\n    `
-                token @ 149..150 `,`
-                StruktPair @ 150..170
-                    Key, identifier, token @ 150..162 `sanity` ; leading: `\n    ` ; trailing: ` `
-                    token @ 162..164 `=` ; trailing: ` `
-                    Value, Binary @ 164..170
-                        Value, number, token @ 164..167 `50` ; trailing: ` `
-                        BinaryOp, token @ 167..169 `+` ; trailing: ` `
-                        Value, number, token @ 169..170 `2`
-                token @ 170..172 `}` ; leading: `\n`
-            BinaryOp, token @ 172..173 `.`
-            Value, identifier, token @ 173..179 `health`
-        BinaryOp, token @ 179..180 `.`
-        Value, identifier, token @ 180..183 `max`
+Root, Value, IdentPath @ 0..183
+    Value, IdentPath @ 0..179
+        Value, Strukt @ 0..172
+            token @ 0..1 = `{`
+            StruktPair @ 1..59
+                Key, identifier, token @ 1..14 = `primary` ; leading: `\n    ` ; trailing: ` `
+                token @ 14..16 = `=` ; trailing: ` `
+                Value, Strukt @ 16..59
+                    token @ 16..17 = `{`
+                    StruktPair @ 17..34
+                        Key, identifier, token @ 17..30 = `con` ; leading: `\n        ` ; trailing: ` `
+                        token @ 30..32 = `=` ; trailing: ` `
+                        Value, number, token @ 32..34 = `50`
+                    token @ 34..35 = `,`
+                    StruktPair @ 35..53
+                        Key, identifier, token @ 35..49 = `size` ; leading: `\n        ` ; trailing: ` `
+                        token @ 49..51 = `=` ; trailing: ` `
+                        Value, number, token @ 51..53 = `60`
+                    token @ 53..59 = `}` ; leading: `\n    `
+            token @ 59..60 = `,`
+            StruktPair @ 60..149
+                Key, identifier, token @ 60..72 = `health` ; leading: `\n    ` ; trailing: ` `
+                token @ 72..74 = `=` ; trailing: ` `
+                Value, Strukt @ 74..149
+                    token @ 74..75 = `{`
+                    StruktPair @ 75..123
+                        Key, identifier, token @ 75..88 = `max` ; leading: `\n        ` ; trailing: ` `
+                        token @ 88..90 = `=` ; trailing: ` `
+                        Value, Binary @ 90..123
+                            token @ 90..91 = `(`
+                            Value, Binary @ 91..117
+                                Value, IdentPath @ 91..103
+                                    Value, identifier, token @ 91..98 = `primary`
+                                    BinaryOp, token @ 98..99 = `.`
+                                    Value, identifier, token @ 99..103 = `con` ; trailing: ` `
+                                BinaryOp, token @ 103..105 = `+` ; trailing: ` `
+                                Value, IdentPath @ 105..117
+                                    Value, identifier, token @ 105..112 = `primary`
+                                    BinaryOp, token @ 112..113 = `.`
+                                    Value, identifier, token @ 113..117 = `size`
+                            token @ 117..119 = `)` ; trailing: ` `
+                            BinaryOp, token @ 119..121 = `/` ; trailing: ` `
+                            Value, number, token @ 121..123 = `10`
+                    token @ 123..124 = `,`
+                    StruktPair @ 124..143
+                        Key, identifier, token @ 124..139 = `value` ; leading: `\n        ` ; trailing: ` `
+                        token @ 139..141 = `=` ; trailing: ` `
+                        Value, number, token @ 141..143 = `19`
+                    token @ 143..149 = `}` ; leading: `\n    `
+            token @ 149..150 = `,`
+            StruktPair @ 150..170
+                Key, identifier, token @ 150..162 = `sanity` ; leading: `\n    ` ; trailing: ` `
+                token @ 162..164 = `=` ; trailing: ` `
+                Value, Binary @ 164..170
+                    Value, number, token @ 164..167 = `50` ; trailing: ` `
+                    BinaryOp, token @ 167..169 = `+` ; trailing: ` `
+                    Value, number, token @ 169..170 = `2`
+            token @ 170..172 = `}` ; leading: `\n`
+        BinaryOp, token @ 172..173 = `.`
+        Value, identifier, token @ 173..179 = `health`
+    BinaryOp, token @ 179..180 = `.`
+    Value, identifier, token @ 180..183 = `max`
 --- END ---
 
 

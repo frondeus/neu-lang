@@ -3,20 +3,21 @@ md"*foo `1 + 2` bar*"
 ```
 
 [parser]
-ROOT @ 0..21 = `md\"*foo `1 + 2` bar*\"`
-    MARKDOWN, VALUE @ 0..21 = `md\"*foo `1 + 2` bar*\"`
-        TOKEN @ 0..3 = `md\"`
-        MD_EMPHASIS, MD_PARAGRAPH, MD_VALUE @ 3..20 = `*foo `1 + 2` bar*`
-            MD_TEXT @ 4..8 = `foo `
-            INTERPOLATED, ROOT @ 9..14 = `1 + 2`
-                BINARY, VALUE @ 9..14 = `1 + 2`
-                    NUMBER, TOKEN, VALUE @ 9..10 = `1`
-                    TRIVIA @ 10..11 = ` `
-                    OP, TOKEN @ 11..12 = `+`
-                    TRIVIA @ 12..13 = ` `
-                    NUMBER, TOKEN, VALUE @ 13..14 = `2`
-            MD_TEXT @ 15..19 = ` bar`
-        TOKEN @ 20..21 = `\"`
+--- GREEN TREE ---
+Root, Value, Markdown @ 0..19
+    token @ 0..3 = `md"`
+    Md_Value, Md_Paragraph @ 3..18
+        Md_Emphasis @ 3..18
+            token @ 3..4 = `*`
+            Md_Text @ 4..8 = `foo `
+            Value, Binary @ 8..13
+                Interpolated, Value, number, token @ 8..10 = `1` ; trailing: ` `
+                BinaryOp, token @ 10..12 = `+` ; trailing: ` `
+                Value, number, token @ 12..13 = `2`
+            Md_Text @ 13..17 = ` bar`
+            token @ 17..18 = `*`
+    token @ 18..19 = `"`
+--- END ---
 
 
 [eval]

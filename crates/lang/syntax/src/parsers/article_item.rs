@@ -1,4 +1,3 @@
-use crate::parsers::common::separated;
 //use crate::parsers::markdown::markdown;
 use crate::parsers::neu::{leading_trivia, trailing_trivia};
 use crate::{
@@ -11,214 +10,188 @@ use crate::{
 };
 use microtree_parser::*;
 use microtree_parser::parsers::*;
+use crate::parsers::markdown::markdown;
 
-pub fn parser<'s>() -> impl Parser<'s, FileToken> {
-    node(|builder| {
-        let mut builder = builder.node().name(Nodes::Root);
-        match builder.peek_token() {
-            None => (),
-            Some(FileToken::ThreePlus) => {
-                builder = builder.parse(main_item());
-            }
-            Some(FileToken::Error) => { }
-        }
-        builder
-            .parse(token(None))
-            .finish()
+pub fn parser<S: Sink>() -> impl Parser<FileToken, S> {
+    parse(|s| {
+        s.peek()
+            .at(None)
+            .at_unexpected(FileToken::Error)
+            .parse(skip())
+            .at(FileToken::ThreePlus)
+            .parse(main_item())
+            .expect()
+            .expect(None)
     })
 }
 
-fn main_item<'s>() -> impl Parser<'s, FileToken> {
-    node(|builder| {
-        builder.node()
-        .name(Nodes::ArticleItem)
-        .parse(token(FileToken::ThreePlus))
-        .parse_mode(main_item_header(), None)
-        .parse_mode(main_item_body(), None)
-        .finish()
+fn main_item<S: Sink>() -> impl Parser<FileToken, S> {
+    parse(|s| {
+        s.start(Nodes::ArticleItem)
+            .expect(FileToken::ThreePlus)
+            .with_mode(main_item_header())
+            .with_mode(main_item_body())
+        .end()
     })
 }
 
-fn main_item_body<'s>() -> impl Parser<'s, BodyToken> {
+fn main_item_body<S: Sink>() -> impl Parser<BodyToken, S> {
     item_body(false)
 }
 
-fn main_item_header<'s>() -> impl Parser<'s,HeaderToken> {
-    node(|builder| {
-        builder.node()
+fn main_item_header<S: Sink>() -> impl Parser<HeaderToken, S> {
+    parse(|s| {
+        s.unfinished()
         .parse(req_trivia(HeaderToken::InlineWhitespace))
-        .parse(named(
-            tokens(vec![HeaderToken::Identifier, HeaderToken::ItemId]),
-            Nodes::Identifier,
-        ))
-        .parse(token(HeaderToken::Colon))
-        .parse(named(token(HeaderToken::ItemId), Nodes::ArticleItemId))
+        .alias(Nodes::Identifier)
+        .expect(HeaderToken::Identifier)
+        .expect(HeaderToken::Colon)
+        .alias(Nodes::ArticleItemId)
+        .expect(HeaderToken::ItemId)
         .parse(req_trivia(HeaderToken::InlineWhitespace))
-        .parse(token(HeaderToken::ThreePlus))
+        .expect(HeaderToken::ThreePlus)
         .parse(opt_ws())
         .parse(req_trivia(HeaderToken::NewLine))
-        .parse(node(|builder| {
-            builder.node()
-            .name(Nodes::Value)
-            .name(Nodes::Strukt)
+        .parse(parse(|s| {
+            let leading_trivia = leading_trivia();
+            let trailing_trivia = trailing_trivia();
+            s.alias(Nodes::Value)
+            .start(Nodes::Strukt)
             .parse(separated(
-                node(|builder| {
-                    let leading_trivia = leading_trivia();
-                    let trailing_trivia = trailing_trivia();
+                with_mode(with_ctx(Context {
+                            leading: Some(&leading_trivia),
+                            trailing: Some(&trailing_trivia),
+                }, struct_key_val())),
+                HeaderToken::NewLine,
+                HeaderToken::ThreePlus,
+                true
+            ))
+            .end()
+        }))
+        .expect(HeaderToken::ThreePlus)
+        .abort()
+    })
+}
 
-                    let ctx = Context {
-                        leading_trivia: Some(&leading_trivia),
-                        trailing_trivia: Some(&trailing_trivia),
-                    };
-                    builder
-                        .parse_mode(struct_key_val(), &ctx)
-                }),
+fn item<S: Sink>() -> impl Parser<BodyToken, S> {
+    parse(|s| {
+        s.start(Nodes::ArticleItem)
+            .expect(BodyToken::PlusPlus)
+            .with_mode(item_header())
+            .with_mode(item_body(true))
+            .expect(BodyToken::PlusPlusEnd)
+        .end()
+    })
+}
+
+fn item_header<S: Sink>() -> impl Parser<HeaderToken, S> {
+    parse(|s| {
+        s.unfinished()
+        .parse(req_trivia(HeaderToken::InlineWhitespace))
+        .alias(Nodes::Identifier)
+        .expect(HeaderToken::Identifier)
+        .expect(HeaderToken::Colon)
+        .alias(Nodes::ArticleItemId)
+        .expect(HeaderToken::ItemId)
+        .parse(req_trivia(HeaderToken::InlineWhitespace))
+        .expect(HeaderToken::PlusPlus)
+        .parse(opt_ws())
+        .parse(req_trivia(HeaderToken::NewLine))
+        .parse(parse(|s| {
+            let leading_trivia = leading_trivia();
+            let trailing_trivia = trailing_trivia();
+            s
+            .alias(Nodes::Value)
+            .start(Nodes::Strukt)
+            .parse(separated(
+                with_mode(with_ctx(Context {
+                            leading: Some(&leading_trivia),
+                            trailing: Some(&trailing_trivia),
+                }, struct_key_val())),
                 HeaderToken::NewLine,
                 HeaderToken::ThreePlus,
                 true,
             ))
-            .finish()
+            .end()
         }))
-        .parse(token(HeaderToken::ThreePlus))
-        .finish()
+        .expect(HeaderToken::ThreePlus)
+        .abort()
     })
 }
 
-fn item<'s>() -> impl Parser<'s, BodyToken> {
-    node(|builder| {
-        builder.node().
-            name(Nodes::ArticleItem)
-            .parse(token(BodyToken::PlusPlus))
-            .parse_mode(item_header(), None)
-            .parse_mode(item_body(true), None)
-            .parse(token(BodyToken::PlusPlusEnd))
-            .finish()
-    })
+fn item_peek_end<'c, 's, S: Sink>(s: Builder<'c, 's, BodyToken ,S>, ends: bool) ->  Peek<'c, 's, BodyToken, S> {
+    if ends {
+        s.peek().at(BodyToken::PlusPlusEnd)
+            .at_unexpected(None)
+    } else {
+        s.peek().at(None)
+    }
 }
 
-fn item_header<'s>() -> impl Parser<'s, HeaderToken> {
-    node(|builder| {
-        builder.node()
-        .parse(req_trivia(HeaderToken::InlineWhitespace))
-        .parse(named(
-            tokens(vec![HeaderToken::Identifier, HeaderToken::ItemId]),
-            Nodes::Identifier,
-        ))
-        .parse(token(HeaderToken::Colon))
-        .parse(named(token(HeaderToken::ItemId), Nodes::ArticleItemId))
-        .parse(req_trivia(HeaderToken::InlineWhitespace))
-        .parse(token(HeaderToken::PlusPlus))
-        .parse(opt_ws())
-        .parse(req_trivia(HeaderToken::NewLine))
-        .parse(node(|builder| {
-            builder.node()
-            .name(Nodes::Value)
-            .name(Nodes::Strukt)
-            .parse(separated(
-                node(|builder| {
-                    let leading_trivia = leading_trivia();
-                    let trailing_trivia = trailing_trivia();
-
-                    let ctx = Context {
-                        leading_trivia: Some(&leading_trivia),
-                        trailing_trivia: Some(&trailing_trivia),
-                    };
-                    builder.parse_mode(struct_key_val(), &ctx)
-                }),
-                HeaderToken::NewLine,
-                HeaderToken::ThreePlus,
-                true,
-            ))
-            .finish()
-        }))
-        .parse(token(HeaderToken::ThreePlus))
-        .finish()
-    })
-}
-
-fn item_body<'s>(ends: bool) -> impl Parser<'s, BodyToken> {
-    node(move |builder| {
-        let mut builder = builder.node()
-            .name(Nodes::ArticleBody);
-        loop {
-            match builder.peek_token() {
-                None => break builder.finish(),
-                Some(BodyToken::PlusPlusEnd) if ends => break builder.finish(),
-                Some(BodyToken::Text) => {
-                    builder = builder.parse(node(|builder| {
-                        //let i = builder.state().lexer().input().clone();
-                        //builder.name(Nodes::Md_Value);
-                        //builder.name(Nodes::Value);
-                        //builder.name(Nodes::Markdown);
-                        //builder.name(Nodes::Virtual);
-                        //markdown(builder, i);
-                        builder.none()
-                    }));
-                }
-                Some(BodyToken::PlusPlus) => {
-                    builder = builder.parse(item());
-                }
-                Some(BodyToken::OpenBl) => {
-                    builder = builder.parse(item_bl());
-                }
-                Some(_) => {
-                    builder = builder.parse(tokens(vec![
-                        BodyToken::Text,
-                        BodyToken::PlusPlus,
-                        BodyToken::OpenBl,
-                    ]));
+fn item_body<S: Sink>(ends: bool) -> impl Parser<BodyToken, S> {
+    parse(move |s| {
+        // We are not using repeated because of this peek_end behavior
+        let p = item_peek_end(s.start(Nodes::ArticleBody), ends);
+        match p {
+            Peek::Found { s, .. } => s,
+            Peek::None { mut s, .. } => loop {
+                let p = item_peek_end(s, ends);
+                s = match p {
+                    Peek::Found { s, .. } => break s,
+                    p => p
+                        .at(BodyToken::Text).parse(with_mode(markdown()))
+                        .at(BodyToken::PlusPlus).parse(item())
+                        .at(BodyToken::OpenBl).parse(item_bl())
+                        .expect()
                 }
             }
         }
+        .end()
     })
 }
 
-fn item_bl<'s>() -> impl Parser<'s, BodyToken> {
-    node(|builder| {
-        builder.node()
-        .name(Nodes::ArticleRef)
-        .parse(token(BodyToken::OpenBl))
-        .parse_mode(
-            node(|builder| {
-                builder.node()
+fn item_bl<S: Sink>() -> impl Parser<BodyToken, S> {
+    parse(|s| {
+        s.start(Nodes::ArticleRef)
+        .expect(BodyToken::OpenBl)
+        .with_mode(
+            parse(|s| {
+                s
                 .parse(req_trivia(HeaderToken::InlineWhitespace))
-                .parse(named(
-                    tokens(vec![HeaderToken::Identifier, HeaderToken::ItemId]),
-                    Nodes::Identifier,
-                ))
-                .parse(token(HeaderToken::Colon))
-                .parse(named(token(HeaderToken::ItemId), Nodes::ArticleItemId))
+                .alias(Nodes::Identifier)
+                .expect(HeaderToken::Identifier)
+                .expect(HeaderToken::Colon)
+                .alias(Nodes::ArticleItemId)
+                .expect(HeaderToken::ItemId)
                 .parse(req_trivia(HeaderToken::InlineWhitespace))
-                .finish()
-            }),
-            None
+            })
         )
-        .parse(token(BodyToken::CloseBl))
-        .finish()
+        .expect(BodyToken::CloseBl)
+        .end()
     })
 }
 
-fn struct_key_val<'s>() -> impl Parser<'s, NeuToken> {
-    node(|builder| {
-        builder.node()
-        .parse(neu::strukt_key())
-        .parse(token(NeuToken::OpAssign))
+fn struct_key_val<S: Sink>() -> impl Parser<NeuToken, S> + Clone {
+    parse(|s| {
+        s.parse(neu::strukt_key())
+        .expect(NeuToken::OpAssign)
         .parse(neu::value())
-        .finish()
     })
 }
 
-fn req_trivia<'s>(tok: HeaderToken) -> impl Parser<'s, HeaderToken> {
-    token(tok)
+fn req_trivia<S: Sink>(tok: HeaderToken) -> impl Parser<HeaderToken, S> {
+    parse(move |s| s.expect(tok))
 }
 
-fn opt_ws<'s>() -> impl Parser<'s, HeaderToken> {
-    node(|builder| {
-        let mut builder = builder.node();
-        while let Some(HeaderToken::InlineWhitespace) = builder.peek_token() {
-            builder = builder.parse(any_token());
+fn opt_ws<S: Sink>() -> impl Parser<HeaderToken, S> {
+    parse(|mut s| {
+        loop {
+            s = match s.peek()
+                   .at(HeaderToken::InlineWhitespace) {
+                       Peek::Found { s, .. } => s.token(),
+                       Peek::None { s, .. } => break s
+                   }
         }
-        builder.finish()
     })
 }
 
@@ -226,16 +199,24 @@ fn opt_ws<'s>() -> impl Parser<'s, HeaderToken> {
 mod tests {
     use super::parser;
     use crate::lexers::article_item_file::Lexer;
-    use microtree_parser::{ParseResult, State};
+    use microtree_parser::{GreenSink, State};
 
     #[test]
     fn article_parser_tests() {
         test_runner::test_snapshots("md", "parser", |input| {
             let lexer = Lexer::new(input);
 
-            let res: ParseResult = State::parse(lexer, parser());
+            if std::env::var("PARSE_DEBUG").is_ok() {
+                let res: microtree_parser::TestSink = State::parse(lexer, parser());
+                let res = res.events.join("\n");
+                format!("{}", res)
+            }
+            else {
+                let res: GreenSink = State::parse(lexer, parser());
+                let res = res.finish();
 
-            format!("{:?}", res)
+                format!("{:?}", res.root)
+            }
         })
         .unwrap();
     }

@@ -36,30 +36,28 @@
 ]
 
 [parser]
-
 --- GREEN TREE ---
-Root @ 0..60
-    Value, IdentPath @ 0..60
-        Value, IdentPath @ 0..54
-            Value, Strukt @ 0..47
-                token @ 0..1 `{`
-                StruktPair @ 1..45
-                    Key, identifier, token @ 1..13 `health` ; leading: `\n    ` ; trailing: ` `
-                    token @ 13..15 `=` ; trailing: ` `
-                    Value, Strukt @ 15..45
-                        token @ 15..16 `{`
-                        StruktPair @ 16..39
-                            Key, identifier, token @ 16..31 `value` ; leading: `\n        ` ; trailing: ` `
-                            token @ 31..33 `=` ; trailing: ` `
-                            Value, Unary @ 33..39
-                                UnaryOp, token @ 33..34 `.`
-                                Value, identifier, token @ 34..39 `value`
-                        token @ 39..45 `}` ; leading: `\n    `
-                token @ 45..47 `}` ; leading: `\n`
-            BinaryOp, token @ 47..48 `.`
-            Value, identifier, token @ 48..54 `health`
-        BinaryOp, token @ 54..55 `.`
-        Value, identifier, token @ 55..60 `value`
+Root, Value, IdentPath @ 0..60
+    Value, IdentPath @ 0..54
+        Value, Strukt @ 0..47
+            token @ 0..1 = `{`
+            StruktPair @ 1..45
+                Key, identifier, token @ 1..13 = `health` ; leading: `\n    ` ; trailing: ` `
+                token @ 13..15 = `=` ; trailing: ` `
+                Value, Strukt @ 15..45
+                    token @ 15..16 = `{`
+                    StruktPair @ 16..39
+                        Key, identifier, token @ 16..31 = `value` ; leading: `\n        ` ; trailing: ` `
+                        token @ 31..33 = `=` ; trailing: ` `
+                        Value, Unary @ 33..39
+                            UnaryOp, token @ 33..34 = `.`
+                            Value, identifier, token @ 34..39 = `value`
+                    token @ 39..45 = `}` ; leading: `\n    `
+            token @ 45..47 = `}` ; leading: `\n`
+        BinaryOp, token @ 47..48 = `.`
+        Value, identifier, token @ 48..54 = `health`
+    BinaryOp, token @ 54..55 = `.`
+    Value, identifier, token @ 55..60 = `value`
 --- END ---
 
 

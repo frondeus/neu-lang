@@ -9,7 +9,7 @@ edition = "2018"
 [dependencies]
 anyhow = "1.0.34"
 pico-args = "0.3.4"
-microtree-codegen = { path ="../../microtree/crates/codegen" }
+microtree-codegen = { path ="../crates/utils/microtree-codegen" }
 glob = "0.3.0"
 xshell = "0.1.8"
 crossterm = "0.18.2"

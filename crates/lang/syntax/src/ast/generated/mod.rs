@@ -28,7 +28,7 @@ impl Nodes {
     pub const Strukt: Name = Name::new("Strukt");
     pub const Array: Name = Name::new("Array");
     pub const InnerMarkdown: Name = Name::new("InnerMarkdown");
-    pub const MdValue: Name = Name::new("MdValue");
+    pub const Md_Value: Name = Name::new("Md_Value");
     pub const InnerString: Name = Name::new("InnerString");
     pub const Interpolated: Name = Name::new("Interpolated");
     pub const StruktPair: Name = Name::new("StruktPair");
@@ -1401,7 +1401,7 @@ where
             .chain(self.value.map(|it| it.build_green(builder)).into_iter())
             .chain(self.close_p.map(|it| it.build_green(builder)).into_iter())
             .collect();
-        builder.node(Nodes::Value, move |_| children)
+        builder.node(Nodes::Value, children)
     }
 }
 
@@ -1497,7 +1497,7 @@ where
             .chain(self.binary_op.map(|it| it.build_green(builder)).into_iter())
             .chain(self.right.map(|it| it.build_green(builder)).into_iter())
             .collect();
-        builder.node(Nodes::Binary, move |_| children)
+        builder.node(Nodes::Binary, children)
     }
 }
 
@@ -1593,7 +1593,7 @@ where
             .chain(self.op_dot.map(|it| it.build_green(builder)).into_iter())
             .chain(self.right.map(|it| it.build_green(builder)).into_iter())
             .collect();
-        builder.node(Nodes::IdentPath, move |_| children)
+        builder.node(Nodes::IdentPath, children)
     }
 }
 
@@ -1677,7 +1677,7 @@ where
             .chain(self.unary_op.map(|it| it.build_green(builder)).into_iter())
             .chain(self.value.map(|it| it.build_green(builder)).into_iter())
             .collect();
-        builder.node(Nodes::Unary, move |_| children)
+        builder.node(Nodes::Unary, children)
     }
 }
 
@@ -1777,7 +1777,7 @@ where
             )
             .chain(self.dquote.map(|it| it.build_green(builder)).into_iter())
             .collect();
-        builder.node(Nodes::Markdown, move |_| children)
+        builder.node(Nodes::Markdown, children)
     }
 }
 
@@ -1885,7 +1885,7 @@ where
                     .into_iter(),
             )
             .collect();
-        builder.node(Nodes::String, move |_| children)
+        builder.node(Nodes::String, children)
     }
 }
 
@@ -2001,7 +2001,7 @@ where
             })
             .chain(self.close_c.map(|it| it.build_green(builder)).into_iter())
             .collect();
-        builder.node(Nodes::Strukt, move |_| children)
+        builder.node(Nodes::Strukt, children)
     }
 }
 
@@ -2117,7 +2117,7 @@ where
             })
             .chain(self.close_b.map(|it| it.build_green(builder)).into_iter())
             .collect();
-        builder.node(Nodes::Array, move |_| children)
+        builder.node(Nodes::Array, children)
     }
 }
 
@@ -2136,15 +2136,15 @@ impl Ast for InnerMarkdown {
     }
 }
 impl InnerMarkdown {
-    pub fn md_value(&self) -> impl Iterator<Item = MdValue> + '_ {
-        self.0.children().filter_map(MdValue::new)
+    pub fn md_value(&self) -> impl Iterator<Item = Md_Value> + '_ {
+        self.0.children().filter_map(Md_Value::new)
     }
     pub fn build() -> InnerMarkdownBuilder {
         Default::default()
     }
 }
 pub struct InnerMarkdownBuilder {
-    md_value: Vec<Box<dyn AstBuilder<T = MdValue>>>,
+    md_value: Vec<Box<dyn AstBuilder<T = Md_Value>>>,
 }
 impl Default for InnerMarkdownBuilder {
     fn default() -> Self {
@@ -2154,7 +2154,7 @@ impl Default for InnerMarkdownBuilder {
     }
 }
 impl InnerMarkdownBuilder {
-    pub fn fill(self, md_value: Vec<Box<dyn AstBuilder<T = MdValue>>>) -> Self {
+    pub fn fill(self, md_value: Vec<Box<dyn AstBuilder<T = Md_Value>>>) -> Self {
         Self { md_value }
     }
 }
@@ -2177,15 +2177,15 @@ impl AstBuilder for InnerMarkdownBuilder {
                     .collect::<Vec<_>>()
             })
             .collect();
-        builder.node(Nodes::InnerMarkdown, move |_| children)
+        builder.node(Nodes::InnerMarkdown, children)
     }
 }
 
 #[derive(Debug)]
-pub struct MdValue(Red);
-impl Ast for MdValue {
+pub struct Md_Value(Red);
+impl Ast for Md_Value {
     fn new(node: Red) -> Option<Self> {
-        if !node.is(Nodes::MdValue) {
+        if !node.is(Nodes::Md_Value) {
             return None;
         }
         node.green().as_node()?;
@@ -2195,24 +2195,24 @@ impl Ast for MdValue {
         self.0.clone()
     }
 }
-impl MdValue {
+impl Md_Value {
     pub fn text_token(&self) -> Option<Text> {
         self.0.children().filter_map(Text::new).next()
     }
-    pub fn build<T0>() -> MdValueBuilder<T0>
+    pub fn build<T0>() -> Md_ValueBuilder<T0>
     where
         T0: AstBuilder<T = Text>,
     {
         Default::default()
     }
 }
-pub struct MdValueBuilder<T0>
+pub struct Md_ValueBuilder<T0>
 where
     T0: AstBuilder<T = Text>,
 {
     text: Option<T0>,
 }
-impl<T0> Default for MdValueBuilder<T0>
+impl<T0> Default for Md_ValueBuilder<T0>
 where
     T0: AstBuilder<T = Text>,
 {
@@ -2222,7 +2222,7 @@ where
         }
     }
 }
-impl<T0> MdValueBuilder<T0>
+impl<T0> Md_ValueBuilder<T0>
 where
     T0: AstBuilder<T = Text>,
 {
@@ -2230,14 +2230,14 @@ where
         Self { text: Some(text) }
     }
 }
-impl<T0> AstBuilder for MdValueBuilder<T0>
+impl<T0> AstBuilder for Md_ValueBuilder<T0>
 where
     T0: AstBuilder<T = Text>,
 {
-    type T = MdValue;
-    fn build(self, builder: &mut Cache) -> MdValue {
+    type T = Md_Value;
+    fn build(self, builder: &mut Cache) -> Md_Value {
         let green = AstBuilder::build_green(self, builder);
-        MdValue::new(Red::root(green)).unwrap()
+        Md_Value::new(Red::root(green)).unwrap()
     }
     fn build_boxed_green(self: Box<Self>, builder: &mut Cache) -> Green {
         AstBuilder::build_green(*self, builder)
@@ -2247,7 +2247,7 @@ where
             .into_iter()
             .chain(self.text.map(|it| it.build_green(builder)).into_iter())
             .collect();
-        builder.node(Nodes::MdValue, move |_| children)
+        builder.node(Nodes::Md_Value, children)
     }
 }
 
@@ -2307,7 +2307,7 @@ impl AstBuilder for InnerStringBuilder {
                     .collect::<Vec<_>>()
             })
             .collect();
-        builder.node(Nodes::InnerString, move |_| children)
+        builder.node(Nodes::InnerString, children)
     }
 }
 
@@ -2403,7 +2403,7 @@ where
             .chain(self.value.map(|it| it.build_green(builder)).into_iter())
             .chain(self.close_i.map(|it| it.build_green(builder)).into_iter())
             .collect();
-        builder.node(Nodes::Interpolated, move |_| children)
+        builder.node(Nodes::Interpolated, children)
     }
 }
 impl<T0, T1, T2> IntoBuilder<InnerStringPart> for InterpolatedBuilder<T0, T1, T2>
@@ -2509,7 +2509,7 @@ where
             .chain(self.op_assign.map(|it| it.build_green(builder)).into_iter())
             .chain(self.value.map(|it| it.build_green(builder)).into_iter())
             .collect();
-        builder.node(Nodes::StruktPair, move |_| children)
+        builder.node(Nodes::StruktPair, children)
     }
 }
 
@@ -2585,7 +2585,7 @@ where
                     .into_iter(),
             )
             .collect();
-        builder.node(Nodes::Key, move |_| children)
+        builder.node(Nodes::Key, children)
     }
 }
 
@@ -2677,7 +2677,7 @@ where
                     .into_iter(),
             )
             .collect();
-        builder.node(Nodes::MainItem, move |_| children)
+        builder.node(Nodes::MainItem, children)
     }
 }
 
@@ -2846,7 +2846,7 @@ where
                     .into_iter(),
             )
             .collect();
-        builder.node(Nodes::MainItemHeader, move |_| children)
+        builder.node(Nodes::MainItemHeader, children)
     }
 }
 
@@ -2954,7 +2954,7 @@ where
                     .into_iter(),
             )
             .collect();
-        builder.node(Nodes::MainItemBody, move |_| children)
+        builder.node(Nodes::MainItemBody, children)
     }
 }
 
@@ -3026,7 +3026,7 @@ where
             .into_iter()
             .chain(self.item_id.map(|it| it.build_green(builder)).into_iter())
             .collect();
-        builder.node(Nodes::ArticleItemId, move |_| children)
+        builder.node(Nodes::ArticleItemId, children)
     }
 }
 
@@ -3112,7 +3112,7 @@ where
                     .collect::<Vec<_>>()
             })
             .collect();
-        builder.node(Nodes::ArticleItemValues, move |_| children)
+        builder.node(Nodes::ArticleItemValues, children)
     }
 }
 
@@ -3220,7 +3220,7 @@ where
                     .into_iter(),
             )
             .collect();
-        builder.node(Nodes::ArticleItem, move |_| children)
+        builder.node(Nodes::ArticleItem, children)
     }
 }
 impl<T0, T1, T2> IntoBuilder<ArticleBody> for ArticleItemBuilder<T0, T1, T2>
@@ -3404,7 +3404,7 @@ where
                     .into_iter(),
             )
             .collect();
-        builder.node(Nodes::ArticleItemHeader, move |_| children)
+        builder.node(Nodes::ArticleItemHeader, children)
     }
 }
 
@@ -3513,7 +3513,7 @@ where
                     .collect::<Vec<_>>()
             })
             .collect();
-        builder.node(Nodes::ArticleItemBody, move |_| children)
+        builder.node(Nodes::ArticleItemBody, children)
     }
 }
 
@@ -3644,7 +3644,7 @@ where
             .chain(self.item_id.map(|it| it.build_green(builder)).into_iter())
             .chain(self.close_bl.map(|it| it.build_green(builder)).into_iter())
             .collect();
-        builder.node(Nodes::ArticleRef, move |_| children)
+        builder.node(Nodes::ArticleRef, children)
     }
 }
 impl<T0, T1, T2, T3, T4> IntoBuilder<ArticleBody> for ArticleRefBuilder<T0, T1, T2, T3, T4>

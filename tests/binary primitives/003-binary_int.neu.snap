@@ -12,13 +12,11 @@
 ]
 
 [parser]
-
 --- GREEN TREE ---
-Root @ 0..5
-    Value, Binary @ 0..5
-        Value, number, token @ 0..2 `4` ; trailing: ` `
-        BinaryOp, token @ 2..4 `+` ; trailing: ` `
-        Value, number, token @ 4..5 `2`
+Root, Value, Binary @ 0..5
+    Value, number, token @ 0..2 = `4` ; trailing: ` `
+    BinaryOp, token @ 2..4 = `+` ; trailing: ` `
+    Value, number, token @ 4..5 = `2`
 --- END ---
 
 

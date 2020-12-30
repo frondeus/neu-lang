@@ -3,24 +3,22 @@
 ```
 
 [parser]
-
 --- GREEN TREE ---
-Root @ 0..20
-    Value, String @ 0..20
-        token @ 0..2 `"` ; leading: ` `
-        InnerString @ 2..19
-            token @ 2..7 `10 = `
-            Interpolated @ 7..19
-                token @ 7..9 `${`
-                Value, Binary @ 9..18
-                    Value, Binary @ 9..15
-                        Value, number, token @ 9..11 `5` ; trailing: ` `
-                        BinaryOp, token @ 11..13 `+` ; trailing: ` `
-                        Value, number, token @ 13..15 `2` ; trailing: ` `
-                    BinaryOp, token @ 15..17 `+` ; trailing: ` `
-                    Value, number, token @ 17..18 `3`
-                token @ 18..19 `}`
-        token @ 19..20 `"`
+Root, Value, String @ 0..20
+    token @ 0..2 = `"` ; leading: ` `
+    InnerString @ 2..19
+        token @ 2..7 = `10 = `
+        Interpolated @ 7..19
+            token @ 7..9 = `${`
+            Value, Binary @ 9..18
+                Value, Binary @ 9..15
+                    Value, number, token @ 9..11 = `5` ; trailing: ` `
+                    BinaryOp, token @ 11..13 = `+` ; trailing: ` `
+                    Value, number, token @ 13..15 = `2` ; trailing: ` `
+                BinaryOp, token @ 15..17 = `+` ; trailing: ` `
+                Value, number, token @ 17..18 = `3`
+            token @ 18..19 = `}`
+    token @ 19..20 = `"`
 --- END ---
 
 

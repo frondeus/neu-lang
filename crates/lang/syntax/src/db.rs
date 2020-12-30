@@ -1,6 +1,6 @@
 //use crate::ast::{ArticleItem, Ast};
 use neu_canceled::Canceled;
-use microtree_parser::{ParseResult, State};
+use microtree_parser::{GreenSink, ParseResult, State};
 use std::collections::HashSet;
 use std::sync::Arc;
 
@@ -65,7 +65,8 @@ fn parse_neu_syntax(db: &dyn Parser, path: FileId) -> Arc<ParseResult> {
     let input = db.input(path);
     let input = input.as_str();
     let lexer = Lexer::new(input);
-    Arc::new(State::parse(lexer, parser()))
+    let sink: GreenSink = State::parse(lexer, parser());
+    Arc::new(sink.finish())
 }
 
 fn parse_md_syntax(db: &dyn Parser, path: FileId) -> Arc<ParseResult> {
@@ -76,7 +77,8 @@ fn parse_md_syntax(db: &dyn Parser, path: FileId) -> Arc<ParseResult> {
     let input = db.input(path);
     let input = input.as_str();
     let lexer = Lexer::new(input);
-    Arc::new(State::parse(lexer, parser()))
+    let sink: GreenSink = State::parse(lexer, parser());
+    Arc::new(sink.finish())
 }
 
 /*

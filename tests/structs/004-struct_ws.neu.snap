@@ -38,27 +38,25 @@
 ]
 
 [parser]
-
 --- GREEN TREE ---
-Root @ 0..48
-    Value, Strukt @ 0..48
-        token @ 0..1 `{`
-        StruktPair @ 1..25
-            Key, identifier, token @ 1..13 `health` ; leading: `\n    ` ; trailing: ` `
-            token @ 13..15 `=` ; trailing: ` `
-            Value, Binary @ 15..25
-                Value, number, token @ 15..17 `10`
-                BinaryOp, token @ 17..24 `-` ; leading: `\n    ` ; trailing: ` `
-                Value, number, token @ 24..25 `2`
-        token @ 25..26 `,`
-        StruktPair @ 26..46
-            Key, identifier, token @ 26..38 `sanity` ; leading: `\n    ` ; trailing: ` `
-            token @ 38..40 `=` ; trailing: ` `
-            Value, Binary @ 40..46
-                Value, number, token @ 40..43 `50` ; trailing: ` `
-                BinaryOp, token @ 43..45 `+` ; trailing: ` `
-                Value, number, token @ 45..46 `2`
-        token @ 46..48 `}` ; leading: `\n`
+Root, Value, Strukt @ 0..48
+    token @ 0..1 = `{`
+    StruktPair @ 1..25
+        Key, identifier, token @ 1..13 = `health` ; leading: `\n    ` ; trailing: ` `
+        token @ 13..15 = `=` ; trailing: ` `
+        Value, Binary @ 15..25
+            Value, number, token @ 15..17 = `10`
+            BinaryOp, token @ 17..24 = `-` ; leading: `\n    ` ; trailing: ` `
+            Value, number, token @ 24..25 = `2`
+    token @ 25..26 = `,`
+    StruktPair @ 26..46
+        Key, identifier, token @ 26..38 = `sanity` ; leading: `\n    ` ; trailing: ` `
+        token @ 38..40 = `=` ; trailing: ` `
+        Value, Binary @ 40..46
+            Value, number, token @ 40..43 = `50` ; trailing: ` `
+            BinaryOp, token @ 43..45 = `+` ; trailing: ` `
+            Value, number, token @ 45..46 = `2`
+    token @ 46..48 = `}` ; leading: `\n`
 --- END ---
 
 

@@ -2,6 +2,9 @@
 members = [
     #"crates/utils/*",
     "crates/utils/test-runner",
+    "crates/utils/microtree",
+    "crates/utils/microtree-codegen",
+    "crates/utils/microtree-parser",
     "crates/utils/canceled",
     "crates/lang/*",
     "crates/ide/*",

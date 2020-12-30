@@ -9,8 +9,8 @@ edition = "2018"
 [dependencies]
 #neu-parser = { path = "../../utils/parser" }
 neu-canceled = { path = "../../utils/canceled" }
-microtree = { path ="../../../../microtree/crates/lib" }
-microtree-parser = { path ="../../../../microtree/crates/parser" }
+microtree = { path ="../../utils/microtree" }
+microtree-parser = { path ="../../utils/microtree-parser" }
 
 text-size = { version = "1.0.0" }
 itertools = "0.9.0"

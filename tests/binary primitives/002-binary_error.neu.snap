@@ -10,13 +10,11 @@ true ==
 ]
 
 [parser]
-
 --- GREEN TREE ---
-Root @ 0..7
-    Value, Binary @ 0..7
-        Value, Boolean, token @ 0..5 `true` ; trailing: ` `
-        BinaryOp, token @ 5..7 `==`
-        Value, error @ 7..7 ``
+Root, Value, Binary @ 0..7
+    Value, Boolean, token @ 0..5 = `true` ; trailing: ` `
+    BinaryOp, token @ 5..7 = `==`
+    Value, error @ 7..7 = ``
 --- END ---
 
 

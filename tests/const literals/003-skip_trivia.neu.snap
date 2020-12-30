@@ -9,10 +9,8 @@
 ]
 
 [parser]
-
 --- GREEN TREE ---
-Root @ 0..5
-    Value, number, token @ 0..5 `5` ; leading: `    `
+Root, Value, number, token @ 0..5 = `5` ; leading: `    `
 --- END ---
 
 

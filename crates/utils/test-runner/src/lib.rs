@@ -86,7 +86,7 @@ pub fn test_snapshots(ext: &'static str,
     signal_start.wait().unwrap();
     match signal_end.wait_timeout_ms(TIMEOUT) {
         Err(TimeoutError::Timeout) => {
-            panic!("Timed out");
+            bail!("Timed out");
         },
         _ => ()
     }
@@ -178,7 +178,7 @@ fn get_source(file: &str) -> Result<(&str, &str)> {
     let pat = format!("{:`>width$}", "\n", width = bt_count + 1);
     let splited = file.split(&pat).collect::<Vec<_>>();
     if splited.len() != 3 {
-        bail!("Expected one source wrapped in ```: {}", file)
+        bail!("Expected one source wrapped in {}: {}", pat, file)
     }
     let input = splited[1].trim_end_matches('\n'); //.trim();
     let sections = splited[2];

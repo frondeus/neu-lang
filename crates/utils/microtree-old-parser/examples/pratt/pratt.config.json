@@ -1,0 +1,12 @@
+{
+    "tokens": {
+        "Minus": "-",
+        "Plus": "+",
+        "Star": "*",
+        "Slash": "/",
+        "Number": "number",
+        "OpenP": "(",
+        "CloseP": ")"
+    },
+    "handwritten": ["Number"]
+}

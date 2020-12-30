@@ -15,18 +15,16 @@
 ]
 
 [parser]
-
 --- GREEN TREE ---
-Root @ 0..14
-    Value, Unary @ 0..14
-        UnaryOp, token @ 0..1 `.`
-        Value, Binary @ 1..14
-            Value, identifier, token @ 1..5 `bar` ; trailing: ` `
-            BinaryOp, token @ 5..7 `+` ; trailing: ` `
-            Value, IdentPath @ 7..14
-                Value, identifier, token @ 7..10 `foo`
-                BinaryOp, token @ 10..11 `.`
-                Value, identifier, token @ 11..14 `baz`
+Root, Value, Binary @ 0..14
+    Value, Unary @ 0..5
+        UnaryOp, token @ 0..1 = `.`
+        Value, identifier, token @ 1..5 = `bar` ; trailing: ` `
+    BinaryOp, token @ 5..7 = `+` ; trailing: ` `
+    Value, IdentPath @ 7..14
+        Value, identifier, token @ 7..10 = `foo`
+        BinaryOp, token @ 10..11 = `.`
+        Value, identifier, token @ 11..14 = `baz`
 --- END ---
 
 

@@ -1,4 +1,4 @@
-`````
+```````
 md#"
 ```
 {
@@ -24,84 +24,73 @@ But here shouldn't
 ```
 
 "#
-`````
+```````
 
 [parser]
-ROOT @ 0..197
-    MARKDOWN, VALUE @ 0..197
-        TOKEN @ 0..4 = `md#\"`
-        MD_VALUE @ 5..88
-            INTERPOLATED, ROOT @ 9..85
-                STRUCT, VALUE @ 9..84
-                    TOKEN @ 9..10 = `{`
-                    TRIVIA @ 10..15 = `\n    `
-                    IDENTIFIER, KEY, TOKEN @ 15..21 = `health`
-                    TRIVIA @ 21..22 = ` `
-                    TOKEN @ 22..23 = `=`
-                    TRIVIA @ 23..24 = ` `
-                    STRUCT, VALUE @ 24..82
-                        TOKEN @ 24..25 = `{`
-                        TRIVIA @ 25..34 = `\n        `
-                        IDENTIFIER, KEY, TOKEN @ 34..37 = `max`
-                        TRIVIA @ 37..38 = ` `
-                        TOKEN @ 38..39 = `=`
-                        TRIVIA @ 39..40 = ` `
-                        BINARY, VALUE @ 40..54 = `(60 + 70) / 10`
-                            PARENS, VALUE @ 40..50 = `(60 + 70) `
-                                TOKEN @ 40..41 = `(`
-                                BINARY, VALUE @ 41..48 = `60 + 70`
-                                    NUMBER, TOKEN, VALUE @ 41..43 = `60`
-                                    TRIVIA @ 43..44 = ` `
-                                    OP, TOKEN @ 44..45 = `+`
-                                    TRIVIA @ 45..46 = ` `
-                                    NUMBER, TOKEN, VALUE @ 46..48 = `70`
-                                TOKEN @ 48..49 = `)`
-                                TRIVIA @ 49..50 = ` `
-                            OP, TOKEN @ 50..51 = `/`
-                            TRIVIA @ 51..52 = ` `
-                            NUMBER, TOKEN, VALUE @ 52..54 = `10`
-                        TOKEN @ 54..55 = `,`
-                        TRIVIA @ 55..64 = `\n        `
-                        IDENTIFIER, KEY, TOKEN @ 64..69 = `value`
-                        TRIVIA @ 69..70 = ` `
-                        TOKEN @ 70..71 = `=`
-                        TRIVIA @ 71..72 = ` `
-                        UNARY, VALUE @ 72..76 = `.max`
-                            OP, TOKEN @ 72..73 = `.`
-                            IDENTIFIER, TOKEN, VALUE @ 73..76 = `max`
-                        TRIVIA @ 76..81 = `\n    `
-                        TOKEN @ 81..82 = `}`
-                    TRIVIA @ 82..83 = `\n`
-                    TOKEN @ 83..84 = `}`
-                TRIVIA @ 84..85 = `\n`
-        MD_PARAGRAPH, MD_VALUE @ 90..107 = `Here should eval\n`
-            MD_TEXT @ 90..106 = `Here should eval`
-        MD_VALUE @ 107..123 = ````neu\n5 + 2\n````
-            INTERPOLATED, ROOT @ 114..120 = `5 + 2\n`
-                BINARY, VALUE @ 114..119 = `5 + 2`
-                    NUMBER, TOKEN, VALUE @ 114..115 = `5`
-                    TRIVIA @ 115..116 = ` `
-                    OP, TOKEN @ 116..117 = `+`
-                    TRIVIA @ 117..118 = ` `
-                    NUMBER, TOKEN, VALUE @ 118..119 = `2`
-                TRIVIA @ 119..120 = `\n`
-        MD_PARAGRAPH, MD_VALUE @ 125..142 = `Here is intended\n`
-            MD_TEXT @ 125..141 = `Here is intended`
-        MD_VALUE @ 147..153 = `2 + 5\n`
-            INTERPOLATED, ROOT @ 147..153 = `2 + 5\n`
-                BINARY, VALUE @ 147..152 = `2 + 5`
-                    NUMBER, TOKEN, VALUE @ 147..148 = `2`
-                    TRIVIA @ 148..149 = ` `
-                    OP, TOKEN @ 149..150 = `+`
-                    TRIVIA @ 150..151 = ` `
-                    NUMBER, TOKEN, VALUE @ 151..152 = `5`
-                TRIVIA @ 152..153 = `\n`
-        MD_PARAGRAPH, MD_VALUE @ 154..173 = `But here shouldn\'t\n`
-            MD_TEXT @ 154..172 = `But here shouldn\'t`
-        MD_CODEBLOCK, MD_VALUE @ 173..193 = ````example\n5 + 2\n````
-            MD_CODEBLOCKLANG @ 176..183 = `example`
-            MD_TEXT @ 184..190 = `5 + 2\n`
-        TOKEN @ 195..197 = `\"#`
+--- GREEN TREE ---
+Root, Value, Markdown @ 0..202
+    token @ 0..4 = `md#"`
+    Md_Value, token @ 4..5 = `\n`
+    Md_Value, token @ 5..9 = ````\n`
+    Md_Value, Interpolated, Value, Strukt @ 9..84
+        token @ 9..10 = `{`
+        StruktPair @ 10..82
+            Key, identifier, token @ 10..22 = `health` ; leading: `\n    ` ; trailing: ` `
+            token @ 22..24 = `=` ; trailing: ` `
+            Value, Strukt @ 24..82
+                token @ 24..25 = `{`
+                StruktPair @ 25..54
+                    Key, identifier, token @ 25..38 = `max` ; leading: `\n        ` ; trailing: ` `
+                    token @ 38..40 = `=` ; trailing: ` `
+                    Value, Binary @ 40..54
+                        token @ 40..41 = `(`
+                        Value, Binary @ 41..48
+                            Value, number, token @ 41..44 = `60` ; trailing: ` `
+                            BinaryOp, token @ 44..46 = `+` ; trailing: ` `
+                            Value, number, token @ 46..48 = `70`
+                        token @ 48..50 = `)` ; trailing: ` `
+                        BinaryOp, token @ 50..52 = `/` ; trailing: ` `
+                        Value, number, token @ 52..54 = `10`
+                token @ 54..55 = `,`
+                StruktPair @ 55..76
+                    Key, identifier, token @ 55..70 = `value` ; leading: `\n        ` ; trailing: ` `
+                    token @ 70..72 = `=` ; trailing: ` `
+                    Value, Unary @ 72..76
+                        UnaryOp, token @ 72..73 = `.`
+                        Value, identifier, token @ 73..76 = `max`
+                token @ 76..82 = `}` ; leading: `\n    `
+        token @ 82..84 = `}` ; leading: `\n`
+    Md_Value, token @ 84..88 = ````` ; leading: `\n`
+    Md_Value, token @ 88..90 = `\n\n`
+    Md_Value, Md_Paragraph @ 90..107
+        Md_Text @ 90..106 = `Here should eval`
+        token @ 106..107 = `\n`
+    Md_Value, token @ 107..114 = ````neu\n`
+    Md_Value, Value, Binary @ 114..119
+        Interpolated, Value, number, token @ 114..116 = `5` ; trailing: ` `
+        BinaryOp, token @ 116..118 = `+` ; trailing: ` `
+        Value, number, token @ 118..119 = `2`
+    Md_Value, token @ 119..123 = ````` ; leading: `\n`
+    Md_Value, token @ 123..125 = `\n\n`
+    Md_Value, Md_Paragraph @ 125..142
+        Md_Text @ 125..141 = `Here is intended`
+        token @ 141..142 = `\n`
+    Md_Value, token @ 142..147 = `\n    `
+    Md_Value, Value, Binary @ 147..152
+        Interpolated, Value, number, token @ 147..149 = `2` ; trailing: ` `
+        BinaryOp, token @ 149..151 = `+` ; trailing: ` `
+        Value, number, token @ 151..152 = `5`
+    Md_Value, token @ 152..154 = `\n` ; leading: `\n`
+    Md_Value, Md_Paragraph @ 154..173
+        Md_Text @ 154..172 = `But here shouldn't`
+        token @ 172..173 = `\n`
+    Md_Value, Md_CodeBlock @ 173..200
+        Md_CodeBlockLang @ 173..180 = `example`
+        token @ 180..191 = ````example\n`
+        Md_Text @ 191..197 = `5 + 2\n`
+        token @ 197..200 = `````
+    token @ 200..202 = `"#`
+--- END ---
 
 
 [eval]

@@ -8,10 +8,8 @@ true
 ]
 
 [parser]
-
 --- GREEN TREE ---
-Root @ 0..4
-    Value, Boolean, token @ 0..4 `true`
+Root, Value, Boolean, token @ 0..4 = `true`
 --- END ---
 
 

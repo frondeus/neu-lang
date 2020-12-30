@@ -9,12 +9,10 @@
 ]
 
 [parser]
-
 --- GREEN TREE ---
-Root @ 0..4
-    Value, Unary @ 0..4
-        UnaryOp, token @ 0..1 `.`
-        Value, identifier, token @ 1..4 `bar`
+Root, Value, Unary @ 0..4
+    UnaryOp, token @ 0..1 = `.`
+    Value, identifier, token @ 1..4 = `bar`
 --- END ---
 
 

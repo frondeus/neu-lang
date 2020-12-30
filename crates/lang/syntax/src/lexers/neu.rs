@@ -52,7 +52,9 @@ pub enum Token {
     OpBang,
 
     #[display(fmt = "`+`")]
-    #[token("+")]
+    #[token("+", |lex| {
+        !lex.remainder().starts_with("+") // Collision with `+++`
+    })]
     OpPlus,
 
     #[display(fmt = "`*`")]
@@ -88,11 +90,40 @@ pub enum Token {
     OpenC,
 
     #[display(fmt = "`\"`")]
-    #[token("\"")]
+    #[token("\"", |lex| {
+        if lex.extras.count > 0 {
+            let hash_count = lex.extras.count;
+            let hash = "#".repeat(hash_count);
+            if lex.remainder().starts_with(&hash) {
+                lex.bump(hash_count);
+                lex.extras.count = 0;
+                true
+            }
+            else {
+                false
+            }
+        } else {
+            true
+        }
+    })]
     DoubleQuote,
 
     #[display(fmt = "`md\"`")]
-    #[token(r#"md""#)]
+    #[token("md", |lex| {
+        let mut remainder = lex.remainder();
+        let mut hash = 0;
+        while remainder.starts_with("#") {
+            hash += 1;
+            lex.bump(1);
+            remainder = lex.remainder();
+        }
+        lex.extras.count = hash;
+        let quote = remainder.starts_with("\"");
+        if quote {
+            lex.bump(1);
+        }
+        quote
+    })]
     MdQuote,
 
     #[display(fmt = "`}}`")]

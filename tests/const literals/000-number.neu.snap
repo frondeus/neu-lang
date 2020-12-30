@@ -8,10 +8,8 @@
 ]
 
 [parser]
-
 --- GREEN TREE ---
-Root @ 0..1
-    Value, number, token @ 0..1 `4`
+Root, Value, number, token @ 0..1 = `4`
 --- END ---
 
 

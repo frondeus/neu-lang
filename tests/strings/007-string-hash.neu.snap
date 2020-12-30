@@ -3,14 +3,12 @@
 ```
 
 [parser]
-
 --- GREEN TREE ---
-Root @ 0..12
-    Value, String @ 0..12
-        token @ 0..2 `"` ; leading: ` `
-        InnerString @ 2..11
-            token @ 2..11 `foo # bar`
-        token @ 11..12 `"`
+Root, Value, String @ 0..12
+    token @ 0..2 = `"` ; leading: ` `
+    InnerString @ 2..11
+        token @ 2..11 = `foo # bar`
+    token @ 11..12 = `"`
 --- END ---
 
 

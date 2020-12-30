@@ -7,48 +7,46 @@
 ```
 
 [parser]
-
 --- GREEN TREE ---
-Root @ 0..105
-    Value, IdentPath @ 0..105
-        Value, Strukt @ 0..99
-            token @ 0..1 `{`
-            StruktPair @ 1..30
-                Key, identifier, token @ 1..12 `label` ; leading: `\n    ` ; trailing: ` `
-                token @ 12..14 `=` ; trailing: ` `
-                Value, String @ 14..30
-                    token @ 14..15 `"`
-                    InnerString @ 15..29
-                        token @ 15..19 `HP: `
-                        Interpolated @ 19..29
-                            token @ 19..21 `${`
-                            Value, Binary @ 21..28
-                                Value, number, token @ 21..24 `2` ; leading: ` ` ; trailing: ` `
-                                BinaryOp, token @ 24..26 `+` ; trailing: ` `
-                                Value, number, token @ 26..28 `3` ; trailing: ` `
-                            token @ 28..29 `}`
-                    token @ 29..30 `"`
-            token @ 30..31 `,`
-            StruktPair @ 31..67
-                Key, identifier, token @ 31..41 `link` ; leading: `\n    ` ; trailing: ` `
-                token @ 41..43 `=` ; trailing: ` `
-                Value, String @ 43..67
-                    token @ 43..44 `"`
-                    InnerString @ 44..66
-                        token @ 44..66 `[AB](http://google.pl)`
-                    token @ 66..67 `"`
-            token @ 67..68 `,`
-            StruktPair @ 68..97
-                Key, identifier, token @ 68..78 `desc` ; leading: `\n    ` ; trailing: ` `
-                token @ 78..80 `=` ; trailing: ` `
-                Value, String @ 80..97
-                    token @ 80..81 `"`
-                    InnerString @ 81..96
-                        token @ 81..96 `**foo `4` bar**`
-                    token @ 96..97 `"`
-            token @ 97..99 `}` ; leading: `\n`
-        BinaryOp, token @ 99..100 `.`
-        Value, identifier, token @ 100..105 `label`
+Root, Value, IdentPath @ 0..105
+    Value, Strukt @ 0..99
+        token @ 0..1 = `{`
+        StruktPair @ 1..30
+            Key, identifier, token @ 1..12 = `label` ; leading: `\n    ` ; trailing: ` `
+            token @ 12..14 = `=` ; trailing: ` `
+            Value, String @ 14..30
+                token @ 14..15 = `"`
+                InnerString @ 15..29
+                    token @ 15..19 = `HP: `
+                    Interpolated @ 19..29
+                        token @ 19..21 = `${`
+                        Value, Binary @ 21..28
+                            Value, number, token @ 21..24 = `2` ; leading: ` ` ; trailing: ` `
+                            BinaryOp, token @ 24..26 = `+` ; trailing: ` `
+                            Value, number, token @ 26..28 = `3` ; trailing: ` `
+                        token @ 28..29 = `}`
+                token @ 29..30 = `"`
+        token @ 30..31 = `,`
+        StruktPair @ 31..67
+            Key, identifier, token @ 31..41 = `link` ; leading: `\n    ` ; trailing: ` `
+            token @ 41..43 = `=` ; trailing: ` `
+            Value, String @ 43..67
+                token @ 43..44 = `"`
+                InnerString @ 44..66
+                    token @ 44..66 = `[AB](http://google.pl)`
+                token @ 66..67 = `"`
+        token @ 67..68 = `,`
+        StruktPair @ 68..97
+            Key, identifier, token @ 68..78 = `desc` ; leading: `\n    ` ; trailing: ` `
+            token @ 78..80 = `=` ; trailing: ` `
+            Value, String @ 80..97
+                token @ 80..81 = `"`
+                InnerString @ 81..96
+                    token @ 81..96 = `**foo `4` bar**`
+                token @ 96..97 = `"`
+        token @ 97..99 = `}` ; leading: `\n`
+    BinaryOp, token @ 99..100 = `.`
+    Value, identifier, token @ 100..105 = `label`
 --- END ---
 
 

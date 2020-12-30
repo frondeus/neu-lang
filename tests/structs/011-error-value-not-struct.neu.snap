@@ -10,13 +10,11 @@
 ]
 
 [parser]
-
 --- GREEN TREE ---
-Root @ 0..5
-    Value, IdentPath @ 0..5
-        Value, number, token @ 0..1 `4`
-        BinaryOp, token @ 1..2 `.`
-        Value, identifier, token @ 2..5 `bar`
+Root, Value, IdentPath @ 0..5
+    Value, number, token @ 0..1 = `4`
+    BinaryOp, token @ 1..2 = `.`
+    Value, identifier, token @ 2..5 = `bar`
 --- END ---
 
 

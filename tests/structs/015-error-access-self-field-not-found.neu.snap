@@ -29,23 +29,21 @@
 ]
 
 [parser]
-
 --- GREEN TREE ---
-Root @ 0..32
-    Value, Strukt @ 0..32
-        token @ 0..1 `{`
-        StruktPair @ 1..14
-            Key, identifier, token @ 1..10 `foo` ; leading: `\n    ` ; trailing: ` `
-            token @ 10..12 `=` ; trailing: ` `
-            Value, number, token @ 12..14 `10`
-        token @ 14..15 `,`
-        StruktPair @ 15..30
-            Key, identifier, token @ 15..24 `bar` ; leading: `\n    ` ; trailing: ` `
-            token @ 24..26 `=` ; trailing: ` `
-            Value, Unary @ 26..30
-                UnaryOp, token @ 26..27 `.`
-                Value, identifier, token @ 27..30 `baz`
-        token @ 30..32 `}` ; leading: `\n`
+Root, Value, Strukt @ 0..32
+    token @ 0..1 = `{`
+    StruktPair @ 1..14
+        Key, identifier, token @ 1..10 = `foo` ; leading: `\n    ` ; trailing: ` `
+        token @ 10..12 = `=` ; trailing: ` `
+        Value, number, token @ 12..14 = `10`
+    token @ 14..15 = `,`
+    StruktPair @ 15..30
+        Key, identifier, token @ 15..24 = `bar` ; leading: `\n    ` ; trailing: ` `
+        token @ 24..26 = `=` ; trailing: ` `
+        Value, Unary @ 26..30
+            UnaryOp, token @ 26..27 = `.`
+            Value, identifier, token @ 27..30 = `baz`
+    token @ 30..32 = `}` ; leading: `\n`
 --- END ---
 
 

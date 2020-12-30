@@ -3,12 +3,16 @@ md"**foo**"
 ```
 
 [parser]
-ROOT @ 0..11 = `md\"**foo**\"`
-    MARKDOWN, VALUE @ 0..11 = `md\"**foo**\"`
-        TOKEN @ 0..3 = `md\"`
-        MD_PARAGRAPH, MD_STRONG, MD_VALUE @ 3..10 = `**foo**`
-            MD_TEXT @ 5..8 = `foo`
-        TOKEN @ 10..11 = `\"`
+--- GREEN TREE ---
+Root, Value, Markdown @ 0..11
+    token @ 0..3 = `md"`
+    Md_Value, Md_Paragraph @ 3..10
+        Md_Strong @ 3..10
+            token @ 3..5 = `**`
+            Md_Text @ 5..8 = `foo`
+            token @ 8..10 = `**`
+    token @ 10..11 = `"`
+--- END ---
 
 
 [eval]

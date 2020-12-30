@@ -25,9 +25,9 @@ Boolean = 'true' | 'false'
 
 Markdown = 'md_quote' InnerMarkdown 'd_quote'
 
-InnerMarkdown = MdValue*
+InnerMarkdown = Md_Value*
 
-MdValue = 'text'
+Md_Value = 'text'
 
 String = left_quote: 'd_quote' InnerString right_quote: 'd_quote'
 

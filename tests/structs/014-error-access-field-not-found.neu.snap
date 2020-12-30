@@ -22,20 +22,18 @@
 ]
 
 [parser]
-
 --- GREEN TREE ---
-Root @ 0..19
-    Value, IdentPath @ 0..19
-        Value, Strukt @ 0..17
-            token @ 0..1 `{`
-            StruktPair @ 1..14
-                Key, identifier, token @ 1..10 `foo` ; leading: `\n    ` ; trailing: ` `
-                token @ 10..12 `=` ; trailing: ` `
-                Value, number, token @ 12..14 `10`
-            token @ 14..15 `,`
-            token @ 15..17 `}` ; leading: `\n`
-        BinaryOp, token @ 17..18 `.`
-        Value, identifier, token @ 18..19 `x`
+Root, Value, IdentPath @ 0..19
+    Value, Strukt @ 0..17
+        token @ 0..1 = `{`
+        StruktPair @ 1..14
+            Key, identifier, token @ 1..10 = `foo` ; leading: `\n    ` ; trailing: ` `
+            token @ 10..12 = `=` ; trailing: ` `
+            Value, number, token @ 12..14 = `10`
+        token @ 14..15 = `,`
+        token @ 15..17 = `}` ; leading: `\n`
+    BinaryOp, token @ 17..18 = `.`
+    Value, identifier, token @ 18..19 = `x`
 --- END ---
 
 
