@@ -4,10 +4,6 @@ use logos::Logos;
 
 #[derive(Display, Debug, PartialEq, Clone, Copy, Logos)]
 pub enum Token {
-    #[display(fmt = "text")]
-    #[error]
-    Text,
-
     #[display(fmt = "`++ end ++`")]
     #[token("++ end ++")]
     PlusPlusEnd,
@@ -23,6 +19,11 @@ pub enum Token {
     #[display(fmt = "`+]`")]
     #[token("+]")]
     CloseBl,
+
+    #[display(fmt = "text")]
+    #[error]
+    Text,
+
 }
 
 pub type Lexer<'s, T = Token> = microtree_parser::Lexer<'s, T>;

@@ -230,10 +230,17 @@ mod tests {
         test_runner::test_snapshots("neu", "parser", |input| {
             let lexer = Lexer::new(input);
 
-            let res: GreenSink = State::parse(lexer, parser());
+            if std::env::var("DEBUG").is_ok() {
+                let res: microtree_parser::TestSink = State::parse(lexer, parser());
+                let res = res.events.join("\n");
+                format!("{}", res)
+            }
+            else {
+                let res: GreenSink = State::parse(lexer, parser());
 
-            let root = res.finish().root;
-            format!("{:?}", root)
+                let root = res.finish().root;
+                format!("{:?}", root)
+            }
         })
         .unwrap();
     }

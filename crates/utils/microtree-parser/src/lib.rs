@@ -47,6 +47,8 @@ mod event {
         Finish(Name),
         End,
         Trivia(TriviaKind, SmolStr),
+        IgnoreTrivia, // Sometimes trivia is just wrong. Hack!
+        Eof
     }
 
     impl Event {
@@ -337,11 +339,28 @@ mod sinks {
                             None => self.roots.push(green),
                         }
                     }
+                    Event::IgnoreTrivia => {
+                        self.leading.take();
+                        self.trailing.take();
+                    }
                     Event::Trivia(TriviaKind::Leading, value) => {
                         self.leading.get_or_insert(value);
                     }
                     Event::Trivia(TriviaKind::Trailing, value) => {
                         self.trailing.get_or_insert(value);
+                    }
+                    Event::Eof => {
+                        let leading = self.leading.take().unwrap_or_default();
+                        let trailing = self.trailing.take().unwrap_or_default();
+                        if leading != "" || trailing != "" {
+                            let trivia = format!("{}{}", leading, trailing);
+                            let green = self.cache.with_trivia(microtree::Name::new("eof"),
+                                                               trivia, "", "");
+                            match self.current() {
+                                Some(parent) => parent.children.push(green),
+                                None => self.roots.push(green)
+                            }
+                        }
                     }
                 }
             }
@@ -664,6 +683,7 @@ mod token_kind {
     pub trait TokenKind<'s>:
         Logos<'s, Source = str, Extras: Clone>
         + std::fmt::Display
+        + std::fmt::Debug
         + PartialEq
         + Clone
         + Copy
@@ -718,6 +738,22 @@ mod lexer {
 
         pub fn peek_token(&mut self) -> Option<Tok> {
             self.peek().map(|t| t.token)
+        }
+
+        pub fn rewind(&mut self, count: usize) {
+            let offset = self.inner.span().end - count;
+            let source = self.inner.source();
+            let subsource = &source[offset..];
+            dbg!("REWIND");
+            dbg!(&self.inner.slice());
+            dbg!(&source);
+            dbg!(&offset);
+            dbg!(&subsource);
+            dbg!(&self.peeked.as_ref().map(|s| s.as_ref().map(|(_, s)| s)));
+            let mut new_inner = Inner::new(source);
+            new_inner.bump(offset);
+            self.inner = new_inner;
+            self.peeked = None;
         }
 
         pub(crate) fn inner(&self) -> &Inner<'s, Tok> {
@@ -889,6 +925,7 @@ mod state {
     {
         pub(crate) lexer: Lexer<'s, Tok>,
         pub(crate) sink: S,
+        pub(crate) trivia: usize
     }
 
     impl<'s, Tok, S> State<'s, Tok, S>
@@ -919,6 +956,7 @@ mod state {
             Self {
                 sink,
                 lexer,
+                trivia: 0
             }
         }
 
@@ -926,11 +964,20 @@ mod state {
         where Tok2: TokenKind<'s>,
               Tok::Extras: Into<Tok2::Extras>
         {
-            let Self { lexer, sink } = self;
+            let Self { lexer, sink, .. } = self;
             State {
                 sink,
-                lexer: lexer.morph()
+                lexer: lexer.morph(),
+                trivia: 0
             }
+        }
+
+        pub fn count_trivia(&mut self, count: usize) {
+            self.trivia += count;
+        }
+
+        pub fn reset_count_trivia(&mut self) {
+            self.trivia = 0;
         }
 
         pub fn sink_mut(&mut self) -> &mut S {
@@ -942,12 +989,14 @@ mod state {
     }
 }
 
-mod builder {
+mod peek {
     use itertools::Itertools;
 
     use crate::{
         Context, Event, Lexer, Name, Parser, Sink, Spanned, State, TextRange, TokenKind, Trivia,
         TriviaKind,
+        SmolStr,
+        Builder
     };
 
     use logos::Logos;
@@ -1055,9 +1104,7 @@ mod builder {
                         .as_ref()
                         .map(|e| e.value.to_string())
                         .unwrap_or_else(|| "".to_string());
-                    s.state
-                        .sink_mut()
-                        .event(Event::token("error", err_value.clone()));
+                    s = s.add_token(Name::new("error"), err_value);
                     s.state.sink_mut().error(format!(
                         "Expected one of: {} but found {}",
                         expected
@@ -1077,6 +1124,20 @@ mod builder {
             }
         }
     }
+
+}
+
+mod builder {
+    use itertools::Itertools;
+
+    use crate::{
+        Context, Event, Lexer, Name, Parser, Sink, Spanned, State, TextRange, TokenKind, Trivia,
+        TriviaKind,
+        SmolStr,
+        Peek
+    };
+
+    use logos::Logos;
 
     pub struct Builder<'c, 's, Tok, S>
     where
@@ -1113,6 +1174,7 @@ mod builder {
                 if start != end {
                     let text_range = TextRange::new(start, end);
                     let value = self.state.lexer_mut().text_for_span(text_range);
+                    self.state.count_trivia(value.len());
                     self.state.sink_mut().event(Event::Trivia(kind, value));
                 }
             }
@@ -1156,11 +1218,18 @@ mod builder {
             self
         }
 
+        pub fn add_token(mut self, name: Name, value: impl Into<SmolStr>) -> Self {
+            self.state.reset_count_trivia();
+            self.state.sink_mut().event(Event::Token(name.into(), value.into()));
+            self
+        }
+
         pub fn token(mut self) -> Self {
             if let Some(value) = self.next_token().map(|t| t.value) {
-                self.state.sink_mut().event(Event::token("token", value));
+                self.add_token(Name::new("token"), value)
+            } else {
+                self
             }
-            self
         }
 
         pub fn parse<P>(self, mut parser: P) -> Self
@@ -1185,18 +1254,19 @@ mod builder {
             let expected = expected.into();
             let next = self.next_token();
             if expected == next.as_ref().map(|t| t.token) {
-                if let Some(value) = next.map(|t| t.value) {
-                    self.state.sink_mut().event(Event::token("token", value));
-                }
-                return self;
+                return if let Some(value) = next.map(|t| t.value) {
+                    self.add_token(Name::new("token"), value)
+                } else {
+                    self.state.reset_count_trivia();
+                    self.state.sink_mut().event(Event::Eof);
+                    self
+                };
             }
             let err_value = next
                 .as_ref()
                 .map(|e| e.value.to_string())
                 .unwrap_or_else(|| "".to_string());
-            self.state
-                .sink_mut()
-                .event(Event::token("error", err_value.clone()));
+            self = self.add_token(Name::new("error"), err_value);
             self.state.sink_mut().error(format!(
                 "Expected {} but found {}",
                 expected
@@ -1254,9 +1324,15 @@ mod builder {
 
             let inner = Context::default();
 
-            let state = parser.parse(state.morph(), inner).morph();
+            let mut state = parser.parse(state.morph(), inner);
 
-            Self { state, ctx }
+            let trivia = state.trivia;
+            if trivia > 0 {
+                state.sink_mut().event(Event::IgnoreTrivia);
+                state.lexer_mut().rewind(trivia);
+            }
+
+            Self { state: state.morph(), ctx }
         }
 
         pub fn with_range(self, range: TextRange, mut parser: impl Parser<Tok, S>) -> Self {
@@ -1478,7 +1554,7 @@ pub mod parsers {
                             };
                         s = match p.at(separator) {
                             Peek::Found{ s, .. } =>
-                            match dbg!(s.token().peek()).at(close) {
+                            match s.token().peek().at(close) {
                                 Peek::Found {s, ..} if trailing => break 'outer s,
                                 p => break 'inner p.ignore_unexpected()
                             },
@@ -1569,6 +1645,7 @@ pub use peekable::*;
 pub use spanned::*;
 pub use token_kind::*;
 
+pub use peek::*;
 pub use builder::*;
 pub use context::*;
 pub use parse_fn::*;

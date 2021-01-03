@@ -100,19 +100,18 @@ fn item_header<S: Sink>() -> impl Parser<HeaderToken, S> {
         .parse(parse(|s| {
             let leading_trivia = leading_trivia();
             let trailing_trivia = trailing_trivia();
-            s
-            .alias(Nodes::Value)
-            .start(Nodes::Strukt)
-            .parse(separated(
-                with_mode(with_ctx(Context {
-                            leading: Some(&leading_trivia),
-                            trailing: Some(&trailing_trivia),
-                }, struct_key_val())),
-                HeaderToken::NewLine,
-                HeaderToken::ThreePlus,
-                true,
-            ))
-            .end()
+            s.alias(Nodes::Value)
+             .start(Nodes::Strukt)
+             .parse(separated(
+                 with_mode(with_ctx(Context {
+                     leading: Some(&leading_trivia),
+                     trailing: Some(&trailing_trivia),
+                 }, struct_key_val())),
+                 HeaderToken::NewLine,
+                 HeaderToken::ThreePlus,
+                 true,
+             ))
+             .end()
         }))
         .expect(HeaderToken::ThreePlus)
         .abort()
@@ -139,7 +138,20 @@ fn item_body<S: Sink>(ends: bool) -> impl Parser<BodyToken, S> {
                 s = match p {
                     Peek::Found { s, .. } => break s,
                     p => p
-                        .at(BodyToken::Text).parse(with_mode(markdown()))
+                        .at(BodyToken::Text).parse(
+                            parse(|mut s| {
+
+                                  let next = s.lexer_mut().next().unwrap();
+                                  dbg!(&next);
+                                s
+                                  //s.start(Nodes::Markdown)
+                                    .add_token(Nodes::Markdown.into(), next.value)
+                                  //.token()
+                                  //.with_mode(markdown())
+                                  //.end()
+                            }
+                            )
+                        )
                         .at(BodyToken::PlusPlus).parse(item())
                         .at(BodyToken::OpenBl).parse(item_bl())
                         .expect()
@@ -206,7 +218,7 @@ mod tests {
         test_runner::test_snapshots("md", "parser", |input| {
             let lexer = Lexer::new(input);
 
-            if std::env::var("PARSE_DEBUG").is_ok() {
+            if std::env::var("DEBUG").is_ok() {
                 let res: microtree_parser::TestSink = State::parse(lexer, parser());
                 let res = res.events.join("\n");
                 format!("{}", res)

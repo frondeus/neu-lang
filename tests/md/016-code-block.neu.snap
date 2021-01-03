@@ -60,7 +60,8 @@ Root, Value, Markdown @ 0..202
                         Value, identifier, token @ 73..76 = `max`
                 token @ 76..82 = `}` ; leading: `\n    `
         token @ 82..84 = `}` ; leading: `\n`
-    Md_Value, token @ 84..88 = ````` ; leading: `\n`
+    Md_Value, eof @ 84..85 = `` ; leading: `\n`
+    Md_Value, token @ 85..88 = `````
     Md_Value, token @ 88..90 = `\n\n`
     Md_Value, Md_Paragraph @ 90..107
         Md_Text @ 90..106 = `Here should eval`
@@ -70,7 +71,8 @@ Root, Value, Markdown @ 0..202
         Interpolated, Value, number, token @ 114..116 = `5` ; trailing: ` `
         BinaryOp, token @ 116..118 = `+` ; trailing: ` `
         Value, number, token @ 118..119 = `2`
-    Md_Value, token @ 119..123 = ````` ; leading: `\n`
+    Md_Value, eof @ 119..120 = `` ; leading: `\n`
+    Md_Value, token @ 120..123 = `````
     Md_Value, token @ 123..125 = `\n\n`
     Md_Value, Md_Paragraph @ 125..142
         Md_Text @ 125..141 = `Here is intended`
@@ -80,7 +82,8 @@ Root, Value, Markdown @ 0..202
         Interpolated, Value, number, token @ 147..149 = `2` ; trailing: ` `
         BinaryOp, token @ 149..151 = `+` ; trailing: ` `
         Value, number, token @ 151..152 = `5`
-    Md_Value, token @ 152..154 = `\n` ; leading: `\n`
+    Md_Value, eof @ 152..153 = `` ; leading: `\n`
+    Md_Value, token @ 153..154 = `\n`
     Md_Value, Md_Paragraph @ 154..173
         Md_Text @ 154..172 = `But here shouldn't`
         token @ 172..173 = `\n`

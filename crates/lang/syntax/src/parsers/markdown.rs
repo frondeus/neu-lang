@@ -4,7 +4,7 @@ use crate::lexers::md_string::Token as MdStrToken;
 use crate::Nodes;
 use microtree_parser::*;
 use microtree_parser::parsers::*;
-use pulldown_cmark::{CodeBlockKind, CowStr, Event as MdEvent, LinkType, Tag};
+use pulldown_cmark::{CodeBlockKind, CowStr, Event, LinkType, Tag};
 use text_size::{TextLen, TextRange, TextSize};
 
 pub(crate) fn inner_md_string<S: Sink>() -> impl Parser<MdStrToken, S>
@@ -12,20 +12,24 @@ pub(crate) fn inner_md_string<S: Sink>() -> impl Parser<MdStrToken, S>
     parse(|s| {
         s.peek()
             .at(MdStrToken::Text)
-            .parse(markdown())
+            .parse(parse(|mut s| {
+                let next = s.lexer_mut().next().unwrap();
+                let value = next.value;
+                let range = next.range;
+                s.parse(markdown(value, range))
+            }))
             .ignore_unexpected()
     })
 }
 
-pub(crate) fn markdown<S>() -> impl Parser<MdStrToken, S> + Clone
+pub(crate) fn markdown<S>(value: SmolStr, range: TextRange)
+            -> impl Parser<MdStrToken, S> + Clone
 where
     //for<'s> <Token as Logos<'s>>::Extras: From<HashCount> + Into<HashCount>,
     S: Sink,
 {
-    parse(|mut s| {
-        let next = s.lexer_mut().next().unwrap();
-        let from = next.range.start();
-        let value = next.value;
+    parse(move |mut s| {
+        let from = range.start();
         let value_len: TextSize = (value.len() as u32).into();
 
 
@@ -74,13 +78,13 @@ type B<'c, 's, S> = Builder<'c, 's, MdStrToken, S>;
 
 fn translate_code<'c, 's, S: Sink>(
     state: &mut MdState,
-    next: MdEvent<'_>,
+    next: Event<'_>,
     range: TextRange,
     value: &str,
     from: TextSize,
     mut s: B<'c, 's, S>
 ) -> B<'c, 's, S> {
-    if let MdEvent::End(_) = next {
+    if let Event::End(_) = next {
 
         state.code = false;
         let code_range = state.code_range.take();
@@ -155,7 +159,7 @@ where S: Sink {
 
 fn translate_event<'c, 's, S>(
     state: &mut MdState,
-    next: MdEvent<'_>,
+    next: Event<'_>,
     range: TextRange,
     value: &str,
     from: TextSize,
@@ -165,22 +169,22 @@ where
 {
     s = leading(state, range, value, s);
     s = match next {
-        MdEvent::Start(tag) => translate_start(state, tag, s),
-        MdEvent::End(tag) => translate_end(tag, s),
-        MdEvent::Text(v) => token(s, Nodes::Md_Text, v.to_string()),
-        MdEvent::Html(v) => token(s, Nodes::Md_Html, v.to_string()),
-        MdEvent::SoftBreak => token(s, Nodes::Md_SoftBreak, &value[range]),
-        MdEvent::HardBreak => token(s, Nodes::Md_HardBreak, &value[range]),
-        MdEvent::Rule => token(s, Nodes::Md_Rule, &value[range]),
-        MdEvent::Code(v) => {
+        Event::Start(tag) => translate_start(state, tag, s),
+        Event::End(tag) => translate_end(tag, s),
+        Event::Text(v) => token(s, Nodes::Md_Text, v.to_string()),
+        Event::Html(v) => token(s, Nodes::Md_Html, v.to_string()),
+        Event::SoftBreak => token(s, Nodes::Md_SoftBreak, &value[range]),
+        Event::HardBreak => token(s, Nodes::Md_HardBreak, &value[range]),
+        Event::Rule => token(s, Nodes::Md_Rule, &value[range]),
+        Event::Code(v) => {
             let start = range.start() + TextSize::from(1);
             let end = range.end() - TextSize::from(1);
             let range = TextRange::new(start + from, end + from);
             s.alias(Nodes::Interpolated)
             .with_range(range, with_mode(crate::parsers::neu::parser()))
         }
-        MdEvent::TaskListMarker(_) => todo!(),
-        MdEvent::FootnoteReference(_) => todo!(),
+        Event::TaskListMarker(_) => todo!(),
+        Event::FootnoteReference(_) => todo!(),
     };
 
     s
@@ -191,8 +195,7 @@ fn token<'c, 's, S>(mut s: B<'c, 's, S>, name: microtree::Name, value: impl Into
 where
     S: Sink
 {
-    s.sink_mut().event(Event::Token(name.into(), value.into() ));
-    s
+    s.add_token(name.into(), value)
 }
 
 fn translate_start<'c, 's, S: Sink>(state: &mut MdState, tag: Tag, mut s: B<'c, 's, S>) -> B<'c, 's, S> {
