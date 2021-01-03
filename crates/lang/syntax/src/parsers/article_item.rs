@@ -227,7 +227,7 @@ mod tests {
                 let res: GreenSink = State::parse(lexer, parser());
                 let res = res.finish();
 
-                format!("{:?}", res.root)
+                format!("{:?}", res)
             }
         })
         .unwrap();

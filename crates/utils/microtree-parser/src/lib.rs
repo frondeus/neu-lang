@@ -737,19 +737,13 @@ mod lexer {
         }
 
         pub fn peek_token(&mut self) -> Option<Tok> {
-            self.peek().map(|t| t.token)
+            self.peek().map(|t| dbg!(t).token)
         }
 
         pub fn rewind(&mut self, count: usize) {
             let offset = self.inner.span().end - count;
             let source = self.inner.source();
             let subsource = &source[offset..];
-            dbg!("REWIND");
-            dbg!(&self.inner.slice());
-            dbg!(&source);
-            dbg!(&offset);
-            dbg!(&subsource);
-            dbg!(&self.peeked.as_ref().map(|s| s.as_ref().map(|(_, s)| s)));
             let mut new_inner = Inner::new(source);
             new_inner.bump(offset);
             self.inner = new_inner;
@@ -784,8 +778,8 @@ mod lexer {
         type Item = Spanned<Tok>;
 
         fn next(&mut self) -> Option<Self::Item> {
+            //dbg!("NEXT");
             let mut first = self.lex()?;
-
             loop {
                 match self.peek_one() {
                     Some(token) if first.token.mergeable(token.token) => {
@@ -805,16 +799,23 @@ mod lexer {
 
     impl<'s, Tok: TokenKind<'s>> Lexer<'s, Tok> {
         fn lex(&mut self) -> Option<Spanned<Tok>> {
+            //dbg!("LEX");
             if let Some(peeked) = self.peeked.take() {
                 if let Some((original, peeked)) = peeked {
                     self.inner = original;
+                    //dbg!(&peeked);
                     return Some(peeked);
                 }
                 return None;
             }
+            //dbg!(&self.inner.remainder());
+            //dbg!(self.inner.source());
+            //dbg!(self.inner.slice());
             let token = self.inner.next()?;
+            //dbg!(&token);
             let value = self.inner.slice().into();
             let range = self.span();
+            //dbg!(&value);
             Some(Spanned {
                 token,
                 range,
@@ -823,6 +824,7 @@ mod lexer {
         }
 
         fn peek_one(&mut self) -> Option<&Spanned<Tok>> {
+            //dbg!("PEEK ONE");
             if self.peeked.is_none() {
                 let saved = self.inner.clone();
                 let token = self.lex();
@@ -1341,6 +1343,9 @@ mod builder {
             let source = state.lexer_mut().inner().source();
             let subsource = &source[range];
             let sublexer = Lexer::new(subsource);
+
+            //dbg!("WITH RANGE");
+            //dbg!(&subsource);
 
             let previous = std::mem::replace(state.lexer_mut(), sublexer);
 
