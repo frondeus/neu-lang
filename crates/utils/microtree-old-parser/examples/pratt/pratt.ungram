@@ -1,7 +1,0 @@
-Value = 'number' | Unary | Binary | ( '(' Value ')')
-
-Unary = '-' Value
-
-Binary = left: Value Op right: Value
-
-Op = '-' | '+' | '*' | '/'

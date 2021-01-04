@@ -678,11 +678,10 @@ mod peekable {
 }
 
 mod token_kind {
-    use logos::Logos;
+    use crate::TextSize;
+    use crate::Source;
 
-    pub trait TokenKind<'s>:
-        Logos<'s, Source = str, Extras: Clone>
-        + std::fmt::Display
+    pub trait TokenKind: std::fmt::Display
         + std::fmt::Debug
         + PartialEq
         + Clone
@@ -690,57 +689,143 @@ mod token_kind {
         + Send
         + Sync
     {
+        type Extras: Default + Clone;
+        const ERROR: Self;
+        fn lex(source: &mut Source<'_>, extras: &mut Self::Extras) -> Self;
         fn mergeable(self, _other: Self) -> bool {
             false
         }
     }
 }
 
-mod lexer {
-    use crate::{PeekableIterator, SmolStr, Spanned, TextRange, TextSize, TokenKind};
-    use logos::Lexer as Inner;
+mod source {
+    use std::convert::TryFrom;
 
-    #[derive(Clone)]
-    pub struct Lexer<'s, Tok: TokenKind<'s>> {
-        #[allow(clippy::option_option)]
-        peeked: Option<Option<(Inner<'s, Tok>, Spanned<Tok>)>>,
-        inner: Inner<'s, Tok>,
+    use crate::{TextRange, TextSize, TextLen, SmolStr};
+
+    #[derive(Clone, Copy)]
+    pub struct Source<'s> {
+        source: &'s str,
+        range: TextRange
     }
 
-    impl<'s, Tok: TokenKind<'s>> Lexer<'s, Tok> {
-        pub fn new(source: &'s Tok::Source) -> Self {
+    impl<'s> Source<'s> {
+        pub fn chomp(&mut self, len: usize) -> TextSize {
+            let end = match self
+                .as_ref()
+                .char_indices()
+                .nth(len - 1)
+                .and_then(|(last, c)| TextSize::try_from(last + c.len_utf8()).ok())
+            {
+                Some(last) => self.range.start() + last,
+                None => self.range.end(),
+            };
+            self.set_cursor(end);
+
+            end
+        }
+
+        pub fn cursor(&self) -> TextSize {
+            self.range.start()
+        }
+
+        fn set_cursor(&mut self, cursor: TextSize) {
+            self.range = TextRange::new(cursor, self.range.end());
+        }
+
+        pub fn with_range(mut self, range: TextRange) -> Self {
+            self.range = range;
+            self
+        }
+
+        pub fn range_span(&self, range: TextRange) -> SmolStr {
+            self.source[range].into()
+        }
+    }
+
+    impl<'s> AsRef<str> for Source<'s> {
+        fn as_ref(&self) -> &str {
+            &self.source[self.range]
+        }
+    }
+
+    impl<'s> From<&'s str> for Source<'s> {
+        fn from(source: &'s str) -> Self {
             Self {
-                inner: Inner::new(source),
+                source,
+                range: TextRange::up_to(source.text_len())
+            }
+        }
+    }
+}
+
+mod lexer {
+    use crate::{PeekableIterator, Source, SmolStr, Spanned, TextRange, TextSize, TokenKind};
+
+    #[derive(Clone)]
+    pub struct Lexer<'s, Tok: TokenKind> {
+        #[allow(clippy::option_option)]
+        peeked: Option<Option<(
+            Source<'s>,
+            Spanned<Tok>)>>,
+        source: Source<'s>,
+        pub extras: Tok::Extras
+        //inner: Inner<'s, Tok>,
+    }
+
+    impl<'s, Tok: TokenKind> Lexer<'s, Tok> {
+        pub fn new(source: &'s str) -> Self {
+            Self {
+                //inner: Inner::new(source),
+                source: Source::from(source),
                 peeked: None,
+                extras: Default::default()
+            }
+        }
+
+        pub fn with_range(&self, range: TextRange) -> Self {
+            Self {
+                source: self.source.with_range(range),
+                peeked: None,
+                extras: Default::default()
             }
         }
 
         pub fn morph<Tok2>(self) -> Lexer<'s, Tok2>
         where
-            Tok2: TokenKind<'s>,
+            Tok2: TokenKind,
             Tok::Extras: Into<Tok2::Extras>,
         {
             Lexer {
                 peeked: None,
-                inner: self.inner.morph(),
+                source: self.source,
+                extras: self.extras.into()
+                //inner: self.inner.morph(),
             }
         }
 
-        pub fn span(&self) -> TextRange {
-            let range = self.inner.span();
-            TextRange::new((range.start as u32).into(), (range.end as u32).into())
-        }
+        //pub fn span(&self) -> TextRange {
+            //let range = self.inner.span();
+            //TextRange::new((range.start as u32).into(), (range.end as u32).into())
+            //todo!();
+        //}
 
-        pub(crate) fn text_for_span(&self, span: TextRange) -> SmolStr {
-            let source = self.inner.source();
-            source[span].into()
-        }
+        //pub(crate) fn text_for_span(&self, span: TextRange) -> SmolStr {
+            //let source = self.inner.source();
+            //source[span].into()
+            //todo!();
+        //}
 
         pub fn peek_token(&mut self) -> Option<Tok> {
-            self.peek().map(|t| dbg!(t).token)
+            self.peek().map(|t| t.token)
+        }
+
+        pub fn source(&self) -> &Source<'s> {
+            &self.source
         }
 
         pub fn rewind(&mut self, count: usize) {
+            /*
             let offset = self.inner.span().end - count;
             let source = self.inner.source();
             let subsource = &source[offset..];
@@ -748,22 +833,20 @@ mod lexer {
             new_inner.bump(offset);
             self.inner = new_inner;
             self.peeked = None;
-        }
-
-        pub(crate) fn inner(&self) -> &Inner<'s, Tok> {
-            &self.inner
+            */
+            todo!();
         }
     }
 
     impl<'s, Tok> PeekableIterator for Lexer<'s, Tok>
     where
-        Tok: TokenKind<'s>,
+        Tok: TokenKind,
     {
         fn peek(&mut self) -> Option<&Self::Item> {
             if self.peeked.is_none() {
-                let saved = self.inner.clone();
+                let saved = self.source;
                 let token = self.next();
-                let original = std::mem::replace(&mut self.inner, saved);
+                let original = std::mem::replace(&mut self.source, saved);
                 self.peeked = Some(token.map(|token| (original, token)));
             }
 
@@ -774,7 +857,7 @@ mod lexer {
         }
     }
 
-    impl<'s, Tok: TokenKind<'s>> Iterator for Lexer<'s, Tok> {
+    impl<'s, Tok: TokenKind> Iterator for Lexer<'s, Tok> {
         type Item = Spanned<Tok>;
 
         fn next(&mut self) -> Option<Self::Item> {
@@ -787,8 +870,8 @@ mod lexer {
                         let len: TextSize = ((first.value.len() + token.value.len()) as u32).into();
                         let range = TextRange::at(from, len);
                         first.range = range;
-                        let new_value = &self.inner.source()[range];
-                        first.value = new_value.into();
+                        let new_value = self.source.range_span(range);
+                        first.value = new_value;
                         self.lex();
                     }
                     _ => break Some(first),
@@ -797,12 +880,12 @@ mod lexer {
         }
     }
 
-    impl<'s, Tok: TokenKind<'s>> Lexer<'s, Tok> {
+    impl<'s, Tok: TokenKind> Lexer<'s, Tok> {
         fn lex(&mut self) -> Option<Spanned<Tok>> {
-            //dbg!("LEX");
+            // //dbg!("LEX");
             if let Some(peeked) = self.peeked.take() {
                 if let Some((original, peeked)) = peeked {
-                    self.inner = original;
+                    self.source = original;
                     //dbg!(&peeked);
                     return Some(peeked);
                 }
@@ -811,10 +894,17 @@ mod lexer {
             //dbg!(&self.inner.remainder());
             //dbg!(self.inner.source());
             //dbg!(self.inner.slice());
-            let token = self.inner.next()?;
+            if self.source.as_ref().is_empty() {
+                return None;
+            }
+
+            let from = self.source.cursor();
+            let token = Tok::lex(&mut self.source, &mut self.extras);
+            let to = self.source.cursor();
+
+            let range = TextRange::new(from, to);
             //dbg!(&token);
-            let value = self.inner.slice().into();
-            let range = self.span();
+            let value = self.source.range_span(range);
             //dbg!(&value);
             Some(Spanned {
                 token,
@@ -824,11 +914,10 @@ mod lexer {
         }
 
         fn peek_one(&mut self) -> Option<&Spanned<Tok>> {
-            //dbg!("PEEK ONE");
-            if self.peeked.is_none() {
-                let saved = self.inner.clone();
-                let token = self.lex();
-                let original = std::mem::replace(&mut self.inner, saved);
+             if self.peeked.is_none() {
+                 let saved = self.source;
+                 let token = self.lex();
+                let original = std::mem::replace(&mut self.source, saved);
                 self.peeked = Some(token.map(|token| (original, token)));
             }
 
@@ -840,12 +929,35 @@ mod lexer {
     }
 }
 
+mod callback_result {
+    use crate::{Source, TokenKind};
+
+    pub trait CallbackResult<P, T: TokenKind> {
+        fn result<C: Fn(P) -> T>(self, c: C) -> T;
+    }
+
+    impl<P, T: TokenKind> CallbackResult<P, T> for P {
+        fn result<C: Fn(P) -> T>(self, c: C) -> T {
+            c(self)
+        }
+    }
+
+    impl<T: TokenKind> CallbackResult<(), T> for bool {
+        fn result<C: Fn(()) -> T>(self, c: C) -> T {
+            match self {
+                true => c(()),
+                _ => T::ERROR
+            }
+        }
+    }
+}
+
 mod parser {
     use crate::{Context, Sink, State, TokenKind};
 
     pub trait Parser<Tok, S>
     where
-        Tok: for<'s> TokenKind<'s>,
+        Tok: TokenKind,
         S: Sink,
     {
         fn parse<'s, 'c>(
@@ -861,14 +973,14 @@ mod context {
 
     pub trait Trivia<Tok>
     where
-        Tok: for<'s> TokenKind<'s>,
+        Tok: TokenKind,
     {
         fn parse<'s>(&self, state: &mut Lexer<'s, Tok>);
     }
 
     pub struct Context<'c, Tok>
     where
-        Tok: for<'s> TokenKind<'s>,
+        Tok: TokenKind,
     {
         pub leading: Option<&'c dyn Trivia<Tok>>,
         pub trailing: Option<&'c dyn Trivia<Tok>>,
@@ -876,7 +988,7 @@ mod context {
 
     impl<'c, Tok> Default for Context<'c, Tok>
     where
-        Tok: for<'s> TokenKind<'s> //+ 'c,
+        Tok: TokenKind //+ 'c,
     {
         fn default() -> Self {
             Self {
@@ -886,7 +998,7 @@ mod context {
         }
     }
 
-    impl<'c, Tok> Clone for Context<'c, Tok> where Tok: for<'s> TokenKind<'s> {
+    impl<'c, Tok> Clone for Context<'c, Tok> where Tok: TokenKind {
         fn clone(&self) -> Self {
             Self {
                 leading: self.leading.clone(),
@@ -894,11 +1006,11 @@ mod context {
             }
         }
     }
-    impl<'c, Tok> Copy for Context<'c, Tok> where Tok: for<'s> TokenKind<'s> {}
+    impl<'c, Tok> Copy for Context<'c, Tok> where Tok: TokenKind {}
 
     impl<'c, Tok> Context<'c, Tok>
     where
-        Tok: for<'s> TokenKind<'s> //+ 'c,
+        Tok: TokenKind //+ 'c,
     {
         pub fn new(trivia: &'c dyn Trivia<Tok>) -> Self {
             Self {
@@ -922,7 +1034,7 @@ mod state {
 
     pub struct State<'s, Tok, S>
     where
-        Tok: TokenKind<'s>,
+        Tok: TokenKind,
         S: Sink,
     {
         pub(crate) lexer: Lexer<'s, Tok>,
@@ -932,7 +1044,7 @@ mod state {
 
     impl<'s, Tok, S> State<'s, Tok, S>
     where
-        Tok: for<'s2> TokenKind<'s2>,
+        Tok: TokenKind,
         S: Sink + Default,
     {
         pub fn parse(lexer: Lexer<'s, Tok>, mut parser: impl Parser<Tok, S>) -> S {
@@ -948,7 +1060,7 @@ mod state {
 
     impl<'s, Tok, S> State<'s, Tok, S>
     where
-        Tok: TokenKind<'s>,
+        Tok: TokenKind,
         S: Sink,
     {
         pub fn new(
@@ -963,7 +1075,7 @@ mod state {
         }
 
         pub fn morph<Tok2>(self) -> State<'s, Tok2, S>
-        where Tok2: TokenKind<'s>,
+        where Tok2: TokenKind,
               Tok::Extras: Into<Tok2::Extras>
         {
             let Self { lexer, sink, .. } = self;
@@ -1001,11 +1113,9 @@ mod peek {
         Builder
     };
 
-    use logos::Logos;
-
     pub enum Peek<'c, 's, Tok, S>
     where
-        Tok: for<'s2> TokenKind<'s2>,
+        Tok: TokenKind,
         S: Sink,
     {
         Found { s: Builder<'c, 's, Tok, S>, handled: bool },
@@ -1018,7 +1128,7 @@ mod peek {
 
     impl<'c, 's, Tok, S> std::fmt::Debug for Peek<'c, 's, Tok, S>
         where
-        Tok: for<'s2> TokenKind<'s2> + std::fmt::Debug,
+        Tok: TokenKind + std::fmt::Debug,
         S: Sink,
     {
         fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -1036,7 +1146,7 @@ mod peek {
 
     impl<'c, 's, Tok, S> Peek<'c, 's, Tok, S>
     where
-        Tok: for<'s2> TokenKind<'s2>,
+        Tok: TokenKind,
         S: Sink,
     {
         pub fn at(self, expected: impl Into<Option<Tok>>) -> Self {
@@ -1139,11 +1249,9 @@ mod builder {
         Peek
     };
 
-    use logos::Logos;
-
     pub struct Builder<'c, 's, Tok, S>
     where
-        Tok: for<'s2> TokenKind<'s2>,
+        Tok: TokenKind,
         S: Sink,
     {
         pub(crate) state: State<'s, Tok, S>,
@@ -1152,7 +1260,7 @@ mod builder {
 
     impl<'c, 's, Tok, S> Builder<'c, 's, Tok, S>
     where
-        Tok: for<'s2> TokenKind<'s2>,
+        Tok: TokenKind,
         S: Sink,
     {
         pub fn peek(mut self) -> Peek<'c, 's, Tok, S> {
@@ -1170,12 +1278,12 @@ mod builder {
             kind: TriviaKind,
         ) {
             if let Some(trivia) = trivia {
-                let start = self.state.lexer_mut().span().end();
+                let start = self.state.lexer_mut().source().cursor();
                 trivia.parse(self.state.lexer_mut());
-                let end = self.state.lexer_mut().span().end();
+                let end = self.state.lexer_mut().source().cursor();
                 if start != end {
                     let text_range = TextRange::new(start, end);
-                    let value = self.state.lexer_mut().text_for_span(text_range);
+                    let value = self.state.lexer_mut().source().range_span(text_range);
                     self.state.count_trivia(value.len());
                     self.state.sink_mut().event(Event::Trivia(kind, value));
                 }
@@ -1318,9 +1426,9 @@ mod builder {
 
         pub fn with_mode<'c2, Tok2>(self, mut parser: impl Parser<Tok2, S>) -> Self
         where
-            Tok2: for<'s2> TokenKind<'s2>,
-            for<'s2> <Tok as Logos<'s2>>::Extras: Into<<Tok2 as Logos<'s2>>::Extras>,
-            for<'s2> <Tok2 as Logos<'s2>>::Extras: Into<<Tok as Logos<'s2>>::Extras>,
+            Tok2: TokenKind,
+            Tok::Extras: Into<Tok2::Extras>,
+            Tok2::Extras: Into<Tok::Extras>,
         {
             let Self { state, ctx } = self;
 
@@ -1340,9 +1448,10 @@ mod builder {
         pub fn with_range(self, range: TextRange, mut parser: impl Parser<Tok, S>) -> Self {
             let Self { mut state, ctx } = self;
 
-            let source = state.lexer_mut().inner().source();
-            let subsource = &source[range];
-            let sublexer = Lexer::new(subsource);
+            //let source = state.lexer_mut().source();
+            //let subsource = &source[range];
+            //let sublexer = Lexer::new(subsource);
+            let sublexer = state.lexer_mut().with_range(range);
 
             //dbg!("WITH RANGE");
             //dbg!(&subsource);
@@ -1366,7 +1475,7 @@ mod trivia_fn {
     pub struct TriviaFn<F, Tok>
     where
         F: for<'s> Fn(&mut Lexer<'s, Tok>),
-        Tok: for<'s> TokenKind<'s>,
+        Tok: TokenKind,
     {
         f: F,
         _phantom: PhantomData<Tok>,
@@ -1375,7 +1484,7 @@ mod trivia_fn {
     impl<F, Tok> Clone for TriviaFn<F, Tok>
     where
         F: Clone + for<'s> Fn(&mut Lexer<'s, Tok>),
-        Tok: for<'s> TokenKind<'s>,
+        Tok: TokenKind,
     {
         fn clone(&self) -> Self {
             Self {
@@ -1388,7 +1497,7 @@ mod trivia_fn {
     impl<F, Tok> Trivia<Tok> for TriviaFn<F, Tok>
     where
         F: for<'s> Fn(&mut Lexer<'s, Tok>),
-        Tok: for<'s> TokenKind<'s>,
+        Tok: TokenKind,
     {
         fn parse<'s>(&self, state: &mut Lexer<'s, Tok>) {
             (self.f)(state)
@@ -1398,7 +1507,7 @@ mod trivia_fn {
     pub fn trivia<F, Tok>(f: F) -> impl Trivia<Tok> + Clone
     where
         F: Clone + for<'s> Fn(&mut Lexer<'s, Tok>),
-        Tok: for<'s> TokenKind<'s>,
+        Tok: TokenKind,
     {
         TriviaFn {
             f,
@@ -1415,7 +1524,7 @@ mod parse_fn {
     pub struct ParseFn<F, Tok, S>
     where
         F: for<'c, 's> FnMut(Builder<'c, 's, Tok, S>) -> Builder<'c, 's, Tok, S>,
-        Tok: for<'s> TokenKind<'s>,
+        Tok: TokenKind,
         S: Sink,
     {
         f: F,
@@ -1425,7 +1534,7 @@ mod parse_fn {
     impl<F, Tok, S> Clone for ParseFn<F, Tok, S>
     where
         F: Clone + for<'c, 's> FnMut(Builder<'c, 's, Tok, S>) -> Builder<'c, 's, Tok, S>,
-        Tok: for<'s> TokenKind<'s>,
+        Tok: TokenKind,
         S: Sink,
     {
         fn clone(&self) -> Self {
@@ -1439,7 +1548,7 @@ mod parse_fn {
     impl<F, Tok, S> Parser<Tok, S> for ParseFn<F, Tok, S>
     where
         F: for<'c, 's> FnMut(Builder<'c, 's, Tok, S>) -> Builder<'c, 's, Tok, S>,
-        Tok: for<'s> TokenKind<'s>,
+        Tok: TokenKind,
         S: Sink,
     {
         fn parse<'c, 's>(
@@ -1456,7 +1565,7 @@ mod parse_fn {
     pub fn parse<F, Tok, S>(f: F) -> ParseFn<F, Tok, S>
     where
         F: Clone + for<'c, 's> FnMut(Builder<'c, 's, Tok, S>) -> Builder<'c, 's, Tok, S>,
-        Tok: for<'s> TokenKind<'s>,
+        Tok: TokenKind,
         S: Sink,
     {
         ParseFn {
@@ -1468,7 +1577,7 @@ mod parse_fn {
     // pub fn parse_once<'s, F, Tok, S>(f: F) -> impl Parser<'s, Tok, S>
     // where
     //     F: for<'c, 's> FnMut(Builder<'c, 's, Tok, S>) -> Builder<'c, 's, Tok, S>,
-    //     Tok: TokenKind<'s>,
+    //     Tok: TokenKind,
     //     S: Sink,
     // {
     //     ParseFn {
@@ -1481,19 +1590,18 @@ mod parse_fn {
 pub mod parsers {
     mod basic {
         use crate::{Parser, Context, Sink, TokenKind, parse};
-        use logos::Logos;
 
-        pub fn skip<Tok: for<'s> TokenKind<'s>, S: Sink>() -> impl Parser<Tok, S> {
+        pub fn skip<Tok: TokenKind, S: Sink>() -> impl Parser<Tok, S> {
             parse(|s| s)
         }
 
         pub fn with_mode<Tok, Tok2, S>(parser: impl Parser<Tok2, S> + Clone) -> impl Parser<Tok, S> + Clone
         where
             S: Sink,
-            Tok: for<'s> TokenKind<'s>,
-            Tok2: for<'s> TokenKind<'s>,
-            for<'s> <Tok as Logos<'s>>::Extras: Into<<Tok2 as Logos<'s>>::Extras>,
-            for<'s> <Tok2 as Logos<'s>>::Extras: Into<<Tok as Logos<'s>>::Extras>,
+            Tok: TokenKind,
+            Tok2: TokenKind,
+            Tok::Extras: Into<Tok2::Extras>,
+            Tok2::Extras: Into<Tok::Extras>,
         {
             parse(move |s| s.with_mode(parser.clone()))
         }
@@ -1502,7 +1610,7 @@ pub mod parsers {
         impl Parser<Tok, S> + 'c + Clone
         where
             S: Sink + 'c,
-            Tok: for<'s> TokenKind<'s>
+            Tok: TokenKind
         {
             parse(move |s| s.with_ctx(ctx, parser.clone()))
         }
@@ -1517,7 +1625,7 @@ pub mod parsers {
         ) -> impl Parser<Tok, S>
         where
             F: Clone + for<'c, 's> FnMut(Peek<'c, 's, Tok, S>) -> Peek<'c, 's, Tok, S>,
-            Tok: for<'s> TokenKind<'s>,
+            Tok: TokenKind,
             S: Sink
         {
             parse(move |s| {
@@ -1543,7 +1651,7 @@ pub mod parsers {
         ) -> impl Parser<Tok, S>
         where
             P: Parser<Tok, S> + Clone,
-            Tok: for<'s> TokenKind<'s> + std::fmt::Debug,
+            Tok: TokenKind + std::fmt::Debug,
             S: Sink
         {
             parse(move |s| match s.peek().at(close) {
@@ -1580,7 +1688,7 @@ pub mod parsers {
 
         pub fn pratt<Tok, L, S, BP, F>(left: L, bp: BP, f: F) -> impl Parser<Tok, S> + Clone
         where
-            Tok: for<'s> TokenKind<'s>,
+            Tok: TokenKind,
             L: Clone + Parser<Tok, S>,
             S: Sink,
             BP: Clone + FnMut(Option<Tok>) -> Option<(Assoc, i32)>,
@@ -1591,7 +1699,7 @@ pub mod parsers {
 
         fn pratt_inner<Tok, L, S, BP, F>(left: L, mut bp: BP, mut f: F, rbp: i32) -> impl Parser<Tok, S> + Clone
         where
-            Tok: for<'s> TokenKind<'s>,
+            Tok: TokenKind,
             L: Clone + Parser<Tok, S>,
             S: Sink,
             BP: Clone + FnMut(Option<Tok>) -> Option<(Assoc, i32)>,
@@ -1637,6 +1745,7 @@ pub mod parsers {
 
 pub use smol_str::SmolStr;
 pub use text_size::{TextLen, TextRange, TextSize};
+pub use microtree_derive::TokenKind;
 
 pub use error::*;
 pub use event::*;
@@ -1645,7 +1754,9 @@ pub use sink::*;
 
 pub use sinks::*;
 
+pub use source::*;
 pub use lexer::*;
+pub use callback_result::*;
 pub use peekable::*;
 pub use spanned::*;
 pub use token_kind::*;
@@ -1663,62 +1774,59 @@ mod tests {
     use crate::parsers::{Assoc, separated};
 
     use super::*;
-    use derive_more::Display;
-    use logos::Logos;
     use parsers::pratt;
 
-    #[derive(Logos, Debug, PartialEq, Clone, Copy, Display)]
+    fn mergeable(token: Token, other: Token) -> bool {
+        token == Token::Error && other == token
+    }
+
+    fn lex_number(chomped: TextSize, source: &mut Source<'_>, extras: &mut String) -> bool {
+        *extras = "foo".to_string();
+        eprintln!("foo: {}", extras);
+        //Some(chomped)
+        false
+    }
+
+    #[derive(Debug, PartialEq, Clone, Copy, TokenKind)]
+    #[token_kind(extras = "String", mergeable = "mergeable")]
     enum Token {
-        #[display(fmt = "number")]
-        #[regex("[0-9]+")]
+        #[token_kind(regex = r"[0-9]+", callback="lex_number")]
         Number,
 
-        #[display(fmt = "`(`")]
-        #[token("(")]
+        #[token_kind(token = "(")]
         OpenP,
 
-        #[display(fmt = "`)`")]
-        #[token(")")]
+        #[token_kind(token = ")")]
         CloseP,
 
-        #[display(fmt = "`[`")]
-        #[token("[")]
+        #[token_kind(token = "[")]
         OpenB,
 
-        #[display(fmt = "`]`")]
-        #[token("]")]
+        #[token_kind(token = "]")]
         CloseB,
 
-        #[display(fmt = "`,`")]
-        #[token(",")]
+        #[token_kind(token = ",")]
         Comma,
 
-        #[display(fmt = "`-`")]
-        #[token("-")]
+        #[token_kind(token = "-")]
         OpMinus,
 
-        #[display(fmt = "`+`")]
-        #[token("+")]
+        #[token_kind(token = "+")]
         OpPlus,
 
-        #[display(fmt = "`*`")]
-        #[token("*")]
+        #[token_kind(token = "*")]
         OpStar,
 
-        #[display(fmt = "`/`")]
-        #[token("/")]
+        #[token_kind(token = "/")]
         OpSlash,
 
-        #[display(fmt = "line ending")]
-        #[regex(r"(\r?\n)+")]
+        #[token_kind(regex = r"(\r?\n)+", display = "line ending")]
         LineEnd,
 
-        #[display(fmt = "space or tab")]
-        #[regex("[ \t]+")]
+        #[token_kind(regex = r"[ \t]+", display = "space or tab")]
         Whitespace,
 
-        #[display(fmt = "error")]
-        #[error]
+        #[token_kind(error)]
         Error,
     }
 
@@ -1731,12 +1839,6 @@ mod tests {
         pub const Binary: Name = Name::new("Binary");
         pub const Op: Name = Name::new("Op");
         pub const Array: Name = Name::new("Array");
-    }
-
-    impl TokenKind<'_> for Token {
-        fn mergeable(self, other: Self) -> bool {
-            self == Self::Error && self == other
-        }
     }
 
     type Lexer<'s, T = Token> = crate::Lexer<'s, T>;

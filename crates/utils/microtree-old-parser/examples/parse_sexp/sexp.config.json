@@ -1,9 +1,0 @@
-{
-    "tokens": {
-        "LParen": "(",
-        "RParen": ")",
-        "Dot": ".",
-        "Atom": "atom"
-    },
-    "handwritten": ["Atom"]
-}

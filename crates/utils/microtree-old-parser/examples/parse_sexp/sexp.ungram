@@ -1,5 +1,0 @@
-Value = Nil | 'atom' | List | Cons
-
-Nil = '(' ')'
-List = '(' values: Value* ')'
-Cons = '(' car: Value '.' cdr: Value ')'

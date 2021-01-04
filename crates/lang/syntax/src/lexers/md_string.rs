@@ -1,45 +1,38 @@
 use crate::HashCount;
-use derive_more::Display;
-use microtree_parser::TokenKind;
-use logos::Logos;
+use microtree_parser::{TextSize, Source, TokenKind, CallbackResult};
 
-#[derive(Debug, PartialEq, Clone, Copy, Display, Logos)]
-#[logos(extras = HashCount)]
-pub enum Token {
-    #[display(fmt = "`\"`")]
-    #[token(r#"""#, |lex| {
-        if lex.extras.count > 0 {
-            let hash_count = lex.extras.count;
-            let hash = "#".repeat(hash_count);
-            if lex.remainder().starts_with(&hash) {
-            //panic!("remainder: `{}`, hash_count: {}", &remainder, hash_count);
-                lex.bump(hash_count);
-                // We don't reset extras cause its done on Neu side
-                //lex.extras.count = 0;
-                true
-            }
-            else {
-                false
-            }
-        } else {
+fn lex_dquote(_chomped: TextSize, source: &mut Source<'_>, extras: &mut HashCount) -> bool {
+    if extras.count > 0 {
+        let hash_count =extras.count;
+        let hash = "#".repeat(hash_count);
+        if source.as_ref().starts_with(&hash) {
+            source.chomp(hash_count);
             true
         }
-    })]
+        else {
+            false
+        }
+    } else {
+        true
+    }
+}
+
+
+#[derive(Debug, PartialEq, Clone, Copy, TokenKind)]
+#[token_kind(extras = "HashCount", mergeable = "mergeable")]
+pub enum Token {
+    #[token_kind(token = r#"""#, callback = "lex_dquote")]
     Close,
 
-    #[error]
-    #[display(fmt = "text")]
+    #[token_kind(error, display = "text")]
     Text,
-
 }
 
 pub type Lexer<'s, T = Token> = microtree_parser::Lexer<'s, T>;
 
-impl<'s> TokenKind<'s> for Token {
-    fn mergeable(self, other: Self) -> bool {
-        match (self, other) {
-            (Self::Text, Self::Text) => true,
-            _ => false,
-        }
+fn mergeable(first: Token, other: Token) -> bool {
+    match (first, other) {
+        (Token::Text, Token::Text) => true,
+        _ => false,
     }
 }

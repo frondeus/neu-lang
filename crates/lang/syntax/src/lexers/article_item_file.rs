@@ -1,25 +1,20 @@
-use derive_more::Display;
-use microtree_parser::TokenKind;
-use logos::Logos;
+use microtree_parser::{TokenKind, Source};
 
-#[derive(Debug, PartialEq, Clone, Copy, Display, Logos)]
+#[derive(Debug, PartialEq, Clone, Copy, TokenKind)]
+#[token_kind(mergeable = "mergeable")]
 pub enum Token {
-    #[display(fmt = "`+++`")]
-    #[token("+++")]
+    #[token_kind(token = "+++")]
     ThreePlus,
 
-    #[display(fmt = "error")]
-    #[error]
+    #[token_kind(error)]
     Error,
 }
 
 pub type Lexer<'s, T = Token> = microtree_parser::Lexer<'s, T>;
 
-impl<'s> TokenKind<'s> for Token {
-    fn mergeable(self, other: Self) -> bool {
-        match (self, other) {
-            (Self::Error, Self::Error) => true,
-            _ => false,
-        }
+fn mergeable(first: Token, other: Token) -> bool {
+    match (first, other) {
+        (Token::Error, Token::Error) => true,
+        _ => false,
     }
 }

@@ -9,14 +9,16 @@ edition = "2018"
 #green = ["microtree"]
 
 [dependencies]
-logos = "0.11.4"
+#logos = "0.11.4"
 smol_str = "0.1.17"
 text-size = "1.0.0"
 itertools = "0.10.0"
 
 microtree = { path = "../microtree" }
+microtree-derive = { path = "../microtree-derive" }
 
 [dev-dependencies]
-derive_more = "0.99.11"
 diff_assert = { git = "https://github.com/frondeus/diff-assert.git" }
+lazy_static = "1.4.0"
+regex = "1.4.2"
 unindent = "0.1.7"

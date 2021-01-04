@@ -1,49 +1,38 @@
-use derive_more::Display;
-use microtree_parser::TokenKind;
-use logos::Logos;
+use microtree_parser::{Source, TokenKind};
 
-#[derive(Debug, PartialEq, Clone, Copy, Display, Logos)]
+#[derive(Debug, PartialEq, Clone, Copy, TokenKind)]
+#[token_kind(mergeable = "mergeable")]
 pub enum Token {
-    #[display(fmt = "`+++`")]
-    #[token("+++")]
+    #[token_kind(token = "+++")]
     ThreePlus,
 
-    #[display(fmt = "`++`")]
-    #[token("++")]
+    #[token_kind(token = "++")]
     PlusPlus,
 
-    #[display(fmt = "` `, `\t`")]
-    #[regex(r#"[ \t]+"#)]
+    #[token_kind(regex = r"[ \t]+", display = r"` `, `\t`")]
     InlineWhitespace,
 
-    #[display(fmt = "`\n`, `\r\n`")]
-    #[regex(r#"[\r?\n]+"#)]
+    #[token_kind(regex = r"[\r?\n]+", display = r"`\n`, `\r\n`")]
     NewLine,
 
-    #[display(fmt = "identifier")]
-    #[regex(r#"[A-Za-z_]+[A-Za-z_0-9]*"#)]
-    Identifier,
-
-    #[display(fmt = "`:`")]
-    #[token(":")]
-    Colon,
-
-    #[display(fmt = "item id")]
-    #[regex(r#"[0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F]"#)]
+    #[token_kind(regex = r"[0-9a-fA-F]{8}", display = "item id")]
     ItemId,
 
-    #[display(fmt = "error")]
-    #[error]
+    #[token_kind(regex = r"[A-Za-z_]+[A-Za-z_0-9]*", display="identifier")]
+    Identifier,
+
+    #[token_kind(token = ":")]
+    Colon,
+
+    #[token_kind(error)]
     Error,
 }
 
 pub type Lexer<'s, T = Token> = microtree_parser::Lexer<'s, T>;
 
-impl<'s> TokenKind<'s> for Token {
-    fn mergeable(self, other: Self) -> bool {
-        match (self, other) {
-            (Self::Error, Self::Error) => true,
-            _ => false,
-        }
+fn mergeable(first: Token, other: Token) -> bool {
+    match (first, other) {
+        (Token::Error, Token::Error) => true,
+        _ => false,
     }
 }

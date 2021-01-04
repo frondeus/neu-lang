@@ -1,16 +1,15 @@
 [package]
-name = "microtree-parser"
+name = "microtree-derive"
 version = "0.1.0"
 authors = ["Wojciech Polak <frondeus@gmail.com>"]
 edition = "2018"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
-[dependencies]
-logos = "0.11.4"
-microtree = { path = "../lib" }
-smol_str = "0.1.17"
-text-size = "1.0.0"
+[lib]
+proc-macro = true
 
-[dev-dependencies]
-derive_more = "0.99.11"
+[dependencies]
+darling = "0.11.0"
+quote = "1.0.8"
+syn = "1.0.57"

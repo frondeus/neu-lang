@@ -1,160 +1,139 @@
 use crate::HashCount;
-use derive_more::Display;
-use microtree_parser::TokenKind;
-use logos::Logos;
+use microtree_parser::{TextSize, Source, TokenKind, CallbackResult};
 
-#[derive(Debug, PartialEq, Clone, Copy, Display, Logos)]
-#[logos(extras = HashCount)]
-pub enum Token {
-    #[display(fmt = "error")]
-    #[error]
-    Error,
+fn lex_comment(_chomped: TextSize, source: &mut Source<'_>, extras: &mut HashCount) -> bool {
+    source.as_ref()
+        .find("*/")
+        .map(|i| source.chomp(i + 2))
+        .is_some()
+}
 
-    #[display(fmt = "` `, `\t`")]
-    #[regex(r#"[ \t]+"#)]
-    Whitespace,
+fn lex_plus(_chomped: TextSize, source: &mut Source<'_>, extras: &mut HashCount) -> bool {
+    !source.as_ref().starts_with("+")
+}
 
-    #[display(fmt = "`\n`, `\r\n`")]
-    #[regex(r#"(\r?\n)+"#)]
-    LineEnd,
-
-    #[display(fmt = "inline comment")]
-    #[regex(r#"//[^\n]*"#)]
-    InlineComment,
-
-    #[display(fmt = "block comment")]
-    #[token("/*", |lex| {
-        lex.remainder()
-           .find("*/")
-           .map(|i| lex.bump(i + 2))
-           .is_some()
-    })]
-    BlockComment,
-
-    #[display(fmt = "number")]
-    #[regex(r#"[0-9]+"#)]
-    Number,
-
-    #[display(fmt = "`true`")]
-    #[token("true")]
-    True,
-
-    #[display(fmt = "`false`")]
-    #[token("false")]
-    False,
-
-    #[display(fmt = "`-`")]
-    #[token("-")]
-    OpMinus,
-
-    #[display(fmt = "`!`")]
-    #[token("!")]
-    OpBang,
-
-    #[display(fmt = "`+`")]
-    #[token("+", |lex| {
-        !lex.remainder().starts_with("+") // Collision with `+++`
-    })]
-    OpPlus,
-
-    #[display(fmt = "`*`")]
-    #[token("*")]
-    OpStar,
-
-    #[display(fmt = "`/`")]
-    #[token("/")]
-    OpSlash,
-
-    #[display(fmt = "`==`")]
-    #[token("==")]
-    OpDEqual,
-
-    #[display(fmt = "`=`")]
-    #[token("=")]
-    OpAssign,
-
-    #[display(fmt = "identifier")]
-    #[regex("[a-zA-Z_]+[a-zA-Z_0-9]*")]
-    Identifier,
-
-    #[display(fmt = "`(`")]
-    #[token("(")]
-    OpenP,
-
-    #[display(fmt = "`)`")]
-    #[token(")")]
-    CloseP,
-
-    #[display(fmt = "`{{`")]
-    #[token("{")]
-    OpenC,
-
-    #[display(fmt = "`\"`")]
-    #[token("\"", |lex| {
-        if lex.extras.count > 0 {
-            let hash_count = lex.extras.count;
-            let hash = "#".repeat(hash_count);
-            if lex.remainder().starts_with(&hash) {
-                lex.bump(hash_count);
-                lex.extras.count = 0;
-                true
-            }
-            else {
-                false
-            }
-        } else {
+fn lex_dquote(_chomped: TextSize, source: &mut Source<'_>, extras: &mut HashCount) -> bool {
+    if extras.count > 0 {
+        let hash_count =extras.count;
+        let hash = "#".repeat(hash_count);
+        if source.as_ref().starts_with(&hash) {
+            source.chomp(hash_count);
+            extras.count = 0;
             true
         }
-    })]
+        else {
+            false
+        }
+    } else {
+        true
+    }
+}
+
+fn lex_mdquote(_chomped: TextSize, source: &mut Source<'_>, extras: &mut HashCount) -> bool {
+    let mut remainder = source.as_ref();
+    let mut hash = 0;
+    while remainder.starts_with("#") {
+        hash += 1;
+        source.chomp(1);
+        remainder = source.as_ref();
+    }
+    extras.count = hash;
+    let quote = remainder.starts_with("\"");
+    if quote {
+        source.chomp(1);
+    }
+    quote
+}
+
+#[derive(Debug, PartialEq, Clone, Copy, TokenKind)]
+#[token_kind(extras = "HashCount", mergeable = "mergeable")]
+pub enum Token {
+    #[token_kind(regex = r"[ \t]+", display = r"` `, `\t`")]
+    Whitespace,
+
+    #[token_kind(regex = r"(\r?\n)+", display = r"`\n`, `\r\n`")]
+    LineEnd,
+
+    #[token_kind(regex = r"//[^\n]*", display = "//")]
+    InlineComment,
+
+    #[token_kind(token = "/*", callback = "lex_comment", display = "/*")]
+    BlockComment,
+
+    #[token_kind(regex = r"[0-9]+")]
+    Number,
+
+    #[token_kind(token = "true")]
+    True,
+
+    #[token_kind(token = "false")]
+    False,
+
+    #[token_kind(token = "-")]
+    OpMinus,
+
+    #[token_kind(token = "!")]
+    OpBang,
+
+    #[token_kind(token = "+", callback = "lex_plus")]
+    OpPlus,
+
+    #[token_kind(token = "*")]
+    OpStar,
+
+    #[token_kind(token = "/")]
+    OpSlash,
+
+    #[token_kind(token = "==")]
+    OpDEqual,
+
+    #[token_kind(token = "=")]
+    OpAssign,
+
+    #[token_kind(regex = r"[a-zA-Z_]+[a-zA-Z_0-9]*", display = "identifier")]
+    Identifier,
+
+    #[token_kind(token = "(")]
+    OpenP,
+
+    #[token_kind(token = ")")]
+    CloseP,
+
+    #[token_kind(token = "{", display = "`{{`")]
+    OpenC,
+
+    #[token_kind(token = "\"", callback = "lex_dquote")]
     DoubleQuote,
 
-    #[display(fmt = "`md\"`")]
-    #[token("md", |lex| {
-        let mut remainder = lex.remainder();
-        let mut hash = 0;
-        while remainder.starts_with("#") {
-            hash += 1;
-            lex.bump(1);
-            remainder = lex.remainder();
-        }
-        lex.extras.count = hash;
-        let quote = remainder.starts_with("\"");
-        if quote {
-            lex.bump(1);
-        }
-        quote
-    })]
+    #[token_kind(token = "md", callback = "lex_mdquote")]
     MdQuote,
 
-    #[display(fmt = "`}}`")]
-    #[token("}")]
+    #[token_kind(token = "}", display = "`}}`")]
     CloseC,
 
-    #[display(fmt = "`[`")]
-    #[token("[")]
+    #[token_kind(token = "[")]
     OpenB,
 
-    #[display(fmt = "`]`")]
-    #[token("]")]
+    #[token_kind(token = "]")]
     CloseB,
 
-    #[display(fmt = "`,`")]
-    #[token(",")]
+    #[token_kind(token = ",")]
     Comma,
 
-    #[display(fmt = "`.`")]
-    #[token(".")]
+    #[token_kind(token = ".")]
     OpDot,
+
+    #[token_kind(error)]
+    Error,
+
 }
 
 pub type Lexer<'s, T = Token> = microtree_parser::Lexer<'s, T>;
 
-impl<'s> TokenKind<'s> for Token {
-    fn mergeable(self, other: Self) -> bool {
-        match (self, other) {
-            (Self::Error, Self::Error) => true,
-            (Self::LineEnd, Self::LineEnd) => true,
-            _ => false,
-        }
+fn mergeable(first: Token, other: Token) -> bool {
+    match (first, other) {
+        (Token::Error, Token::Error) => true,
+        (Token::LineEnd, Token::LineEnd) => true,
+        _ => false,
     }
 }
