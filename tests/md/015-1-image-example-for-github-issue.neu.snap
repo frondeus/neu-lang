@@ -4,16 +4,17 @@ md#"![alt text](https://github.com/icon48.png "Logo Title Text 1")"#
 
 [parser]
 --- GREEN TREE ---
-Root, Value, Markdown @ 0..114
+Root, Value, Markdown @ 0..85
     token @ 0..4 = `md#"`
-    Md_Value, Md_Paragraph @ 4..112
-        Md_Image, Md_InlineImage @ 4..112
+    MdValue, MdParagraph @ 4..83
+        MdValue, MdImage, MdInlineImage @ 4..83
             token @ 4..6 = `![`
-            Md_Text @ 6..14 = `alt text`
-            token @ 14..66 = `](https://github.com/icon48.png "Logo Title Text 1")`
-            Md_ImageSrc @ 66..95 = `https://github.com/icon48.png`
-            Md_ImageTitle @ 95..112 = `Logo Title Text 1`
-    token @ 112..114 = `"#`
+            MdValue, MdText @ 6..14 = `alt text`
+            token @ 14..16 = `](`
+            MdImageSrc @ 16..45 = `https://github.com/icon48.png`
+            MdImageTitle @ 45..62 = `Logo Title Text 1`
+            token @ 62..83 = ` "Logo Title Text 1")`
+    token @ 83..85 = `"#`
 --- END ---
 
 

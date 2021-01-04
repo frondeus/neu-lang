@@ -8,19 +8,34 @@ chrono = "20.06.1925"
 
 Ala ma kota
 
-`````
+++ chrono:0123abcd ++
+title = "Chronologia sesji"
++++
 
+Kot ma ale
+
+++ end ++
+
+Ale kota nie ma
+
+`````
 [errors]
 No errors
+
+[mentions]
+chrono:0123abcd in sesja:a88907fd
 
 [render]
 <h1>Pośród Pradawnych Drzew</h1>
 <div class="side-table"><table><tr><th class="align-right">chrono</th><td>20.06.1925</td></tr><tr><th class="align-right">desc</th><td>Sesja jednostrzałowa dla Macek II RP</td></tr><tr><th class="align-right">when</th><td>20.10.2019</td></tr></table>
-</div><p>Ala ma kota</p>
+</div><p>Ala ma kota</p><div class="article-item" id="chrono_0123abcd" ><h1>Chronologia sesji</h1>
+<div class="side-table"><table><tr><th>Mentioned in</th></tr><tr><td><a href="/sesja/a88907fd">Pośród Pradawnych Drzew</a></td></tr></table>
+</div><p>Kot ma ale</p></div>
+<p>Ale kota nie ma</p>
 
 [parser]
 --- GREEN TREE ---
-Root, ArticleItem @ 0..164
+Root, ArticleItem @ 0..257
     token @ 0..3 = `+++`
     token @ 3..4 = ` `
     identifier, token @ 4..9 = `sesja`
@@ -63,11 +78,42 @@ Root, ArticleItem @ 0..164
             token @ 146..147 = `"`
         token @ 147..148 = `\n`
     token @ 148..151 = `+++`
-    ArticleBody @ 151..164
-        Markdown @ 151..164
+    ArticleBody @ 151..257
+        Markdown @ 151..165
             token @ 151..153 = `\n\n`
-            MdValue, MdParagraph @ 153..164
+            MdValue, MdParagraph @ 153..165
                 MdValue, MdText @ 153..164 = `Ala ma kota`
+                token @ 164..165 = `\n`
+        ArticleItem @ 165..240
+            token @ 165..167 = `++`
+            token @ 167..168 = ` `
+            identifier, token @ 168..174 = `chrono`
+            token @ 174..175 = `:`
+            item_id, token @ 175..183 = `0123abcd`
+            token @ 183..184 = ` `
+            token @ 184..186 = `++`
+            token @ 186..187 = `\n`
+            Value, Strukt @ 187..215
+                Key, identifier, token @ 187..193 = `title` ; trailing: ` `
+                token @ 193..195 = `=` ; trailing: ` `
+                Value, String @ 195..214
+                    token @ 195..196 = `"`
+                    InnerString @ 196..213
+                        token @ 196..213 = `Chronologia sesji`
+                    token @ 213..214 = `"`
+                token @ 214..215 = `\n`
+            token @ 215..218 = `+++`
+            ArticleBody @ 218..231
+                Markdown @ 218..231
+                    token @ 218..220 = `\n\n`
+                    MdValue, MdParagraph @ 220..231
+                        MdValue, MdText @ 220..230 = `Kot ma ale`
+                        token @ 230..231 = `\n`
+            token @ 231..240 = `++ end ++`
+        Markdown @ 240..257
+            token @ 240..242 = `\n\n`
+            MdValue, MdParagraph @ 242..257
+                MdValue, MdText @ 242..257 = `Ale kota nie ma`
 --- END ---
 
 

@@ -1,12 +1,12 @@
 use crate::HashCount;
 use microtree_parser::{TokenKind, Source, TextSize, CallbackResult};
 
-fn lex_dquote(_chomped: TextSize, source: &mut Source<'_>, extras: &mut HashCount) -> bool {
+fn lex_dquote(_bumped: TextSize, source: &mut Source<'_>, extras: &mut HashCount) -> bool {
     if extras.count > 0 {
         let hash_count =extras.count;
         let hash = "#".repeat(hash_count);
         if source.as_ref().starts_with(&hash) {
-            source.chomp(hash_count);
+            source.bump(hash_count);
             true
         }
         else {

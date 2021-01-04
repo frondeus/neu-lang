@@ -7,10 +7,10 @@ bar"
 --- GREEN TREE ---
 Root, Value, Markdown @ 0..11
     token @ 0..3 = `md"`
-    Md_Value, Md_Paragraph @ 3..10
-        Md_Text @ 3..6 = `foo`
-        Md_SoftBreak @ 6..7 = `\n`
-        Md_Text @ 7..10 = `bar`
+    MdValue, MdParagraph @ 3..10
+        MdValue, MdText @ 3..6 = `foo`
+        MdValue, MdSoftBreak @ 6..7 = `\n`
+        MdValue, MdText @ 7..10 = `bar`
     token @ 10..11 = `"`
 --- END ---
 

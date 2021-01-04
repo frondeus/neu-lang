@@ -11,20 +11,20 @@ defg
 --- GREEN TREE ---
 Root, Value, Markdown @ 0..28
     token @ 0..3 = `md"`
-    Md_Value, token @ 3..4 = `\n`
-    Md_Value, Md_H1 @ 4..10
+    token @ 3..4 = `\n`
+    MdValue, MdH1 @ 4..10
         token @ 4..6 = `# `
-        Md_Text @ 6..9 = `foo`
+        MdValue, MdText @ 6..9 = `foo`
         token @ 9..10 = `\n`
-    Md_Value, Md_Paragraph @ 10..15
-        Md_Text @ 10..14 = `abcd`
+    MdValue, MdParagraph @ 10..15
+        MdValue, MdText @ 10..14 = `abcd`
         token @ 14..15 = `\n`
-    Md_Value, Md_H2 @ 15..22
+    MdValue, MdH2 @ 15..22
         token @ 15..18 = `## `
-        Md_Text @ 18..21 = `bar`
+        MdValue, MdText @ 18..21 = `bar`
         token @ 21..22 = `\n`
-    Md_Value, Md_Paragraph @ 22..27
-        Md_Text @ 22..26 = `defg`
+    MdValue, MdParagraph @ 22..27
+        MdValue, MdText @ 22..26 = `defg`
         token @ 26..27 = `\n`
     token @ 27..28 = `"`
 --- END ---

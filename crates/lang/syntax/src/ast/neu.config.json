@@ -26,23 +26,24 @@
                 "Identifier": "identifier",
                 "OpAssign": "=",
                 "Text": "text",
+
                 "ThreePlus": "+++",
                 "ItemIdent": "item_identifier",
                 "OpColon": ":",
-                "ItemId": "item_id",
+                "ArticleItemId": "item_id",
                 "LineEnding": "ln",
                 "PlusPlusEnd": "++ end ++",
-                "PlusPlus": "++"
+                "PlusPlus": "++",
+
+                "MdLinkUrl": "md_link_url",
+                "MdLinkTitle": "md_link_title"
         },
         "handwritten": [
-        "Identifier"
-        ],
-        "handwritten_": [
-                "Number",
-                "MdQuote",
-                "DQuote",
-                "MdValue",
-                "Text",
-                "CloseI"
+                "Identifier",
+
+                "ArticleItemId",
+
+                "MdLinkUrl",
+                "MdLinkTitle"
         ]
 }

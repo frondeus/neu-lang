@@ -11,9 +11,9 @@ neu-syntax = { path = "../syntax" }
 neu-eval = { path = "../eval" }
 neu-render = { path = "../render" }
 neu-analyze = { path = "../analyze" }
-neu-canceled = { path = "../../utils/canceled" }
 
-neu-parser = { path = "../../utils/parser" }
+#neu-parser = { path = "../../utils/parser" }
+neu-canceled = { path = "../../utils/canceled" }
 neu-diagnostics = { path = "../../utils/diagnostics" }
 
 itertools = "0.9.0"

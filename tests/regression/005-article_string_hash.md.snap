@@ -1,0 +1,128 @@
+`````
++++ monster:cd73e6b4 +++
+title = "Snake Man"
+S = "50 # 3k6 x 5"
+KON = "50 # 3k6 x 5"
+BC = "50 # 3k6 x 5"
+ZR = "65 # (2k6 + 6) x 5"
+INT = "80 # (3k6+6) x 5"
+MOC = "65 # (2k6+6) x 5"
+PW = 10
+MO = 0
+Krzepa = 0
+PM = 13
+Ruch = 8
+Ataki = 1
++++
+
+Ugryzienie: Jad bardzo trujący.
+`````
+[errors]
+No errors
+
+[render]
+<h1>Snake Man</h1>
+<div class="side-table"><table><tr><th class="align-right">Ataki</th><td>1</td></tr><tr><th class="align-right">BC</th><td>50 # 3k6 x 5</td></tr><tr><th class="align-right">INT</th><td>80 # (3k6+6) x 5</td></tr><tr><th class="align-right">KON</th><td>50 # 3k6 x 5</td></tr><tr><th class="align-right">Krzepa</th><td>0</td></tr><tr><th class="align-right">MO</th><td>0</td></tr><tr><th class="align-right">MOC</th><td>65 # (2k6+6) x 5</td></tr><tr><th class="align-right">PM</th><td>13</td></tr><tr><th class="align-right">PW</th><td>10</td></tr><tr><th class="align-right">Ruch</th><td>8</td></tr><tr><th class="align-right">S</th><td>50 # 3k6 x 5</td></tr><tr><th class="align-right">ZR</th><td>65 # (2k6 + 6) x 5</td></tr></table>
+</div><p>Ugryzienie: Jad bardzo trujący.</p>
+
+[parser]
+--- GREEN TREE ---
+Root, ArticleItem @ 0..271
+    token @ 0..3 = `+++`
+    token @ 3..4 = ` `
+    identifier, token @ 4..11 = `monster`
+    token @ 11..12 = `:`
+    item_id, token @ 12..20 = `cd73e6b4`
+    token @ 20..21 = ` `
+    token @ 21..24 = `+++`
+    token @ 24..25 = `\n`
+    Value, Strukt @ 25..234
+        Key, identifier, token @ 25..31 = `title` ; trailing: ` `
+        token @ 31..33 = `=` ; trailing: ` `
+        Value, String @ 33..44
+            token @ 33..34 = `"`
+            InnerString @ 34..43
+                token @ 34..43 = `Snake Man`
+            token @ 43..44 = `"`
+        token @ 44..45 = `\n`
+        Key, identifier, token @ 45..47 = `S` ; trailing: ` `
+        token @ 47..49 = `=` ; trailing: ` `
+        Value, String @ 49..63
+            token @ 49..50 = `"`
+            InnerString @ 50..62
+                token @ 50..62 = `50 # 3k6 x 5`
+            token @ 62..63 = `"`
+        token @ 63..64 = `\n`
+        Key, identifier, token @ 64..68 = `KON` ; trailing: ` `
+        token @ 68..70 = `=` ; trailing: ` `
+        Value, String @ 70..84
+            token @ 70..71 = `"`
+            InnerString @ 71..83
+                token @ 71..83 = `50 # 3k6 x 5`
+            token @ 83..84 = `"`
+        token @ 84..85 = `\n`
+        Key, identifier, token @ 85..88 = `BC` ; trailing: ` `
+        token @ 88..90 = `=` ; trailing: ` `
+        Value, String @ 90..104
+            token @ 90..91 = `"`
+            InnerString @ 91..103
+                token @ 91..103 = `50 # 3k6 x 5`
+            token @ 103..104 = `"`
+        token @ 104..105 = `\n`
+        Key, identifier, token @ 105..108 = `ZR` ; trailing: ` `
+        token @ 108..110 = `=` ; trailing: ` `
+        Value, String @ 110..130
+            token @ 110..111 = `"`
+            InnerString @ 111..129
+                token @ 111..129 = `65 # (2k6 + 6) x 5`
+            token @ 129..130 = `"`
+        token @ 130..131 = `\n`
+        Key, identifier, token @ 131..135 = `INT` ; trailing: ` `
+        token @ 135..137 = `=` ; trailing: ` `
+        Value, String @ 137..155
+            token @ 137..138 = `"`
+            InnerString @ 138..154
+                token @ 138..154 = `80 # (3k6+6) x 5`
+            token @ 154..155 = `"`
+        token @ 155..156 = `\n`
+        Key, identifier, token @ 156..160 = `MOC` ; trailing: ` `
+        token @ 160..162 = `=` ; trailing: ` `
+        Value, String @ 162..180
+            token @ 162..163 = `"`
+            InnerString @ 163..179
+                token @ 163..179 = `65 # (2k6+6) x 5`
+            token @ 179..180 = `"`
+        token @ 180..181 = `\n`
+        Key, identifier, token @ 181..184 = `PW` ; trailing: ` `
+        token @ 184..186 = `=` ; trailing: ` `
+        Value, number, token @ 186..188 = `10`
+        token @ 188..189 = `\n`
+        Key, identifier, token @ 189..192 = `MO` ; trailing: ` `
+        token @ 192..194 = `=` ; trailing: ` `
+        Value, number, token @ 194..195 = `0`
+        token @ 195..196 = `\n`
+        Key, identifier, token @ 196..203 = `Krzepa` ; trailing: ` `
+        token @ 203..205 = `=` ; trailing: ` `
+        Value, number, token @ 205..206 = `0`
+        token @ 206..207 = `\n`
+        Key, identifier, token @ 207..210 = `PM` ; trailing: ` `
+        token @ 210..212 = `=` ; trailing: ` `
+        Value, number, token @ 212..214 = `13`
+        token @ 214..215 = `\n`
+        Key, identifier, token @ 215..220 = `Ruch` ; trailing: ` `
+        token @ 220..222 = `=` ; trailing: ` `
+        Value, number, token @ 222..223 = `8`
+        token @ 223..224 = `\n`
+        Key, identifier, token @ 224..230 = `Ataki` ; trailing: ` `
+        token @ 230..232 = `=` ; trailing: ` `
+        Value, number, token @ 232..233 = `1`
+        token @ 233..234 = `\n`
+    token @ 234..237 = `+++`
+    ArticleBody @ 237..271
+        Markdown @ 237..271
+            token @ 237..239 = `\n\n`
+            MdValue, MdParagraph @ 239..271
+                MdValue, MdText @ 239..271 = `Ugryzienie: Jad bardzo trujący.`
+--- END ---
+
+

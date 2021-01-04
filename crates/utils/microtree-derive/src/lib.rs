@@ -1,7 +1,6 @@
 extern crate proc_macro;
 
 use proc_macro::TokenStream;
-use syn::export::TokenStream2;
 use quote::quote;
 use darling::*;
 
@@ -16,7 +15,10 @@ struct TokenKindOpts {
     extras: Option<syn::Path>,
 
     #[darling(default)]
-    mergeable: Option<syn::Path>
+    mergeable: Option<syn::Path>,
+
+    #[darling(default)]
+    debug: Option<()>
 }
 
 #[derive(Debug, FromVariant)]
@@ -68,7 +70,7 @@ pub fn token_kind_derive(args: TokenStream) -> TokenStream {
         let name = variant.ident;
         let callback = match variant.callback {
             Some(ref callback) => quote!(
-                return CallbackResult::result(#callback(chomped, source, extras), |()| Self::#name);
+                return CallbackResult::result(#callback(bumped, source, extras), |()| Self::#name);
             ),
             _ => quote!(return Self::#name;)
         };
@@ -84,7 +86,7 @@ pub fn token_kind_derive(args: TokenStream) -> TokenStream {
             variants.push(quote!(
                 if let Some(m) = #regex_name.find(source.as_ref()) {
                     let count = m.as_str().chars().count();
-                    let chomped = source.chomp(count);
+                    let bumped = source.bump(count);
                     #callback
                 }
             ));
@@ -99,7 +101,7 @@ pub fn token_kind_derive(args: TokenStream) -> TokenStream {
             let count = token.chars().count();
             variants.push(quote!(
                 if source.as_ref().starts_with(#token) {
-                    let chomped = source.chomp(#count);
+                    let bumped = source.bump(#count);
                     #callback
                 }
             ));
@@ -154,14 +156,20 @@ pub fn token_kind_derive(args: TokenStream) -> TokenStream {
         )
     } else { quote!() };
 
+    let debug = if opts.debug.is_some() {
+        quote!(dbg!(&source.as_ref());)
+    } else {quote!()};
+
     let quoted = quote!{
         impl TokenKind for #name {
             type Extras = #extras;
             const ERROR: Self = Self::#error_variant;
             fn lex(source: &mut Source<'_>, extras: &mut Self::Extras) -> Self {
+                //dbg!(&source.as_ref());
+                #debug
                 #regexes
                 #(#variants)*
-                source.chomp(1);
+                source.bump(1);
                 Self::ERROR
             }
             #mergeable
@@ -175,6 +183,8 @@ pub fn token_kind_derive(args: TokenStream) -> TokenStream {
             }
         }
     };
-    eprintln!("{}", &quoted.to_string());
+    if opts.debug.is_some() {
+        eprintln!("{}", &quoted.to_string());
+    }
     quoted.into()
 }

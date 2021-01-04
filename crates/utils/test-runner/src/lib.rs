@@ -102,6 +102,7 @@ fn test_snapshots_inner(ext: &str, section_name: &str, f: impl Fn(&str) -> Strin
     let mut skipped = 0;
     for entry in glob::glob(&format!("{}/tests/**/*.{}.snap", path.display(), ext))? {
         let entry = entry?;
+        //dbg!(&entry);
         let entry_file = load_file(&entry)?;
         let (input, snaps) = get_source(&entry_file)?;
         let mut section = None;

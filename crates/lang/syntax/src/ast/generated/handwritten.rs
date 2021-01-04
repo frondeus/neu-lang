@@ -7,63 +7,101 @@ use microtree::nodes;
 impl Nodes {
     pub const Number: Name = Name::new("number");
     pub const Identifier: Name = Name::new("identifier");
+    pub const ArticleItemId: Name = Name::new("item_id");
 }
 nodes! {
     Nodes,
     Markdown {
-        Md_Paragraph,
-        Md_Emphasis,
-        Md_Strong,
-        Md_SoftBreak,
-        Md_HardBreak,
-        Md_Rule,
-        Md_BlockQuote,
-        Md_UnorderedList,
-        Md_ListItem,
-        Md_OrderedList,
+        MdParagraph,
+        MdEmphasis,
+        MdStrong,
+        MdSoftBreak,
+        MdHardBreak,
+        MdRule,
+        MdBlockQuote,
+        MdUnorderedList,
+        MdListItem,
+        MdOrderedList,
 
-        Md_Link,
-        Md_InlineLink,
-        Md_ReferenceLink,
-        Md_ShortcutLink,
-        Md_AutoLink,
-        Md_EmailLink,
+        MdInlineLink,
+        MdReferenceLink,
+        MdShortcutLink,
+        MdAutoLink,
+        MdEmailLink,
 
-        Md_Image,
-        Md_InlineImage,
-        Md_ReferenceImage,
-        Md_ShortcutImage,
-        Md_AutoImage,
-        Md_EmailImage,
+        MdImage,
+        MdInlineImage,
+        MdReferenceImage,
+        MdShortcutImage,
+        MdAutoImage,
+        MdEmailImage,
 
-        Md_LinkUrl,
-        Md_LinkTitle,
+        MdLinkUrl,
+        MdLinkTitle,
 
-        Md_ImageSrc,
-        Md_ImageTitle,
+        MdImageSrc,
+        MdImageTitle,
 
-        Md_CodeBlock,
-        Md_CodeBlockLang,
+        MdReference,
+        MdReferenceLabel,
 
-        Md_H1,
-        Md_H2,
-        Md_H3,
-        Md_H4,
-        Md_H5,
-        Md_H6,
+        MdCodeBlock,
+        MdCodeBlockLang,
 
-        Md_Text,
-        Md_Html
+        MdH1,
+        MdH2,
+        MdH3,
+        MdH4,
+        MdH5,
+        MdH6,
+
+        MdText,
+        MdHtml
 }
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Identifier(Red);
 impl Ast for Identifier {
-    fn new(_node: Red) -> Option<Self> {
-        todo!()
+    fn new(node: Red) -> Option<Self> {
+        Some(Self(node))
     }
 
     fn red(&self) -> Red {
-        todo!()
+        self.0.clone()
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ArticleItemId(Red);
+impl Ast for ArticleItemId {
+    fn new(node: Red) -> Option<Self> {
+        Some(Self(node))
+    }
+
+    fn red(&self) -> Red {
+        self.0.clone()
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct MdLinkUrl(Red);
+impl Ast for MdLinkUrl {
+    fn new(node: Red) -> Option<Self> {
+        Some(Self(node))
+    }
+    fn red(&self) -> Red {
+        self.0.clone()
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct MdLinkTitle(Red);
+impl Ast for MdLinkTitle {
+    fn new(node: Red) -> Option<Self> {
+        Some(Self(node))
+    }
+    fn red(&self) -> Red {
+        self.0.clone()
     }
 }

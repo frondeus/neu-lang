@@ -1,0 +1,153 @@
+`````
++++ sesja:a88907fd +++
+title = "Pośród Pradawnych Drzew"
++++
+
+1
+
+
+2
+
+++ test:0000aaaa ++
+title = "Test"
++++
+
+3
+
+++ end ++
+
+++ chrono:0123abcd ++
+title = "Chronologia sesji"
++++
+
+4
+
+[+ test:0000aaaa +]
+
+++ end ++
+
+5
+
+`````
+
+[errors]
+No errors
+
+[mentions]
+test:0000aaaa in chrono:0123abcd
+test:0000aaaa in sesja:a88907fd
+chrono:0123abcd in sesja:a88907fd
+
+[render]
+<h1>Pośród Pradawnych Drzew</h1>
+<div class="side-table"></div><p>1</p><p>2</p><div class="article-item" id="test_0000aaaa" ><h1>Test</h1>
+<div class="side-table"><table><tr><th>Mentioned in</th></tr><tr><td><a href="/chrono/0123abcd">Chronologia sesji</a></td></tr><tr><td><a href="/sesja/a88907fd">Pośród Pradawnych Drzew</a></td></tr></table>
+</div><p>3</p></div>
+<div class="article-item" id="chrono_0123abcd" ><h1>Chronologia sesji</h1>
+<div class="side-table"><table><tr><th>Mentioned in</th></tr><tr><td><a href="/sesja/a88907fd">Pośród Pradawnych Drzew</a></td></tr></table>
+</div><p>4</p><div class="article-item" id="test_0000aaaa" ><h1>Test</h1>
+<div class="side-table"><table><tr><th>Mentioned in</th></tr><tr><td><a href="/chrono/0123abcd">Chronologia sesji</a></td></tr><tr><td><a href="/sesja/a88907fd">Pośród Pradawnych Drzew</a></td></tr></table>
+</div><p>3</p></div>
+</div>
+<p>5</p>
+
+[parser]
+--- GREEN TREE ---
+Root, ArticleItem @ 0..209
+    token @ 0..3 = `+++`
+    token @ 3..4 = ` `
+    identifier, token @ 4..9 = `sesja`
+    token @ 9..10 = `:`
+    item_id, token @ 10..18 = `a88907fd`
+    token @ 18..19 = ` `
+    token @ 19..22 = `+++`
+    token @ 22..23 = `\n`
+    Value, Strukt @ 23..59
+        Key, identifier, token @ 23..29 = `title` ; trailing: ` `
+        token @ 29..31 = `=` ; trailing: ` `
+        Value, String @ 31..58
+            token @ 31..32 = `"`
+            InnerString @ 32..57
+                token @ 32..57 = `Pośród Pradawnych Drzew`
+            token @ 57..58 = `"`
+        token @ 58..59 = `\n`
+    token @ 59..62 = `+++`
+    ArticleBody @ 62..209
+        Markdown @ 62..70
+            token @ 62..64 = `\n\n`
+            MdValue, MdParagraph @ 64..66
+                MdValue, MdText @ 64..65 = `1`
+                token @ 65..66 = `\n`
+            token @ 66..68 = `\n\n`
+            MdValue, MdParagraph @ 68..70
+                MdValue, MdText @ 68..69 = `2`
+                token @ 69..70 = `\n`
+        ArticleItem @ 70..121
+            token @ 70..72 = `++`
+            token @ 72..73 = ` `
+            identifier, token @ 73..77 = `test`
+            token @ 77..78 = `:`
+            item_id, token @ 78..86 = `0000aaaa`
+            token @ 86..87 = ` `
+            token @ 87..89 = `++`
+            token @ 89..90 = `\n`
+            Value, Strukt @ 90..105
+                Key, identifier, token @ 90..96 = `title` ; trailing: ` `
+                token @ 96..98 = `=` ; trailing: ` `
+                Value, String @ 98..104
+                    token @ 98..99 = `"`
+                    InnerString @ 99..103
+                        token @ 99..103 = `Test`
+                    token @ 103..104 = `"`
+                token @ 104..105 = `\n`
+            token @ 105..108 = `+++`
+            ArticleBody @ 108..112
+                Markdown @ 108..112
+                    token @ 108..110 = `\n\n`
+                    MdValue, MdParagraph @ 110..112
+                        MdValue, MdText @ 110..111 = `3`
+                        token @ 111..112 = `\n`
+            token @ 112..121 = `++ end ++`
+        Markdown @ 121..121
+        ArticleItem @ 121..206
+            token @ 121..123 = `++`
+            token @ 123..124 = ` `
+            identifier, token @ 124..130 = `chrono`
+            token @ 130..131 = `:`
+            item_id, token @ 131..139 = `0123abcd`
+            token @ 139..140 = ` `
+            token @ 140..142 = `++`
+            token @ 142..143 = `\n`
+            Value, Strukt @ 143..171
+                Key, identifier, token @ 143..149 = `title` ; trailing: ` `
+                token @ 149..151 = `=` ; trailing: ` `
+                Value, String @ 151..170
+                    token @ 151..152 = `"`
+                    InnerString @ 152..169
+                        token @ 152..169 = `Chronologia sesji`
+                    token @ 169..170 = `"`
+                token @ 170..171 = `\n`
+            token @ 171..174 = `+++`
+            ArticleBody @ 174..197
+                Markdown @ 174..178
+                    token @ 174..176 = `\n\n`
+                    MdValue, MdParagraph @ 176..178
+                        MdValue, MdText @ 176..177 = `4`
+                        token @ 177..178 = `\n`
+                ArticleRef @ 178..197
+                    token @ 178..180 = `[+`
+                    token @ 180..181 = ` `
+                    identifier, token @ 181..185 = `test`
+                    token @ 185..186 = `:`
+                    item_id, token @ 186..194 = `0000aaaa`
+                    token @ 194..195 = ` `
+                    token @ 195..197 = `+]`
+                Markdown @ 197..197
+            token @ 197..206 = `++ end ++`
+        Markdown @ 206..209
+            token @ 206..208 = `\n\n`
+            MdValue, MdParagraph @ 208..209
+                MdValue, MdText @ 208..209 = `5`
+--- END ---
+
+

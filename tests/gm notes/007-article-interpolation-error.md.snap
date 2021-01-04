@@ -1,26 +1,31 @@
-`````
+```````
 +++ sesja:a88907fd +++
 title = "Pośród Pradawnych Drzew"
 when = "20.10.2019"
 desc = "Sesja jednostrzałowa dla Macek II RP"
 chrono = "20.06.1925"
+age = 5
 +++
 
-Ala ma kota
+Ala ma **kota**.
 
-`````
+```
+4 + .ages
+```
+
+```````
 
 [errors]
-No errors
+test.md | N62 | Field not found
 
 [render]
 <h1>Pośród Pradawnych Drzew</h1>
-<div class="side-table"><table><tr><th class="align-right">chrono</th><td>20.06.1925</td></tr><tr><th class="align-right">desc</th><td>Sesja jednostrzałowa dla Macek II RP</td></tr><tr><th class="align-right">when</th><td>20.10.2019</td></tr></table>
-</div><p>Ala ma kota</p>
+<div class="side-table"><table><tr><th class="align-right">age</th><td>5</td></tr><tr><th class="align-right">chrono</th><td>20.06.1925</td></tr><tr><th class="align-right">desc</th><td>Sesja jednostrzałowa dla Macek II RP</td></tr><tr><th class="align-right">when</th><td>20.10.2019</td></tr></table>
+</div><p>Ala ma <strong>kota</strong>.</p>
 
 [parser]
 --- GREEN TREE ---
-Root, ArticleItem @ 0..164
+Root, ArticleItem @ 0..196
     token @ 0..3 = `+++`
     token @ 3..4 = ` `
     identifier, token @ 4..9 = `sesja`
@@ -29,7 +34,7 @@ Root, ArticleItem @ 0..164
     token @ 18..19 = ` `
     token @ 19..22 = `+++`
     token @ 22..23 = `\n`
-    Value, Strukt @ 23..148
+    Value, Strukt @ 23..156
         Key, identifier, token @ 23..29 = `title` ; trailing: ` `
         token @ 29..31 = `=` ; trailing: ` `
         Value, String @ 31..58
@@ -62,12 +67,33 @@ Root, ArticleItem @ 0..164
                 token @ 136..146 = `20.06.1925`
             token @ 146..147 = `"`
         token @ 147..148 = `\n`
-    token @ 148..151 = `+++`
-    ArticleBody @ 151..164
-        Markdown @ 151..164
-            token @ 151..153 = `\n\n`
-            MdValue, MdParagraph @ 153..164
-                MdValue, MdText @ 153..164 = `Ala ma kota`
+        Key, identifier, token @ 148..152 = `age` ; trailing: ` `
+        token @ 152..154 = `=` ; trailing: ` `
+        Value, number, token @ 154..155 = `5`
+        token @ 155..156 = `\n`
+    token @ 156..159 = `+++`
+    ArticleBody @ 159..196
+        Markdown @ 159..196
+            token @ 159..161 = `\n\n`
+            MdValue, MdParagraph @ 161..178
+                MdValue, MdText @ 161..168 = `Ala ma `
+                MdValue, MdStrong @ 168..176
+                    token @ 168..170 = `**`
+                    MdValue, MdText @ 170..174 = `kota`
+                    token @ 174..176 = `**`
+                MdValue, MdText @ 176..177 = `.`
+                token @ 177..178 = `\n`
+            token @ 178..179 = `\n`
+            MdValue, token @ 179..183 = `\`\`\`\n`
+            MdValue, Interpolated @ 183..193
+                Value, Binary @ 183..192
+                    Value, number, token @ 183..185 = `4` ; trailing: ` `
+                    BinaryOp, token @ 185..187 = `+` ; trailing: ` `
+                    Value, Unary @ 187..192
+                        UnaryOp, token @ 187..188 = `.`
+                        Value, identifier, token @ 188..192 = `ages`
+                eof @ 192..193 = `` ; leading: `\n`
+            token @ 193..196 = `\`\`\``
 --- END ---
 
 

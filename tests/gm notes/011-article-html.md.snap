@@ -6,7 +6,9 @@ desc = "Sesja jednostrzałowa dla Macek II RP"
 chrono = "20.06.1925"
 +++
 
-Ala ma kota
+<form name="form">
+    <input type="text" name="name"/>
+</form>
 
 `````
 
@@ -16,11 +18,13 @@ No errors
 [render]
 <h1>Pośród Pradawnych Drzew</h1>
 <div class="side-table"><table><tr><th class="align-right">chrono</th><td>20.06.1925</td></tr><tr><th class="align-right">desc</th><td>Sesja jednostrzałowa dla Macek II RP</td></tr><tr><th class="align-right">when</th><td>20.10.2019</td></tr></table>
-</div><p>Ala ma kota</p>
+</div><form name="form">
+    <input type="text" name="name"/>
+</form>
 
 [parser]
 --- GREEN TREE ---
-Root, ArticleItem @ 0..164
+Root, ArticleItem @ 0..216
     token @ 0..3 = `+++`
     token @ 3..4 = ` `
     identifier, token @ 4..9 = `sesja`
@@ -63,11 +67,12 @@ Root, ArticleItem @ 0..164
             token @ 146..147 = `"`
         token @ 147..148 = `\n`
     token @ 148..151 = `+++`
-    ArticleBody @ 151..164
-        Markdown @ 151..164
+    ArticleBody @ 151..216
+        Markdown @ 151..216
             token @ 151..153 = `\n\n`
-            MdValue, MdParagraph @ 153..164
-                MdValue, MdText @ 153..164 = `Ala ma kota`
+            MdValue, MdHtml @ 153..172 = `<form name="form">\n`
+            MdValue, MdHtml @ 172..209 = `    <input type="text" name="name"/>\n`
+            MdValue, MdHtml @ 209..216 = `</form>`
 --- END ---
 
 

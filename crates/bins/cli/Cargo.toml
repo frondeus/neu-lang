@@ -5,7 +5,8 @@ name = "neu-cli"
 version = "0.1.0"
 
 [dependencies]
-neu-parser = { path = "../../utils/parser" }
+#neu-parser = { path = "../../utils/parser" }
+
 neu-syntax = { path = "../../lang/syntax" }
 neu-eval = { path = "../../lang/eval" }
 neu-render = { path = "../../lang/render" }

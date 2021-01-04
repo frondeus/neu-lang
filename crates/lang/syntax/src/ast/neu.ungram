@@ -2,7 +2,7 @@ Value = Literal
       | Binary
       | IdentPath
       | Unary
-      | Markdown
+      | MdString
       | String
       | Strukt
       | Array
@@ -23,11 +23,8 @@ BinaryOp = '+' | '/' | '*' | '=='
 
 Boolean = 'true' | 'false'
 
-Markdown = 'md_quote' InnerMarkdown 'd_quote'
+MdString = 'md_quote' Markdown 'd_quote'
 
-InnerMarkdown = Md_Value*
-
-Md_Value = 'text'
 
 String = left_quote: 'd_quote' InnerString right_quote: 'd_quote'
 
@@ -45,22 +42,26 @@ Key = 'identifier'
 
 Array = '[' values:( Value (',' Value)* ','? )?  ']'
 
-MainItem = MainItemHeader MainItemBody
+ArticleItem = MainArticle | SubArticle
 
-MainItemBody = '+++' 'ln' ArticleBody
+MainArticle = ArticleHeader ArticleBody
 
-MainItemHeader = start: '+++' 'item_identifier' ':' ArticleItemId separator: '+++' 'ln' ArticleItemValues
+SubArticle = SubArticleHeader ArticleBody? '++ end ++'
 
-ArticleItemId = 'item_id'
+ArticleHeader = start: '+++' 'item_identifier' ':' 'item_id' separator: '+++' 'ln' ArticleHeaderValues
 
-ArticleItemValues = values: ( StruktPair ( 'ln' StruktPair )* 'ln'? )?
+ArticleHeaderValues = values: ( StruktPair ( 'ln' StruktPair )* 'ln'? )?
 
-ArticleItem = ArticleItemHeader ArticleItemBody? '++ end ++'
+SubArticleHeader = '++' 'item_identifier' ':' 'item_id' '+++' 'ln' ArticleHeaderValues
 
-ArticleItemHeader = '++' 'item_identifier' ':' ArticleItemId '+++' 'ln' ArticleItemValues
+ArticleBody = '+++' 'ln' items: ArticleBodyItem*
 
-ArticleItemBody = '+++' 'ln' ArticleBody*
-
-ArticleBody = 'text' | ArticleItem | ArticleRef
+ArticleBodyItem = Markdown | SubArticle | ArticleRef
 
 ArticleRef = '[+' 'item_identifier' ':' 'item_id' '+]'
+
+Markdown = values: MdValue*
+
+MdValue = MdLink | 'text'
+
+MdLink = values: MdValue* 'md_link_url' 'md_link_title'

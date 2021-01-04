@@ -1,0 +1,44 @@
+`````
++++ campaign:a81c23d3 +++
+title = "Maski Nyarlathotepa"
+where = "NY, London, Cair, Kenya, Australia, Shanghai"
++++
+
+`````
+[errors]
+No errors
+
+[parser]
+--- GREEN TREE ---
+Root, ArticleItem @ 0..114
+    token @ 0..3 = `+++`
+    token @ 3..4 = ` `
+    identifier, token @ 4..12 = `campaign`
+    token @ 12..13 = `:`
+    item_id, token @ 13..21 = `a81c23d3`
+    token @ 21..22 = ` `
+    token @ 22..25 = `+++`
+    token @ 25..26 = `\n`
+    Value, Strukt @ 26..111
+        Key, identifier, token @ 26..32 = `title` ; trailing: ` `
+        token @ 32..34 = `=` ; trailing: ` `
+        Value, String @ 34..55
+            token @ 34..35 = `"`
+            InnerString @ 35..54
+                token @ 35..54 = `Maski Nyarlathotepa`
+            token @ 54..55 = `"`
+        token @ 55..56 = `\n`
+        Key, identifier, token @ 56..62 = `where` ; trailing: ` `
+        token @ 62..64 = `=` ; trailing: ` `
+        Value, String @ 64..110
+            token @ 64..65 = `"`
+            InnerString @ 65..109
+                token @ 65..109 = `NY, London, Cair, Kenya, Australia, Shanghai`
+            token @ 109..110 = `"`
+        token @ 110..111 = `\n`
+    token @ 111..114 = `+++`
+    ArticleBody @ 114..114
+--- END ---
+
+
+[.render]

@@ -10,19 +10,19 @@ md"
 --- GREEN TREE ---
 Root, Value, Markdown @ 0..34
     token @ 0..3 = `md"`
-    Md_Value, token @ 3..4 = `\n`
-    Md_Value, Md_OrderedList @ 4..33
-        Md_ListItem @ 4..14
+    token @ 3..4 = `\n`
+    MdValue, MdOrderedList @ 4..33
+        MdValue, MdListItem @ 4..14
             token @ 4..8 = `27. `
-            Md_Text @ 8..13 = `Apple`
+            MdValue, MdText @ 8..13 = `Apple`
             token @ 13..14 = `\n`
-        Md_ListItem @ 14..24
+        MdValue, MdListItem @ 14..24
             token @ 14..17 = `2. `
-            Md_Text @ 17..23 = `Orange`
+            MdValue, MdText @ 17..23 = `Orange`
             token @ 23..24 = `\n`
-        Md_ListItem @ 24..33
+        MdValue, MdListItem @ 24..33
             token @ 24..27 = `3. `
-            Md_Text @ 27..32 = `Grape`
+            MdValue, MdText @ 27..32 = `Grape`
             token @ 32..33 = `\n`
     token @ 33..34 = `"`
 --- END ---

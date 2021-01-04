@@ -6,7 +6,7 @@ desc = "Sesja jednostrzałowa dla Macek II RP"
 chrono = "20.06.1925"
 +++
 
-Ala ma kota
+Ala ma **kota**
 
 `````
 
@@ -16,11 +16,11 @@ No errors
 [render]
 <h1>Pośród Pradawnych Drzew</h1>
 <div class="side-table"><table><tr><th class="align-right">chrono</th><td>20.06.1925</td></tr><tr><th class="align-right">desc</th><td>Sesja jednostrzałowa dla Macek II RP</td></tr><tr><th class="align-right">when</th><td>20.10.2019</td></tr></table>
-</div><p>Ala ma kota</p>
+</div><p>Ala ma <strong>kota</strong></p>
 
 [parser]
 --- GREEN TREE ---
-Root, ArticleItem @ 0..164
+Root, ArticleItem @ 0..168
     token @ 0..3 = `+++`
     token @ 3..4 = ` `
     identifier, token @ 4..9 = `sesja`
@@ -63,11 +63,15 @@ Root, ArticleItem @ 0..164
             token @ 146..147 = `"`
         token @ 147..148 = `\n`
     token @ 148..151 = `+++`
-    ArticleBody @ 151..164
-        Markdown @ 151..164
+    ArticleBody @ 151..168
+        Markdown @ 151..168
             token @ 151..153 = `\n\n`
-            MdValue, MdParagraph @ 153..164
-                MdValue, MdText @ 153..164 = `Ala ma kota`
+            MdValue, MdParagraph @ 153..168
+                MdValue, MdText @ 153..160 = `Ala ma `
+                MdValue, MdStrong @ 160..168
+                    token @ 160..162 = `**`
+                    MdValue, MdText @ 162..166 = `kota`
+                    token @ 166..168 = `**`
 --- END ---
 
 

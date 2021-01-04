@@ -3,13 +3,13 @@ use std::sync::Arc;
 use crate::Green;
 use crate::Name;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct RedData {
     kind: RedKind,
     green: Green,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum RedKind {
     Root,
     Child {
@@ -32,8 +32,14 @@ impl RedKind {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Eq)]
 pub struct Red(Arc<RedData>);
+
+impl std::fmt::Display for Red {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(&self.green(), f)
+    }
+}
 
 impl Red {
     pub fn root(green: Green) -> Self {

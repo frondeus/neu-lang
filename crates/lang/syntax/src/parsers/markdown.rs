@@ -4,31 +4,37 @@ use crate::lexers::md_string::Token as MdStrToken;
 use crate::Nodes;
 use microtree_parser::*;
 use microtree_parser::parsers::*;
-use pulldown_cmark::{CodeBlockKind, CowStr, Event, LinkType, Tag};
-use text_size::{TextLen, TextRange, TextSize};
+use pulldown_cmark::{CodeBlockKind, Event, LinkType, Tag, CowStr, HeadingLevel};
+use text_size::{TextRange, TextSize};
+use std::collections::BTreeMap;
 
 pub(crate) fn inner_md_string<S: Sink>() -> impl Parser<MdStrToken, S>
 {
     parse(|s| {
         s.peek()
-            .at(MdStrToken::Text)
-            .parse(parse(|mut s| {
-                let next = s.lexer_mut().next().unwrap();
-                let value = next.value;
-                let range = next.range;
-                s.parse(markdown(value, range))
-            }))
-            .ignore_unexpected()
+         .at(MdStrToken::Text)
+         .parse(markdown())
+         .ignore_unexpected()
     })
 }
 
-pub(crate) fn markdown<S>(value: SmolStr, range: TextRange)
-            -> impl Parser<MdStrToken, S> + Clone
+pub(crate) fn markdown<T, S>() -> impl Parser<T, S>
 where
-    //for<'s> <Token as Logos<'s>>::Extras: From<HashCount> + Into<HashCount>,
+    T: TokenKind,
     S: Sink,
+    T::Extras: Into<crate::HashCount> + From<crate::HashCount>
 {
-    parse(move |mut s| {
+    parse(|mut s| {
+        let next = s.lexer_mut().next().unwrap();
+        let value = next.value;
+        let range = next.range;
+        s.with_mode(markdown_inner(value, range))
+    })
+}
+
+pub(crate) fn markdown_inner<S: Sink>(value: SmolStr, range: TextRange)
+                                -> impl Parser<MdStrToken, S> + Clone {
+    parse(move |s| {
         let from = range.start();
         let value_len: TextSize = (value.len() as u32).into();
 
@@ -44,249 +50,482 @@ where
             })
             .peekable();
 
-        s = s.alias(Nodes::Md_Value)
-            .unfinished();
-        let mut state = MdState {
-            prev: TextRange::up_to(value_len),
-            ..Default::default()
+        let mut parser = MdParser {
+            from,
+            value: &value,
+            s,
+            opts: Options {
+                gaps: vec![TextRange::up_to(value_len)],
+                ..Default::default()
+            }
         };
         while events.peek().is_some() {
             let (next, range) = events.next().unwrap();
 
-            if state.code {
-                s = translate_code(&mut state, next, range, &value, from, s);
-            }
-            else {
-                s = translate_event(&mut state, next, range, &value, from, s);
-            }
-
-            state.prev = range;
+            parser = parser.translate(next, range);
         }
-        s.abort()
+        let eof = TextRange::new(value_len, value_len);
+        parser.insert_pre(eof).s
     })
 }
 
 
+struct MdParser<'a, 'c, 's, S: Sink> {
+    s: Builder<'c, 's, MdStrToken, S>,
+    from: TextSize,
+    value: &'a str,
+    opts: Options
+}
+
 #[derive(Default)]
-struct MdState {
-    prev: TextRange,
+struct Options {
     code: bool,
-    code_range: Option<TextRange>
+    code_range: Option<TextRange>,
+    gaps: Vec<TextRange>,
+    future: BTreeMap<TextSize, (TextRange, microtree::Name)>
 }
 
-type B<'c, 's, S> = Builder<'c, 's, MdStrToken, S>;
+impl Options {
+    fn add_range(&mut self, range: TextRange) {
+        let mut new = vec![];
+        let gaps = std::mem::take(&mut self.gaps);
+        self.gaps = gaps.into_iter()
+                 .filter_map(|gap| {
+                     /*
+                      1. |        GAP      |
+                         |-----| RANGE |---|
 
-fn translate_code<'c, 's, S: Sink>(
-    state: &mut MdState,
-    next: Event<'_>,
-    range: TextRange,
-    value: &str,
-    from: TextSize,
-    mut s: B<'c, 's, S>
-) -> B<'c, 's, S> {
-    if let Event::End(_) = next {
+                      2. |        GAP      |
+                         |-----| RANGE     |
 
-        state.code = false;
-        let code_range = state.code_range.take();
-        if let Some(range) = code_range {
-            s = s
-                .alias(Nodes::Interpolated)
-                .with_range(range, with_mode(crate::parsers::neu::parser()));
-        }
-        s = leading(state, range, value, s);
+                      3. |        GAP      |
+                         | RANGE       |---|
+
+                      4. |        GAP      |
+                         |    RANGE        |
+
+                      5. |  GAP |----------| ALways remove gap add nothing
+                         | RANGE           |
+                     */
+                     if let Some(intersection) = gap.intersect(range) {
+                         if !range.contains_range(gap) {
+                             if gap.start() < intersection.start() {
+                                 let left = TextRange::new(gap.start(), intersection.start());
+                                 new.push(left);
+                             }
+
+                             if gap.end() > intersection.end() {
+                                 let right = TextRange::new(intersection.end(), gap.end());
+                                 new.push(right);
+                             }
+                         }
+                         return None;
+                     }
+                     Some(gap)
+                 })
+            .collect::<Vec<_>>();
+        self.gaps.append(&mut new);
+        //eprintln!("ADDED RANGE {:?} ; gaps: {:?}", range, self.gaps);
     }
-    else {
-        s = leading(state, range, value, s);
-        let mut code_range = *state.code_range.get_or_insert(range + from);
-        code_range = TextRange::cover(code_range, range + from);
-        state.code_range = Some(code_range);
-    }
-    s
-}
 
-fn leading<'c, 's, S>(
-    state: &mut MdState,
-    range: TextRange,
-    value: &str,
-    s: B<'c, 's, S>
-) -> B<'c, 's, S>
-where S: Sink {
-    /*
+    fn gap_leading_to_end(&mut self, range: TextRange) -> Option<TextRange> {
+        //eprintln!("LEADING TO END: {:?} ; gaps: {:?}", range, self.gaps);
 
-    Three scenarios:
-    1. When it intersects in the beginning:
-    | s-paragraph |
-         |  text  |
-    =
-    |----|
-
-    2. When there is leading between:
-    | foo |  | bar |
-    =
-          |--|
-
-    3. When there is leading before end:
-    | text |
-    | e-paragraph |
-    =
-           |------|
-    */
-
-    let leading = if state.prev.start() < range.start() {
-        if state.prev.end() >= range.end() { //1.
-            Some(TextRange::new(state.prev.start(), range.start()))
-        }
-        else if state.prev.end() < range.start() { //2.
-            Some(TextRange::new(state.prev.end(), range.start()))
-        } else{
-            None
-        }
-    }
-    else if state.prev.end() < range.end() {
-        // 3.
-        Some(TextRange::new(state.prev.end(), range.end()))
-    }
-    else { None }
-    ;
-
-    if let Some(leading) = leading {
-        token(s, Nodes::Token, &value[leading])
-    }
-    else {
-        s
-    }
-}
-
-fn translate_event<'c, 's, S>(
-    state: &mut MdState,
-    next: Event<'_>,
-    range: TextRange,
-    value: &str,
-    from: TextSize,
-    mut s: B<'c, 's, S>) -> B<'c, 's, S>
-where
-    S: Sink,
-{
-    s = leading(state, range, value, s);
-    s = match next {
-        Event::Start(tag) => translate_start(state, tag, s),
-        Event::End(tag) => translate_end(tag, s),
-        Event::Text(v) => token(s, Nodes::Md_Text, v.to_string()),
-        Event::Html(v) => token(s, Nodes::Md_Html, v.to_string()),
-        Event::SoftBreak => token(s, Nodes::Md_SoftBreak, &value[range]),
-        Event::HardBreak => token(s, Nodes::Md_HardBreak, &value[range]),
-        Event::Rule => token(s, Nodes::Md_Rule, &value[range]),
-        Event::Code(v) => {
-            let start = range.start() + TextSize::from(1);
-            let end = range.end() - TextSize::from(1);
-            let range = TextRange::new(start + from, end + from);
-            s.alias(Nodes::Interpolated)
-            .with_range(range, with_mode(crate::parsers::neu::parser()))
-        }
-        Event::TaskListMarker(_) => todo!(),
-        Event::FootnoteReference(_) => todo!(),
-    };
-
-    s
-}
-
-fn token<'c, 's, S>(mut s: B<'c, 's, S>, name: microtree::Name, value: impl Into<SmolStr>)
-    -> B<'c, 's, S>
-where
-    S: Sink
-{
-    s.add_token(name.into(), value)
-}
-
-fn translate_start<'c, 's, S: Sink>(state: &mut MdState, tag: Tag, mut s: B<'c, 's, S>) -> B<'c, 's, S> {
-    match tag {
-        Tag::Paragraph => {
-            s.start(Nodes::Md_Paragraph)
-        }
-        Tag::Emphasis => {
-            s.start(Nodes::Md_Emphasis)
-        }
-        Tag::Strong => {
-            s.start(Nodes::Md_Strong)
-        }
-        Tag::Heading(lvl) => {
-            let name = match lvl {
-                1 => Nodes::Md_H1,
-                2 => Nodes::Md_H2,
-                3 => Nodes::Md_H3,
-                4 => Nodes::Md_H4,
-                5 => Nodes::Md_H5,
-                _ => Nodes::Md_H6,
-            };
-            s.start(name)
-        }
-        Tag::BlockQuote => {
-            s.start(Nodes::Md_BlockQuote)
-        }
-        Tag::List(None) => s.start(Nodes::Md_UnorderedList),
-        Tag::List(Some(1)) => s.start(Nodes::Md_OrderedList),
-        Tag::List(_offset) => s.start(Nodes::Md_OrderedList),
-        Tag::Item => s.start(Nodes::Md_ListItem),
-        Tag::Link(link_type, _url, _title) => {
-            s.alias(Nodes::Md_Link)
-             .start(match link_type {
-                LinkType::Inline =>  Nodes::Md_InlineLink,
-                LinkType::Reference =>  Nodes::Md_ReferenceLink,
-                LinkType::Shortcut =>  Nodes::Md_ShortcutLink,
-                LinkType::Autolink =>  Nodes::Md_AutoLink,
-                LinkType::Email =>  Nodes::Md_EmailLink,
-                lt => todo!("LinkType: {:?}", lt)
+        let leading = self.gaps
+            .iter()
+            .filter_map(|gap| {
+                gap.intersect(range)
             })
+            .next();
+
+        //eprintln!("leading: {:?}", leading);
+        if let Some(leading) = leading {
+            self.add_range(leading);
         }
-        Tag::Image(link_type, _src, _title) => {
-            s.alias(Nodes::Md_Image)
-             .start(match link_type {
-                LinkType::Inline =>  Nodes::Md_InlineImage,
-                LinkType::Reference =>  Nodes::Md_ReferenceImage,
-                LinkType::Shortcut =>  Nodes::Md_ShortcutImage,
-                LinkType::Autolink =>  Nodes::Md_AutoImage,
-                LinkType::Email =>  Nodes::Md_EmailImage,
-                lt => todo!("LinkType: {:?}", lt)
+
+        leading
+    }
+
+    fn gap_leading_to_start(&mut self, range: TextRange) -> Option<TextRange> {
+        //eprintln!("LEADING TO TOKEN: {:?} ; gaps: {:?}", range, self.gaps);
+        let leading = self.gaps
+            .iter()
+            .filter(|gap| {
+                gap.start() < range.start()
             })
+            .filter_map(|gap| {
+                gap.intersect(range).map(|i| (gap, i))
+            })
+            .map(|(gap, intersection)| {
+                let from = gap.start();
+                let end = intersection.start();
+                TextRange::new(from, end)
+            })
+            .next();
+
+        //eprintln!("leading: {:?}", leading);
+        if let Some(leading) = leading {
+            self.add_range(leading);
         }
-        Tag::CodeBlock(lang_kind) => {
-            let lang_str = match lang_kind {
-                CodeBlockKind::Indented => "",
-                CodeBlockKind::Fenced(ref lang) => lang.as_ref()
-            };
-            if lang_str == "neu" || lang_str == "" {
-                state.code = true;
-                state.code_range = None;
-                s
+
+        leading
+    }
+
+    fn gap_leading_to_token(&mut self, range: TextRange) -> Option<TextRange> {
+        /*
+        1. |             GAP                   |
+           |---| TOKEN |                       |
+        */
+        //eprintln!("LEADING TO TOKEN: {:?} ; gaps: {:?}", range, self.gaps);
+
+        let leading = self.gap_leading_to_start(range);
+
+        self.add_range(range);
+
+        leading
+    }
+}
+
+impl<'a, 'c, 's, S: Sink> MdParser<'a, 'c, 's, S> {
+    fn translate(mut self, next: Event<'a>, range: TextRange) -> Self {
+        self = self.insert_pre(range);
+        if self.opts.code {
+            self.translate_code(next, range)
+        } else {
+            self.translate_event(next, range)
+        }
+    }
+
+    fn insert_pre(mut self, range: TextRange) -> Self {
+        let mut to_remove = vec![];
+        let mut future = std::mem::take(&mut self.opts.future);
+        for (i, (future_range, future_name)) in future.iter() {
+            if range.start() >= future_range.start() {
+                to_remove.push(*i);
+                let future_name = *future_name;
+                let future_range = *future_range;
+                if future_name == Nodes::MdImageSrc ||
+                    future_name == Nodes::MdLinkUrl {
+                        //It's a reference and we need to recover label
+                        if let Some(leading) = self.opts.gap_leading_to_token(future_range) {
+                            let leading = &self.value[leading];
+                            let len = leading.len();
+                            let mut start = None;
+                            for (i, c) in leading.chars().rev().enumerate() {
+                                let i = len - i;
+                                if c == '[' { // Bingo
+                                    start = Some(i);
+                                    break;
+                                }
+                            }
+                            if let Some(start) = start {
+                                self.s = self.s.add_token(Nodes::Token.into(), &leading[0..start]);
+                                if let Some(end) = leading[start..].find(']') {
+                                    let label = &leading[start..=end + 1];
+                                    self.s = self.s.alias(Nodes::MdValue);
+                                    self.s = self.s.add_token(Nodes::MdReference.into(), label);
+                                    self.s = self.s.add_token(Nodes::Token.into(), &leading[end + 2..]);
+                                }
+                            }
+                        }
+                    }
+                self.s = self.s.alias(Nodes::MdValue);
+                self = self.token(future_name.into(), future_range);
             }
-            else {
-                s = s.start(Nodes::Md_CodeBlock);
-                if lang_str != "" {
-                    s = token(s, Nodes::Md_CodeBlockLang, lang_str.to_string());
+        }
+        for i in to_remove {
+            future.remove(&i);
+        }
+        self.opts.future = future;
+        self
+    }
+
+    fn translate_code(mut self, next: Event<'a>, range: TextRange) -> Self {
+        if let Event::End(_) = next {
+            self.opts.code = false;
+            let code_range = self.opts.code_range.take();
+            if let Some(range) = code_range {
+                self = self.token_leading(range);
+                self.s = self.s.alias(Nodes::MdValue);
+                self.s = self.s
+                             .start(Nodes::Interpolated)
+                             .with_range(range + self.from, with_mode(crate::parsers::neu::parser()))
+                             .end();
+                //self.opts.prev = range;
+            }
+            let leading = self.opts.gap_leading_to_end(range);
+            if let Some(leading) = leading {
+                let leading = &self.value[leading];
+                self.s = self.s.add_token(Nodes::Token.into(), leading);
+            }
+            //self = self.leading(range);
+        }
+        else {
+            //self = self.leading(range);
+            let mut code_range = *self.opts.code_range.get_or_insert(range);
+            code_range = TextRange::cover(code_range, range);
+            self.opts.code_range = Some(code_range);
+        }
+        self
+    }
+
+    fn translate_event(mut self, next: Event<'a>, range: TextRange) -> Self {
+        let leading = self.opts.gap_leading_to_start(range);
+        if let Some(leading) = leading {
+            let leading = &self.value[leading];
+            self.s = self.s.add_token(Nodes::Token.into(), leading);
+        }
+
+
+        match next {
+            Event::Start(tag) => {
+                self.s = self.s.alias(Nodes::MdValue);
+                self.translate_start(tag)
+            }
+            Event::End(tag) => {
+                self.translate_end(tag, range)
+            },
+            Event::Text(_) => {
+                self.s = self.s.alias(Nodes::MdValue);
+                self.token(Nodes::MdText, range)
+            }
+            Event::Html(_) => {
+                self.s = self.s.alias(Nodes::MdValue);
+                self.token(Nodes::MdHtml, range)
+            }
+            Event::SoftBreak => {
+                self.s = self.s.alias(Nodes::MdValue);
+                self.token(Nodes::MdSoftBreak, range)
+            },
+            Event::HardBreak => {
+                self.s = self.s.alias(Nodes::MdValue);
+                self.token(Nodes::MdHardBreak, range)
+            } ,
+            Event::Rule => {
+                self.s = self.s.alias(Nodes::MdValue);
+                self.token(Nodes::MdRule, range)
+            } ,
+            Event::Code(_) => {
+                let start = range.start() + TextSize::from(1);
+                let end = range.end() - TextSize::from(1);
+                let range = TextRange::new(start, end);
+                self = self.token_leading(range);
+                let range = range + self.from;
+                self.s = self.s.alias(Nodes::MdValue);
+                self.s = self.s.start(Nodes::Interpolated)
+                               .with_range(range, with_mode(crate::parsers::neu::parser()))
+                               .end();
+                self
+            }
+            Event::TaskListMarker(_) => todo!(),
+            Event::FootnoteReference(_) => todo!(),
+        }
+    }
+
+    fn translate_start(mut self, tag: Tag<'a>) -> Self {
+        match tag {
+            Tag::Paragraph => {
+                self.s = self.s.start(Nodes::MdParagraph);
+                self
+            }
+            Tag::Emphasis => {
+                self.s = self.s.start(Nodes::MdEmphasis);
+                self
+            }
+            Tag::Strong => {
+                self.s = self.s.start(Nodes::MdStrong);
+                self
+            }
+            Tag::Heading(lvl) => {
+                let name = match lvl {
+                    HeadingLevel::H1 => Nodes::MdH1,
+                    HeadingLevel::H2 => Nodes::MdH2,
+                    HeadingLevel::H3 => Nodes::MdH3,
+                    HeadingLevel::H4 => Nodes::MdH4,
+                    HeadingLevel::H5 => Nodes::MdH5,
+                    HeadingLevel::H6 => Nodes::MdH6,
+                };
+                self.s = self.s.start(name);
+                self
+            }
+            Tag::BlockQuote => {
+                self.s = self.s.start(Nodes::MdBlockQuote);
+                self
+            }
+            Tag::List(None) => {
+                self.s = self.s.start(Nodes::MdUnorderedList);
+                self
+            }
+            Tag::List(Some(1)) => {
+                self.s = self.s.start(Nodes::MdOrderedList);
+                self
+            }
+            Tag::List(_offset) => {
+                self.s = self.s.start(Nodes::MdOrderedList);
+                self
+            }
+            Tag::Item => {
+                self.s = self.s.start(Nodes::MdListItem);
+                self
+            }
+            Tag::Link(link_type, _url, _title) => {
+                self.s = self.s.alias(Nodes::MdLink)
+                               .start(match &link_type {
+                                   LinkType::Inline =>  Nodes::MdInlineLink,
+                                   LinkType::Reference(_) =>  Nodes::MdReferenceLink,
+                                   LinkType::Shortcut =>  Nodes::MdShortcutLink,
+                                   LinkType::Autolink =>  Nodes::MdAutoLink,
+                                   LinkType::Email =>  Nodes::MdEmailLink,
+                                   lt => todo!("LinkType: {:?}", lt)
+                               });
+                self
+            }
+            Tag::Image(link_type, _src, _title) => {
+                self.s = self.s.alias(Nodes::MdImage)
+                               .start(match &link_type {
+                                   LinkType::Inline =>  Nodes::MdInlineImage,
+                                   LinkType::Reference(_) =>  Nodes::MdReferenceImage,
+                                   LinkType::Shortcut =>  Nodes::MdShortcutImage,
+                                   LinkType::Autolink =>  Nodes::MdAutoImage,
+                                   LinkType::Email =>  Nodes::MdEmailImage,
+                                   lt => todo!("LinkType: {:?}", lt)
+                               });
+                self
+            }
+            Tag::CodeBlock(lang_kind) => {
+                match lang_kind {
+                    CodeBlockKind::Indented => {
+                        self.opts.code = true;
+                        self.opts.code_range = None;
+                        self
+                    },
+                    CodeBlockKind::Fenced(lang) => {
+                        if lang.as_ref() == "neu" || lang.as_ref() == "" {
+                            self.opts.code = true;
+                            self.opts.code_range = None;
+                            self
+                        }
+                        else {
+                            self.s = self.s.start(Nodes::MdCodeBlock);
+                            self.token_cow(Nodes::MdCodeBlockLang, lang)
+                        }
+                    }
                 }
-                s
             }
+            _ => self
         }
-        Tag::FootnoteDefinition(_) => {s}
-        Tag::Table(_) => {s}
-        Tag::TableHead => {s}
-        Tag::TableRow => {s}
-        Tag::TableCell => {s}
-        Tag::Strikethrough => {s}
+    }
+
+    fn translate_end(mut self, tag: Tag<'a>, range: TextRange) -> Self {
+        self = match tag {
+            Tag::Link(link_type, url, title) => {
+                if let LinkType::Reference(label) = link_type {
+                    if let Some(range) = self.get_range(&url) {
+                        self.in_future(range, Nodes::MdLinkUrl);
+                    }
+                    if let Some(range) = self.get_range(&title) {
+                        self.in_future(range, Nodes::MdLinkTitle);
+                    }
+                    self.token_cow(Nodes::MdReferenceLabel, label)
+                }
+                else if let LinkType::Shortcut = link_type {
+                    if let Some(range) = self.get_range(&url) {
+                        self.in_future(range, Nodes::MdLinkUrl);
+                    }
+                    if let Some(range) = self.get_range(&title) {
+                        self.in_future(range, Nodes::MdLinkTitle);
+                    }
+                    self
+                }
+                else {
+                    self.token_cow(Nodes::MdLinkUrl, url)
+                        .token_cow(Nodes::MdLinkTitle, title)
+                }
+
+            },
+            Tag::Image(link_type, src, title) => {
+                if let LinkType::Reference(label) = link_type {
+                    if let Some(range) = self.get_range(&src) {
+                        self.in_future(range, Nodes::MdImageSrc);
+                    }
+                    if let Some(range) = self.get_range(&title) {
+                        self.in_future(range, Nodes::MdImageTitle);
+                    }
+                    self.token_cow(Nodes::MdReferenceLabel, label)
+                }
+                else if let LinkType::Shortcut = link_type {
+                    if let Some(range) = self.get_range(&src) {
+                        self.in_future(range, Nodes::MdImageSrc);
+                    }
+                    if let Some(range) = self.get_range(&title) {
+                        self.in_future(range, Nodes::MdImageTitle);
+                    }
+                    self
+                }
+                else {
+                    self.token_cow(Nodes::MdImageSrc, src)
+                    .token_cow(Nodes::MdImageTitle, title)
+                }
+            },
+            _ => self
+        };
+
+        let leading = self.opts.gap_leading_to_end(range);
+        if let Some(leading) = leading {
+            let leading = &self.value[leading];
+            self.s = self.s.add_token(Nodes::Token.into(), leading);
+        }
+        self.s = self.s.end();
+        self
+    }
+
+    fn in_future(&mut self, range: TextRange, name: microtree::Name) {
+        self.opts.future.insert(range.start(), (range, name));
+    }
+
+    fn token_leading(mut self, range: TextRange) -> Self {
+        let leading = self.opts.gap_leading_to_token(range);
+        if let Some(leading) = leading {
+            let leading = &self.value[leading];
+            self.s = self.s.add_token(Nodes::Token.into(), leading);
+        }
+        self
+    }
+
+
+    fn token(mut self, name: microtree::Name, range: TextRange) -> Self {
+        self = self.token_leading(range);
+        let value = &self.value[range];
+        self.s = self.s.add_token(name.into(), value);
+        self
+    }
+
+    fn token_cow(mut self, name: microtree::Name, cow: CowStr<'a>) -> Self {
+        if let Some(range) = self.get_range(&cow) {
+            self = self.token_leading(range);
+        }
+        if !cow.is_empty() {
+            self.s = self.s.add_token(name.into(), cow.to_string());
+        }
+        self
+    }
+
+
+    fn get_range(&self, cow: &CowStr<'a>) -> Option<TextRange> {
+        match cow {
+            CowStr::Borrowed(s) => {
+                let offset = offset(s, self.value)?;
+                let offset = TextSize::try_from(offset).unwrap();
+                Some(TextRange::at(offset, s.text_len()))
+            },
+            _ => None
+        }
     }
 }
 
-fn translate_end<'c, 's, S: Sink>(tag: Tag, mut s: B<'c, 's, S>) -> B<'c, 's, S> {
-    match tag {
-        Tag::Link(_, url, title) => {
-            s = token(s, Nodes::Md_LinkUrl, url.to_string());
-            token(s, Nodes::Md_LinkTitle, title.to_string())
-        },
-        Tag::Image(_, src, title) => {
-            s = token(s, Nodes::Md_ImageSrc, src.to_string());
-            token(s, Nodes::Md_ImageTitle, title.to_string())
-        },
-        _ => s
-    }
-    .end()
+fn offset(a: &str, orig: &str) -> Option<usize> {
+    let a = a.as_ptr() as usize;
+    let orig = orig.as_ptr() as usize;
+    if a >= orig { Some (a - orig) }
+    else { None }
 }

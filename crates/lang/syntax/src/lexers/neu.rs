@@ -1,23 +1,23 @@
 use crate::HashCount;
 use microtree_parser::{TextSize, Source, TokenKind, CallbackResult};
 
-fn lex_comment(_chomped: TextSize, source: &mut Source<'_>, extras: &mut HashCount) -> bool {
+fn lex_comment(_bumped: TextSize, source: &mut Source<'_>, _: &mut HashCount) -> bool {
     source.as_ref()
         .find("*/")
-        .map(|i| source.chomp(i + 2))
+        .map(|i| source.bump(i + 2))
         .is_some()
 }
 
-fn lex_plus(_chomped: TextSize, source: &mut Source<'_>, extras: &mut HashCount) -> bool {
+fn lex_plus(_bumped: TextSize, source: &mut Source<'_>, _: &mut HashCount) -> bool {
     !source.as_ref().starts_with("+")
 }
 
-fn lex_dquote(_chomped: TextSize, source: &mut Source<'_>, extras: &mut HashCount) -> bool {
+fn lex_dquote(_bumped: TextSize, source: &mut Source<'_>, extras: &mut HashCount) -> bool {
     if extras.count > 0 {
         let hash_count =extras.count;
         let hash = "#".repeat(hash_count);
         if source.as_ref().starts_with(&hash) {
-            source.chomp(hash_count);
+            source.bump(hash_count);
             extras.count = 0;
             true
         }
@@ -29,18 +29,18 @@ fn lex_dquote(_chomped: TextSize, source: &mut Source<'_>, extras: &mut HashCoun
     }
 }
 
-fn lex_mdquote(_chomped: TextSize, source: &mut Source<'_>, extras: &mut HashCount) -> bool {
+fn lex_mdquote(_bumped: TextSize, source: &mut Source<'_>, extras: &mut HashCount) -> bool {
     let mut remainder = source.as_ref();
     let mut hash = 0;
     while remainder.starts_with("#") {
         hash += 1;
-        source.chomp(1);
+        source.bump(1);
         remainder = source.as_ref();
     }
     extras.count = hash;
     let quote = remainder.starts_with("\"");
     if quote {
-        source.chomp(1);
+        source.bump(1);
     }
     quote
 }
@@ -90,9 +90,6 @@ pub enum Token {
     #[token_kind(token = "=")]
     OpAssign,
 
-    #[token_kind(regex = r"[a-zA-Z_]+[a-zA-Z_0-9]*", display = "identifier")]
-    Identifier,
-
     #[token_kind(token = "(")]
     OpenP,
 
@@ -122,6 +119,9 @@ pub enum Token {
 
     #[token_kind(token = ".")]
     OpDot,
+
+    #[token_kind(regex = r"[a-zA-Z_]+[a-zA-Z_0-9]*", display = "identifier")]
+    Identifier,
 
     #[token_kind(error)]
     Error,

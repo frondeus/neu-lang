@@ -42,7 +42,7 @@ Root, Value, IdentPath @ 0..105
             Value, String @ 80..97
                 token @ 80..81 = `"`
                 InnerString @ 81..96
-                    token @ 81..96 = `**foo `4` bar**`
+                    token @ 81..96 = `**foo \`4\` bar**`
                 token @ 96..97 = `"`
         token @ 97..99 = `}` ; leading: `\n`
     BinaryOp, token @ 99..100 = `.`

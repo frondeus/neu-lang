@@ -147,6 +147,7 @@ mod sinks {
 
         impl GreenSink {
             pub fn finish(mut self) -> ParseResult {
+                //assert!(self.stack.is_empty());
                 let name = GreenName::new("Root");
                 let root = match self.roots.len() {
                     0 | 1 => self.cache.alias(name, self.roots.into_iter().next()),
@@ -638,10 +639,28 @@ mod sinks {
         }
     }
 
+    mod dbg_sink {
+        use crate::Sink;
+
+        #[derive(Default, Debug)]
+        pub struct DbgSink;
+
+        impl Sink for DbgSink {
+            fn event(&mut self, event: crate::Event) {
+                println!("{:?}", event);
+            }
+
+            fn error(&mut self, error: crate::Error) {
+                eprintln!("ERROR: {}", error);
+            }
+        }
+    }
+
     pub use wrapper_sink::*;
     pub use green_sink::*;
     pub use test_sink::*;
     pub use write_sink::*;
+    pub use dbg_sink::*;
 }
 
 mod spanned {
@@ -678,7 +697,6 @@ mod peekable {
 }
 
 mod token_kind {
-    use crate::TextSize;
     use crate::Source;
 
     pub trait TokenKind: std::fmt::Display
@@ -710,7 +728,7 @@ mod source {
     }
 
     impl<'s> Source<'s> {
-        pub fn chomp(&mut self, len: usize) -> TextSize {
+        pub fn bump(&mut self, len: usize) -> TextSize {
             let end = match self
                 .as_ref()
                 .char_indices()
@@ -723,6 +741,23 @@ mod source {
             self.set_cursor(end);
 
             end
+        }
+
+        pub fn rewind(&mut self, len: usize) {
+            let range = TextRange::new(
+                self.range.start() - TextSize::try_from(4 * len).unwrap(),
+                self.range.start(),
+            );
+            let end = match self.source[range]
+                .char_indices()
+                .rev()
+                .nth(len - 1)
+                .and_then(|(last, _c)| TextSize::try_from(last).ok())
+            {
+                Some(last) => range.start() + last,
+                None => TextSize::default(),
+            };
+            self.set_cursor(end);
         }
 
         pub fn cursor(&self) -> TextSize {
@@ -760,7 +795,7 @@ mod source {
 }
 
 mod lexer {
-    use crate::{PeekableIterator, Source, SmolStr, Spanned, TextRange, TextSize, TokenKind};
+    use crate::{PeekableIterator, Source, Spanned, TextRange, TextSize, TokenKind};
 
     #[derive(Clone)]
     pub struct Lexer<'s, Tok: TokenKind> {
@@ -825,6 +860,8 @@ mod lexer {
         }
 
         pub fn rewind(&mut self, count: usize) {
+            self.source.rewind(count);
+            self.peeked = None;
             /*
             let offset = self.inner.span().end - count;
             let source = self.inner.source();
@@ -834,7 +871,6 @@ mod lexer {
             self.inner = new_inner;
             self.peeked = None;
             */
-            todo!();
         }
     }
 
@@ -930,7 +966,7 @@ mod lexer {
 }
 
 mod callback_result {
-    use crate::{Source, TokenKind};
+    use crate::TokenKind;
 
     pub trait CallbackResult<P, T: TokenKind> {
         fn result<C: Fn(P) -> T>(self, c: C) -> T;
@@ -1106,12 +1142,7 @@ mod state {
 mod peek {
     use itertools::Itertools;
 
-    use crate::{
-        Context, Event, Lexer, Name, Parser, Sink, Spanned, State, TextRange, TokenKind, Trivia,
-        TriviaKind,
-        SmolStr,
-        Builder
-    };
+    use crate::{Name, Parser, Sink, TokenKind, Builder};
 
     pub enum Peek<'c, 's, Tok, S>
     where
@@ -1240,8 +1271,6 @@ mod peek {
 }
 
 mod builder {
-    use itertools::Itertools;
-
     use crate::{
         Context, Event, Lexer, Name, Parser, Sink, Spanned, State, TextRange, TokenKind, Trivia,
         TriviaKind,
@@ -1780,10 +1809,10 @@ mod tests {
         token == Token::Error && other == token
     }
 
-    fn lex_number(chomped: TextSize, source: &mut Source<'_>, extras: &mut String) -> bool {
+    fn lex_number(bumped: TextSize, source: &mut Source<'_>, extras: &mut String) -> bool {
         *extras = "foo".to_string();
         eprintln!("foo: {}", extras);
-        //Some(chomped)
+        //Some(bumped)
         false
     }
 

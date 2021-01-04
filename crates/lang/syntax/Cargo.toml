@@ -15,7 +15,8 @@ microtree-parser = { path ="../../utils/microtree-parser" }
 text-size = { version = "1.0.0" }
 itertools = "0.9.0"
 derive_more = "0.99.5"
-pulldown-cmark = "0.7.0"
+#pulldown-cmark = "0.7.0"
+pulldown-cmark = { path = "/home/frondeus/Code/pulldown-cmark" }
 salsa = "0.15.0"
 #logos = "0.11.4"
 lazy_static = "1.4.0"

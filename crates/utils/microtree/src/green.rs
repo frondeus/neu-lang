@@ -161,7 +161,9 @@ fn fmt_green(
 }
 
 fn fmt_debug_str(s: &SmolStr) -> String {
-    s.replace("\t", "\\t").replace("\n", "\\n")
+    s.replace("\t", "\\t")
+     .replace("\n", "\\n")
+     .replace("`", "\\`")
 }
 
 impl Debug for Green {

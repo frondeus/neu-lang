@@ -14,7 +14,7 @@ use crate::parsers::markdown::markdown;
 
 pub fn parser<S: Sink>() -> impl Parser<FileToken, S> {
     parse(|s| {
-        s.peek()
+        dbg!(s.peek())
             .at(None)
             .at_unexpected(FileToken::Error)
             .parse(skip())
@@ -139,18 +139,10 @@ fn item_body<S: Sink>(ends: bool) -> impl Parser<BodyToken, S> {
                     Peek::Found { s, .. } => break s,
                     p => p
                         .at(BodyToken::Text).parse(
-                            parse(|mut s| {
-
-                                  let next = s.lexer_mut().next().unwrap();
-                                  dbg!(&next);
-                                s
-                                  //s.start(Nodes::Markdown)
-                                    .add_token(Nodes::Markdown.into(), next.value)
-                                  //.token()
-                                  //.with_mode(markdown())
-                                  //.end()
-                            }
-                            )
+                            parse(|s| s
+                                  .start(Nodes::Markdown)
+                                  .parse(markdown())
+                                  .end())
                         )
                         .at(BodyToken::PlusPlus).parse(item())
                         .at(BodyToken::OpenBl).parse(item_bl())
@@ -227,7 +219,7 @@ mod tests {
                 let res: GreenSink = State::parse(lexer, parser());
                 let res = res.finish();
 
-                format!("{:?}", res)
+                format!("{:?}", res.root)
             }
         })
         .unwrap();

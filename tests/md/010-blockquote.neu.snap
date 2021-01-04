@@ -10,17 +10,17 @@ md"foo
 --- GREEN TREE ---
 Root, Value, Markdown @ 0..21
     token @ 0..3 = `md"`
-    Md_Value, Md_Paragraph @ 3..7
-        Md_Text @ 3..6 = `foo`
+    MdValue, MdParagraph @ 3..7
+        MdValue, MdText @ 3..6 = `foo`
         token @ 6..7 = `\n`
-    Md_Value, token @ 7..8 = `\n`
-    Md_Value, Md_BlockQuote @ 8..20
+    token @ 7..8 = `\n`
+    MdValue, MdBlockQuote @ 8..20
         token @ 8..10 = `> `
-        Md_Paragraph @ 10..20
-            Md_Text @ 10..13 = `bar`
-            Md_SoftBreak @ 13..14 = `\n`
+        MdValue, MdParagraph @ 10..20
+            MdValue, MdText @ 10..13 = `bar`
+            MdValue, MdSoftBreak @ 13..14 = `\n`
             token @ 14..16 = `> `
-            Md_Text @ 16..19 = `baz`
+            MdValue, MdText @ 16..19 = `baz`
             token @ 19..20 = `\n`
     token @ 20..21 = `"`
 --- END ---

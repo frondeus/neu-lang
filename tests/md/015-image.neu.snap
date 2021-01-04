@@ -14,35 +14,42 @@ Reference-style:
 
 [parser]
 --- GREEN TREE ---
-Root, Value, Markdown @ 0..410
+Root, Value, Markdown @ 0..342
     token @ 0..4 = `md#"`
-    Md_Value, token @ 4..5 = `\n`
-    Md_Value, Md_Paragraph @ 5..52
-        Md_Text @ 5..51 = `Here's our logo (hover to see the title text):`
+    token @ 4..5 = `\n`
+    MdValue, MdParagraph @ 5..52
+        MdValue, MdText @ 5..51 = `Here's our logo (hover to see the title text):`
         token @ 51..52 = `\n`
-    Md_Value, token @ 52..53 = `\n`
-    Md_Value, Md_Paragraph @ 53..276
-        Md_Text @ 53..66 = `Inline-style:`
-        Md_SoftBreak @ 66..67 = `\n`
-        Md_Image, Md_InlineImage @ 67..275
+    token @ 52..53 = `\n`
+    MdValue, MdParagraph @ 53..197
+        MdValue, MdText @ 53..66 = `Inline-style:`
+        MdValue, MdSoftBreak @ 66..67 = `\n`
+        MdValue, MdImage, MdInlineImage @ 67..196
             token @ 67..69 = `![`
-            Md_Text @ 69..77 = `alt text`
-            token @ 77..179 = `](https://github.com/adam-p/markdown-here/raw/master/src/common/images/icon48.png "Logo Title Text 1")`
-            Md_ImageSrc @ 179..258 = `https://github.com/adam-p/markdown-here/raw/master/src/common/images/icon48.png`
-            Md_ImageTitle @ 258..275 = `Logo Title Text 1`
-        token @ 275..276 = `\n`
-    Md_Value, token @ 276..277 = `\n`
-    Md_Value, Md_Paragraph @ 277..408
-        Md_Text @ 277..293 = `Reference-style:`
-        Md_SoftBreak @ 293..294 = `\n`
-        Md_Image, Md_ReferenceImage @ 294..407
-            token @ 294..296 = `![`
-            Md_Text @ 296..304 = `alt text`
-            token @ 304..311 = `][logo]`
-            Md_ImageSrc @ 311..390 = `https://github.com/adam-p/markdown-here/raw/master/src/common/images/icon48.png`
-            Md_ImageTitle @ 390..407 = `Logo Title Text 2`
-        token @ 407..408 = `\n`
-    token @ 408..410 = `"#`
+            MdValue, MdText @ 69..77 = `alt text`
+            token @ 77..79 = `](`
+            MdImageSrc @ 79..158 = `https://github.com/adam-p/markdown-here/raw/master/src/common/images/icon48.png`
+            MdImageTitle @ 158..175 = `Logo Title Text 1`
+            token @ 175..196 = ` "Logo Title Text 1")`
+        token @ 196..197 = `\n`
+    token @ 197..198 = `\n`
+    MdValue, MdParagraph @ 198..233
+        MdValue, MdText @ 198..214 = `Reference-style:`
+        MdValue, MdSoftBreak @ 214..215 = `\n`
+        MdValue, MdImage, MdReferenceImage @ 215..232
+            token @ 215..217 = `![`
+            MdValue, MdText @ 217..225 = `alt text`
+            token @ 225..227 = `][`
+            MdReferenceLabel @ 227..231 = `logo`
+            token @ 231..232 = `]`
+        token @ 232..233 = `\n`
+    token @ 233..235 = `\n[`
+    MdValue, MdReference @ 235..239 = `logo`
+    token @ 239..242 = `]: `
+    MdValue, MdImageSrc @ 242..321 = `https://github.com/adam-p/markdown-here/raw/master/src/common/images/icon48.png`
+    MdValue, token @ 321..323 = ` "`
+    MdImageTitle @ 323..340 = `Logo Title Text 2`
+    token @ 340..342 = `"#`
 --- END ---
 
 

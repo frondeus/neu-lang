@@ -18,33 +18,33 @@ impl Nodes {
     pub const UnaryOp: Name = Name::new("UnaryOp");
     pub const BinaryOp: Name = Name::new("BinaryOp");
     pub const InnerStringPart: Name = Name::new("InnerStringPart");
-    pub const ArticleBody: Name = Name::new("ArticleBody");
+    pub const ArticleItem: Name = Name::new("ArticleItem");
+    pub const ArticleBodyItem: Name = Name::new("ArticleBodyItem");
+    pub const MdValue: Name = Name::new("MdValue");
     pub const Value: Name = Name::new("Value");
     pub const Binary: Name = Name::new("Binary");
     pub const IdentPath: Name = Name::new("IdentPath");
     pub const Unary: Name = Name::new("Unary");
-    pub const Markdown: Name = Name::new("Markdown");
+    pub const MdString: Name = Name::new("MdString");
     pub const String: Name = Name::new("String");
     pub const Strukt: Name = Name::new("Strukt");
     pub const Array: Name = Name::new("Array");
-    pub const InnerMarkdown: Name = Name::new("InnerMarkdown");
-    pub const Md_Value: Name = Name::new("Md_Value");
+    pub const Markdown: Name = Name::new("Markdown");
     pub const InnerString: Name = Name::new("InnerString");
     pub const Interpolated: Name = Name::new("Interpolated");
     pub const StruktPair: Name = Name::new("StruktPair");
     pub const Key: Name = Name::new("Key");
-    pub const MainItem: Name = Name::new("MainItem");
-    pub const MainItemHeader: Name = Name::new("MainItemHeader");
-    pub const MainItemBody: Name = Name::new("MainItemBody");
-    pub const ArticleItemId: Name = Name::new("ArticleItemId");
-    pub const ArticleItemValues: Name = Name::new("ArticleItemValues");
-    pub const ArticleItem: Name = Name::new("ArticleItem");
-    pub const ArticleItemHeader: Name = Name::new("ArticleItemHeader");
-    pub const ArticleItemBody: Name = Name::new("ArticleItemBody");
+    pub const MainArticle: Name = Name::new("MainArticle");
+    pub const SubArticle: Name = Name::new("SubArticle");
+    pub const ArticleHeader: Name = Name::new("ArticleHeader");
+    pub const ArticleBody: Name = Name::new("ArticleBody");
+    pub const SubArticleHeader: Name = Name::new("SubArticleHeader");
+    pub const ArticleHeaderValues: Name = Name::new("ArticleHeaderValues");
     pub const ArticleRef: Name = Name::new("ArticleRef");
+    pub const MdLink: Name = Name::new("MdLink");
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct OpBang(Red);
 impl Ast for OpBang {
     fn new(node: Red) -> Option<Self> {
@@ -73,7 +73,7 @@ impl IntoBuilder<UnaryOp> for TokenBuilder<OpBang> {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct OpenI(Red);
 impl Ast for OpenI {
     fn new(node: Red) -> Option<Self> {
@@ -97,7 +97,7 @@ impl OpenI {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct OpenP(Red);
 impl Ast for OpenP {
     fn new(node: Red) -> Option<Self> {
@@ -121,7 +121,7 @@ impl OpenP {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct CloseP(Red);
 impl Ast for CloseP {
     fn new(node: Red) -> Option<Self> {
@@ -145,7 +145,7 @@ impl CloseP {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct OpStar(Red);
 impl Ast for OpStar {
     fn new(node: Red) -> Option<Self> {
@@ -174,7 +174,7 @@ impl IntoBuilder<BinaryOp> for TokenBuilder<OpStar> {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct OpPlus(Red);
 impl Ast for OpPlus {
     fn new(node: Red) -> Option<Self> {
@@ -203,7 +203,7 @@ impl IntoBuilder<BinaryOp> for TokenBuilder<OpPlus> {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct PlusPlus(Red);
 impl Ast for PlusPlus {
     fn new(node: Red) -> Option<Self> {
@@ -227,7 +227,7 @@ impl PlusPlus {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct PlusPlusEnd(Red);
 impl Ast for PlusPlusEnd {
     fn new(node: Red) -> Option<Self> {
@@ -251,7 +251,7 @@ impl PlusPlusEnd {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct ThreePlus(Red);
 impl Ast for ThreePlus {
     fn new(node: Red) -> Option<Self> {
@@ -275,7 +275,7 @@ impl ThreePlus {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct CloseBl(Red);
 impl Ast for CloseBl {
     fn new(node: Red) -> Option<Self> {
@@ -299,7 +299,7 @@ impl CloseBl {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Comma(Red);
 impl Ast for Comma {
     fn new(node: Red) -> Option<Self> {
@@ -323,7 +323,7 @@ impl Comma {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct OpMinus(Red);
 impl Ast for OpMinus {
     fn new(node: Red) -> Option<Self> {
@@ -352,7 +352,7 @@ impl IntoBuilder<UnaryOp> for TokenBuilder<OpMinus> {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct OpDot(Red);
 impl Ast for OpDot {
     fn new(node: Red) -> Option<Self> {
@@ -381,7 +381,7 @@ impl IntoBuilder<UnaryOp> for TokenBuilder<OpDot> {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct OpSlash(Red);
 impl Ast for OpSlash {
     fn new(node: Red) -> Option<Self> {
@@ -410,7 +410,7 @@ impl IntoBuilder<BinaryOp> for TokenBuilder<OpSlash> {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct OpColon(Red);
 impl Ast for OpColon {
     fn new(node: Red) -> Option<Self> {
@@ -434,7 +434,7 @@ impl OpColon {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct OpAssign(Red);
 impl Ast for OpAssign {
     fn new(node: Red) -> Option<Self> {
@@ -458,7 +458,7 @@ impl OpAssign {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct OpDEqual(Red);
 impl Ast for OpDEqual {
     fn new(node: Red) -> Option<Self> {
@@ -487,7 +487,7 @@ impl IntoBuilder<BinaryOp> for TokenBuilder<OpDEqual> {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct OpenB(Red);
 impl Ast for OpenB {
     fn new(node: Red) -> Option<Self> {
@@ -511,7 +511,7 @@ impl OpenB {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct OpenBl(Red);
 impl Ast for OpenBl {
     fn new(node: Red) -> Option<Self> {
@@ -535,7 +535,7 @@ impl OpenBl {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct CloseB(Red);
 impl Ast for CloseB {
     fn new(node: Red) -> Option<Self> {
@@ -559,7 +559,7 @@ impl CloseB {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct CloseI(Red);
 impl Ast for CloseI {
     fn new(node: Red) -> Option<Self> {
@@ -583,7 +583,7 @@ impl CloseI {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct DQuote(Red);
 impl Ast for DQuote {
     fn new(node: Red) -> Option<Self> {
@@ -607,7 +607,7 @@ impl DQuote {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct False(Red);
 impl Ast for False {
     fn new(node: Red) -> Option<Self> {
@@ -636,31 +636,7 @@ impl IntoBuilder<Boolean> for TokenBuilder<False> {
     }
 }
 
-#[derive(Debug)]
-pub struct ItemId(Red);
-impl Ast for ItemId {
-    fn new(node: Red) -> Option<Self> {
-        if !node.is(Nodes::Token) {
-            return None;
-        }
-        let green = node.green();
-        let tok = green.as_token()?;
-        if tok.value != "item_id" {
-            return None;
-        }
-        Some(Self(node))
-    }
-    fn red(&self) -> Red {
-        self.0.clone()
-    }
-}
-impl ItemId {
-    pub fn build() -> TokenBuilder<ItemId> {
-        TokenBuilder::new("item_id")
-    }
-}
-
-#[derive(Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct ItemIdent(Red);
 impl Ast for ItemIdent {
     fn new(node: Red) -> Option<Self> {
@@ -684,7 +660,7 @@ impl ItemIdent {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct LineEnding(Red);
 impl Ast for LineEnding {
     fn new(node: Red) -> Option<Self> {
@@ -708,7 +684,7 @@ impl LineEnding {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct MdQuote(Red);
 impl Ast for MdQuote {
     fn new(node: Red) -> Option<Self> {
@@ -732,7 +708,7 @@ impl MdQuote {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Number(Red);
 impl Ast for Number {
     fn new(node: Red) -> Option<Self> {
@@ -761,7 +737,7 @@ impl IntoBuilder<Literal> for TokenBuilder<Number> {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Text(Red);
 impl Ast for Text {
     fn new(node: Red) -> Option<Self> {
@@ -790,7 +766,7 @@ impl IntoBuilder<InnerStringPart> for TokenBuilder<Text> {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct True(Red);
 impl Ast for True {
     fn new(node: Red) -> Option<Self> {
@@ -819,7 +795,7 @@ impl IntoBuilder<Boolean> for TokenBuilder<True> {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct OpenC(Red);
 impl Ast for OpenC {
     fn new(node: Red) -> Option<Self> {
@@ -843,7 +819,7 @@ impl OpenC {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct CloseC(Red);
 impl Ast for CloseC {
     fn new(node: Red) -> Option<Self> {
@@ -867,7 +843,7 @@ impl CloseC {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub enum Literal {
     Number(Number),
     Boolean(Boolean),
@@ -909,7 +885,7 @@ impl Literal {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub enum Boolean {
     True(True),
     False(False),
@@ -951,7 +927,7 @@ impl Boolean {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub enum UnaryOp {
     OpMinus(OpMinus),
     OpBang(OpBang),
@@ -1007,7 +983,7 @@ impl UnaryOp {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub enum BinaryOp {
     OpPlus(OpPlus),
     OpSlash(OpSlash),
@@ -1077,7 +1053,7 @@ impl BinaryOp {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub enum InnerStringPart {
     Text(Text),
     Interpolated(Interpolated),
@@ -1119,51 +1095,93 @@ impl InnerStringPart {
     }
 }
 
-#[derive(Debug)]
-pub enum ArticleBody {
-    Text(Text),
-    ArticleItem(ArticleItem),
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub enum ArticleItem {
+    MainArticle(MainArticle),
+    SubArticle(SubArticle),
+}
+impl From<MainArticle> for ArticleItem {
+    fn from(val: MainArticle) -> Self {
+        Self::MainArticle(val)
+    }
+}
+impl From<SubArticle> for ArticleItem {
+    fn from(val: SubArticle) -> Self {
+        Self::SubArticle(val)
+    }
+}
+impl Ast for ArticleItem {
+    fn new(node: Red) -> Option<Self> {
+        None.or_else(|| MainArticle::new(node.clone()).map(ArticleItem::MainArticle))
+            .or_else(|| SubArticle::new(node.clone()).map(ArticleItem::SubArticle))
+    }
+    fn red(&self) -> Red {
+        match &self {
+            ArticleItem::MainArticle(node) => node.red(),
+            ArticleItem::SubArticle(node) => node.red(),
+        }
+    }
+}
+impl ArticleItem {
+    pub fn as_mainarticle(self) -> Option<MainArticle> {
+        match self {
+            Self::MainArticle(val) => Some(val),
+            _ => None,
+        }
+    }
+    pub fn as_subarticle(self) -> Option<SubArticle> {
+        match self {
+            Self::SubArticle(val) => Some(val),
+            _ => None,
+        }
+    }
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub enum ArticleBodyItem {
+    Markdown(Markdown),
+    SubArticle(SubArticle),
     ArticleRef(ArticleRef),
 }
-impl From<Text> for ArticleBody {
-    fn from(val: Text) -> Self {
-        Self::Text(val)
+impl From<Markdown> for ArticleBodyItem {
+    fn from(val: Markdown) -> Self {
+        Self::Markdown(val)
     }
 }
-impl From<ArticleItem> for ArticleBody {
-    fn from(val: ArticleItem) -> Self {
-        Self::ArticleItem(val)
+impl From<SubArticle> for ArticleBodyItem {
+    fn from(val: SubArticle) -> Self {
+        Self::SubArticle(val)
     }
 }
-impl From<ArticleRef> for ArticleBody {
+impl From<ArticleRef> for ArticleBodyItem {
     fn from(val: ArticleRef) -> Self {
         Self::ArticleRef(val)
     }
 }
-impl Ast for ArticleBody {
+impl Ast for ArticleBodyItem {
     fn new(node: Red) -> Option<Self> {
-        None.or_else(|| Text::new(node.clone()).map(ArticleBody::Text))
-            .or_else(|| ArticleItem::new(node.clone()).map(ArticleBody::ArticleItem))
-            .or_else(|| ArticleRef::new(node.clone()).map(ArticleBody::ArticleRef))
+        None.or_else(|| Markdown::new(node.clone()).map(ArticleBodyItem::Markdown))
+            .or_else(|| SubArticle::new(node.clone()).map(ArticleBodyItem::SubArticle))
+            .or_else(|| ArticleRef::new(node.clone()).map(ArticleBodyItem::ArticleRef))
     }
     fn red(&self) -> Red {
         match &self {
-            ArticleBody::Text(node) => node.red(),
-            ArticleBody::ArticleItem(node) => node.red(),
-            ArticleBody::ArticleRef(node) => node.red(),
+            ArticleBodyItem::Markdown(node) => node.red(),
+            ArticleBodyItem::SubArticle(node) => node.red(),
+            ArticleBodyItem::ArticleRef(node) => node.red(),
         }
     }
 }
-impl ArticleBody {
-    pub fn as_text(self) -> Option<Text> {
+impl ArticleBodyItem {
+    pub fn as_markdown(self) -> Option<Markdown> {
         match self {
-            Self::Text(val) => Some(val),
+            Self::Markdown(val) => Some(val),
             _ => None,
         }
     }
-    pub fn as_articleitem(self) -> Option<ArticleItem> {
+    pub fn as_subarticle(self) -> Option<SubArticle> {
         match self {
-            Self::ArticleItem(val) => Some(val),
+            Self::SubArticle(val) => Some(val),
             _ => None,
         }
     }
@@ -1175,7 +1193,49 @@ impl ArticleBody {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub enum MdValue {
+    MdLink(MdLink),
+    Text(Text),
+}
+impl From<MdLink> for MdValue {
+    fn from(val: MdLink) -> Self {
+        Self::MdLink(val)
+    }
+}
+impl From<Text> for MdValue {
+    fn from(val: Text) -> Self {
+        Self::Text(val)
+    }
+}
+impl Ast for MdValue {
+    fn new(node: Red) -> Option<Self> {
+        None.or_else(|| MdLink::new(node.clone()).map(MdValue::MdLink))
+            .or_else(|| Text::new(node.clone()).map(MdValue::Text))
+    }
+    fn red(&self) -> Red {
+        match &self {
+            MdValue::MdLink(node) => node.red(),
+            MdValue::Text(node) => node.red(),
+        }
+    }
+}
+impl MdValue {
+    pub fn as_mdlink(self) -> Option<MdLink> {
+        match self {
+            Self::MdLink(val) => Some(val),
+            _ => None,
+        }
+    }
+    pub fn as_text(self) -> Option<Text> {
+        match self {
+            Self::Text(val) => Some(val),
+            _ => None,
+        }
+    }
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Value(Red);
 impl Ast for Value {
     fn new(node: Red) -> Option<Self> {
@@ -1202,8 +1262,8 @@ impl Value {
     pub fn unary(&self) -> Option<Unary> {
         self.0.children().filter_map(Unary::new).next()
     }
-    pub fn markdown(&self) -> Option<Markdown> {
-        self.0.children().filter_map(Markdown::new).next()
+    pub fn md_string(&self) -> Option<MdString> {
+        self.0.children().filter_map(MdString::new).next()
     }
     pub fn string(&self) -> Option<String> {
         self.0.children().filter_map(String::new).next()
@@ -1233,7 +1293,7 @@ impl Value {
         T1: AstBuilder<T = Binary>,
         T2: AstBuilder<T = IdentPath>,
         T3: AstBuilder<T = Unary>,
-        T4: AstBuilder<T = Markdown>,
+        T4: AstBuilder<T = MdString>,
         T5: AstBuilder<T = String>,
         T6: AstBuilder<T = Strukt>,
         T7: AstBuilder<T = Array>,
@@ -1251,7 +1311,7 @@ where
     T1: AstBuilder<T = Binary>,
     T2: AstBuilder<T = IdentPath>,
     T3: AstBuilder<T = Unary>,
-    T4: AstBuilder<T = Markdown>,
+    T4: AstBuilder<T = MdString>,
     T5: AstBuilder<T = String>,
     T6: AstBuilder<T = Strukt>,
     T7: AstBuilder<T = Array>,
@@ -1264,7 +1324,7 @@ where
     binary: Option<T1>,
     ident_path: Option<T2>,
     unary: Option<T3>,
-    markdown: Option<T4>,
+    md_string: Option<T4>,
     string: Option<T5>,
     strukt: Option<T6>,
     array: Option<T7>,
@@ -1280,7 +1340,7 @@ where
     T1: AstBuilder<T = Binary>,
     T2: AstBuilder<T = IdentPath>,
     T3: AstBuilder<T = Unary>,
-    T4: AstBuilder<T = Markdown>,
+    T4: AstBuilder<T = MdString>,
     T5: AstBuilder<T = String>,
     T6: AstBuilder<T = Strukt>,
     T7: AstBuilder<T = Array>,
@@ -1295,7 +1355,7 @@ where
             binary: Default::default(),
             ident_path: Default::default(),
             unary: Default::default(),
-            markdown: Default::default(),
+            md_string: Default::default(),
             string: Default::default(),
             strukt: Default::default(),
             array: Default::default(),
@@ -1313,7 +1373,7 @@ where
     T1: AstBuilder<T = Binary>,
     T2: AstBuilder<T = IdentPath>,
     T3: AstBuilder<T = Unary>,
-    T4: AstBuilder<T = Markdown>,
+    T4: AstBuilder<T = MdString>,
     T5: AstBuilder<T = String>,
     T6: AstBuilder<T = Strukt>,
     T7: AstBuilder<T = Array>,
@@ -1328,7 +1388,7 @@ where
         binary: T1,
         ident_path: T2,
         unary: T3,
-        markdown: T4,
+        md_string: T4,
         string: T5,
         strukt: T6,
         array: T7,
@@ -1342,7 +1402,7 @@ where
             binary: Some(binary),
             ident_path: Some(ident_path),
             unary: Some(unary),
-            markdown: Some(markdown),
+            md_string: Some(md_string),
             string: Some(string),
             strukt: Some(strukt),
             array: Some(array),
@@ -1360,7 +1420,7 @@ where
     T1: AstBuilder<T = Binary>,
     T2: AstBuilder<T = IdentPath>,
     T3: AstBuilder<T = Unary>,
-    T4: AstBuilder<T = Markdown>,
+    T4: AstBuilder<T = MdString>,
     T5: AstBuilder<T = String>,
     T6: AstBuilder<T = Strukt>,
     T7: AstBuilder<T = Array>,
@@ -1388,7 +1448,7 @@ where
                     .into_iter(),
             )
             .chain(self.unary.map(|it| it.build_green(builder)).into_iter())
-            .chain(self.markdown.map(|it| it.build_green(builder)).into_iter())
+            .chain(self.md_string.map(|it| it.build_green(builder)).into_iter())
             .chain(self.string.map(|it| it.build_green(builder)).into_iter())
             .chain(self.strukt.map(|it| it.build_green(builder)).into_iter())
             .chain(self.array.map(|it| it.build_green(builder)).into_iter())
@@ -1405,7 +1465,7 @@ where
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Binary(Red);
 impl Ast for Binary {
     fn new(node: Red) -> Option<Self> {
@@ -1501,7 +1561,7 @@ where
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct IdentPath(Red);
 impl Ast for IdentPath {
     fn new(node: Red) -> Option<Self> {
@@ -1597,7 +1657,7 @@ where
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Unary(Red);
 impl Ast for Unary {
     fn new(node: Red) -> Option<Self> {
@@ -1681,11 +1741,11 @@ where
     }
 }
 
-#[derive(Debug)]
-pub struct Markdown(Red);
-impl Ast for Markdown {
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct MdString(Red);
+impl Ast for MdString {
     fn new(node: Red) -> Option<Self> {
-        if !node.is(Nodes::Markdown) {
+        if !node.is(Nodes::MdString) {
             return None;
         }
         node.green().as_node()?;
@@ -1695,73 +1755,73 @@ impl Ast for Markdown {
         self.0.clone()
     }
 }
-impl Markdown {
+impl MdString {
     pub fn md_quote_token(&self) -> Option<MdQuote> {
         self.0.children().filter_map(MdQuote::new).next()
     }
-    pub fn inner_markdown(&self) -> Option<InnerMarkdown> {
-        self.0.children().filter_map(InnerMarkdown::new).next()
+    pub fn markdown(&self) -> Option<Markdown> {
+        self.0.children().filter_map(Markdown::new).next()
     }
     pub fn dquote_token(&self) -> Option<DQuote> {
         self.0.children().filter_map(DQuote::new).next()
     }
-    pub fn build<T0, T1, T2>() -> MarkdownBuilder<T0, T1, T2>
+    pub fn build<T0, T1, T2>() -> MdStringBuilder<T0, T1, T2>
     where
         T0: AstBuilder<T = MdQuote>,
-        T1: AstBuilder<T = InnerMarkdown>,
+        T1: AstBuilder<T = Markdown>,
         T2: AstBuilder<T = DQuote>,
     {
         Default::default()
     }
 }
-pub struct MarkdownBuilder<T0, T1, T2>
+pub struct MdStringBuilder<T0, T1, T2>
 where
     T0: AstBuilder<T = MdQuote>,
-    T1: AstBuilder<T = InnerMarkdown>,
+    T1: AstBuilder<T = Markdown>,
     T2: AstBuilder<T = DQuote>,
 {
     md_quote: Option<T0>,
-    inner_markdown: Option<T1>,
+    markdown: Option<T1>,
     dquote: Option<T2>,
 }
-impl<T0, T1, T2> Default for MarkdownBuilder<T0, T1, T2>
+impl<T0, T1, T2> Default for MdStringBuilder<T0, T1, T2>
 where
     T0: AstBuilder<T = MdQuote>,
-    T1: AstBuilder<T = InnerMarkdown>,
+    T1: AstBuilder<T = Markdown>,
     T2: AstBuilder<T = DQuote>,
 {
     fn default() -> Self {
         Self {
             md_quote: Default::default(),
-            inner_markdown: Default::default(),
+            markdown: Default::default(),
             dquote: Default::default(),
         }
     }
 }
-impl<T0, T1, T2> MarkdownBuilder<T0, T1, T2>
+impl<T0, T1, T2> MdStringBuilder<T0, T1, T2>
 where
     T0: AstBuilder<T = MdQuote>,
-    T1: AstBuilder<T = InnerMarkdown>,
+    T1: AstBuilder<T = Markdown>,
     T2: AstBuilder<T = DQuote>,
 {
-    pub fn fill(self, md_quote: T0, inner_markdown: T1, dquote: T2) -> Self {
+    pub fn fill(self, md_quote: T0, markdown: T1, dquote: T2) -> Self {
         Self {
             md_quote: Some(md_quote),
-            inner_markdown: Some(inner_markdown),
+            markdown: Some(markdown),
             dquote: Some(dquote),
         }
     }
 }
-impl<T0, T1, T2> AstBuilder for MarkdownBuilder<T0, T1, T2>
+impl<T0, T1, T2> AstBuilder for MdStringBuilder<T0, T1, T2>
 where
     T0: AstBuilder<T = MdQuote>,
-    T1: AstBuilder<T = InnerMarkdown>,
+    T1: AstBuilder<T = Markdown>,
     T2: AstBuilder<T = DQuote>,
 {
-    type T = Markdown;
-    fn build(self, builder: &mut Cache) -> Markdown {
+    type T = MdString;
+    fn build(self, builder: &mut Cache) -> MdString {
         let green = AstBuilder::build_green(self, builder);
-        Markdown::new(Red::root(green)).unwrap()
+        MdString::new(Red::root(green)).unwrap()
     }
     fn build_boxed_green(self: Box<Self>, builder: &mut Cache) -> Green {
         AstBuilder::build_green(*self, builder)
@@ -1770,18 +1830,14 @@ where
         let children = None
             .into_iter()
             .chain(self.md_quote.map(|it| it.build_green(builder)).into_iter())
-            .chain(
-                self.inner_markdown
-                    .map(|it| it.build_green(builder))
-                    .into_iter(),
-            )
+            .chain(self.markdown.map(|it| it.build_green(builder)).into_iter())
             .chain(self.dquote.map(|it| it.build_green(builder)).into_iter())
             .collect();
-        builder.node(Nodes::Markdown, children)
+        builder.node(Nodes::MdString, children)
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct String(Red);
 impl Ast for String {
     fn new(node: Red) -> Option<Self> {
@@ -1889,7 +1945,7 @@ where
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Strukt(Red);
 impl Ast for Strukt {
     fn new(node: Red) -> Option<Self> {
@@ -2005,7 +2061,7 @@ where
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Array(Red);
 impl Ast for Array {
     fn new(node: Red) -> Option<Self> {
@@ -2121,11 +2177,11 @@ where
     }
 }
 
-#[derive(Debug)]
-pub struct InnerMarkdown(Red);
-impl Ast for InnerMarkdown {
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct Markdown(Red);
+impl Ast for Markdown {
     fn new(node: Red) -> Option<Self> {
-        if !node.is(Nodes::InnerMarkdown) {
+        if !node.is(Nodes::Markdown) {
             return None;
         }
         node.green().as_node()?;
@@ -2135,34 +2191,34 @@ impl Ast for InnerMarkdown {
         self.0.clone()
     }
 }
-impl InnerMarkdown {
-    pub fn md_value(&self) -> impl Iterator<Item = Md_Value> + '_ {
-        self.0.children().filter_map(Md_Value::new)
+impl Markdown {
+    pub fn values(&self) -> impl Iterator<Item = MdValue> + '_ {
+        self.0.children().filter_map(MdValue::new)
     }
-    pub fn build() -> InnerMarkdownBuilder {
+    pub fn build() -> MarkdownBuilder {
         Default::default()
     }
 }
-pub struct InnerMarkdownBuilder {
-    md_value: Vec<Box<dyn AstBuilder<T = Md_Value>>>,
+pub struct MarkdownBuilder {
+    values: Vec<Box<dyn AstBuilder<T = MdValue>>>,
 }
-impl Default for InnerMarkdownBuilder {
+impl Default for MarkdownBuilder {
     fn default() -> Self {
         Self {
-            md_value: Default::default(),
+            values: Default::default(),
         }
     }
 }
-impl InnerMarkdownBuilder {
-    pub fn fill(self, md_value: Vec<Box<dyn AstBuilder<T = Md_Value>>>) -> Self {
-        Self { md_value }
+impl MarkdownBuilder {
+    pub fn fill(self, values: Vec<Box<dyn AstBuilder<T = MdValue>>>) -> Self {
+        Self { values }
     }
 }
-impl AstBuilder for InnerMarkdownBuilder {
-    type T = InnerMarkdown;
-    fn build(self, builder: &mut Cache) -> InnerMarkdown {
+impl AstBuilder for MarkdownBuilder {
+    type T = Markdown;
+    fn build(self, builder: &mut Cache) -> Markdown {
         let green = AstBuilder::build_green(self, builder);
-        InnerMarkdown::new(Red::root(green)).unwrap()
+        Markdown::new(Red::root(green)).unwrap()
     }
     fn build_boxed_green(self: Box<Self>, builder: &mut Cache) -> Green {
         AstBuilder::build_green(*self, builder)
@@ -2171,87 +2227,22 @@ impl AstBuilder for InnerMarkdownBuilder {
         let children = None
             .into_iter()
             .chain({
-                self.md_value
+                self.values
                     .into_iter()
                     .map(|it| it.build_boxed_green(builder))
                     .collect::<Vec<_>>()
             })
             .collect();
-        builder.node(Nodes::InnerMarkdown, children)
+        builder.node(Nodes::Markdown, children)
+    }
+}
+impl IntoBuilder<ArticleBodyItem> for MarkdownBuilder {
+    fn into_builder(self) -> AliasBuilder<Self, ArticleBodyItem> {
+        AliasBuilder::new(Nodes::ArticleBodyItem, self)
     }
 }
 
-#[derive(Debug)]
-pub struct Md_Value(Red);
-impl Ast for Md_Value {
-    fn new(node: Red) -> Option<Self> {
-        if !node.is(Nodes::Md_Value) {
-            return None;
-        }
-        node.green().as_node()?;
-        Some(Self(node))
-    }
-    fn red(&self) -> Red {
-        self.0.clone()
-    }
-}
-impl Md_Value {
-    pub fn text_token(&self) -> Option<Text> {
-        self.0.children().filter_map(Text::new).next()
-    }
-    pub fn build<T0>() -> Md_ValueBuilder<T0>
-    where
-        T0: AstBuilder<T = Text>,
-    {
-        Default::default()
-    }
-}
-pub struct Md_ValueBuilder<T0>
-where
-    T0: AstBuilder<T = Text>,
-{
-    text: Option<T0>,
-}
-impl<T0> Default for Md_ValueBuilder<T0>
-where
-    T0: AstBuilder<T = Text>,
-{
-    fn default() -> Self {
-        Self {
-            text: Default::default(),
-        }
-    }
-}
-impl<T0> Md_ValueBuilder<T0>
-where
-    T0: AstBuilder<T = Text>,
-{
-    pub fn fill(self, text: T0) -> Self {
-        Self { text: Some(text) }
-    }
-}
-impl<T0> AstBuilder for Md_ValueBuilder<T0>
-where
-    T0: AstBuilder<T = Text>,
-{
-    type T = Md_Value;
-    fn build(self, builder: &mut Cache) -> Md_Value {
-        let green = AstBuilder::build_green(self, builder);
-        Md_Value::new(Red::root(green)).unwrap()
-    }
-    fn build_boxed_green(self: Box<Self>, builder: &mut Cache) -> Green {
-        AstBuilder::build_green(*self, builder)
-    }
-    fn build_green(self, builder: &mut Cache) -> Green {
-        let children = None
-            .into_iter()
-            .chain(self.text.map(|it| it.build_green(builder)).into_iter())
-            .collect();
-        builder.node(Nodes::Md_Value, children)
-    }
-}
-
-#[derive(Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct InnerString(Red);
 impl Ast for InnerString {
     fn new(node: Red) -> Option<Self> {
@@ -2311,7 +2302,7 @@ impl AstBuilder for InnerStringBuilder {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Interpolated(Red);
 impl Ast for Interpolated {
     fn new(node: Red) -> Option<Self> {
@@ -2417,7 +2408,7 @@ where
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct StruktPair(Red);
 impl Ast for StruktPair {
     fn new(node: Red) -> Option<Self> {
@@ -2513,7 +2504,7 @@ where
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Key(Red);
 impl Ast for Key {
     fn new(node: Red) -> Option<Self> {
@@ -2589,11 +2580,11 @@ where
     }
 }
 
-#[derive(Debug)]
-pub struct MainItem(Red);
-impl Ast for MainItem {
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct MainArticle(Red);
+impl Ast for MainArticle {
     fn new(node: Red) -> Option<Self> {
-        if !node.is(Nodes::MainItem) {
+        if !node.is(Nodes::MainArticle) {
             return None;
         }
         node.green().as_node()?;
@@ -2603,62 +2594,62 @@ impl Ast for MainItem {
         self.0.clone()
     }
 }
-impl MainItem {
-    pub fn main_item_header(&self) -> Option<MainItemHeader> {
-        self.0.children().filter_map(MainItemHeader::new).next()
+impl MainArticle {
+    pub fn article_header(&self) -> Option<ArticleHeader> {
+        self.0.children().filter_map(ArticleHeader::new).next()
     }
-    pub fn main_item_body(&self) -> Option<MainItemBody> {
-        self.0.children().filter_map(MainItemBody::new).next()
+    pub fn article_body(&self) -> Option<ArticleBody> {
+        self.0.children().filter_map(ArticleBody::new).next()
     }
-    pub fn build<T0, T1>() -> MainItemBuilder<T0, T1>
+    pub fn build<T0, T1>() -> MainArticleBuilder<T0, T1>
     where
-        T0: AstBuilder<T = MainItemHeader>,
-        T1: AstBuilder<T = MainItemBody>,
+        T0: AstBuilder<T = ArticleHeader>,
+        T1: AstBuilder<T = ArticleBody>,
     {
         Default::default()
     }
 }
-pub struct MainItemBuilder<T0, T1>
+pub struct MainArticleBuilder<T0, T1>
 where
-    T0: AstBuilder<T = MainItemHeader>,
-    T1: AstBuilder<T = MainItemBody>,
+    T0: AstBuilder<T = ArticleHeader>,
+    T1: AstBuilder<T = ArticleBody>,
 {
-    main_item_header: Option<T0>,
-    main_item_body: Option<T1>,
+    article_header: Option<T0>,
+    article_body: Option<T1>,
 }
-impl<T0, T1> Default for MainItemBuilder<T0, T1>
+impl<T0, T1> Default for MainArticleBuilder<T0, T1>
 where
-    T0: AstBuilder<T = MainItemHeader>,
-    T1: AstBuilder<T = MainItemBody>,
+    T0: AstBuilder<T = ArticleHeader>,
+    T1: AstBuilder<T = ArticleBody>,
 {
     fn default() -> Self {
         Self {
-            main_item_header: Default::default(),
-            main_item_body: Default::default(),
+            article_header: Default::default(),
+            article_body: Default::default(),
         }
     }
 }
-impl<T0, T1> MainItemBuilder<T0, T1>
+impl<T0, T1> MainArticleBuilder<T0, T1>
 where
-    T0: AstBuilder<T = MainItemHeader>,
-    T1: AstBuilder<T = MainItemBody>,
+    T0: AstBuilder<T = ArticleHeader>,
+    T1: AstBuilder<T = ArticleBody>,
 {
-    pub fn fill(self, main_item_header: T0, main_item_body: T1) -> Self {
+    pub fn fill(self, article_header: T0, article_body: T1) -> Self {
         Self {
-            main_item_header: Some(main_item_header),
-            main_item_body: Some(main_item_body),
+            article_header: Some(article_header),
+            article_body: Some(article_body),
         }
     }
 }
-impl<T0, T1> AstBuilder for MainItemBuilder<T0, T1>
+impl<T0, T1> AstBuilder for MainArticleBuilder<T0, T1>
 where
-    T0: AstBuilder<T = MainItemHeader>,
-    T1: AstBuilder<T = MainItemBody>,
+    T0: AstBuilder<T = ArticleHeader>,
+    T1: AstBuilder<T = ArticleBody>,
 {
-    type T = MainItem;
-    fn build(self, builder: &mut Cache) -> MainItem {
+    type T = MainArticle;
+    fn build(self, builder: &mut Cache) -> MainArticle {
         let green = AstBuilder::build_green(self, builder);
-        MainItem::new(Red::root(green)).unwrap()
+        MainArticle::new(Red::root(green)).unwrap()
     }
     fn build_boxed_green(self: Box<Self>, builder: &mut Cache) -> Green {
         AstBuilder::build_green(*self, builder)
@@ -2667,25 +2658,34 @@ where
         let children = None
             .into_iter()
             .chain(
-                self.main_item_header
+                self.article_header
                     .map(|it| it.build_green(builder))
                     .into_iter(),
             )
             .chain(
-                self.main_item_body
+                self.article_body
                     .map(|it| it.build_green(builder))
                     .into_iter(),
             )
             .collect();
-        builder.node(Nodes::MainItem, children)
+        builder.node(Nodes::MainArticle, children)
+    }
+}
+impl<T0, T1> IntoBuilder<ArticleItem> for MainArticleBuilder<T0, T1>
+where
+    T0: AstBuilder<T = ArticleHeader>,
+    T1: AstBuilder<T = ArticleBody>,
+{
+    fn into_builder(self) -> AliasBuilder<Self, ArticleItem> {
+        AliasBuilder::new(Nodes::ArticleItem, self)
     }
 }
 
-#[derive(Debug)]
-pub struct MainItemHeader(Red);
-impl Ast for MainItemHeader {
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct SubArticle(Red);
+impl Ast for SubArticle {
     fn new(node: Red) -> Option<Self> {
-        if !node.is(Nodes::MainItemHeader) {
+        if !node.is(Nodes::SubArticle) {
             return None;
         }
         node.green().as_node()?;
@@ -2695,7 +2695,125 @@ impl Ast for MainItemHeader {
         self.0.clone()
     }
 }
-impl MainItemHeader {
+impl SubArticle {
+    pub fn sub_article_header(&self) -> Option<SubArticleHeader> {
+        self.0.children().filter_map(SubArticleHeader::new).next()
+    }
+    pub fn article_body(&self) -> Option<ArticleBody> {
+        self.0.children().filter_map(ArticleBody::new).next()
+    }
+    pub fn plus_plus_end_token(&self) -> Option<PlusPlusEnd> {
+        self.0.children().filter_map(PlusPlusEnd::new).next()
+    }
+    pub fn build<T0, T1, T2>() -> SubArticleBuilder<T0, T1, T2>
+    where
+        T0: AstBuilder<T = SubArticleHeader>,
+        T1: AstBuilder<T = ArticleBody>,
+        T2: AstBuilder<T = PlusPlusEnd>,
+    {
+        Default::default()
+    }
+}
+pub struct SubArticleBuilder<T0, T1, T2>
+where
+    T0: AstBuilder<T = SubArticleHeader>,
+    T1: AstBuilder<T = ArticleBody>,
+    T2: AstBuilder<T = PlusPlusEnd>,
+{
+    sub_article_header: Option<T0>,
+    article_body: Option<T1>,
+    plus_plus_end: Option<T2>,
+}
+impl<T0, T1, T2> Default for SubArticleBuilder<T0, T1, T2>
+where
+    T0: AstBuilder<T = SubArticleHeader>,
+    T1: AstBuilder<T = ArticleBody>,
+    T2: AstBuilder<T = PlusPlusEnd>,
+{
+    fn default() -> Self {
+        Self {
+            sub_article_header: Default::default(),
+            article_body: Default::default(),
+            plus_plus_end: Default::default(),
+        }
+    }
+}
+impl<T0, T1, T2> SubArticleBuilder<T0, T1, T2>
+where
+    T0: AstBuilder<T = SubArticleHeader>,
+    T1: AstBuilder<T = ArticleBody>,
+    T2: AstBuilder<T = PlusPlusEnd>,
+{
+    pub fn fill(self, sub_article_header: T0, article_body: T1, plus_plus_end: T2) -> Self {
+        Self {
+            sub_article_header: Some(sub_article_header),
+            article_body: Some(article_body),
+            plus_plus_end: Some(plus_plus_end),
+        }
+    }
+}
+impl<T0, T1, T2> AstBuilder for SubArticleBuilder<T0, T1, T2>
+where
+    T0: AstBuilder<T = SubArticleHeader>,
+    T1: AstBuilder<T = ArticleBody>,
+    T2: AstBuilder<T = PlusPlusEnd>,
+{
+    type T = SubArticle;
+    fn build(self, builder: &mut Cache) -> SubArticle {
+        let green = AstBuilder::build_green(self, builder);
+        SubArticle::new(Red::root(green)).unwrap()
+    }
+    fn build_boxed_green(self: Box<Self>, builder: &mut Cache) -> Green {
+        AstBuilder::build_green(*self, builder)
+    }
+    fn build_green(self, builder: &mut Cache) -> Green {
+        let children = None
+            .into_iter()
+            .chain(
+                self.sub_article_header
+                    .map(|it| it.build_green(builder))
+                    .into_iter(),
+            )
+            .chain(
+                self.article_body
+                    .map(|it| it.build_green(builder))
+                    .into_iter(),
+            )
+            .chain(
+                self.plus_plus_end
+                    .map(|it| it.build_green(builder))
+                    .into_iter(),
+            )
+            .collect();
+        builder.node(Nodes::SubArticle, children)
+    }
+}
+impl<T0, T1, T2> IntoBuilder<ArticleItem> for SubArticleBuilder<T0, T1, T2>
+where
+    T0: AstBuilder<T = SubArticleHeader>,
+    T1: AstBuilder<T = ArticleBody>,
+    T2: AstBuilder<T = PlusPlusEnd>,
+{
+    fn into_builder(self) -> AliasBuilder<Self, ArticleItem> {
+        AliasBuilder::new(Nodes::ArticleItem, self)
+    }
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct ArticleHeader(Red);
+impl Ast for ArticleHeader {
+    fn new(node: Red) -> Option<Self> {
+        if !node.is(Nodes::ArticleHeader) {
+            return None;
+        }
+        node.green().as_node()?;
+        Some(Self(node))
+    }
+    fn red(&self) -> Red {
+        self.0.clone()
+    }
+}
+impl ArticleHeader {
     pub fn start_token(&self) -> Option<ThreePlus> {
         self.0.children().filter_map(ThreePlus::new).next()
     }
@@ -2705,7 +2823,7 @@ impl MainItemHeader {
     pub fn op_colon_token(&self) -> Option<OpColon> {
         self.0.children().filter_map(OpColon::new).next()
     }
-    pub fn article_item_id(&self) -> Option<ArticleItemId> {
+    pub fn article_item_id_token(&self) -> Option<ArticleItemId> {
         self.0.children().filter_map(ArticleItemId::new).next()
     }
     pub fn separator_token(&self) -> Option<ThreePlus> {
@@ -2714,10 +2832,13 @@ impl MainItemHeader {
     pub fn line_ending_token(&self) -> Option<LineEnding> {
         self.0.children().filter_map(LineEnding::new).next()
     }
-    pub fn article_item_values(&self) -> Option<ArticleItemValues> {
-        self.0.children().filter_map(ArticleItemValues::new).next()
+    pub fn article_header_values(&self) -> Option<ArticleHeaderValues> {
+        self.0
+            .children()
+            .filter_map(ArticleHeaderValues::new)
+            .next()
     }
-    pub fn build<T0, T1, T2, T3, T4, T5, T6>() -> MainItemHeaderBuilder<T0, T1, T2, T3, T4, T5, T6>
+    pub fn build<T0, T1, T2, T3, T4, T5, T6>() -> ArticleHeaderBuilder<T0, T1, T2, T3, T4, T5, T6>
     where
         T0: AstBuilder<T = ThreePlus>,
         T1: AstBuilder<T = ItemIdent>,
@@ -2725,12 +2846,12 @@ impl MainItemHeader {
         T3: AstBuilder<T = ArticleItemId>,
         T4: AstBuilder<T = ThreePlus>,
         T5: AstBuilder<T = LineEnding>,
-        T6: AstBuilder<T = ArticleItemValues>,
+        T6: AstBuilder<T = ArticleHeaderValues>,
     {
         Default::default()
     }
 }
-pub struct MainItemHeaderBuilder<T0, T1, T2, T3, T4, T5, T6>
+pub struct ArticleHeaderBuilder<T0, T1, T2, T3, T4, T5, T6>
 where
     T0: AstBuilder<T = ThreePlus>,
     T1: AstBuilder<T = ItemIdent>,
@@ -2738,7 +2859,7 @@ where
     T3: AstBuilder<T = ArticleItemId>,
     T4: AstBuilder<T = ThreePlus>,
     T5: AstBuilder<T = LineEnding>,
-    T6: AstBuilder<T = ArticleItemValues>,
+    T6: AstBuilder<T = ArticleHeaderValues>,
 {
     start: Option<T0>,
     item_ident: Option<T1>,
@@ -2746,9 +2867,9 @@ where
     article_item_id: Option<T3>,
     separator: Option<T4>,
     line_ending: Option<T5>,
-    article_item_values: Option<T6>,
+    article_header_values: Option<T6>,
 }
-impl<T0, T1, T2, T3, T4, T5, T6> Default for MainItemHeaderBuilder<T0, T1, T2, T3, T4, T5, T6>
+impl<T0, T1, T2, T3, T4, T5, T6> Default for ArticleHeaderBuilder<T0, T1, T2, T3, T4, T5, T6>
 where
     T0: AstBuilder<T = ThreePlus>,
     T1: AstBuilder<T = ItemIdent>,
@@ -2756,7 +2877,7 @@ where
     T3: AstBuilder<T = ArticleItemId>,
     T4: AstBuilder<T = ThreePlus>,
     T5: AstBuilder<T = LineEnding>,
-    T6: AstBuilder<T = ArticleItemValues>,
+    T6: AstBuilder<T = ArticleHeaderValues>,
 {
     fn default() -> Self {
         Self {
@@ -2766,11 +2887,11 @@ where
             article_item_id: Default::default(),
             separator: Default::default(),
             line_ending: Default::default(),
-            article_item_values: Default::default(),
+            article_header_values: Default::default(),
         }
     }
 }
-impl<T0, T1, T2, T3, T4, T5, T6> MainItemHeaderBuilder<T0, T1, T2, T3, T4, T5, T6>
+impl<T0, T1, T2, T3, T4, T5, T6> ArticleHeaderBuilder<T0, T1, T2, T3, T4, T5, T6>
 where
     T0: AstBuilder<T = ThreePlus>,
     T1: AstBuilder<T = ItemIdent>,
@@ -2778,7 +2899,7 @@ where
     T3: AstBuilder<T = ArticleItemId>,
     T4: AstBuilder<T = ThreePlus>,
     T5: AstBuilder<T = LineEnding>,
-    T6: AstBuilder<T = ArticleItemValues>,
+    T6: AstBuilder<T = ArticleHeaderValues>,
 {
     pub fn fill(
         self,
@@ -2788,7 +2909,7 @@ where
         article_item_id: T3,
         separator: T4,
         line_ending: T5,
-        article_item_values: T6,
+        article_header_values: T6,
     ) -> Self {
         Self {
             start: Some(start),
@@ -2797,11 +2918,11 @@ where
             article_item_id: Some(article_item_id),
             separator: Some(separator),
             line_ending: Some(line_ending),
-            article_item_values: Some(article_item_values),
+            article_header_values: Some(article_header_values),
         }
     }
 }
-impl<T0, T1, T2, T3, T4, T5, T6> AstBuilder for MainItemHeaderBuilder<T0, T1, T2, T3, T4, T5, T6>
+impl<T0, T1, T2, T3, T4, T5, T6> AstBuilder for ArticleHeaderBuilder<T0, T1, T2, T3, T4, T5, T6>
 where
     T0: AstBuilder<T = ThreePlus>,
     T1: AstBuilder<T = ItemIdent>,
@@ -2809,12 +2930,12 @@ where
     T3: AstBuilder<T = ArticleItemId>,
     T4: AstBuilder<T = ThreePlus>,
     T5: AstBuilder<T = LineEnding>,
-    T6: AstBuilder<T = ArticleItemValues>,
+    T6: AstBuilder<T = ArticleHeaderValues>,
 {
-    type T = MainItemHeader;
-    fn build(self, builder: &mut Cache) -> MainItemHeader {
+    type T = ArticleHeader;
+    fn build(self, builder: &mut Cache) -> ArticleHeader {
         let green = AstBuilder::build_green(self, builder);
-        MainItemHeader::new(Red::root(green)).unwrap()
+        ArticleHeader::new(Red::root(green)).unwrap()
     }
     fn build_boxed_green(self: Box<Self>, builder: &mut Cache) -> Green {
         AstBuilder::build_green(*self, builder)
@@ -2841,20 +2962,20 @@ where
                     .into_iter(),
             )
             .chain(
-                self.article_item_values
+                self.article_header_values
                     .map(|it| it.build_green(builder))
                     .into_iter(),
             )
             .collect();
-        builder.node(Nodes::MainItemHeader, children)
+        builder.node(Nodes::ArticleHeader, children)
     }
 }
 
-#[derive(Debug)]
-pub struct MainItemBody(Red);
-impl Ast for MainItemBody {
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct ArticleBody(Red);
+impl Ast for ArticleBody {
     fn new(node: Red) -> Option<Self> {
-        if !node.is(Nodes::MainItemBody) {
+        if !node.is(Nodes::ArticleBody) {
             return None;
         }
         node.green().as_node()?;
@@ -2864,73 +2985,73 @@ impl Ast for MainItemBody {
         self.0.clone()
     }
 }
-impl MainItemBody {
+impl ArticleBody {
     pub fn three_plus_token(&self) -> Option<ThreePlus> {
         self.0.children().filter_map(ThreePlus::new).next()
     }
     pub fn line_ending_token(&self) -> Option<LineEnding> {
         self.0.children().filter_map(LineEnding::new).next()
     }
-    pub fn article_body(&self) -> Option<ArticleBody> {
-        self.0.children().filter_map(ArticleBody::new).next()
+    pub fn items(&self) -> impl Iterator<Item = ArticleBodyItem> + '_ {
+        self.0.children().filter_map(ArticleBodyItem::new)
     }
-    pub fn build<T0, T1, T2>() -> MainItemBodyBuilder<T0, T1, T2>
+    pub fn build<T0, T1>() -> ArticleBodyBuilder<T0, T1>
     where
         T0: AstBuilder<T = ThreePlus>,
         T1: AstBuilder<T = LineEnding>,
-        T2: AstBuilder<T = ArticleBody>,
     {
         Default::default()
     }
 }
-pub struct MainItemBodyBuilder<T0, T1, T2>
+pub struct ArticleBodyBuilder<T0, T1>
 where
     T0: AstBuilder<T = ThreePlus>,
     T1: AstBuilder<T = LineEnding>,
-    T2: AstBuilder<T = ArticleBody>,
 {
     three_plus: Option<T0>,
     line_ending: Option<T1>,
-    article_body: Option<T2>,
+    items: Vec<Box<dyn AstBuilder<T = ArticleBodyItem>>>,
 }
-impl<T0, T1, T2> Default for MainItemBodyBuilder<T0, T1, T2>
+impl<T0, T1> Default for ArticleBodyBuilder<T0, T1>
 where
     T0: AstBuilder<T = ThreePlus>,
     T1: AstBuilder<T = LineEnding>,
-    T2: AstBuilder<T = ArticleBody>,
 {
     fn default() -> Self {
         Self {
             three_plus: Default::default(),
             line_ending: Default::default(),
-            article_body: Default::default(),
+            items: Default::default(),
         }
     }
 }
-impl<T0, T1, T2> MainItemBodyBuilder<T0, T1, T2>
+impl<T0, T1> ArticleBodyBuilder<T0, T1>
 where
     T0: AstBuilder<T = ThreePlus>,
     T1: AstBuilder<T = LineEnding>,
-    T2: AstBuilder<T = ArticleBody>,
 {
-    pub fn fill(self, three_plus: T0, line_ending: T1, article_body: T2) -> Self {
+    pub fn fill(
+        self,
+        three_plus: T0,
+        line_ending: T1,
+        items: Vec<Box<dyn AstBuilder<T = ArticleBodyItem>>>,
+    ) -> Self {
         Self {
             three_plus: Some(three_plus),
             line_ending: Some(line_ending),
-            article_body: Some(article_body),
+            items,
         }
     }
 }
-impl<T0, T1, T2> AstBuilder for MainItemBodyBuilder<T0, T1, T2>
+impl<T0, T1> AstBuilder for ArticleBodyBuilder<T0, T1>
 where
     T0: AstBuilder<T = ThreePlus>,
     T1: AstBuilder<T = LineEnding>,
-    T2: AstBuilder<T = ArticleBody>,
 {
-    type T = MainItemBody;
-    fn build(self, builder: &mut Cache) -> MainItemBody {
+    type T = ArticleBody;
+    fn build(self, builder: &mut Cache) -> ArticleBody {
         let green = AstBuilder::build_green(self, builder);
-        MainItemBody::new(Red::root(green)).unwrap()
+        ArticleBody::new(Red::root(green)).unwrap()
     }
     fn build_boxed_green(self: Box<Self>, builder: &mut Cache) -> Green {
         AstBuilder::build_green(*self, builder)
@@ -2948,179 +3069,22 @@ where
                     .map(|it| it.build_green(builder))
                     .into_iter(),
             )
-            .chain(
-                self.article_body
-                    .map(|it| it.build_green(builder))
-                    .into_iter(),
-            )
-            .collect();
-        builder.node(Nodes::MainItemBody, children)
-    }
-}
-
-#[derive(Debug)]
-pub struct ArticleItemId(Red);
-impl Ast for ArticleItemId {
-    fn new(node: Red) -> Option<Self> {
-        if !node.is(Nodes::ArticleItemId) {
-            return None;
-        }
-        node.green().as_node()?;
-        Some(Self(node))
-    }
-    fn red(&self) -> Red {
-        self.0.clone()
-    }
-}
-impl ArticleItemId {
-    pub fn item_id_token(&self) -> Option<ItemId> {
-        self.0.children().filter_map(ItemId::new).next()
-    }
-    pub fn build<T0>() -> ArticleItemIdBuilder<T0>
-    where
-        T0: AstBuilder<T = ItemId>,
-    {
-        Default::default()
-    }
-}
-pub struct ArticleItemIdBuilder<T0>
-where
-    T0: AstBuilder<T = ItemId>,
-{
-    item_id: Option<T0>,
-}
-impl<T0> Default for ArticleItemIdBuilder<T0>
-where
-    T0: AstBuilder<T = ItemId>,
-{
-    fn default() -> Self {
-        Self {
-            item_id: Default::default(),
-        }
-    }
-}
-impl<T0> ArticleItemIdBuilder<T0>
-where
-    T0: AstBuilder<T = ItemId>,
-{
-    pub fn fill(self, item_id: T0) -> Self {
-        Self {
-            item_id: Some(item_id),
-        }
-    }
-}
-impl<T0> AstBuilder for ArticleItemIdBuilder<T0>
-where
-    T0: AstBuilder<T = ItemId>,
-{
-    type T = ArticleItemId;
-    fn build(self, builder: &mut Cache) -> ArticleItemId {
-        let green = AstBuilder::build_green(self, builder);
-        ArticleItemId::new(Red::root(green)).unwrap()
-    }
-    fn build_boxed_green(self: Box<Self>, builder: &mut Cache) -> Green {
-        AstBuilder::build_green(*self, builder)
-    }
-    fn build_green(self, builder: &mut Cache) -> Green {
-        let children = None
-            .into_iter()
-            .chain(self.item_id.map(|it| it.build_green(builder)).into_iter())
-            .collect();
-        builder.node(Nodes::ArticleItemId, children)
-    }
-}
-
-#[derive(Debug)]
-pub struct ArticleItemValues(Red);
-impl Ast for ArticleItemValues {
-    fn new(node: Red) -> Option<Self> {
-        if !node.is(Nodes::ArticleItemValues) {
-            return None;
-        }
-        node.green().as_node()?;
-        Some(Self(node))
-    }
-    fn red(&self) -> Red {
-        self.0.clone()
-    }
-}
-impl ArticleItemValues {
-    pub fn values(&self) -> impl Iterator<Item = StruktPair> + '_ {
-        self.0.children().filter_map(StruktPair::new)
-    }
-    pub fn build<T0>() -> ArticleItemValuesBuilder<T0>
-    where
-        T0: AstBuilder<T = LineEnding>,
-    {
-        Default::default()
-    }
-}
-pub struct ArticleItemValuesBuilder<T0>
-where
-    T0: AstBuilder<T = LineEnding>,
-{
-    values: Vec<Box<dyn AstBuilder<T = StruktPair>>>,
-    line_ending: Option<T0>,
-}
-impl<T0> Default for ArticleItemValuesBuilder<T0>
-where
-    T0: AstBuilder<T = LineEnding>,
-{
-    fn default() -> Self {
-        Self {
-            values: Default::default(),
-            line_ending: Default::default(),
-        }
-    }
-}
-impl<T0> ArticleItemValuesBuilder<T0>
-where
-    T0: AstBuilder<T = LineEnding>,
-{
-    pub fn fill(self, values: Vec<Box<dyn AstBuilder<T = StruktPair>>>, line_ending: T0) -> Self {
-        Self {
-            values,
-            line_ending: Some(line_ending),
-        }
-    }
-}
-impl<T0> AstBuilder for ArticleItemValuesBuilder<T0>
-where
-    T0: AstBuilder<T = LineEnding>,
-{
-    type T = ArticleItemValues;
-    fn build(self, builder: &mut Cache) -> ArticleItemValues {
-        let green = AstBuilder::build_green(self, builder);
-        ArticleItemValues::new(Red::root(green)).unwrap()
-    }
-    fn build_boxed_green(self: Box<Self>, builder: &mut Cache) -> Green {
-        AstBuilder::build_green(*self, builder)
-    }
-    fn build_green(self, builder: &mut Cache) -> Green {
-        let children = None
-            .into_iter()
             .chain({
-                let delit = self.line_ending.map(|it| it.build_green(builder));
-                self.values
+                self.items
                     .into_iter()
-                    .flat_map(|it| {
-                        Some(it.build_boxed_green(builder))
-                            .into_iter()
-                            .chain(delit.clone().into_iter())
-                            .collect::<Vec<_>>()
-                    })
+                    .map(|it| it.build_boxed_green(builder))
                     .collect::<Vec<_>>()
             })
             .collect();
-        builder.node(Nodes::ArticleItemValues, children)
+        builder.node(Nodes::ArticleBody, children)
     }
 }
 
-#[derive(Debug)]
-pub struct ArticleItem(Red);
-impl Ast for ArticleItem {
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct SubArticleHeader(Red);
+impl Ast for SubArticleHeader {
     fn new(node: Red) -> Option<Self> {
-        if !node.is(Nodes::ArticleItem) {
+        if !node.is(Nodes::SubArticleHeader) {
             return None;
         }
         node.green().as_node()?;
@@ -3130,125 +3094,7 @@ impl Ast for ArticleItem {
         self.0.clone()
     }
 }
-impl ArticleItem {
-    pub fn article_item_header(&self) -> Option<ArticleItemHeader> {
-        self.0.children().filter_map(ArticleItemHeader::new).next()
-    }
-    pub fn article_item_body(&self) -> Option<ArticleItemBody> {
-        self.0.children().filter_map(ArticleItemBody::new).next()
-    }
-    pub fn plus_plus_end_token(&self) -> Option<PlusPlusEnd> {
-        self.0.children().filter_map(PlusPlusEnd::new).next()
-    }
-    pub fn build<T0, T1, T2>() -> ArticleItemBuilder<T0, T1, T2>
-    where
-        T0: AstBuilder<T = ArticleItemHeader>,
-        T1: AstBuilder<T = ArticleItemBody>,
-        T2: AstBuilder<T = PlusPlusEnd>,
-    {
-        Default::default()
-    }
-}
-pub struct ArticleItemBuilder<T0, T1, T2>
-where
-    T0: AstBuilder<T = ArticleItemHeader>,
-    T1: AstBuilder<T = ArticleItemBody>,
-    T2: AstBuilder<T = PlusPlusEnd>,
-{
-    article_item_header: Option<T0>,
-    article_item_body: Option<T1>,
-    plus_plus_end: Option<T2>,
-}
-impl<T0, T1, T2> Default for ArticleItemBuilder<T0, T1, T2>
-where
-    T0: AstBuilder<T = ArticleItemHeader>,
-    T1: AstBuilder<T = ArticleItemBody>,
-    T2: AstBuilder<T = PlusPlusEnd>,
-{
-    fn default() -> Self {
-        Self {
-            article_item_header: Default::default(),
-            article_item_body: Default::default(),
-            plus_plus_end: Default::default(),
-        }
-    }
-}
-impl<T0, T1, T2> ArticleItemBuilder<T0, T1, T2>
-where
-    T0: AstBuilder<T = ArticleItemHeader>,
-    T1: AstBuilder<T = ArticleItemBody>,
-    T2: AstBuilder<T = PlusPlusEnd>,
-{
-    pub fn fill(self, article_item_header: T0, article_item_body: T1, plus_plus_end: T2) -> Self {
-        Self {
-            article_item_header: Some(article_item_header),
-            article_item_body: Some(article_item_body),
-            plus_plus_end: Some(plus_plus_end),
-        }
-    }
-}
-impl<T0, T1, T2> AstBuilder for ArticleItemBuilder<T0, T1, T2>
-where
-    T0: AstBuilder<T = ArticleItemHeader>,
-    T1: AstBuilder<T = ArticleItemBody>,
-    T2: AstBuilder<T = PlusPlusEnd>,
-{
-    type T = ArticleItem;
-    fn build(self, builder: &mut Cache) -> ArticleItem {
-        let green = AstBuilder::build_green(self, builder);
-        ArticleItem::new(Red::root(green)).unwrap()
-    }
-    fn build_boxed_green(self: Box<Self>, builder: &mut Cache) -> Green {
-        AstBuilder::build_green(*self, builder)
-    }
-    fn build_green(self, builder: &mut Cache) -> Green {
-        let children = None
-            .into_iter()
-            .chain(
-                self.article_item_header
-                    .map(|it| it.build_green(builder))
-                    .into_iter(),
-            )
-            .chain(
-                self.article_item_body
-                    .map(|it| it.build_green(builder))
-                    .into_iter(),
-            )
-            .chain(
-                self.plus_plus_end
-                    .map(|it| it.build_green(builder))
-                    .into_iter(),
-            )
-            .collect();
-        builder.node(Nodes::ArticleItem, children)
-    }
-}
-impl<T0, T1, T2> IntoBuilder<ArticleBody> for ArticleItemBuilder<T0, T1, T2>
-where
-    T0: AstBuilder<T = ArticleItemHeader>,
-    T1: AstBuilder<T = ArticleItemBody>,
-    T2: AstBuilder<T = PlusPlusEnd>,
-{
-    fn into_builder(self) -> AliasBuilder<Self, ArticleBody> {
-        AliasBuilder::new(Nodes::ArticleBody, self)
-    }
-}
-
-#[derive(Debug)]
-pub struct ArticleItemHeader(Red);
-impl Ast for ArticleItemHeader {
-    fn new(node: Red) -> Option<Self> {
-        if !node.is(Nodes::ArticleItemHeader) {
-            return None;
-        }
-        node.green().as_node()?;
-        Some(Self(node))
-    }
-    fn red(&self) -> Red {
-        self.0.clone()
-    }
-}
-impl ArticleItemHeader {
+impl SubArticleHeader {
     pub fn plus_plus_token(&self) -> Option<PlusPlus> {
         self.0.children().filter_map(PlusPlus::new).next()
     }
@@ -3258,7 +3104,7 @@ impl ArticleItemHeader {
     pub fn op_colon_token(&self) -> Option<OpColon> {
         self.0.children().filter_map(OpColon::new).next()
     }
-    pub fn article_item_id(&self) -> Option<ArticleItemId> {
+    pub fn article_item_id_token(&self) -> Option<ArticleItemId> {
         self.0.children().filter_map(ArticleItemId::new).next()
     }
     pub fn three_plus_token(&self) -> Option<ThreePlus> {
@@ -3267,11 +3113,13 @@ impl ArticleItemHeader {
     pub fn line_ending_token(&self) -> Option<LineEnding> {
         self.0.children().filter_map(LineEnding::new).next()
     }
-    pub fn article_item_values(&self) -> Option<ArticleItemValues> {
-        self.0.children().filter_map(ArticleItemValues::new).next()
+    pub fn article_header_values(&self) -> Option<ArticleHeaderValues> {
+        self.0
+            .children()
+            .filter_map(ArticleHeaderValues::new)
+            .next()
     }
-    pub fn build<T0, T1, T2, T3, T4, T5, T6>(
-    ) -> ArticleItemHeaderBuilder<T0, T1, T2, T3, T4, T5, T6>
+    pub fn build<T0, T1, T2, T3, T4, T5, T6>() -> SubArticleHeaderBuilder<T0, T1, T2, T3, T4, T5, T6>
     where
         T0: AstBuilder<T = PlusPlus>,
         T1: AstBuilder<T = ItemIdent>,
@@ -3279,12 +3127,12 @@ impl ArticleItemHeader {
         T3: AstBuilder<T = ArticleItemId>,
         T4: AstBuilder<T = ThreePlus>,
         T5: AstBuilder<T = LineEnding>,
-        T6: AstBuilder<T = ArticleItemValues>,
+        T6: AstBuilder<T = ArticleHeaderValues>,
     {
         Default::default()
     }
 }
-pub struct ArticleItemHeaderBuilder<T0, T1, T2, T3, T4, T5, T6>
+pub struct SubArticleHeaderBuilder<T0, T1, T2, T3, T4, T5, T6>
 where
     T0: AstBuilder<T = PlusPlus>,
     T1: AstBuilder<T = ItemIdent>,
@@ -3292,7 +3140,7 @@ where
     T3: AstBuilder<T = ArticleItemId>,
     T4: AstBuilder<T = ThreePlus>,
     T5: AstBuilder<T = LineEnding>,
-    T6: AstBuilder<T = ArticleItemValues>,
+    T6: AstBuilder<T = ArticleHeaderValues>,
 {
     plus_plus: Option<T0>,
     item_ident: Option<T1>,
@@ -3300,9 +3148,9 @@ where
     article_item_id: Option<T3>,
     three_plus: Option<T4>,
     line_ending: Option<T5>,
-    article_item_values: Option<T6>,
+    article_header_values: Option<T6>,
 }
-impl<T0, T1, T2, T3, T4, T5, T6> Default for ArticleItemHeaderBuilder<T0, T1, T2, T3, T4, T5, T6>
+impl<T0, T1, T2, T3, T4, T5, T6> Default for SubArticleHeaderBuilder<T0, T1, T2, T3, T4, T5, T6>
 where
     T0: AstBuilder<T = PlusPlus>,
     T1: AstBuilder<T = ItemIdent>,
@@ -3310,7 +3158,7 @@ where
     T3: AstBuilder<T = ArticleItemId>,
     T4: AstBuilder<T = ThreePlus>,
     T5: AstBuilder<T = LineEnding>,
-    T6: AstBuilder<T = ArticleItemValues>,
+    T6: AstBuilder<T = ArticleHeaderValues>,
 {
     fn default() -> Self {
         Self {
@@ -3320,11 +3168,11 @@ where
             article_item_id: Default::default(),
             three_plus: Default::default(),
             line_ending: Default::default(),
-            article_item_values: Default::default(),
+            article_header_values: Default::default(),
         }
     }
 }
-impl<T0, T1, T2, T3, T4, T5, T6> ArticleItemHeaderBuilder<T0, T1, T2, T3, T4, T5, T6>
+impl<T0, T1, T2, T3, T4, T5, T6> SubArticleHeaderBuilder<T0, T1, T2, T3, T4, T5, T6>
 where
     T0: AstBuilder<T = PlusPlus>,
     T1: AstBuilder<T = ItemIdent>,
@@ -3332,7 +3180,7 @@ where
     T3: AstBuilder<T = ArticleItemId>,
     T4: AstBuilder<T = ThreePlus>,
     T5: AstBuilder<T = LineEnding>,
-    T6: AstBuilder<T = ArticleItemValues>,
+    T6: AstBuilder<T = ArticleHeaderValues>,
 {
     pub fn fill(
         self,
@@ -3342,7 +3190,7 @@ where
         article_item_id: T3,
         three_plus: T4,
         line_ending: T5,
-        article_item_values: T6,
+        article_header_values: T6,
     ) -> Self {
         Self {
             plus_plus: Some(plus_plus),
@@ -3351,11 +3199,11 @@ where
             article_item_id: Some(article_item_id),
             three_plus: Some(three_plus),
             line_ending: Some(line_ending),
-            article_item_values: Some(article_item_values),
+            article_header_values: Some(article_header_values),
         }
     }
 }
-impl<T0, T1, T2, T3, T4, T5, T6> AstBuilder for ArticleItemHeaderBuilder<T0, T1, T2, T3, T4, T5, T6>
+impl<T0, T1, T2, T3, T4, T5, T6> AstBuilder for SubArticleHeaderBuilder<T0, T1, T2, T3, T4, T5, T6>
 where
     T0: AstBuilder<T = PlusPlus>,
     T1: AstBuilder<T = ItemIdent>,
@@ -3363,12 +3211,12 @@ where
     T3: AstBuilder<T = ArticleItemId>,
     T4: AstBuilder<T = ThreePlus>,
     T5: AstBuilder<T = LineEnding>,
-    T6: AstBuilder<T = ArticleItemValues>,
+    T6: AstBuilder<T = ArticleHeaderValues>,
 {
-    type T = ArticleItemHeader;
-    fn build(self, builder: &mut Cache) -> ArticleItemHeader {
+    type T = SubArticleHeader;
+    fn build(self, builder: &mut Cache) -> SubArticleHeader {
         let green = AstBuilder::build_green(self, builder);
-        ArticleItemHeader::new(Red::root(green)).unwrap()
+        SubArticleHeader::new(Red::root(green)).unwrap()
     }
     fn build_boxed_green(self: Box<Self>, builder: &mut Cache) -> Green {
         AstBuilder::build_green(*self, builder)
@@ -3399,20 +3247,20 @@ where
                     .into_iter(),
             )
             .chain(
-                self.article_item_values
+                self.article_header_values
                     .map(|it| it.build_green(builder))
                     .into_iter(),
             )
             .collect();
-        builder.node(Nodes::ArticleItemHeader, children)
+        builder.node(Nodes::SubArticleHeader, children)
     }
 }
 
-#[derive(Debug)]
-pub struct ArticleItemBody(Red);
-impl Ast for ArticleItemBody {
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct ArticleHeaderValues(Red);
+impl Ast for ArticleHeaderValues {
     fn new(node: Red) -> Option<Self> {
-        if !node.is(Nodes::ArticleItemBody) {
+        if !node.is(Nodes::ArticleHeaderValues) {
             return None;
         }
         node.green().as_node()?;
@@ -3422,73 +3270,54 @@ impl Ast for ArticleItemBody {
         self.0.clone()
     }
 }
-impl ArticleItemBody {
-    pub fn three_plus_token(&self) -> Option<ThreePlus> {
-        self.0.children().filter_map(ThreePlus::new).next()
+impl ArticleHeaderValues {
+    pub fn values(&self) -> impl Iterator<Item = StruktPair> + '_ {
+        self.0.children().filter_map(StruktPair::new)
     }
-    pub fn line_ending_token(&self) -> Option<LineEnding> {
-        self.0.children().filter_map(LineEnding::new).next()
-    }
-    pub fn article_body(&self) -> impl Iterator<Item = ArticleBody> + '_ {
-        self.0.children().filter_map(ArticleBody::new)
-    }
-    pub fn build<T0, T1>() -> ArticleItemBodyBuilder<T0, T1>
+    pub fn build<T0>() -> ArticleHeaderValuesBuilder<T0>
     where
-        T0: AstBuilder<T = ThreePlus>,
-        T1: AstBuilder<T = LineEnding>,
+        T0: AstBuilder<T = LineEnding>,
     {
         Default::default()
     }
 }
-pub struct ArticleItemBodyBuilder<T0, T1>
+pub struct ArticleHeaderValuesBuilder<T0>
 where
-    T0: AstBuilder<T = ThreePlus>,
-    T1: AstBuilder<T = LineEnding>,
+    T0: AstBuilder<T = LineEnding>,
 {
-    three_plus: Option<T0>,
-    line_ending: Option<T1>,
-    article_body: Vec<Box<dyn AstBuilder<T = ArticleBody>>>,
+    values: Vec<Box<dyn AstBuilder<T = StruktPair>>>,
+    line_ending: Option<T0>,
 }
-impl<T0, T1> Default for ArticleItemBodyBuilder<T0, T1>
+impl<T0> Default for ArticleHeaderValuesBuilder<T0>
 where
-    T0: AstBuilder<T = ThreePlus>,
-    T1: AstBuilder<T = LineEnding>,
+    T0: AstBuilder<T = LineEnding>,
 {
     fn default() -> Self {
         Self {
-            three_plus: Default::default(),
+            values: Default::default(),
             line_ending: Default::default(),
-            article_body: Default::default(),
         }
     }
 }
-impl<T0, T1> ArticleItemBodyBuilder<T0, T1>
+impl<T0> ArticleHeaderValuesBuilder<T0>
 where
-    T0: AstBuilder<T = ThreePlus>,
-    T1: AstBuilder<T = LineEnding>,
+    T0: AstBuilder<T = LineEnding>,
 {
-    pub fn fill(
-        self,
-        three_plus: T0,
-        line_ending: T1,
-        article_body: Vec<Box<dyn AstBuilder<T = ArticleBody>>>,
-    ) -> Self {
+    pub fn fill(self, values: Vec<Box<dyn AstBuilder<T = StruktPair>>>, line_ending: T0) -> Self {
         Self {
-            three_plus: Some(three_plus),
+            values,
             line_ending: Some(line_ending),
-            article_body,
         }
     }
 }
-impl<T0, T1> AstBuilder for ArticleItemBodyBuilder<T0, T1>
+impl<T0> AstBuilder for ArticleHeaderValuesBuilder<T0>
 where
-    T0: AstBuilder<T = ThreePlus>,
-    T1: AstBuilder<T = LineEnding>,
+    T0: AstBuilder<T = LineEnding>,
 {
-    type T = ArticleItemBody;
-    fn build(self, builder: &mut Cache) -> ArticleItemBody {
+    type T = ArticleHeaderValues;
+    fn build(self, builder: &mut Cache) -> ArticleHeaderValues {
         let green = AstBuilder::build_green(self, builder);
-        ArticleItemBody::new(Red::root(green)).unwrap()
+        ArticleHeaderValues::new(Red::root(green)).unwrap()
     }
     fn build_boxed_green(self: Box<Self>, builder: &mut Cache) -> Green {
         AstBuilder::build_green(*self, builder)
@@ -3496,28 +3325,24 @@ where
     fn build_green(self, builder: &mut Cache) -> Green {
         let children = None
             .into_iter()
-            .chain(
-                self.three_plus
-                    .map(|it| it.build_green(builder))
-                    .into_iter(),
-            )
-            .chain(
-                self.line_ending
-                    .map(|it| it.build_green(builder))
-                    .into_iter(),
-            )
             .chain({
-                self.article_body
+                let delit = self.line_ending.map(|it| it.build_green(builder));
+                self.values
                     .into_iter()
-                    .map(|it| it.build_boxed_green(builder))
+                    .flat_map(|it| {
+                        Some(it.build_boxed_green(builder))
+                            .into_iter()
+                            .chain(delit.clone().into_iter())
+                            .collect::<Vec<_>>()
+                    })
                     .collect::<Vec<_>>()
             })
             .collect();
-        builder.node(Nodes::ArticleItemBody, children)
+        builder.node(Nodes::ArticleHeaderValues, children)
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct ArticleRef(Red);
 impl Ast for ArticleRef {
     fn new(node: Red) -> Option<Self> {
@@ -3541,8 +3366,8 @@ impl ArticleRef {
     pub fn op_colon_token(&self) -> Option<OpColon> {
         self.0.children().filter_map(OpColon::new).next()
     }
-    pub fn item_id_token(&self) -> Option<ItemId> {
-        self.0.children().filter_map(ItemId::new).next()
+    pub fn article_item_id_token(&self) -> Option<ArticleItemId> {
+        self.0.children().filter_map(ArticleItemId::new).next()
     }
     pub fn close_bl_token(&self) -> Option<CloseBl> {
         self.0.children().filter_map(CloseBl::new).next()
@@ -3552,7 +3377,7 @@ impl ArticleRef {
         T0: AstBuilder<T = OpenBl>,
         T1: AstBuilder<T = ItemIdent>,
         T2: AstBuilder<T = OpColon>,
-        T3: AstBuilder<T = ItemId>,
+        T3: AstBuilder<T = ArticleItemId>,
         T4: AstBuilder<T = CloseBl>,
     {
         Default::default()
@@ -3563,13 +3388,13 @@ where
     T0: AstBuilder<T = OpenBl>,
     T1: AstBuilder<T = ItemIdent>,
     T2: AstBuilder<T = OpColon>,
-    T3: AstBuilder<T = ItemId>,
+    T3: AstBuilder<T = ArticleItemId>,
     T4: AstBuilder<T = CloseBl>,
 {
     open_bl: Option<T0>,
     item_ident: Option<T1>,
     op_colon: Option<T2>,
-    item_id: Option<T3>,
+    article_item_id: Option<T3>,
     close_bl: Option<T4>,
 }
 impl<T0, T1, T2, T3, T4> Default for ArticleRefBuilder<T0, T1, T2, T3, T4>
@@ -3577,7 +3402,7 @@ where
     T0: AstBuilder<T = OpenBl>,
     T1: AstBuilder<T = ItemIdent>,
     T2: AstBuilder<T = OpColon>,
-    T3: AstBuilder<T = ItemId>,
+    T3: AstBuilder<T = ArticleItemId>,
     T4: AstBuilder<T = CloseBl>,
 {
     fn default() -> Self {
@@ -3585,7 +3410,7 @@ where
             open_bl: Default::default(),
             item_ident: Default::default(),
             op_colon: Default::default(),
-            item_id: Default::default(),
+            article_item_id: Default::default(),
             close_bl: Default::default(),
         }
     }
@@ -3595,7 +3420,7 @@ where
     T0: AstBuilder<T = OpenBl>,
     T1: AstBuilder<T = ItemIdent>,
     T2: AstBuilder<T = OpColon>,
-    T3: AstBuilder<T = ItemId>,
+    T3: AstBuilder<T = ArticleItemId>,
     T4: AstBuilder<T = CloseBl>,
 {
     pub fn fill(
@@ -3603,14 +3428,14 @@ where
         open_bl: T0,
         item_ident: T1,
         op_colon: T2,
-        item_id: T3,
+        article_item_id: T3,
         close_bl: T4,
     ) -> Self {
         Self {
             open_bl: Some(open_bl),
             item_ident: Some(item_ident),
             op_colon: Some(op_colon),
-            item_id: Some(item_id),
+            article_item_id: Some(article_item_id),
             close_bl: Some(close_bl),
         }
     }
@@ -3620,7 +3445,7 @@ where
     T0: AstBuilder<T = OpenBl>,
     T1: AstBuilder<T = ItemIdent>,
     T2: AstBuilder<T = OpColon>,
-    T3: AstBuilder<T = ItemId>,
+    T3: AstBuilder<T = ArticleItemId>,
     T4: AstBuilder<T = CloseBl>,
 {
     type T = ArticleRef;
@@ -3641,21 +3466,143 @@ where
                     .into_iter(),
             )
             .chain(self.op_colon.map(|it| it.build_green(builder)).into_iter())
-            .chain(self.item_id.map(|it| it.build_green(builder)).into_iter())
+            .chain(
+                self.article_item_id
+                    .map(|it| it.build_green(builder))
+                    .into_iter(),
+            )
             .chain(self.close_bl.map(|it| it.build_green(builder)).into_iter())
             .collect();
         builder.node(Nodes::ArticleRef, children)
     }
 }
-impl<T0, T1, T2, T3, T4> IntoBuilder<ArticleBody> for ArticleRefBuilder<T0, T1, T2, T3, T4>
+impl<T0, T1, T2, T3, T4> IntoBuilder<ArticleBodyItem> for ArticleRefBuilder<T0, T1, T2, T3, T4>
 where
     T0: AstBuilder<T = OpenBl>,
     T1: AstBuilder<T = ItemIdent>,
     T2: AstBuilder<T = OpColon>,
-    T3: AstBuilder<T = ItemId>,
+    T3: AstBuilder<T = ArticleItemId>,
     T4: AstBuilder<T = CloseBl>,
 {
-    fn into_builder(self) -> AliasBuilder<Self, ArticleBody> {
-        AliasBuilder::new(Nodes::ArticleBody, self)
+    fn into_builder(self) -> AliasBuilder<Self, ArticleBodyItem> {
+        AliasBuilder::new(Nodes::ArticleBodyItem, self)
+    }
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct MdLink(Red);
+impl Ast for MdLink {
+    fn new(node: Red) -> Option<Self> {
+        if !node.is(Nodes::MdLink) {
+            return None;
+        }
+        node.green().as_node()?;
+        Some(Self(node))
+    }
+    fn red(&self) -> Red {
+        self.0.clone()
+    }
+}
+impl MdLink {
+    pub fn values(&self) -> impl Iterator<Item = MdValue> + '_ {
+        self.0.children().filter_map(MdValue::new)
+    }
+    pub fn md_link_url_token(&self) -> Option<MdLinkUrl> {
+        self.0.children().filter_map(MdLinkUrl::new).next()
+    }
+    pub fn md_link_title_token(&self) -> Option<MdLinkTitle> {
+        self.0.children().filter_map(MdLinkTitle::new).next()
+    }
+    pub fn build<T1, T2>() -> MdLinkBuilder<T1, T2>
+    where
+        T1: AstBuilder<T = MdLinkUrl>,
+        T2: AstBuilder<T = MdLinkTitle>,
+    {
+        Default::default()
+    }
+}
+pub struct MdLinkBuilder<T1, T2>
+where
+    T1: AstBuilder<T = MdLinkUrl>,
+    T2: AstBuilder<T = MdLinkTitle>,
+{
+    values: Vec<Box<dyn AstBuilder<T = MdValue>>>,
+    md_link_url: Option<T1>,
+    md_link_title: Option<T2>,
+}
+impl<T1, T2> Default for MdLinkBuilder<T1, T2>
+where
+    T1: AstBuilder<T = MdLinkUrl>,
+    T2: AstBuilder<T = MdLinkTitle>,
+{
+    fn default() -> Self {
+        Self {
+            values: Default::default(),
+            md_link_url: Default::default(),
+            md_link_title: Default::default(),
+        }
+    }
+}
+impl<T1, T2> MdLinkBuilder<T1, T2>
+where
+    T1: AstBuilder<T = MdLinkUrl>,
+    T2: AstBuilder<T = MdLinkTitle>,
+{
+    pub fn fill(
+        self,
+        values: Vec<Box<dyn AstBuilder<T = MdValue>>>,
+        md_link_url: T1,
+        md_link_title: T2,
+    ) -> Self {
+        Self {
+            values,
+            md_link_url: Some(md_link_url),
+            md_link_title: Some(md_link_title),
+        }
+    }
+}
+impl<T1, T2> AstBuilder for MdLinkBuilder<T1, T2>
+where
+    T1: AstBuilder<T = MdLinkUrl>,
+    T2: AstBuilder<T = MdLinkTitle>,
+{
+    type T = MdLink;
+    fn build(self, builder: &mut Cache) -> MdLink {
+        let green = AstBuilder::build_green(self, builder);
+        MdLink::new(Red::root(green)).unwrap()
+    }
+    fn build_boxed_green(self: Box<Self>, builder: &mut Cache) -> Green {
+        AstBuilder::build_green(*self, builder)
+    }
+    fn build_green(self, builder: &mut Cache) -> Green {
+        let children = None
+            .into_iter()
+            .chain({
+                self.values
+                    .into_iter()
+                    .map(|it| it.build_boxed_green(builder))
+                    .collect::<Vec<_>>()
+            })
+            .chain(
+                self.md_link_url
+                    .map(|it| it.build_green(builder))
+                    .into_iter(),
+            )
+            .chain(
+                self.md_link_title
+                    .map(|it| it.build_green(builder))
+                    .into_iter(),
+            )
+            .collect();
+        builder.node(Nodes::MdLink, children)
+    }
+}
+impl<T1, T2> IntoBuilder<MdValue> for MdLinkBuilder<T1, T2>
+where
+    T1: AstBuilder<T = MdLinkUrl>,
+    T2: AstBuilder<T = MdLinkTitle>,
+{
+    fn into_builder(self) -> AliasBuilder<Self, MdValue> {
+        AliasBuilder::new(Nodes::MdValue, self)
     }
 }
