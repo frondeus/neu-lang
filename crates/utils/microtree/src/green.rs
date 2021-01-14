@@ -3,7 +3,7 @@ use std::sync::Arc;
 
 use smol_str::SmolStr;
 
-#[derive(PartialEq, Eq, Clone, Copy, Default, PartialOrd, Ord)]
+#[derive(PartialEq, Eq, Clone, Copy, Default, PartialOrd, Ord, Hash)]
 pub struct Name(&'static str);
 
 impl Name {
@@ -29,14 +29,14 @@ impl Debug for Name {
     }
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Hash)]
 pub struct GreenData {
     pub name: Name,
     pub size: usize,
     pub kind: GreenKind,
 }
 
-#[derive(PartialEq, Eq, Clone)]
+#[derive(PartialEq, Eq, Clone, Hash)]
 pub struct Green(pub(crate) Arc<GreenData>);
 
 impl Green {
@@ -90,19 +90,19 @@ impl Green {
     }
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Hash)]
 pub struct Node {
     pub children: Vec<Green>,
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Hash)]
 pub struct Token {
     pub leading: SmolStr,
     pub value: SmolStr,
     pub trailing: SmolStr,
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Hash)]
 pub enum GreenKind {
     Node(Node),
     Alias(Option<Green>),

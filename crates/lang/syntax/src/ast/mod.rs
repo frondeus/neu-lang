@@ -1,5 +1,6 @@
 mod generated;
 pub use generated::*;
+use microtree::Ast;
 
 impl MainArticle {
     pub fn get_articles(&self) -> impl Iterator<Item = SubArticle> {
@@ -53,5 +54,12 @@ impl ArticleItem {
             ArticleItem::MainArticle(article) => article.article_body(),
             ArticleItem::SubArticle(article) => article.article_body()
         }
+    }
+}
+
+impl Markdown {
+    pub fn all_links(&self) -> impl Iterator<Item = MdLink> + '_ {
+        self.0.pre_order()
+            .filter_map(|e| MdLink::new(e))
     }
 }

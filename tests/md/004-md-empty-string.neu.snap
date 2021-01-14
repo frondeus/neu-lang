@@ -4,7 +4,7 @@ md""
 
 [parser]
 --- GREEN TREE ---
-Root, Value, Markdown @ 0..4
+Root, Value, MdString @ 0..4
     token @ 0..3 = `md"`
     token @ 3..4 = `"`
 --- END ---

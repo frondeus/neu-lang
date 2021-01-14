@@ -8,22 +8,23 @@ md"
 
 [parser]
 --- GREEN TREE ---
-Root, Value, Markdown @ 0..33
+Root, Value, MdString @ 0..33
     token @ 0..3 = `md"`
-    token @ 3..4 = `\n`
-    MdValue, MdOrderedList @ 4..32
-        MdValue, MdListItem @ 4..13
-            token @ 4..7 = `1. `
-            MdValue, MdText @ 7..12 = `Apple`
-            token @ 12..13 = `\n`
-        MdValue, MdListItem @ 13..23
-            token @ 13..16 = `2. `
-            MdValue, MdText @ 16..22 = `Orange`
-            token @ 22..23 = `\n`
-        MdValue, MdListItem @ 23..32
-            token @ 23..26 = `3. `
-            MdValue, MdText @ 26..31 = `Grape`
-            token @ 31..32 = `\n`
+    Markdown @ 3..32
+        token @ 3..4 = `\n`
+        MdValue, MdOrderedList @ 4..32
+            MdValue, MdListItem @ 4..13
+                token @ 4..7 = `1. `
+                MdValue, MdText @ 7..12 = `Apple`
+                token @ 12..13 = `\n`
+            MdValue, MdListItem @ 13..23
+                token @ 13..16 = `2. `
+                MdValue, MdText @ 16..22 = `Orange`
+                token @ 22..23 = `\n`
+            MdValue, MdListItem @ 23..32
+                token @ 23..26 = `3. `
+                MdValue, MdText @ 26..31 = `Grape`
+                token @ 31..32 = `\n`
     token @ 32..33 = `"`
 --- END ---
 

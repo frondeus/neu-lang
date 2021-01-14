@@ -4,13 +4,14 @@ md"**foo**"
 
 [parser]
 --- GREEN TREE ---
-Root, Value, Markdown @ 0..11
+Root, Value, MdString @ 0..11
     token @ 0..3 = `md"`
-    MdValue, MdParagraph @ 3..10
-        MdValue, MdStrong @ 3..10
-            token @ 3..5 = `**`
-            MdValue, MdText @ 5..8 = `foo`
-            token @ 8..10 = `**`
+    Markdown @ 3..10
+        MdValue, MdParagraph @ 3..10
+            MdValue, MdStrong @ 3..10
+                token @ 3..5 = `**`
+                MdValue, MdText @ 5..8 = `foo`
+                token @ 8..10 = `**`
     token @ 10..11 = `"`
 --- END ---
 

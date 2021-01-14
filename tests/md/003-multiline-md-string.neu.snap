@@ -5,15 +5,16 @@ bar"
 
 [parser]
 --- GREEN TREE ---
-Root, Value, Markdown @ 0..13
+Root, Value, MdString @ 0..13
     token @ 0..3 = `md"`
-    MdValue, MdParagraph @ 3..12
-        MdValue, MdEmphasis @ 3..8
-            token @ 3..4 = `*`
-            MdValue, MdText @ 4..7 = `foo`
-            token @ 7..8 = `*`
-        MdValue, MdSoftBreak @ 8..9 = `\n`
-        MdValue, MdText @ 9..12 = `bar`
+    Markdown @ 3..12
+        MdValue, MdParagraph @ 3..12
+            MdValue, MdEmphasis @ 3..8
+                token @ 3..4 = `*`
+                MdValue, MdText @ 4..7 = `foo`
+                token @ 7..8 = `*`
+            MdValue, MdSoftBreak @ 8..9 = `\n`
+            MdValue, MdText @ 9..12 = `bar`
     token @ 12..13 = `"`
 --- END ---
 

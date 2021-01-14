@@ -13,7 +13,7 @@ impl Nodes {
     pub const Root: Name = Name::new("Root");
     pub const Token: Name = Name::new("token");
     pub const Error: Name = Name::new("error");
-    pub const Literal: Name = Name::new("Literal");
+    pub const Value: Name = Name::new("Value");
     pub const Boolean: Name = Name::new("Boolean");
     pub const UnaryOp: Name = Name::new("UnaryOp");
     pub const BinaryOp: Name = Name::new("BinaryOp");
@@ -21,7 +21,6 @@ impl Nodes {
     pub const ArticleItem: Name = Name::new("ArticleItem");
     pub const ArticleBodyItem: Name = Name::new("ArticleBodyItem");
     pub const MdValue: Name = Name::new("MdValue");
-    pub const Value: Name = Name::new("Value");
     pub const Binary: Name = Name::new("Binary");
     pub const IdentPath: Name = Name::new("IdentPath");
     pub const Unary: Name = Name::new("Unary");
@@ -29,6 +28,7 @@ impl Nodes {
     pub const String: Name = Name::new("String");
     pub const Strukt: Name = Name::new("Strukt");
     pub const Array: Name = Name::new("Array");
+    pub const Parens: Name = Name::new("Parens");
     pub const Markdown: Name = Name::new("Markdown");
     pub const InnerString: Name = Name::new("InnerString");
     pub const Interpolated: Name = Name::new("Interpolated");
@@ -42,10 +42,11 @@ impl Nodes {
     pub const ArticleHeaderValues: Name = Name::new("ArticleHeaderValues");
     pub const ArticleRef: Name = Name::new("ArticleRef");
     pub const MdLink: Name = Name::new("MdLink");
+    pub const MdCodeBlock: Name = Name::new("MdCodeBlock");
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct OpBang(Red);
+pub struct OpBang(pub(crate) Red);
 impl Ast for OpBang {
     fn new(node: Red) -> Option<Self> {
         if !node.is(Nodes::Token) {
@@ -74,7 +75,7 @@ impl IntoBuilder<UnaryOp> for TokenBuilder<OpBang> {
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct OpenI(Red);
+pub struct OpenI(pub(crate) Red);
 impl Ast for OpenI {
     fn new(node: Red) -> Option<Self> {
         if !node.is(Nodes::Token) {
@@ -98,7 +99,7 @@ impl OpenI {
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct OpenP(Red);
+pub struct OpenP(pub(crate) Red);
 impl Ast for OpenP {
     fn new(node: Red) -> Option<Self> {
         if !node.is(Nodes::Token) {
@@ -122,7 +123,7 @@ impl OpenP {
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct CloseP(Red);
+pub struct CloseP(pub(crate) Red);
 impl Ast for CloseP {
     fn new(node: Red) -> Option<Self> {
         if !node.is(Nodes::Token) {
@@ -146,7 +147,7 @@ impl CloseP {
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct OpStar(Red);
+pub struct OpStar(pub(crate) Red);
 impl Ast for OpStar {
     fn new(node: Red) -> Option<Self> {
         if !node.is(Nodes::Token) {
@@ -175,7 +176,7 @@ impl IntoBuilder<BinaryOp> for TokenBuilder<OpStar> {
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct OpPlus(Red);
+pub struct OpPlus(pub(crate) Red);
 impl Ast for OpPlus {
     fn new(node: Red) -> Option<Self> {
         if !node.is(Nodes::Token) {
@@ -204,7 +205,7 @@ impl IntoBuilder<BinaryOp> for TokenBuilder<OpPlus> {
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct PlusPlus(Red);
+pub struct PlusPlus(pub(crate) Red);
 impl Ast for PlusPlus {
     fn new(node: Red) -> Option<Self> {
         if !node.is(Nodes::Token) {
@@ -228,7 +229,7 @@ impl PlusPlus {
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct PlusPlusEnd(Red);
+pub struct PlusPlusEnd(pub(crate) Red);
 impl Ast for PlusPlusEnd {
     fn new(node: Red) -> Option<Self> {
         if !node.is(Nodes::Token) {
@@ -252,7 +253,7 @@ impl PlusPlusEnd {
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct ThreePlus(Red);
+pub struct ThreePlus(pub(crate) Red);
 impl Ast for ThreePlus {
     fn new(node: Red) -> Option<Self> {
         if !node.is(Nodes::Token) {
@@ -276,7 +277,7 @@ impl ThreePlus {
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct CloseBl(Red);
+pub struct CloseBl(pub(crate) Red);
 impl Ast for CloseBl {
     fn new(node: Red) -> Option<Self> {
         if !node.is(Nodes::Token) {
@@ -300,7 +301,7 @@ impl CloseBl {
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct Comma(Red);
+pub struct Comma(pub(crate) Red);
 impl Ast for Comma {
     fn new(node: Red) -> Option<Self> {
         if !node.is(Nodes::Token) {
@@ -324,7 +325,7 @@ impl Comma {
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct OpMinus(Red);
+pub struct OpMinus(pub(crate) Red);
 impl Ast for OpMinus {
     fn new(node: Red) -> Option<Self> {
         if !node.is(Nodes::Token) {
@@ -353,7 +354,7 @@ impl IntoBuilder<UnaryOp> for TokenBuilder<OpMinus> {
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct OpDot(Red);
+pub struct OpDot(pub(crate) Red);
 impl Ast for OpDot {
     fn new(node: Red) -> Option<Self> {
         if !node.is(Nodes::Token) {
@@ -382,7 +383,7 @@ impl IntoBuilder<UnaryOp> for TokenBuilder<OpDot> {
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct OpSlash(Red);
+pub struct OpSlash(pub(crate) Red);
 impl Ast for OpSlash {
     fn new(node: Red) -> Option<Self> {
         if !node.is(Nodes::Token) {
@@ -411,7 +412,7 @@ impl IntoBuilder<BinaryOp> for TokenBuilder<OpSlash> {
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct OpColon(Red);
+pub struct OpColon(pub(crate) Red);
 impl Ast for OpColon {
     fn new(node: Red) -> Option<Self> {
         if !node.is(Nodes::Token) {
@@ -435,7 +436,7 @@ impl OpColon {
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct OpAssign(Red);
+pub struct OpAssign(pub(crate) Red);
 impl Ast for OpAssign {
     fn new(node: Red) -> Option<Self> {
         if !node.is(Nodes::Token) {
@@ -459,7 +460,7 @@ impl OpAssign {
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct OpDEqual(Red);
+pub struct OpDEqual(pub(crate) Red);
 impl Ast for OpDEqual {
     fn new(node: Red) -> Option<Self> {
         if !node.is(Nodes::Token) {
@@ -488,7 +489,7 @@ impl IntoBuilder<BinaryOp> for TokenBuilder<OpDEqual> {
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct OpenB(Red);
+pub struct OpenB(pub(crate) Red);
 impl Ast for OpenB {
     fn new(node: Red) -> Option<Self> {
         if !node.is(Nodes::Token) {
@@ -512,7 +513,7 @@ impl OpenB {
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct OpenBl(Red);
+pub struct OpenBl(pub(crate) Red);
 impl Ast for OpenBl {
     fn new(node: Red) -> Option<Self> {
         if !node.is(Nodes::Token) {
@@ -536,7 +537,7 @@ impl OpenBl {
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct CloseB(Red);
+pub struct CloseB(pub(crate) Red);
 impl Ast for CloseB {
     fn new(node: Red) -> Option<Self> {
         if !node.is(Nodes::Token) {
@@ -560,7 +561,31 @@ impl CloseB {
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct CloseI(Red);
+pub struct Fences(pub(crate) Red);
+impl Ast for Fences {
+    fn new(node: Red) -> Option<Self> {
+        if !node.is(Nodes::Token) {
+            return None;
+        }
+        let green = node.green();
+        let tok = green.as_token()?;
+        if tok.value != "```" {
+            return None;
+        }
+        Some(Self(node))
+    }
+    fn red(&self) -> Red {
+        self.0.clone()
+    }
+}
+impl Fences {
+    pub fn build() -> TokenBuilder<Fences> {
+        TokenBuilder::new("```")
+    }
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct CloseI(pub(crate) Red);
 impl Ast for CloseI {
     fn new(node: Red) -> Option<Self> {
         if !node.is(Nodes::Token) {
@@ -584,7 +609,7 @@ impl CloseI {
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct DQuote(Red);
+pub struct DQuote(pub(crate) Red);
 impl Ast for DQuote {
     fn new(node: Red) -> Option<Self> {
         if !node.is(Nodes::Token) {
@@ -608,7 +633,7 @@ impl DQuote {
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct False(Red);
+pub struct False(pub(crate) Red);
 impl Ast for False {
     fn new(node: Red) -> Option<Self> {
         if !node.is(Nodes::Token) {
@@ -637,31 +662,7 @@ impl IntoBuilder<Boolean> for TokenBuilder<False> {
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct ItemIdent(Red);
-impl Ast for ItemIdent {
-    fn new(node: Red) -> Option<Self> {
-        if !node.is(Nodes::Token) {
-            return None;
-        }
-        let green = node.green();
-        let tok = green.as_token()?;
-        if tok.value != "item_identifier" {
-            return None;
-        }
-        Some(Self(node))
-    }
-    fn red(&self) -> Red {
-        self.0.clone()
-    }
-}
-impl ItemIdent {
-    pub fn build() -> TokenBuilder<ItemIdent> {
-        TokenBuilder::new("item_identifier")
-    }
-}
-
-#[derive(Clone, Debug, Eq, PartialEq)]
-pub struct LineEnding(Red);
+pub struct LineEnding(pub(crate) Red);
 impl Ast for LineEnding {
     fn new(node: Red) -> Option<Self> {
         if !node.is(Nodes::Token) {
@@ -685,7 +686,7 @@ impl LineEnding {
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct MdQuote(Red);
+pub struct MdQuote(pub(crate) Red);
 impl Ast for MdQuote {
     fn new(node: Red) -> Option<Self> {
         if !node.is(Nodes::Token) {
@@ -709,65 +710,7 @@ impl MdQuote {
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct Number(Red);
-impl Ast for Number {
-    fn new(node: Red) -> Option<Self> {
-        if !node.is(Nodes::Token) {
-            return None;
-        }
-        let green = node.green();
-        let tok = green.as_token()?;
-        if tok.value != "number" {
-            return None;
-        }
-        Some(Self(node))
-    }
-    fn red(&self) -> Red {
-        self.0.clone()
-    }
-}
-impl Number {
-    pub fn build() -> TokenBuilder<Number> {
-        TokenBuilder::new("number")
-    }
-}
-impl IntoBuilder<Literal> for TokenBuilder<Number> {
-    fn into_builder(self) -> AliasBuilder<Self, Literal> {
-        AliasBuilder::new(Nodes::Literal, self)
-    }
-}
-
-#[derive(Clone, Debug, Eq, PartialEq)]
-pub struct Text(Red);
-impl Ast for Text {
-    fn new(node: Red) -> Option<Self> {
-        if !node.is(Nodes::Token) {
-            return None;
-        }
-        let green = node.green();
-        let tok = green.as_token()?;
-        if tok.value != "text" {
-            return None;
-        }
-        Some(Self(node))
-    }
-    fn red(&self) -> Red {
-        self.0.clone()
-    }
-}
-impl Text {
-    pub fn build() -> TokenBuilder<Text> {
-        TokenBuilder::new("text")
-    }
-}
-impl IntoBuilder<InnerStringPart> for TokenBuilder<Text> {
-    fn into_builder(self) -> AliasBuilder<Self, InnerStringPart> {
-        AliasBuilder::new(Nodes::InnerStringPart, self)
-    }
-}
-
-#[derive(Clone, Debug, Eq, PartialEq)]
-pub struct True(Red);
+pub struct True(pub(crate) Red);
 impl Ast for True {
     fn new(node: Red) -> Option<Self> {
         if !node.is(Nodes::Token) {
@@ -796,7 +739,7 @@ impl IntoBuilder<Boolean> for TokenBuilder<True> {
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct OpenC(Red);
+pub struct OpenC(pub(crate) Red);
 impl Ast for OpenC {
     fn new(node: Red) -> Option<Self> {
         if !node.is(Nodes::Token) {
@@ -820,7 +763,7 @@ impl OpenC {
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct CloseC(Red);
+pub struct CloseC(pub(crate) Red);
 impl Ast for CloseC {
     fn new(node: Red) -> Option<Self> {
         if !node.is(Nodes::Token) {
@@ -844,33 +787,108 @@ impl CloseC {
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub enum Literal {
+pub enum Value {
     Number(Number),
     Boolean(Boolean),
+    Binary(Binary),
+    IdentPath(IdentPath),
+    Unary(Unary),
+    MdString(MdString),
+    String(String),
+    Strukt(Strukt),
+    Array(Array),
+    Identifier(Identifier),
+    Parens(Parens),
 }
-impl From<Number> for Literal {
+impl From<Number> for Value {
     fn from(val: Number) -> Self {
         Self::Number(val)
     }
 }
-impl From<Boolean> for Literal {
+impl From<Boolean> for Value {
     fn from(val: Boolean) -> Self {
         Self::Boolean(val)
     }
 }
-impl Ast for Literal {
+impl From<Binary> for Value {
+    fn from(val: Binary) -> Self {
+        Self::Binary(val)
+    }
+}
+impl From<IdentPath> for Value {
+    fn from(val: IdentPath) -> Self {
+        Self::IdentPath(val)
+    }
+}
+impl From<Unary> for Value {
+    fn from(val: Unary) -> Self {
+        Self::Unary(val)
+    }
+}
+impl From<MdString> for Value {
+    fn from(val: MdString) -> Self {
+        Self::MdString(val)
+    }
+}
+impl From<String> for Value {
+    fn from(val: String) -> Self {
+        Self::String(val)
+    }
+}
+impl From<Strukt> for Value {
+    fn from(val: Strukt) -> Self {
+        Self::Strukt(val)
+    }
+}
+impl From<Array> for Value {
+    fn from(val: Array) -> Self {
+        Self::Array(val)
+    }
+}
+impl From<Identifier> for Value {
+    fn from(val: Identifier) -> Self {
+        Self::Identifier(val)
+    }
+}
+impl From<Parens> for Value {
+    fn from(val: Parens) -> Self {
+        Self::Parens(val)
+    }
+}
+impl Ast for Value {
     fn new(node: Red) -> Option<Self> {
-        None.or_else(|| Number::new(node.clone()).map(Literal::Number))
-            .or_else(|| Boolean::new(node.clone()).map(Literal::Boolean))
+        if !node.is(Nodes::Value) {
+            return None;
+        }
+        None.or_else(|| Number::new(node.clone()).map(Value::Number))
+            .or_else(|| Boolean::new(node.clone()).map(Value::Boolean))
+            .or_else(|| Binary::new(node.clone()).map(Value::Binary))
+            .or_else(|| IdentPath::new(node.clone()).map(Value::IdentPath))
+            .or_else(|| Unary::new(node.clone()).map(Value::Unary))
+            .or_else(|| MdString::new(node.clone()).map(Value::MdString))
+            .or_else(|| String::new(node.clone()).map(Value::String))
+            .or_else(|| Strukt::new(node.clone()).map(Value::Strukt))
+            .or_else(|| Array::new(node.clone()).map(Value::Array))
+            .or_else(|| Identifier::new(node.clone()).map(Value::Identifier))
+            .or_else(|| Parens::new(node.clone()).map(Value::Parens))
     }
     fn red(&self) -> Red {
         match &self {
-            Literal::Number(node) => node.red(),
-            Literal::Boolean(node) => node.red(),
+            Value::Number(node) => node.red(),
+            Value::Boolean(node) => node.red(),
+            Value::Binary(node) => node.red(),
+            Value::IdentPath(node) => node.red(),
+            Value::Unary(node) => node.red(),
+            Value::MdString(node) => node.red(),
+            Value::String(node) => node.red(),
+            Value::Strukt(node) => node.red(),
+            Value::Array(node) => node.red(),
+            Value::Identifier(node) => node.red(),
+            Value::Parens(node) => node.red(),
         }
     }
 }
-impl Literal {
+impl Value {
     pub fn as_number(self) -> Option<Number> {
         match self {
             Self::Number(val) => Some(val),
@@ -880,6 +898,60 @@ impl Literal {
     pub fn as_boolean(self) -> Option<Boolean> {
         match self {
             Self::Boolean(val) => Some(val),
+            _ => None,
+        }
+    }
+    pub fn as_binary(self) -> Option<Binary> {
+        match self {
+            Self::Binary(val) => Some(val),
+            _ => None,
+        }
+    }
+    pub fn as_identpath(self) -> Option<IdentPath> {
+        match self {
+            Self::IdentPath(val) => Some(val),
+            _ => None,
+        }
+    }
+    pub fn as_unary(self) -> Option<Unary> {
+        match self {
+            Self::Unary(val) => Some(val),
+            _ => None,
+        }
+    }
+    pub fn as_mdstring(self) -> Option<MdString> {
+        match self {
+            Self::MdString(val) => Some(val),
+            _ => None,
+        }
+    }
+    pub fn as_string(self) -> Option<String> {
+        match self {
+            Self::String(val) => Some(val),
+            _ => None,
+        }
+    }
+    pub fn as_strukt(self) -> Option<Strukt> {
+        match self {
+            Self::Strukt(val) => Some(val),
+            _ => None,
+        }
+    }
+    pub fn as_array(self) -> Option<Array> {
+        match self {
+            Self::Array(val) => Some(val),
+            _ => None,
+        }
+    }
+    pub fn as_identifier(self) -> Option<Identifier> {
+        match self {
+            Self::Identifier(val) => Some(val),
+            _ => None,
+        }
+    }
+    pub fn as_parens(self) -> Option<Parens> {
+        match self {
+            Self::Parens(val) => Some(val),
             _ => None,
         }
     }
@@ -902,6 +974,9 @@ impl From<False> for Boolean {
 }
 impl Ast for Boolean {
     fn new(node: Red) -> Option<Self> {
+        if !node.is(Nodes::Boolean) {
+            return None;
+        }
         None.or_else(|| True::new(node.clone()).map(Boolean::True))
             .or_else(|| False::new(node.clone()).map(Boolean::False))
     }
@@ -950,6 +1025,9 @@ impl From<OpDot> for UnaryOp {
 }
 impl Ast for UnaryOp {
     fn new(node: Red) -> Option<Self> {
+        if !node.is(Nodes::UnaryOp) {
+            return None;
+        }
         None.or_else(|| OpMinus::new(node.clone()).map(UnaryOp::OpMinus))
             .or_else(|| OpBang::new(node.clone()).map(UnaryOp::OpBang))
             .or_else(|| OpDot::new(node.clone()).map(UnaryOp::OpDot))
@@ -985,10 +1063,16 @@ impl UnaryOp {
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum BinaryOp {
+    OpMinus(OpMinus),
     OpPlus(OpPlus),
     OpSlash(OpSlash),
     OpStar(OpStar),
     OpDEqual(OpDEqual),
+}
+impl From<OpMinus> for BinaryOp {
+    fn from(val: OpMinus) -> Self {
+        Self::OpMinus(val)
+    }
 }
 impl From<OpPlus> for BinaryOp {
     fn from(val: OpPlus) -> Self {
@@ -1012,13 +1096,18 @@ impl From<OpDEqual> for BinaryOp {
 }
 impl Ast for BinaryOp {
     fn new(node: Red) -> Option<Self> {
-        None.or_else(|| OpPlus::new(node.clone()).map(BinaryOp::OpPlus))
+        if !node.is(Nodes::BinaryOp) {
+            return None;
+        }
+        None.or_else(|| OpMinus::new(node.clone()).map(BinaryOp::OpMinus))
+            .or_else(|| OpPlus::new(node.clone()).map(BinaryOp::OpPlus))
             .or_else(|| OpSlash::new(node.clone()).map(BinaryOp::OpSlash))
             .or_else(|| OpStar::new(node.clone()).map(BinaryOp::OpStar))
             .or_else(|| OpDEqual::new(node.clone()).map(BinaryOp::OpDEqual))
     }
     fn red(&self) -> Red {
         match &self {
+            BinaryOp::OpMinus(node) => node.red(),
             BinaryOp::OpPlus(node) => node.red(),
             BinaryOp::OpSlash(node) => node.red(),
             BinaryOp::OpStar(node) => node.red(),
@@ -1027,6 +1116,12 @@ impl Ast for BinaryOp {
     }
 }
 impl BinaryOp {
+    pub fn as_opminus(self) -> Option<OpMinus> {
+        match self {
+            Self::OpMinus(val) => Some(val),
+            _ => None,
+        }
+    }
     pub fn as_opplus(self) -> Option<OpPlus> {
         match self {
             Self::OpPlus(val) => Some(val),
@@ -1070,6 +1165,9 @@ impl From<Interpolated> for InnerStringPart {
 }
 impl Ast for InnerStringPart {
     fn new(node: Red) -> Option<Self> {
+        if !node.is(Nodes::InnerStringPart) {
+            return None;
+        }
         None.or_else(|| Text::new(node.clone()).map(InnerStringPart::Text))
             .or_else(|| Interpolated::new(node.clone()).map(InnerStringPart::Interpolated))
     }
@@ -1112,6 +1210,9 @@ impl From<SubArticle> for ArticleItem {
 }
 impl Ast for ArticleItem {
     fn new(node: Red) -> Option<Self> {
+        if !node.is(Nodes::ArticleItem) {
+            return None;
+        }
         None.or_else(|| MainArticle::new(node.clone()).map(ArticleItem::MainArticle))
             .or_else(|| SubArticle::new(node.clone()).map(ArticleItem::SubArticle))
     }
@@ -1160,6 +1261,9 @@ impl From<ArticleRef> for ArticleBodyItem {
 }
 impl Ast for ArticleBodyItem {
     fn new(node: Red) -> Option<Self> {
+        if !node.is(Nodes::ArticleBodyItem) {
+            return None;
+        }
         None.or_else(|| Markdown::new(node.clone()).map(ArticleBodyItem::Markdown))
             .or_else(|| SubArticle::new(node.clone()).map(ArticleBodyItem::SubArticle))
             .or_else(|| ArticleRef::new(node.clone()).map(ArticleBodyItem::ArticleRef))
@@ -1196,11 +1300,17 @@ impl ArticleBodyItem {
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum MdValue {
     MdLink(MdLink),
+    MdCodeBlock(MdCodeBlock),
     Text(Text),
 }
 impl From<MdLink> for MdValue {
     fn from(val: MdLink) -> Self {
         Self::MdLink(val)
+    }
+}
+impl From<MdCodeBlock> for MdValue {
+    fn from(val: MdCodeBlock) -> Self {
+        Self::MdCodeBlock(val)
     }
 }
 impl From<Text> for MdValue {
@@ -1210,12 +1320,17 @@ impl From<Text> for MdValue {
 }
 impl Ast for MdValue {
     fn new(node: Red) -> Option<Self> {
+        if !node.is(Nodes::MdValue) {
+            return None;
+        }
         None.or_else(|| MdLink::new(node.clone()).map(MdValue::MdLink))
+            .or_else(|| MdCodeBlock::new(node.clone()).map(MdValue::MdCodeBlock))
             .or_else(|| Text::new(node.clone()).map(MdValue::Text))
     }
     fn red(&self) -> Red {
         match &self {
             MdValue::MdLink(node) => node.red(),
+            MdValue::MdCodeBlock(node) => node.red(),
             MdValue::Text(node) => node.red(),
         }
     }
@@ -1224,6 +1339,12 @@ impl MdValue {
     pub fn as_mdlink(self) -> Option<MdLink> {
         match self {
             Self::MdLink(val) => Some(val),
+            _ => None,
+        }
+    }
+    pub fn as_mdcodeblock(self) -> Option<MdCodeBlock> {
+        match self {
+            Self::MdCodeBlock(val) => Some(val),
             _ => None,
         }
     }
@@ -1236,243 +1357,12 @@ impl MdValue {
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct Value(Red);
-impl Ast for Value {
-    fn new(node: Red) -> Option<Self> {
-        if !node.is(Nodes::Value) {
-            return None;
-        }
-        node.green().as_node()?;
-        Some(Self(node))
-    }
-    fn red(&self) -> Red {
-        self.0.clone()
-    }
-}
-impl Value {
-    pub fn literal(&self) -> Option<Literal> {
-        self.0.children().filter_map(Literal::new).next()
-    }
-    pub fn binary(&self) -> Option<Binary> {
-        self.0.children().filter_map(Binary::new).next()
-    }
-    pub fn ident_path(&self) -> Option<IdentPath> {
-        self.0.children().filter_map(IdentPath::new).next()
-    }
-    pub fn unary(&self) -> Option<Unary> {
-        self.0.children().filter_map(Unary::new).next()
-    }
-    pub fn md_string(&self) -> Option<MdString> {
-        self.0.children().filter_map(MdString::new).next()
-    }
-    pub fn string(&self) -> Option<String> {
-        self.0.children().filter_map(String::new).next()
-    }
-    pub fn strukt(&self) -> Option<Strukt> {
-        self.0.children().filter_map(Strukt::new).next()
-    }
-    pub fn array(&self) -> Option<Array> {
-        self.0.children().filter_map(Array::new).next()
-    }
-    pub fn identifier_token(&self) -> Option<Identifier> {
-        self.0.children().filter_map(Identifier::new).next()
-    }
-    pub fn open_p_token(&self) -> Option<OpenP> {
-        self.0.children().filter_map(OpenP::new).next()
-    }
-    pub fn value(&self) -> Option<Value> {
-        self.0.children().filter_map(Value::new).next()
-    }
-    pub fn close_p_token(&self) -> Option<CloseP> {
-        self.0.children().filter_map(CloseP::new).next()
-    }
-    pub fn build<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(
-    ) -> ValueBuilder<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>
-    where
-        T0: AstBuilder<T = Literal>,
-        T1: AstBuilder<T = Binary>,
-        T2: AstBuilder<T = IdentPath>,
-        T3: AstBuilder<T = Unary>,
-        T4: AstBuilder<T = MdString>,
-        T5: AstBuilder<T = String>,
-        T6: AstBuilder<T = Strukt>,
-        T7: AstBuilder<T = Array>,
-        T8: AstBuilder<T = Identifier>,
-        T9: AstBuilder<T = OpenP>,
-        T10: AstBuilder<T = Value>,
-        T11: AstBuilder<T = CloseP>,
-    {
-        Default::default()
-    }
-}
-pub struct ValueBuilder<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>
-where
-    T0: AstBuilder<T = Literal>,
-    T1: AstBuilder<T = Binary>,
-    T2: AstBuilder<T = IdentPath>,
-    T3: AstBuilder<T = Unary>,
-    T4: AstBuilder<T = MdString>,
-    T5: AstBuilder<T = String>,
-    T6: AstBuilder<T = Strukt>,
-    T7: AstBuilder<T = Array>,
-    T8: AstBuilder<T = Identifier>,
-    T9: AstBuilder<T = OpenP>,
-    T10: AstBuilder<T = Value>,
-    T11: AstBuilder<T = CloseP>,
-{
-    literal: Option<T0>,
-    binary: Option<T1>,
-    ident_path: Option<T2>,
-    unary: Option<T3>,
-    md_string: Option<T4>,
-    string: Option<T5>,
-    strukt: Option<T6>,
-    array: Option<T7>,
-    identifier: Option<T8>,
-    open_p: Option<T9>,
-    value: Option<T10>,
-    close_p: Option<T11>,
-}
-impl<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> Default
-    for ValueBuilder<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>
-where
-    T0: AstBuilder<T = Literal>,
-    T1: AstBuilder<T = Binary>,
-    T2: AstBuilder<T = IdentPath>,
-    T3: AstBuilder<T = Unary>,
-    T4: AstBuilder<T = MdString>,
-    T5: AstBuilder<T = String>,
-    T6: AstBuilder<T = Strukt>,
-    T7: AstBuilder<T = Array>,
-    T8: AstBuilder<T = Identifier>,
-    T9: AstBuilder<T = OpenP>,
-    T10: AstBuilder<T = Value>,
-    T11: AstBuilder<T = CloseP>,
-{
-    fn default() -> Self {
-        Self {
-            literal: Default::default(),
-            binary: Default::default(),
-            ident_path: Default::default(),
-            unary: Default::default(),
-            md_string: Default::default(),
-            string: Default::default(),
-            strukt: Default::default(),
-            array: Default::default(),
-            identifier: Default::default(),
-            open_p: Default::default(),
-            value: Default::default(),
-            close_p: Default::default(),
-        }
-    }
-}
-impl<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>
-    ValueBuilder<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>
-where
-    T0: AstBuilder<T = Literal>,
-    T1: AstBuilder<T = Binary>,
-    T2: AstBuilder<T = IdentPath>,
-    T3: AstBuilder<T = Unary>,
-    T4: AstBuilder<T = MdString>,
-    T5: AstBuilder<T = String>,
-    T6: AstBuilder<T = Strukt>,
-    T7: AstBuilder<T = Array>,
-    T8: AstBuilder<T = Identifier>,
-    T9: AstBuilder<T = OpenP>,
-    T10: AstBuilder<T = Value>,
-    T11: AstBuilder<T = CloseP>,
-{
-    pub fn fill(
-        self,
-        literal: T0,
-        binary: T1,
-        ident_path: T2,
-        unary: T3,
-        md_string: T4,
-        string: T5,
-        strukt: T6,
-        array: T7,
-        identifier: T8,
-        open_p: T9,
-        value: T10,
-        close_p: T11,
-    ) -> Self {
-        Self {
-            literal: Some(literal),
-            binary: Some(binary),
-            ident_path: Some(ident_path),
-            unary: Some(unary),
-            md_string: Some(md_string),
-            string: Some(string),
-            strukt: Some(strukt),
-            array: Some(array),
-            identifier: Some(identifier),
-            open_p: Some(open_p),
-            value: Some(value),
-            close_p: Some(close_p),
-        }
-    }
-}
-impl<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> AstBuilder
-    for ValueBuilder<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>
-where
-    T0: AstBuilder<T = Literal>,
-    T1: AstBuilder<T = Binary>,
-    T2: AstBuilder<T = IdentPath>,
-    T3: AstBuilder<T = Unary>,
-    T4: AstBuilder<T = MdString>,
-    T5: AstBuilder<T = String>,
-    T6: AstBuilder<T = Strukt>,
-    T7: AstBuilder<T = Array>,
-    T8: AstBuilder<T = Identifier>,
-    T9: AstBuilder<T = OpenP>,
-    T10: AstBuilder<T = Value>,
-    T11: AstBuilder<T = CloseP>,
-{
-    type T = Value;
-    fn build(self, builder: &mut Cache) -> Value {
-        let green = AstBuilder::build_green(self, builder);
-        Value::new(Red::root(green)).unwrap()
-    }
-    fn build_boxed_green(self: Box<Self>, builder: &mut Cache) -> Green {
-        AstBuilder::build_green(*self, builder)
-    }
-    fn build_green(self, builder: &mut Cache) -> Green {
-        let children = None
-            .into_iter()
-            .chain(self.literal.map(|it| it.build_green(builder)).into_iter())
-            .chain(self.binary.map(|it| it.build_green(builder)).into_iter())
-            .chain(
-                self.ident_path
-                    .map(|it| it.build_green(builder))
-                    .into_iter(),
-            )
-            .chain(self.unary.map(|it| it.build_green(builder)).into_iter())
-            .chain(self.md_string.map(|it| it.build_green(builder)).into_iter())
-            .chain(self.string.map(|it| it.build_green(builder)).into_iter())
-            .chain(self.strukt.map(|it| it.build_green(builder)).into_iter())
-            .chain(self.array.map(|it| it.build_green(builder)).into_iter())
-            .chain(
-                self.identifier
-                    .map(|it| it.build_green(builder))
-                    .into_iter(),
-            )
-            .chain(self.open_p.map(|it| it.build_green(builder)).into_iter())
-            .chain(self.value.map(|it| it.build_green(builder)).into_iter())
-            .chain(self.close_p.map(|it| it.build_green(builder)).into_iter())
-            .collect();
-        builder.node(Nodes::Value, children)
-    }
-}
-
-#[derive(Clone, Debug, Eq, PartialEq)]
-pub struct Binary(Red);
+pub struct Binary(pub(crate) Red);
 impl Ast for Binary {
     fn new(node: Red) -> Option<Self> {
         if !node.is(Nodes::Binary) {
             return None;
         }
-        node.green().as_node()?;
         Some(Self(node))
     }
     fn red(&self) -> Red {
@@ -1481,13 +1371,13 @@ impl Ast for Binary {
 }
 impl Binary {
     pub fn left(&self) -> Option<Value> {
-        self.0.children().filter_map(Value::new).next()
+        self.0.children().filter_map(Value::new).nth(0usize)
     }
     pub fn binary_op(&self) -> Option<BinaryOp> {
-        self.0.children().filter_map(BinaryOp::new).next()
+        self.0.children().filter_map(BinaryOp::new).nth(0usize)
     }
     pub fn right(&self) -> Option<Value> {
-        self.0.children().filter_map(Value::new).next()
+        self.0.children().filter_map(Value::new).nth(1usize)
     }
     pub fn build<T0, T1, T2>() -> BinaryBuilder<T0, T1, T2>
     where
@@ -1560,15 +1450,24 @@ where
         builder.node(Nodes::Binary, children)
     }
 }
+impl<T0, T1, T2> IntoBuilder<Value> for BinaryBuilder<T0, T1, T2>
+where
+    T0: AstBuilder<T = Value>,
+    T1: AstBuilder<T = BinaryOp>,
+    T2: AstBuilder<T = Value>,
+{
+    fn into_builder(self) -> AliasBuilder<Self, Value> {
+        AliasBuilder::new(Nodes::Value, self)
+    }
+}
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct IdentPath(Red);
+pub struct IdentPath(pub(crate) Red);
 impl Ast for IdentPath {
     fn new(node: Red) -> Option<Self> {
         if !node.is(Nodes::IdentPath) {
             return None;
         }
-        node.green().as_node()?;
         Some(Self(node))
     }
     fn red(&self) -> Red {
@@ -1577,13 +1476,13 @@ impl Ast for IdentPath {
 }
 impl IdentPath {
     pub fn left(&self) -> Option<Value> {
-        self.0.children().filter_map(Value::new).next()
+        self.0.children().filter_map(Value::new).nth(0usize)
     }
     pub fn op_dot_token(&self) -> Option<OpDot> {
-        self.0.children().filter_map(OpDot::new).next()
+        self.0.children().filter_map(OpDot::new).nth(0usize)
     }
     pub fn right(&self) -> Option<Value> {
-        self.0.children().filter_map(Value::new).next()
+        self.0.children().filter_map(Value::new).nth(1usize)
     }
     pub fn build<T0, T1, T2>() -> IdentPathBuilder<T0, T1, T2>
     where
@@ -1656,15 +1555,24 @@ where
         builder.node(Nodes::IdentPath, children)
     }
 }
+impl<T0, T1, T2> IntoBuilder<Value> for IdentPathBuilder<T0, T1, T2>
+where
+    T0: AstBuilder<T = Value>,
+    T1: AstBuilder<T = OpDot>,
+    T2: AstBuilder<T = Value>,
+{
+    fn into_builder(self) -> AliasBuilder<Self, Value> {
+        AliasBuilder::new(Nodes::Value, self)
+    }
+}
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct Unary(Red);
+pub struct Unary(pub(crate) Red);
 impl Ast for Unary {
     fn new(node: Red) -> Option<Self> {
         if !node.is(Nodes::Unary) {
             return None;
         }
-        node.green().as_node()?;
         Some(Self(node))
     }
     fn red(&self) -> Red {
@@ -1673,10 +1581,10 @@ impl Ast for Unary {
 }
 impl Unary {
     pub fn unary_op(&self) -> Option<UnaryOp> {
-        self.0.children().filter_map(UnaryOp::new).next()
+        self.0.children().filter_map(UnaryOp::new).nth(0usize)
     }
     pub fn value(&self) -> Option<Value> {
-        self.0.children().filter_map(Value::new).next()
+        self.0.children().filter_map(Value::new).nth(0usize)
     }
     pub fn build<T0, T1>() -> UnaryBuilder<T0, T1>
     where
@@ -1740,15 +1648,23 @@ where
         builder.node(Nodes::Unary, children)
     }
 }
+impl<T0, T1> IntoBuilder<Value> for UnaryBuilder<T0, T1>
+where
+    T0: AstBuilder<T = UnaryOp>,
+    T1: AstBuilder<T = Value>,
+{
+    fn into_builder(self) -> AliasBuilder<Self, Value> {
+        AliasBuilder::new(Nodes::Value, self)
+    }
+}
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct MdString(Red);
+pub struct MdString(pub(crate) Red);
 impl Ast for MdString {
     fn new(node: Red) -> Option<Self> {
         if !node.is(Nodes::MdString) {
             return None;
         }
-        node.green().as_node()?;
         Some(Self(node))
     }
     fn red(&self) -> Red {
@@ -1757,13 +1673,13 @@ impl Ast for MdString {
 }
 impl MdString {
     pub fn md_quote_token(&self) -> Option<MdQuote> {
-        self.0.children().filter_map(MdQuote::new).next()
+        self.0.children().filter_map(MdQuote::new).nth(0usize)
     }
     pub fn markdown(&self) -> Option<Markdown> {
-        self.0.children().filter_map(Markdown::new).next()
+        self.0.children().filter_map(Markdown::new).nth(0usize)
     }
     pub fn dquote_token(&self) -> Option<DQuote> {
-        self.0.children().filter_map(DQuote::new).next()
+        self.0.children().filter_map(DQuote::new).nth(0usize)
     }
     pub fn build<T0, T1, T2>() -> MdStringBuilder<T0, T1, T2>
     where
@@ -1836,15 +1752,24 @@ where
         builder.node(Nodes::MdString, children)
     }
 }
+impl<T0, T1, T2> IntoBuilder<Value> for MdStringBuilder<T0, T1, T2>
+where
+    T0: AstBuilder<T = MdQuote>,
+    T1: AstBuilder<T = Markdown>,
+    T2: AstBuilder<T = DQuote>,
+{
+    fn into_builder(self) -> AliasBuilder<Self, Value> {
+        AliasBuilder::new(Nodes::Value, self)
+    }
+}
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct String(Red);
+pub struct String(pub(crate) Red);
 impl Ast for String {
     fn new(node: Red) -> Option<Self> {
         if !node.is(Nodes::String) {
             return None;
         }
-        node.green().as_node()?;
         Some(Self(node))
     }
     fn red(&self) -> Red {
@@ -1853,13 +1778,13 @@ impl Ast for String {
 }
 impl String {
     pub fn left_quote_token(&self) -> Option<DQuote> {
-        self.0.children().filter_map(DQuote::new).next()
+        self.0.children().filter_map(DQuote::new).nth(0usize)
     }
     pub fn inner_string(&self) -> Option<InnerString> {
-        self.0.children().filter_map(InnerString::new).next()
+        self.0.children().filter_map(InnerString::new).nth(0usize)
     }
     pub fn right_quote_token(&self) -> Option<DQuote> {
-        self.0.children().filter_map(DQuote::new).next()
+        self.0.children().filter_map(DQuote::new).nth(1usize)
     }
     pub fn build<T0, T1, T2>() -> StringBuilder<T0, T1, T2>
     where
@@ -1944,15 +1869,24 @@ where
         builder.node(Nodes::String, children)
     }
 }
+impl<T0, T1, T2> IntoBuilder<Value> for StringBuilder<T0, T1, T2>
+where
+    T0: AstBuilder<T = DQuote>,
+    T1: AstBuilder<T = InnerString>,
+    T2: AstBuilder<T = DQuote>,
+{
+    fn into_builder(self) -> AliasBuilder<Self, Value> {
+        AliasBuilder::new(Nodes::Value, self)
+    }
+}
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct Strukt(Red);
+pub struct Strukt(pub(crate) Red);
 impl Ast for Strukt {
     fn new(node: Red) -> Option<Self> {
         if !node.is(Nodes::Strukt) {
             return None;
         }
-        node.green().as_node()?;
         Some(Self(node))
     }
     fn red(&self) -> Red {
@@ -1961,13 +1895,13 @@ impl Ast for Strukt {
 }
 impl Strukt {
     pub fn open_c_token(&self) -> Option<OpenC> {
-        self.0.children().filter_map(OpenC::new).next()
+        self.0.children().filter_map(OpenC::new).nth(0usize)
     }
     pub fn pairs(&self) -> impl Iterator<Item = StruktPair> + '_ {
         self.0.children().filter_map(StruktPair::new)
     }
     pub fn close_c_token(&self) -> Option<CloseC> {
-        self.0.children().filter_map(CloseC::new).next()
+        self.0.children().filter_map(CloseC::new).nth(0usize)
     }
     pub fn build<T0, T1, T2>() -> StruktBuilder<T0, T1, T2>
     where
@@ -2060,15 +1994,24 @@ where
         builder.node(Nodes::Strukt, children)
     }
 }
+impl<T0, T1, T2> IntoBuilder<Value> for StruktBuilder<T0, T1, T2>
+where
+    T0: AstBuilder<T = OpenC>,
+    T1: AstBuilder<T = Comma>,
+    T2: AstBuilder<T = CloseC>,
+{
+    fn into_builder(self) -> AliasBuilder<Self, Value> {
+        AliasBuilder::new(Nodes::Value, self)
+    }
+}
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct Array(Red);
+pub struct Array(pub(crate) Red);
 impl Ast for Array {
     fn new(node: Red) -> Option<Self> {
         if !node.is(Nodes::Array) {
             return None;
         }
-        node.green().as_node()?;
         Some(Self(node))
     }
     fn red(&self) -> Red {
@@ -2077,13 +2020,13 @@ impl Ast for Array {
 }
 impl Array {
     pub fn open_b_token(&self) -> Option<OpenB> {
-        self.0.children().filter_map(OpenB::new).next()
+        self.0.children().filter_map(OpenB::new).nth(0usize)
     }
     pub fn values(&self) -> impl Iterator<Item = Value> + '_ {
         self.0.children().filter_map(Value::new)
     }
     pub fn close_b_token(&self) -> Option<CloseB> {
-        self.0.children().filter_map(CloseB::new).next()
+        self.0.children().filter_map(CloseB::new).nth(0usize)
     }
     pub fn build<T0, T1, T2>() -> ArrayBuilder<T0, T1, T2>
     where
@@ -2176,15 +2119,129 @@ where
         builder.node(Nodes::Array, children)
     }
 }
+impl<T0, T1, T2> IntoBuilder<Value> for ArrayBuilder<T0, T1, T2>
+where
+    T0: AstBuilder<T = OpenB>,
+    T1: AstBuilder<T = Comma>,
+    T2: AstBuilder<T = CloseB>,
+{
+    fn into_builder(self) -> AliasBuilder<Self, Value> {
+        AliasBuilder::new(Nodes::Value, self)
+    }
+}
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct Markdown(Red);
+pub struct Parens(pub(crate) Red);
+impl Ast for Parens {
+    fn new(node: Red) -> Option<Self> {
+        if !node.is(Nodes::Parens) {
+            return None;
+        }
+        Some(Self(node))
+    }
+    fn red(&self) -> Red {
+        self.0.clone()
+    }
+}
+impl Parens {
+    pub fn open_p_token(&self) -> Option<OpenP> {
+        self.0.children().filter_map(OpenP::new).nth(0usize)
+    }
+    pub fn value(&self) -> Option<Value> {
+        self.0.children().filter_map(Value::new).nth(0usize)
+    }
+    pub fn close_p_token(&self) -> Option<CloseP> {
+        self.0.children().filter_map(CloseP::new).nth(0usize)
+    }
+    pub fn build<T0, T1, T2>() -> ParensBuilder<T0, T1, T2>
+    where
+        T0: AstBuilder<T = OpenP>,
+        T1: AstBuilder<T = Value>,
+        T2: AstBuilder<T = CloseP>,
+    {
+        Default::default()
+    }
+}
+pub struct ParensBuilder<T0, T1, T2>
+where
+    T0: AstBuilder<T = OpenP>,
+    T1: AstBuilder<T = Value>,
+    T2: AstBuilder<T = CloseP>,
+{
+    open_p: Option<T0>,
+    value: Option<T1>,
+    close_p: Option<T2>,
+}
+impl<T0, T1, T2> Default for ParensBuilder<T0, T1, T2>
+where
+    T0: AstBuilder<T = OpenP>,
+    T1: AstBuilder<T = Value>,
+    T2: AstBuilder<T = CloseP>,
+{
+    fn default() -> Self {
+        Self {
+            open_p: Default::default(),
+            value: Default::default(),
+            close_p: Default::default(),
+        }
+    }
+}
+impl<T0, T1, T2> ParensBuilder<T0, T1, T2>
+where
+    T0: AstBuilder<T = OpenP>,
+    T1: AstBuilder<T = Value>,
+    T2: AstBuilder<T = CloseP>,
+{
+    pub fn fill(self, open_p: T0, value: T1, close_p: T2) -> Self {
+        Self {
+            open_p: Some(open_p),
+            value: Some(value),
+            close_p: Some(close_p),
+        }
+    }
+}
+impl<T0, T1, T2> AstBuilder for ParensBuilder<T0, T1, T2>
+where
+    T0: AstBuilder<T = OpenP>,
+    T1: AstBuilder<T = Value>,
+    T2: AstBuilder<T = CloseP>,
+{
+    type T = Parens;
+    fn build(self, builder: &mut Cache) -> Parens {
+        let green = AstBuilder::build_green(self, builder);
+        Parens::new(Red::root(green)).unwrap()
+    }
+    fn build_boxed_green(self: Box<Self>, builder: &mut Cache) -> Green {
+        AstBuilder::build_green(*self, builder)
+    }
+    fn build_green(self, builder: &mut Cache) -> Green {
+        let children = None
+            .into_iter()
+            .chain(self.open_p.map(|it| it.build_green(builder)).into_iter())
+            .chain(self.value.map(|it| it.build_green(builder)).into_iter())
+            .chain(self.close_p.map(|it| it.build_green(builder)).into_iter())
+            .collect();
+        builder.node(Nodes::Parens, children)
+    }
+}
+impl<T0, T1, T2> IntoBuilder<Value> for ParensBuilder<T0, T1, T2>
+where
+    T0: AstBuilder<T = OpenP>,
+    T1: AstBuilder<T = Value>,
+    T2: AstBuilder<T = CloseP>,
+{
+    fn into_builder(self) -> AliasBuilder<Self, Value> {
+        AliasBuilder::new(Nodes::Value, self)
+    }
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct Markdown(pub(crate) Red);
 impl Ast for Markdown {
     fn new(node: Red) -> Option<Self> {
         if !node.is(Nodes::Markdown) {
             return None;
         }
-        node.green().as_node()?;
         Some(Self(node))
     }
     fn red(&self) -> Red {
@@ -2243,13 +2300,12 @@ impl IntoBuilder<ArticleBodyItem> for MarkdownBuilder {
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct InnerString(Red);
+pub struct InnerString(pub(crate) Red);
 impl Ast for InnerString {
     fn new(node: Red) -> Option<Self> {
         if !node.is(Nodes::InnerString) {
             return None;
         }
-        node.green().as_node()?;
         Some(Self(node))
     }
     fn red(&self) -> Red {
@@ -2257,7 +2313,7 @@ impl Ast for InnerString {
     }
 }
 impl InnerString {
-    pub fn inner_string_part(&self) -> impl Iterator<Item = InnerStringPart> + '_ {
+    pub fn parts(&self) -> impl Iterator<Item = InnerStringPart> + '_ {
         self.0.children().filter_map(InnerStringPart::new)
     }
     pub fn build() -> InnerStringBuilder {
@@ -2265,18 +2321,18 @@ impl InnerString {
     }
 }
 pub struct InnerStringBuilder {
-    inner_string_part: Vec<Box<dyn AstBuilder<T = InnerStringPart>>>,
+    parts: Vec<Box<dyn AstBuilder<T = InnerStringPart>>>,
 }
 impl Default for InnerStringBuilder {
     fn default() -> Self {
         Self {
-            inner_string_part: Default::default(),
+            parts: Default::default(),
         }
     }
 }
 impl InnerStringBuilder {
-    pub fn fill(self, inner_string_part: Vec<Box<dyn AstBuilder<T = InnerStringPart>>>) -> Self {
-        Self { inner_string_part }
+    pub fn fill(self, parts: Vec<Box<dyn AstBuilder<T = InnerStringPart>>>) -> Self {
+        Self { parts }
     }
 }
 impl AstBuilder for InnerStringBuilder {
@@ -2292,7 +2348,7 @@ impl AstBuilder for InnerStringBuilder {
         let children = None
             .into_iter()
             .chain({
-                self.inner_string_part
+                self.parts
                     .into_iter()
                     .map(|it| it.build_boxed_green(builder))
                     .collect::<Vec<_>>()
@@ -2303,13 +2359,12 @@ impl AstBuilder for InnerStringBuilder {
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct Interpolated(Red);
+pub struct Interpolated(pub(crate) Red);
 impl Ast for Interpolated {
     fn new(node: Red) -> Option<Self> {
         if !node.is(Nodes::Interpolated) {
             return None;
         }
-        node.green().as_node()?;
         Some(Self(node))
     }
     fn red(&self) -> Red {
@@ -2318,13 +2373,13 @@ impl Ast for Interpolated {
 }
 impl Interpolated {
     pub fn open_i_token(&self) -> Option<OpenI> {
-        self.0.children().filter_map(OpenI::new).next()
+        self.0.children().filter_map(OpenI::new).nth(0usize)
     }
     pub fn value(&self) -> Option<Value> {
-        self.0.children().filter_map(Value::new).next()
+        self.0.children().filter_map(Value::new).nth(0usize)
     }
     pub fn close_i_token(&self) -> Option<CloseI> {
-        self.0.children().filter_map(CloseI::new).next()
+        self.0.children().filter_map(CloseI::new).nth(0usize)
     }
     pub fn build<T0, T1, T2>() -> InterpolatedBuilder<T0, T1, T2>
     where
@@ -2409,13 +2464,12 @@ where
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct StruktPair(Red);
+pub struct StruktPair(pub(crate) Red);
 impl Ast for StruktPair {
     fn new(node: Red) -> Option<Self> {
         if !node.is(Nodes::StruktPair) {
             return None;
         }
-        node.green().as_node()?;
         Some(Self(node))
     }
     fn red(&self) -> Red {
@@ -2424,13 +2478,13 @@ impl Ast for StruktPair {
 }
 impl StruktPair {
     pub fn key(&self) -> Option<Key> {
-        self.0.children().filter_map(Key::new).next()
+        self.0.children().filter_map(Key::new).nth(0usize)
     }
     pub fn op_assign_token(&self) -> Option<OpAssign> {
-        self.0.children().filter_map(OpAssign::new).next()
+        self.0.children().filter_map(OpAssign::new).nth(0usize)
     }
     pub fn value(&self) -> Option<Value> {
-        self.0.children().filter_map(Value::new).next()
+        self.0.children().filter_map(Value::new).nth(0usize)
     }
     pub fn build<T0, T1, T2>() -> StruktPairBuilder<T0, T1, T2>
     where
@@ -2505,13 +2559,12 @@ where
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct Key(Red);
+pub struct Key(pub(crate) Red);
 impl Ast for Key {
     fn new(node: Red) -> Option<Self> {
         if !node.is(Nodes::Key) {
             return None;
         }
-        node.green().as_node()?;
         Some(Self(node))
     }
     fn red(&self) -> Red {
@@ -2520,7 +2573,7 @@ impl Ast for Key {
 }
 impl Key {
     pub fn identifier_token(&self) -> Option<Identifier> {
-        self.0.children().filter_map(Identifier::new).next()
+        self.0.children().filter_map(Identifier::new).nth(0usize)
     }
     pub fn build<T0>() -> KeyBuilder<T0>
     where
@@ -2581,13 +2634,12 @@ where
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct MainArticle(Red);
+pub struct MainArticle(pub(crate) Red);
 impl Ast for MainArticle {
     fn new(node: Red) -> Option<Self> {
         if !node.is(Nodes::MainArticle) {
             return None;
         }
-        node.green().as_node()?;
         Some(Self(node))
     }
     fn red(&self) -> Red {
@@ -2596,10 +2648,10 @@ impl Ast for MainArticle {
 }
 impl MainArticle {
     pub fn article_header(&self) -> Option<ArticleHeader> {
-        self.0.children().filter_map(ArticleHeader::new).next()
+        self.0.children().filter_map(ArticleHeader::new).nth(0usize)
     }
     pub fn article_body(&self) -> Option<ArticleBody> {
-        self.0.children().filter_map(ArticleBody::new).next()
+        self.0.children().filter_map(ArticleBody::new).nth(0usize)
     }
     pub fn build<T0, T1>() -> MainArticleBuilder<T0, T1>
     where
@@ -2682,13 +2734,12 @@ where
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct SubArticle(Red);
+pub struct SubArticle(pub(crate) Red);
 impl Ast for SubArticle {
     fn new(node: Red) -> Option<Self> {
         if !node.is(Nodes::SubArticle) {
             return None;
         }
-        node.green().as_node()?;
         Some(Self(node))
     }
     fn red(&self) -> Red {
@@ -2697,13 +2748,16 @@ impl Ast for SubArticle {
 }
 impl SubArticle {
     pub fn sub_article_header(&self) -> Option<SubArticleHeader> {
-        self.0.children().filter_map(SubArticleHeader::new).next()
+        self.0
+            .children()
+            .filter_map(SubArticleHeader::new)
+            .nth(0usize)
     }
     pub fn article_body(&self) -> Option<ArticleBody> {
-        self.0.children().filter_map(ArticleBody::new).next()
+        self.0.children().filter_map(ArticleBody::new).nth(0usize)
     }
     pub fn plus_plus_end_token(&self) -> Option<PlusPlusEnd> {
-        self.0.children().filter_map(PlusPlusEnd::new).next()
+        self.0.children().filter_map(PlusPlusEnd::new).nth(0usize)
     }
     pub fn build<T0, T1, T2>() -> SubArticleBuilder<T0, T1, T2>
     where
@@ -2800,13 +2854,12 @@ where
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct ArticleHeader(Red);
+pub struct ArticleHeader(pub(crate) Red);
 impl Ast for ArticleHeader {
     fn new(node: Red) -> Option<Self> {
         if !node.is(Nodes::ArticleHeader) {
             return None;
         }
-        node.green().as_node()?;
         Some(Self(node))
     }
     fn red(&self) -> Red {
@@ -2815,28 +2868,28 @@ impl Ast for ArticleHeader {
 }
 impl ArticleHeader {
     pub fn start_token(&self) -> Option<ThreePlus> {
-        self.0.children().filter_map(ThreePlus::new).next()
+        self.0.children().filter_map(ThreePlus::new).nth(0usize)
     }
     pub fn item_ident_token(&self) -> Option<ItemIdent> {
-        self.0.children().filter_map(ItemIdent::new).next()
+        self.0.children().filter_map(ItemIdent::new).nth(0usize)
     }
     pub fn op_colon_token(&self) -> Option<OpColon> {
-        self.0.children().filter_map(OpColon::new).next()
+        self.0.children().filter_map(OpColon::new).nth(0usize)
     }
     pub fn article_item_id_token(&self) -> Option<ArticleItemId> {
-        self.0.children().filter_map(ArticleItemId::new).next()
+        self.0.children().filter_map(ArticleItemId::new).nth(0usize)
     }
     pub fn separator_token(&self) -> Option<ThreePlus> {
-        self.0.children().filter_map(ThreePlus::new).next()
+        self.0.children().filter_map(ThreePlus::new).nth(1usize)
     }
     pub fn line_ending_token(&self) -> Option<LineEnding> {
-        self.0.children().filter_map(LineEnding::new).next()
+        self.0.children().filter_map(LineEnding::new).nth(0usize)
     }
     pub fn article_header_values(&self) -> Option<ArticleHeaderValues> {
         self.0
             .children()
             .filter_map(ArticleHeaderValues::new)
-            .next()
+            .nth(0usize)
     }
     pub fn build<T0, T1, T2, T3, T4, T5, T6>() -> ArticleHeaderBuilder<T0, T1, T2, T3, T4, T5, T6>
     where
@@ -2972,13 +3025,12 @@ where
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct ArticleBody(Red);
+pub struct ArticleBody(pub(crate) Red);
 impl Ast for ArticleBody {
     fn new(node: Red) -> Option<Self> {
         if !node.is(Nodes::ArticleBody) {
             return None;
         }
-        node.green().as_node()?;
         Some(Self(node))
     }
     fn red(&self) -> Red {
@@ -2987,10 +3039,10 @@ impl Ast for ArticleBody {
 }
 impl ArticleBody {
     pub fn three_plus_token(&self) -> Option<ThreePlus> {
-        self.0.children().filter_map(ThreePlus::new).next()
+        self.0.children().filter_map(ThreePlus::new).nth(0usize)
     }
     pub fn line_ending_token(&self) -> Option<LineEnding> {
-        self.0.children().filter_map(LineEnding::new).next()
+        self.0.children().filter_map(LineEnding::new).nth(0usize)
     }
     pub fn items(&self) -> impl Iterator<Item = ArticleBodyItem> + '_ {
         self.0.children().filter_map(ArticleBodyItem::new)
@@ -3081,13 +3133,12 @@ where
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct SubArticleHeader(Red);
+pub struct SubArticleHeader(pub(crate) Red);
 impl Ast for SubArticleHeader {
     fn new(node: Red) -> Option<Self> {
         if !node.is(Nodes::SubArticleHeader) {
             return None;
         }
-        node.green().as_node()?;
         Some(Self(node))
     }
     fn red(&self) -> Red {
@@ -3096,28 +3147,28 @@ impl Ast for SubArticleHeader {
 }
 impl SubArticleHeader {
     pub fn plus_plus_token(&self) -> Option<PlusPlus> {
-        self.0.children().filter_map(PlusPlus::new).next()
+        self.0.children().filter_map(PlusPlus::new).nth(0usize)
     }
     pub fn item_ident_token(&self) -> Option<ItemIdent> {
-        self.0.children().filter_map(ItemIdent::new).next()
+        self.0.children().filter_map(ItemIdent::new).nth(0usize)
     }
     pub fn op_colon_token(&self) -> Option<OpColon> {
-        self.0.children().filter_map(OpColon::new).next()
+        self.0.children().filter_map(OpColon::new).nth(0usize)
     }
     pub fn article_item_id_token(&self) -> Option<ArticleItemId> {
-        self.0.children().filter_map(ArticleItemId::new).next()
+        self.0.children().filter_map(ArticleItemId::new).nth(0usize)
     }
     pub fn three_plus_token(&self) -> Option<ThreePlus> {
-        self.0.children().filter_map(ThreePlus::new).next()
+        self.0.children().filter_map(ThreePlus::new).nth(0usize)
     }
     pub fn line_ending_token(&self) -> Option<LineEnding> {
-        self.0.children().filter_map(LineEnding::new).next()
+        self.0.children().filter_map(LineEnding::new).nth(0usize)
     }
     pub fn article_header_values(&self) -> Option<ArticleHeaderValues> {
         self.0
             .children()
             .filter_map(ArticleHeaderValues::new)
-            .next()
+            .nth(0usize)
     }
     pub fn build<T0, T1, T2, T3, T4, T5, T6>() -> SubArticleHeaderBuilder<T0, T1, T2, T3, T4, T5, T6>
     where
@@ -3257,13 +3308,12 @@ where
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct ArticleHeaderValues(Red);
+pub struct ArticleHeaderValues(pub(crate) Red);
 impl Ast for ArticleHeaderValues {
     fn new(node: Red) -> Option<Self> {
         if !node.is(Nodes::ArticleHeaderValues) {
             return None;
         }
-        node.green().as_node()?;
         Some(Self(node))
     }
     fn red(&self) -> Red {
@@ -3343,13 +3393,12 @@ where
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct ArticleRef(Red);
+pub struct ArticleRef(pub(crate) Red);
 impl Ast for ArticleRef {
     fn new(node: Red) -> Option<Self> {
         if !node.is(Nodes::ArticleRef) {
             return None;
         }
-        node.green().as_node()?;
         Some(Self(node))
     }
     fn red(&self) -> Red {
@@ -3358,19 +3407,19 @@ impl Ast for ArticleRef {
 }
 impl ArticleRef {
     pub fn open_bl_token(&self) -> Option<OpenBl> {
-        self.0.children().filter_map(OpenBl::new).next()
+        self.0.children().filter_map(OpenBl::new).nth(0usize)
     }
     pub fn item_ident_token(&self) -> Option<ItemIdent> {
-        self.0.children().filter_map(ItemIdent::new).next()
+        self.0.children().filter_map(ItemIdent::new).nth(0usize)
     }
     pub fn op_colon_token(&self) -> Option<OpColon> {
-        self.0.children().filter_map(OpColon::new).next()
+        self.0.children().filter_map(OpColon::new).nth(0usize)
     }
     pub fn article_item_id_token(&self) -> Option<ArticleItemId> {
-        self.0.children().filter_map(ArticleItemId::new).next()
+        self.0.children().filter_map(ArticleItemId::new).nth(0usize)
     }
     pub fn close_bl_token(&self) -> Option<CloseBl> {
-        self.0.children().filter_map(CloseBl::new).next()
+        self.0.children().filter_map(CloseBl::new).nth(0usize)
     }
     pub fn build<T0, T1, T2, T3, T4>() -> ArticleRefBuilder<T0, T1, T2, T3, T4>
     where
@@ -3490,13 +3539,12 @@ where
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct MdLink(Red);
+pub struct MdLink(pub(crate) Red);
 impl Ast for MdLink {
     fn new(node: Red) -> Option<Self> {
         if !node.is(Nodes::MdLink) {
             return None;
         }
-        node.green().as_node()?;
         Some(Self(node))
     }
     fn red(&self) -> Red {
@@ -3508,10 +3556,10 @@ impl MdLink {
         self.0.children().filter_map(MdValue::new)
     }
     pub fn md_link_url_token(&self) -> Option<MdLinkUrl> {
-        self.0.children().filter_map(MdLinkUrl::new).next()
+        self.0.children().filter_map(MdLinkUrl::new).nth(0usize)
     }
     pub fn md_link_title_token(&self) -> Option<MdLinkTitle> {
-        self.0.children().filter_map(MdLinkTitle::new).next()
+        self.0.children().filter_map(MdLinkTitle::new).nth(0usize)
     }
     pub fn build<T1, T2>() -> MdLinkBuilder<T1, T2>
     where
@@ -3601,6 +3649,118 @@ impl<T1, T2> IntoBuilder<MdValue> for MdLinkBuilder<T1, T2>
 where
     T1: AstBuilder<T = MdLinkUrl>,
     T2: AstBuilder<T = MdLinkTitle>,
+{
+    fn into_builder(self) -> AliasBuilder<Self, MdValue> {
+        AliasBuilder::new(Nodes::MdValue, self)
+    }
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct MdCodeBlock(pub(crate) Red);
+impl Ast for MdCodeBlock {
+    fn new(node: Red) -> Option<Self> {
+        if !node.is(Nodes::MdCodeBlock) {
+            return None;
+        }
+        Some(Self(node))
+    }
+    fn red(&self) -> Red {
+        self.0.clone()
+    }
+}
+impl MdCodeBlock {
+    pub fn start_token(&self) -> Option<Fences> {
+        self.0.children().filter_map(Fences::new).nth(0usize)
+    }
+    pub fn md_code_block_lang_token(&self) -> Option<MdCodeBlockLang> {
+        self.0
+            .children()
+            .filter_map(MdCodeBlockLang::new)
+            .nth(0usize)
+    }
+    pub fn end_token(&self) -> Option<Fences> {
+        self.0.children().filter_map(Fences::new).nth(1usize)
+    }
+    pub fn build<T0, T1, T2>() -> MdCodeBlockBuilder<T0, T1, T2>
+    where
+        T0: AstBuilder<T = Fences>,
+        T1: AstBuilder<T = MdCodeBlockLang>,
+        T2: AstBuilder<T = Fences>,
+    {
+        Default::default()
+    }
+}
+pub struct MdCodeBlockBuilder<T0, T1, T2>
+where
+    T0: AstBuilder<T = Fences>,
+    T1: AstBuilder<T = MdCodeBlockLang>,
+    T2: AstBuilder<T = Fences>,
+{
+    start: Option<T0>,
+    md_code_block_lang: Option<T1>,
+    end: Option<T2>,
+}
+impl<T0, T1, T2> Default for MdCodeBlockBuilder<T0, T1, T2>
+where
+    T0: AstBuilder<T = Fences>,
+    T1: AstBuilder<T = MdCodeBlockLang>,
+    T2: AstBuilder<T = Fences>,
+{
+    fn default() -> Self {
+        Self {
+            start: Default::default(),
+            md_code_block_lang: Default::default(),
+            end: Default::default(),
+        }
+    }
+}
+impl<T0, T1, T2> MdCodeBlockBuilder<T0, T1, T2>
+where
+    T0: AstBuilder<T = Fences>,
+    T1: AstBuilder<T = MdCodeBlockLang>,
+    T2: AstBuilder<T = Fences>,
+{
+    pub fn fill(self, start: T0, md_code_block_lang: T1, end: T2) -> Self {
+        Self {
+            start: Some(start),
+            md_code_block_lang: Some(md_code_block_lang),
+            end: Some(end),
+        }
+    }
+}
+impl<T0, T1, T2> AstBuilder for MdCodeBlockBuilder<T0, T1, T2>
+where
+    T0: AstBuilder<T = Fences>,
+    T1: AstBuilder<T = MdCodeBlockLang>,
+    T2: AstBuilder<T = Fences>,
+{
+    type T = MdCodeBlock;
+    fn build(self, builder: &mut Cache) -> MdCodeBlock {
+        let green = AstBuilder::build_green(self, builder);
+        MdCodeBlock::new(Red::root(green)).unwrap()
+    }
+    fn build_boxed_green(self: Box<Self>, builder: &mut Cache) -> Green {
+        AstBuilder::build_green(*self, builder)
+    }
+    fn build_green(self, builder: &mut Cache) -> Green {
+        let children = None
+            .into_iter()
+            .chain(self.start.map(|it| it.build_green(builder)).into_iter())
+            .chain(
+                self.md_code_block_lang
+                    .map(|it| it.build_green(builder))
+                    .into_iter(),
+            )
+            .chain(self.end.map(|it| it.build_green(builder)).into_iter())
+            .collect();
+        builder.node(Nodes::MdCodeBlock, children)
+    }
+}
+impl<T0, T1, T2> IntoBuilder<MdValue> for MdCodeBlockBuilder<T0, T1, T2>
+where
+    T0: AstBuilder<T = Fences>,
+    T1: AstBuilder<T = MdCodeBlockLang>,
+    T2: AstBuilder<T = Fences>,
 {
     fn into_builder(self) -> AliasBuilder<Self, MdValue> {
         AliasBuilder::new(Nodes::MdValue, self)

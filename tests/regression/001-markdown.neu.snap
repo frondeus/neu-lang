@@ -17,8 +17,8 @@ Root, Value, IdentPath @ 0..105
             Value, String @ 14..30
                 token @ 14..15 = `"`
                 InnerString @ 15..29
-                    token @ 15..19 = `HP: `
-                    Interpolated @ 19..29
+                    InnerStringPart, token @ 15..19 = `HP: `
+                    InnerStringPart, Interpolated @ 19..29
                         token @ 19..21 = `${`
                         Value, Binary @ 21..28
                             Value, number, token @ 21..24 = `2` ; leading: ` ` ; trailing: ` `
@@ -33,7 +33,7 @@ Root, Value, IdentPath @ 0..105
             Value, String @ 43..67
                 token @ 43..44 = `"`
                 InnerString @ 44..66
-                    token @ 44..66 = `[AB](http://google.pl)`
+                    InnerStringPart, token @ 44..66 = `[AB](http://google.pl)`
                 token @ 66..67 = `"`
         token @ 67..68 = `,`
         StruktPair @ 68..97
@@ -42,7 +42,7 @@ Root, Value, IdentPath @ 0..105
             Value, String @ 80..97
                 token @ 80..81 = `"`
                 InnerString @ 81..96
-                    token @ 81..96 = `**foo \`4\` bar**`
+                    InnerStringPart, token @ 81..96 = `**foo \`4\` bar**`
                 token @ 96..97 = `"`
         token @ 97..99 = `}` ; leading: `\n`
     BinaryOp, token @ 99..100 = `.`

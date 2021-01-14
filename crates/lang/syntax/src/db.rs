@@ -1,6 +1,6 @@
 use crate::ast::{ArticleItem, MainArticle, Value};
 use neu_canceled::Canceled;
-use microtree_parser::{DbgSink, GreenSink, ParseResult, State};
+use microtree_parser::{GreenSink, ParseResult, State};
 use microtree::{Ast, Red};
 use std::collections::HashSet;
 use std::sync::Arc;
@@ -52,7 +52,7 @@ pub trait Parser: salsa::Database {
 fn parse_syntax(db: &dyn Parser, file: FileId) -> Arc<ParseResult> {
     Canceled::cancel_if(db.salsa_runtime());
     let file_data = db.lookup_file_id(file);
-    dbg!(&file_data);
+    //dbg!(&file_data);
     match file_data.1 {
         FileKind::Md => db.parse_md_syntax(file),
         FileKind::Neu => db.parse_neu_syntax(file),
@@ -78,11 +78,11 @@ fn parse_md_syntax(db: &dyn Parser, path: FileId) -> Arc<ParseResult> {
 
     let input = db.input(path);
     let input = input.as_str();
-    dbg!(&input);
+    //dbg!(&input);
 
-    let _dbg_sink: DbgSink = State::parse(Lexer::new(input), parser());
+    //let _dbg_sink: DbgSink = State::parse(Lexer::new(input), parser());
     let sink: GreenSink = State::parse(Lexer::new(input), parser());
-    dbg!(Arc::new(sink.finish()))
+    Arc::new(sink.finish())
 }
 
 fn parse_all_neu(db: &dyn Parser) -> Vec<(FileId, Value)> {
@@ -104,7 +104,6 @@ fn parse_all_mds(db: &dyn Parser) -> Vec<(Kind, ArticleId, FileId, ArticleItem)>
         .iter()
         .filter_map(|md| {
             let parsed = db.parse_syntax(*md);
-            dbg!(&parsed);
             let red = Red::root(parsed.root.clone());
             let main = MainArticle::new(red)?;
             Some((md, main))
@@ -121,15 +120,19 @@ fn parse_all_mds(db: &dyn Parser) -> Vec<(Kind, ArticleId, FileId, ArticleItem)>
             Some((md, item)).into_iter().chain(items)
         })
         .filter_map(|(md, article_item)| {
+            //dbg!(&article_item);
             let kind = article_item
                 .item_ident()?
                 .red()
                 .to_string();
+            //dbg!(&kind);
 
             let id = article_item
                 .item_id()?
                 .red()
                 .to_string();
+
+            //dbg!(&id);
 
             Some((kind, id, *md, article_item))
         })

@@ -4,21 +4,22 @@ md"*foo `1 + 2` bar*"
 
 [parser]
 --- GREEN TREE ---
-Root, Value, Markdown @ 0..21
+Root, Value, MdString @ 0..21
     token @ 0..3 = `md"`
-    MdValue, MdParagraph @ 3..20
-        MdValue, MdEmphasis @ 3..20
-            token @ 3..4 = `*`
-            MdValue, MdText @ 4..8 = `foo `
-            token @ 8..9 = `\``
-            MdValue, Interpolated @ 9..14
-                Value, Binary @ 9..14
-                    Value, number, token @ 9..11 = `1` ; trailing: ` `
-                    BinaryOp, token @ 11..13 = `+` ; trailing: ` `
-                    Value, number, token @ 13..14 = `2`
-            token @ 14..15 = `\``
-            MdValue, MdText @ 15..19 = ` bar`
-            token @ 19..20 = `*`
+    Markdown @ 3..20
+        MdValue, MdParagraph @ 3..20
+            MdValue, MdEmphasis @ 3..20
+                token @ 3..4 = `*`
+                MdValue, MdText @ 4..8 = `foo `
+                token @ 8..9 = `\``
+                MdValue, Interpolated @ 9..14
+                    Value, Binary @ 9..14
+                        Value, number, token @ 9..11 = `1` ; trailing: ` `
+                        BinaryOp, token @ 11..13 = `+` ; trailing: ` `
+                        Value, number, token @ 13..14 = `2`
+                token @ 14..15 = `\``
+                MdValue, MdText @ 15..19 = ` bar`
+                token @ 19..20 = `*`
     token @ 20..21 = `"`
 --- END ---
 

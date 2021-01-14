@@ -8,20 +8,21 @@ md"foo
 
 [parser]
 --- GREEN TREE ---
-Root, Value, Markdown @ 0..21
+Root, Value, MdString @ 0..21
     token @ 0..3 = `md"`
-    MdValue, MdParagraph @ 3..7
-        MdValue, MdText @ 3..6 = `foo`
-        token @ 6..7 = `\n`
-    token @ 7..8 = `\n`
-    MdValue, MdBlockQuote @ 8..20
-        token @ 8..10 = `> `
-        MdValue, MdParagraph @ 10..20
-            MdValue, MdText @ 10..13 = `bar`
-            MdValue, MdSoftBreak @ 13..14 = `\n`
-            token @ 14..16 = `> `
-            MdValue, MdText @ 16..19 = `baz`
-            token @ 19..20 = `\n`
+    Markdown @ 3..20
+        MdValue, MdParagraph @ 3..7
+            MdValue, MdText @ 3..6 = `foo`
+            token @ 6..7 = `\n`
+        token @ 7..8 = `\n`
+        MdValue, MdBlockQuote @ 8..20
+            token @ 8..10 = `> `
+            MdValue, MdParagraph @ 10..20
+                MdValue, MdText @ 10..13 = `bar`
+                MdValue, MdSoftBreak @ 13..14 = `\n`
+                token @ 14..16 = `> `
+                MdValue, MdText @ 16..19 = `baz`
+                token @ 19..20 = `\n`
     token @ 20..21 = `"`
 --- END ---
 

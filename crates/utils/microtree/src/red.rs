@@ -1,15 +1,17 @@
 use std::sync::Arc;
 
+use text_size::{TextRange, TextSize};
+
 use crate::Green;
 use crate::Name;
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct RedData {
     kind: RedKind,
     green: Green,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum RedKind {
     Root,
     Child {
@@ -32,7 +34,7 @@ impl RedKind {
     }
 }
 
-#[derive(Debug, Clone, Eq)]
+#[derive(Debug, Clone, Eq, Hash)]
 pub struct Red(Arc<RedData>);
 
 impl std::fmt::Display for Red {
@@ -97,6 +99,19 @@ impl Red {
             .unwrap_or_default()
     }
 
+    pub fn range(&self) -> TextRange {
+        let from = TextSize::from(self.offset() as u32);
+        let len = self.0.green.size();
+        let len = TextSize::from(len as u32);
+        TextRange::at(from, len)
+    }
+
+    pub fn ancestors(&self) -> impl Iterator<Item = Red> + '_ {
+        std::iter::successors(self.parent(), |parent| {
+            parent.parent()
+        })
+    }
+
     pub fn children(&self) -> impl Iterator<Item = Red> + '_ {
         let parent = self.clone();
         let mut offset = self.offset();
@@ -109,6 +124,20 @@ impl Red {
                 offset += green_child.size();
                 Self::child(green_child, parent.clone(), idx, child_offset)
             })
+    }
+
+    pub fn pre_order(&self) -> impl Iterator<Item = Red> + '_ {
+        Some(self.clone()).into_iter()
+        .chain(
+            self.children()
+                .flat_map(|child| child.pre_order().collect::<Vec<_>>())
+        )
+    }
+
+    pub fn post_order(&self) -> impl Iterator<Item = Red> + '_ {
+        self.children()
+            .flat_map(|child| child.post_order().collect::<Vec<_>>())
+            .chain(Some(self.clone()).into_iter())
     }
 }
 

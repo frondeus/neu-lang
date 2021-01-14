@@ -14,7 +14,7 @@ pub enum Error {
 }
 
 impl ToReport for Error {
-    fn to_report(&self, _str: &str) -> String {
+    fn to_report(&self) -> String {
         self.to_string()
     }
 }

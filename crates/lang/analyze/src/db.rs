@@ -13,8 +13,7 @@ fn all_mentions(db: &dyn Analyzer) -> Vec<Mention> {
     let parsed = db.parse_all_mds();
 
     let mut mentions = vec![];
-    for (_kind, _id, path, article_item) in parsed {
-        //let parsed = db.parse_syntax(path);
+    for (_kind, _id, _path, article_item) in parsed {
         let _ = crate::find_mentions(article_item, &mut mentions);
     }
 

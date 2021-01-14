@@ -8,7 +8,7 @@
 Root, Value, String @ 0..11
     token @ 0..2 = `"` ; leading: ` `
     InnerString @ 2..10
-        token @ 2..10 = `foo\n bar`
+        InnerStringPart, token @ 2..10 = `foo\n bar`
     token @ 10..11 = `"`
 --- END ---
 

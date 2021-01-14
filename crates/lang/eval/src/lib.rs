@@ -6,32 +6,29 @@ mod value;
 pub mod db;
 
 use error::Error;
+use neu_syntax::{ast::{Binary, BinaryOp, IdentPath, Identifier, InnerStringPart, OpDot, Strukt, Unary, UnaryOp, Value as AstValue}, reexport::{Ast, Red, SmolStr}};
 use neu_diagnostics::{Diagnostic, ToReport, Diagnostics};
-use neu_parser::{Arena, Children, Node, NodeId};
-use neu_syntax::Nodes;
 use std::collections::BTreeMap;
 pub use value::Value;
 
-pub struct Eval<'a> {
-    pub arena: &'a Arena,
-    pub errors: Diagnostics<NodeId>,
-    pub input: &'a str,
+pub struct Eval {
+    pub errors: Diagnostics,
+    pub red: Red
 }
 
-impl<'a> Eval<'a> {
-    pub fn new(arena: &'a Arena, input: &'a str) -> Self {
+impl Eval {
+    pub fn new(red: Red) -> Self {
         Self {
-            arena,
-            errors: Default::default(),
-            input,
+            red,
+            errors: Default::default()
         }
     }
 
     #[allow(clippy::wrong_self_convention)]
     pub fn into_eager(&mut self, value: Value, recursive: bool) -> Option<Value> {
         match value {
-            Value::Lazy { id } => {
-                let v = self.eval(id)?;
+            Value::Lazy { red } => {
+                let v = self.eval_red(red)?;
                 if !recursive {
                     return Some(v);
                 }
@@ -44,7 +41,7 @@ impl<'a> Eval<'a> {
                         let v = self.into_eager(v, recursive);
                         v.map(|v| (k, v))
                     })
-                    .collect::<Option<BTreeMap<String, Value>>>()?;
+                    .collect::<Option<BTreeMap<SmolStr, Value>>>()?;
                 Some(Value::Struct(s))
             }
             Value::Array(a) => {
@@ -58,105 +55,101 @@ impl<'a> Eval<'a> {
         }
     }
 
-    fn eager_eval(&mut self, id: NodeId, recursive: bool) -> Option<Value> {
-        let v = self.eval(id)?;
+    fn eager_eval(&mut self, red: Red, recursive: bool) -> Option<Value> {
+        let v = self.eval_red(red)?;
         self.into_eager(v, recursive)
     }
 
-    fn expect_some<V>(&mut self, id: NodeId, v: Option<V>, error: Error) -> Option<V> {
-        match v {
-            Some(v) => Some(v),
-            None => {
-                let input = self.input;
-                let err: Diagnostic = error.to_report(input);
-                self.errors.add(id, err);
-                None
-            }
+    fn eval(&mut self) -> Option<Value> {
+        self.eval_red(self.red.clone())
+    }
+
+    fn str_non_trivia(red: Red) -> SmolStr {
+        let green = red.green();
+        let green = green.as_token().unwrap();
+        green.value.clone()
+    }
+
+    pub fn eval_red(&mut self, red: Red) -> Option<Value> {
+        if let Some(value) = AstValue::new(red.clone()) {
+            return match value {
+                AstValue::Number(num) => {
+                    let number = Self::str_non_trivia(num.red()).parse().unwrap();
+                    Some(Value::Number(number))
+                },
+                AstValue::Boolean(boolean) => {
+                    let s = Self::str_non_trivia(boolean.red());
+                    Some(Value::Boolean(s == "true"))
+                }
+                AstValue::IdentPath(ident_path) => {
+                    self.eval_ident_path(ident_path)
+                }
+                AstValue::Unary(unary) => {
+                    self.eval_unary(unary)
+                }
+                AstValue::Binary(binary) => {
+                    self.eval_binary(binary)
+                },
+                AstValue::Array(array) => {
+                    let values = array.values()
+                                      .map(|val|
+                                           self.eval_red(val.red())
+                                      )
+                        .collect::<Option<Vec<_>>>()?;
+                    Some(Value::Array(values))
+                },
+                AstValue::Strukt(strukt) => {
+                    let map = strukt
+                        .pairs()
+                        .map(|pair| {
+                            let key = pair.key()?;
+                            let value = pair.value()?;
+                            let key = Self::str_non_trivia(key.red());
+                            let value = Value::Lazy { red: value.red() };
+                            Some((key, value))
+                        })
+                        .collect::<Option<BTreeMap<_, _>>>()?;
+
+                    Some(Value::Struct(map))
+                },
+                AstValue::Identifier(ident) => {
+                    self.eval_identifier(ident)
+                },
+                AstValue::String(string) => {
+                    let parts = string.inner_string()?
+                    .parts()
+                    .map(|part| match part {
+                        InnerStringPart::Text(text) => {
+                            Some(Self::str_non_trivia(text.red()))
+                        },
+                        InnerStringPart::Interpolated(interpolated) => {
+                            let value = interpolated.value()?;
+                            let value = self.eager_eval(value.red(), true)?;
+                            Some(value.to_string().into())
+                        }
+                    })
+                    .collect::<Option<Vec<_>>>()?;
+                    let s = parts.join("");
+                    Some(Value::String(s.into()))
+                },
+                AstValue::MdString(string) => {
+                    let mut s = String::default();
+                    if let Some(markdown) = string.markdown() {
+                        //let references =
+                        for value in markdown.red().children() {
+                            self.eval_md(&mut s, value)?;
+                        }
+                    }
+                    Some(Value::String(s.into()))
+                }
+                s => {
+                    eprintln!("TODO: {:?}", s);
+                    None
+                }
+            };
         }
-    }
-
-    fn eval_identifier(&mut self, id: NodeId, node: &Node) -> Option<Value> {
-        let text = &self.input[node.span];
-        let top = self
-            .arena
-            .ancestors(id)
-            .filter(|ancestor| self.arena.get(ancestor).is(Nodes::Struct))
-            .last();
-        let top = self.expect_some(id, top, Error::ContextNotFound)?;
-        let top = self.eval(top)?;
-        let mut map = self.expect_some(id, top.into_struct(), Error::ValueNotStruct)?;
-        self.expect_some(id, map.remove(text), Error::FieldNotFound)
-    }
-
-    fn eval_ident_path(&mut self, node: &Node) -> Option<Value> {
-        let mut children = Children::new(node.children.iter().copied(), self.arena);
-        let (left_id, _) = children.find_node(Nodes::Value)?;
-        let left = self.eager_eval(left_id, false)?;
-        let _ = children.find_node(Nodes::Op)?;
-        let (right_id, right) = children.find_node(Nodes::Identifier)?;
-        let key = &self.input[right.span];
-
-        let mut map = self.expect_some(left_id, left.into_struct(), Error::ValueNotStruct)?;
-        self.expect_some(right_id, map.remove(key), Error::FieldNotFound)
-    }
-
-    fn eval_self_ident_path(
-        &mut self,
-        op_id: NodeId,
-        value_id: NodeId,
-        value: &Node,
-    ) -> Option<Value> {
-        let text = &self.input[value.span];
-        let current = self
-            .arena
-            .ancestors(op_id)
-            .find(|ancestor| self.arena.get(ancestor).is(Nodes::Struct));
-        let current = self.expect_some(op_id, current, Error::ContextNotFound)?;
-        let current = self.eval(current)?;
-        let mut map = self.expect_some(op_id, current.into_struct(), Error::ValueNotStruct)?;
-        self.expect_some(value_id, map.remove(text), Error::FieldNotFound)
-    }
-
-    fn eval_unary(&mut self, node: &Node) -> Option<Value> {
-        let mut children = Children::new(node.children.iter().copied(), self.arena);
-        let (op_id, op) = children.find_node(Nodes::Op)?;
-        let text_op = &self.input[op.span];
-
-        let (value_id, value) = children.find_node(Nodes::Value)?;
-
-        if text_op == "." {
-            return self.eval_self_ident_path(op_id, value_id, value);
-        }
-
-        let value = self.eager_eval(value_id, false)?;
-        match (text_op, value) {
-            ("-", Value::Number(i)) => Some(Value::Number(-i)),
-            ("!", Value::Boolean(b)) => Some(Value::Boolean(!b)),
-            _ => unreachable!(),
-        }
-    }
-
-    fn eval_binary(&mut self, node: &Node) -> Option<Value> {
-        let mut children = Children::new(node.children.iter().copied(), self.arena);
-        let (left, _) = children.find_node(Nodes::Value)?;
-        let left = self.eager_eval(left, false)?;
-        let (_, op) = children.find_node(Nodes::Op)?;
-        let (right, _) = children.find_node(Nodes::Value)?;
-        let right = self.eager_eval(right, false)?;
-        let text_op = &self.input[op.span];
-        match (left, text_op, right) {
-            (Value::Number(l), "-", Value::Number(r)) => Some(Value::Number(l - r)),
-            (Value::Number(l), "+", Value::Number(r)) => Some(Value::Number(l + r)),
-            (Value::Number(l), "*", Value::Number(r)) => Some(Value::Number(l * r)),
-            (Value::Number(l), "/", Value::Number(r)) => Some(Value::Number(l / r)),
-            (Value::Boolean(l), "==", Value::Boolean(r)) => Some(Value::Boolean(l == r)),
-            _ => unreachable!(),
-        }
-    }
-
-    pub fn eval(&mut self, id: NodeId) -> Option<Value> {
-        let node = self.arena.get(id);
-
+        dbg!(&red);
+        /*
         if node.is(Nodes::Root) {
             return node
                 .children
@@ -164,85 +157,102 @@ impl<'a> Eval<'a> {
                 .filter_map(|child| self.eval(*child))
                 .next();
         }
-        if !node.is(Nodes::Value) {
-            return None;
-        }
 
-        let mut children = Children::new(node.children.iter().copied(), self.arena);
-        let text = &self.input[node.span];
-
-        if node.is(Nodes::Identifier) {
-            return self.eval_identifier(id, node);
-        }
-        if node.is(Nodes::IdentPath) {
-            return self.eval_ident_path(node);
-        }
-        if node.is(Nodes::Number) {
-            return Some(Value::Number(text.parse().unwrap()));
-        }
-        if node.is(Nodes::Boolean) {
-            return Some(Value::Boolean(text == "true"));
-        }
-        if node.is(Nodes::Unary) {
-            return self.eval_unary(node);
-        }
-        if node.is(Nodes::Binary) {
-            return self.eval_binary(node);
-        }
-
-        if node.is(Nodes::Array) {
-            let mut values = vec![];
-            while let Some((value, _)) = children.find_node(Nodes::Value) {
-                let value = self.eval(value)?;
-                values.push(value);
-            }
-            return Some(Value::Array(values));
-        }
-
-        if node.is(Nodes::Struct) {
-            let mut map = BTreeMap::default();
-            while let Some((_, key)) = children.find_node(Nodes::Key) {
-                let key = self.input[key.span].to_string();
-                let (value, _) = children.find_node(Nodes::Value)?;
-                let value = Value::Lazy { id: value };
-                map.insert(key, value);
-            }
-            return Some(Value::Struct(map));
-        }
-
-        if node.is(Nodes::Markdown) {
-            let mut s = String::new();
-            if node.is(Nodes::Md_Value) {
-                self.eval_md(&mut s, node)?;
-            } else {
-                while let Some((_, value)) = children.find_node(Nodes::Md_Value) {
-                    self.eval_md(&mut s, value)?;
-                }
-            }
-            return Some(Value::String(s));
-        }
-
-        if node.is(Nodes::String) {
-            let mut s = String::new();
-            while let Some((_, value)) = children.find_node(Nodes::StrValue) {
-                if value.is(Nodes::Interpolated) {
-                    let mut children = Children::new(value.children.iter().copied(), self.arena);
-                    let (value_id, _) = children.find_node(Nodes::Value)?;
-                    let value = self.eager_eval(value_id, true)?;
-                    s += &value.to_string();
-                } else {
-                    s += &self.input[value.span];
-                }
-            }
-            return Some(Value::String(s));
-        }
         if node.is(Nodes::Parens) {
             let (value, _) = children.find_node(Nodes::Value)?;
             return self.eval(value);
         }
 
+        */
         None
     }
+
+    fn eval_unary(&mut self, unary: Unary) -> Option<Value> {
+        let op = unary.unary_op()?;
+
+        let value = unary.value()?;
+
+        if let UnaryOp::OpDot(op) = op {
+            return self.eval_self_ident_path(op, value);
+        }
+
+        let value = self.eager_eval(value.red(), false)?;
+        match (op, value) {
+            (UnaryOp::OpMinus(_), Value::Number(i)) => Some(Value::Number(-i)),
+            (UnaryOp::OpBang(_), Value::Boolean(b)) => Some(Value::Boolean(!b)),
+            _ => todo!(),
+        }
+    }
+
+    fn eval_self_ident_path(
+        &mut self,
+        op: OpDot,
+        value: AstValue,
+    ) -> Option<Value> {
+        let current =
+            op.red()
+              .ancestors()
+            .filter_map(|ancestor| Strukt::new(ancestor)).next();
+        let current = self.expect_some(op.red(), current, Error::ContextNotFound)?;
+        let current = self.eval_red(current.red())?;
+        let mut map = self.expect_some(op.red(), current.into_struct(), Error::ValueNotStruct)?;
+        let key = Self::str_non_trivia(value.red());
+        self.expect_some(value.red(), map.remove(&key), Error::FieldNotFound)
+    }
+
+    fn eval_binary(&mut self, binary: Binary) -> Option<Value> {
+        let left = binary.left()?;
+        let left = self.eager_eval(left.red(), false)?;
+
+        let op = binary.binary_op()?;
+
+        let right = binary.right()?;
+        let right = self.eager_eval(right.red(), false)?;
+
+        match (left, op, right) {
+            (Value::Number(l), BinaryOp::OpMinus(_), Value::Number(r)) => Some(Value::Number(l - r)),
+            (Value::Number(l), BinaryOp::OpPlus(_), Value::Number(r)) => Some(Value::Number(l + r)),
+            (Value::Number(l), BinaryOp::OpStar(_), Value::Number(r)) => Some(Value::Number(l * r)),
+            (Value::Number(l), BinaryOp::OpSlash(_), Value::Number(r)) => Some(Value::Number(l / r)),
+            (Value::Boolean(l), BinaryOp::OpDEqual(_), Value::Boolean(r)) => Some(Value::Boolean(l == r)),
+            _ => unreachable!(),
+        }
+    }
+
+    fn expect_some<V>(&mut self, red: Red, v: Option<V>, error: Error) -> Option<V> {
+        match v {
+            Some(v) => Some(v),
+            None => {
+                let err: Diagnostic = error.to_report();
+                self.errors.add(red.range(), err);
+                None
+            }
+        }
+    }
+
+    fn eval_identifier(&mut self, ident: Identifier) -> Option<Value> {
+        let key = Self::str_non_trivia(ident.red());
+        let top = ident.red().ancestors()
+                             .filter_map(|red| Strukt::new(red))
+            .last();
+        let top = self.expect_some(ident.red(), top, Error::ContextNotFound)?;
+        let top = self.eval_red(top.red())?;
+        let mut map = self.expect_some(ident.red(), top.into_struct(), Error::ValueNotStruct)?;
+        self.expect_some(ident.red(), map.remove(&key), Error::FieldNotFound)
+    }
+
+    fn eval_ident_path(&mut self, ident_path: IdentPath) -> Option<Value> {
+        let left = ident_path.left()?;
+        let left_val = self.eager_eval(left.red(), false)?;
+
+        let right = ident_path.right()?.as_identifier()?;
+        let key = Self::str_non_trivia(right.red());
+
+        let mut map = self.expect_some(left.red(), left_val.into_struct(), Error::ValueNotStruct)?;
+        self.expect_some(right.red(), map.remove(&key), Error::FieldNotFound)
+    }
+
+
 }
 
 #[cfg(test)]
@@ -267,10 +277,9 @@ mod tests {
             db.set_all_mds(Default::default());
             db.set_all_neu(Arc::new(Some(path.clone()).into_iter().collect()));
             db.set_input(path.clone(), Arc::new(input.into()));
-            let parsed = db.parse_syntax(path.clone());
-            let result = db.eval(path, parsed.root);
+            let result = db.eval_file(path.clone());
 
-            result.display(input).to_string()
+            format!("{}", result)
         })
         .unwrap();
     }

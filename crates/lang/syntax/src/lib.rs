@@ -13,4 +13,5 @@ pub mod db;
 pub mod reexport {
     pub use microtree::*;
     pub use microtree_parser::*;
+    pub use microtree::Name;
 }

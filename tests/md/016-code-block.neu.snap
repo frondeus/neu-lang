@@ -28,75 +28,76 @@ But here shouldn't
 
 [parser]
 --- GREEN TREE ---
-Root, Value, Markdown @ 0..195
+Root, Value, MdString @ 0..195
     token @ 0..4 = `md#"`
-    token @ 4..5 = `\n`
-    MdValue, token @ 5..9 = `\`\`\`\n`
-    MdValue, Interpolated @ 9..85
-        Value, Strukt @ 9..84
-            token @ 9..10 = `{`
-            StruktPair @ 10..82
-                Key, identifier, token @ 10..22 = `health` ; leading: `\n    ` ; trailing: ` `
-                token @ 22..24 = `=` ; trailing: ` `
-                Value, Strukt @ 24..82
-                    token @ 24..25 = `{`
-                    StruktPair @ 25..54
-                        Key, identifier, token @ 25..38 = `max` ; leading: `\n        ` ; trailing: ` `
-                        token @ 38..40 = `=` ; trailing: ` `
-                        Value, Binary @ 40..54
-                            token @ 40..41 = `(`
-                            Value, Binary @ 41..48
-                                Value, number, token @ 41..44 = `60` ; trailing: ` `
-                                BinaryOp, token @ 44..46 = `+` ; trailing: ` `
-                                Value, number, token @ 46..48 = `70`
-                            token @ 48..50 = `)` ; trailing: ` `
-                            BinaryOp, token @ 50..52 = `/` ; trailing: ` `
-                            Value, number, token @ 52..54 = `10`
-                    token @ 54..55 = `,`
-                    StruktPair @ 55..76
-                        Key, identifier, token @ 55..70 = `value` ; leading: `\n        ` ; trailing: ` `
-                        token @ 70..72 = `=` ; trailing: ` `
-                        Value, Unary @ 72..76
-                            UnaryOp, token @ 72..73 = `.`
-                            Value, identifier, token @ 73..76 = `max`
-                    token @ 76..82 = `}` ; leading: `\n    `
-            token @ 82..84 = `}` ; leading: `\n`
-        eof @ 84..85 = `` ; leading: `\n`
-    token @ 85..88 = `\`\`\``
-    token @ 88..90 = `\n\n`
-    MdValue, MdParagraph @ 90..107
-        MdValue, MdText @ 90..106 = `Here should eval`
-        token @ 106..107 = `\n`
-    MdValue, token @ 107..114 = `\`\`\`neu\n`
-    MdValue, Interpolated @ 114..120
-        Value, Binary @ 114..119
-            Value, number, token @ 114..116 = `5` ; trailing: ` `
-            BinaryOp, token @ 116..118 = `+` ; trailing: ` `
-            Value, number, token @ 118..119 = `2`
-        eof @ 119..120 = `` ; leading: `\n`
-    token @ 120..123 = `\`\`\``
-    token @ 123..125 = `\n\n`
-    MdValue, MdParagraph @ 125..142
-        MdValue, MdText @ 125..141 = `Here is intended`
-        token @ 141..142 = `\n`
-    token @ 142..147 = `\n    `
-    MdValue, MdValue, Interpolated @ 147..153
-        Value, Binary @ 147..152
-            Value, number, token @ 147..149 = `2` ; trailing: ` `
-            BinaryOp, token @ 149..151 = `+` ; trailing: ` `
-            Value, number, token @ 151..152 = `5`
-        eof @ 152..153 = `` ; leading: `\n`
-    token @ 153..153 = ``
-    token @ 153..154 = `\n`
-    MdValue, MdParagraph @ 154..173
-        MdValue, MdText @ 154..172 = `But here shouldn't`
-        token @ 172..173 = `\n`
-    MdValue, MdCodeBlock @ 173..193
-        token @ 173..176 = `\`\`\``
-        MdCodeBlockLang @ 176..183 = `example`
-        token @ 183..184 = `\n`
-        MdValue, MdText @ 184..190 = `5 + 2\n`
-        token @ 190..193 = `\`\`\``
+    Markdown @ 4..193
+        token @ 4..5 = `\n`
+        token @ 5..9 = `\`\`\`\n`
+        MdValue, Interpolated @ 9..85
+            Value, Strukt @ 9..84
+                token @ 9..10 = `{`
+                StruktPair @ 10..82
+                    Key, identifier, token @ 10..22 = `health` ; leading: `\n    ` ; trailing: ` `
+                    token @ 22..24 = `=` ; trailing: ` `
+                    Value, Strukt @ 24..82
+                        token @ 24..25 = `{`
+                        StruktPair @ 25..54
+                            Key, identifier, token @ 25..38 = `max` ; leading: `\n        ` ; trailing: ` `
+                            token @ 38..40 = `=` ; trailing: ` `
+                            Value, Binary @ 40..54
+                                token @ 40..41 = `(`
+                                Value, Binary @ 41..48
+                                    Value, number, token @ 41..44 = `60` ; trailing: ` `
+                                    BinaryOp, token @ 44..46 = `+` ; trailing: ` `
+                                    Value, number, token @ 46..48 = `70`
+                                token @ 48..50 = `)` ; trailing: ` `
+                                BinaryOp, token @ 50..52 = `/` ; trailing: ` `
+                                Value, number, token @ 52..54 = `10`
+                        token @ 54..55 = `,`
+                        StruktPair @ 55..76
+                            Key, identifier, token @ 55..70 = `value` ; leading: `\n        ` ; trailing: ` `
+                            token @ 70..72 = `=` ; trailing: ` `
+                            Value, Unary @ 72..76
+                                UnaryOp, token @ 72..73 = `.`
+                                Value, identifier, token @ 73..76 = `max`
+                        token @ 76..82 = `}` ; leading: `\n    `
+                token @ 82..84 = `}` ; leading: `\n`
+            eof @ 84..85 = `` ; leading: `\n`
+        token @ 85..88 = `\`\`\``
+        token @ 88..90 = `\n\n`
+        MdValue, MdParagraph @ 90..107
+            MdValue, MdText @ 90..106 = `Here should eval`
+            token @ 106..107 = `\n`
+        token @ 107..114 = `\`\`\`neu\n`
+        MdValue, Interpolated @ 114..120
+            Value, Binary @ 114..119
+                Value, number, token @ 114..116 = `5` ; trailing: ` `
+                BinaryOp, token @ 116..118 = `+` ; trailing: ` `
+                Value, number, token @ 118..119 = `2`
+            eof @ 119..120 = `` ; leading: `\n`
+        token @ 120..123 = `\`\`\``
+        token @ 123..125 = `\n\n`
+        MdValue, MdParagraph @ 125..142
+            MdValue, MdText @ 125..141 = `Here is intended`
+            token @ 141..142 = `\n`
+        token @ 142..147 = `\n    `
+        MdValue, Interpolated @ 147..153
+            Value, Binary @ 147..152
+                Value, number, token @ 147..149 = `2` ; trailing: ` `
+                BinaryOp, token @ 149..151 = `+` ; trailing: ` `
+                Value, number, token @ 151..152 = `5`
+            eof @ 152..153 = `` ; leading: `\n`
+        token @ 153..153 = ``
+        token @ 153..154 = `\n`
+        MdValue, MdParagraph @ 154..173
+            MdValue, MdText @ 154..172 = `But here shouldn't`
+            token @ 172..173 = `\n`
+        MdValue, MdCodeBlock @ 173..193
+            token @ 173..176 = `\`\`\``
+            MdCodeBlockLang @ 176..183 = `example`
+            token @ 183..184 = `\n`
+            MdValue, MdText @ 184..190 = `5 + 2\n`
+            token @ 190..193 = `\`\`\``
     token @ 193..195 = `"#`
 --- END ---
 

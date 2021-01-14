@@ -3,7 +3,7 @@ use inflections::case::{to_lower_case, to_snake_case};
 use itertools::Itertools;
 use quote::{format_ident, quote};
 use serde::Deserialize;
-use std::io::Write;
+use std::{collections::HashMap, io::Write};
 use std::{collections::BTreeMap, path::Path};
 use syn::Ident;
 use ungrammar::{Grammar, Rule, Token};
@@ -157,7 +157,7 @@ pub fn codegen(
             "{}\n",
             quote! (
                 #[derive(Clone, Debug, Eq, PartialEq)]
-                pub struct #token_name(Red);
+                pub struct #token_name(pub(crate) Red);
                 impl Ast for #token_name {
                     fn new(node: Red) -> Option<Self> {
                         if !node.is(Nodes::Token) {
@@ -219,6 +219,9 @@ pub fn codegen(
 
                 impl Ast for #enum_name {
                     fn new(node: Red) -> Option<Self> {
+                        if !node.is(Nodes::#enum_name) {
+                            return None;
+                        }
                         None
                             #(
                                 .or_else(|| #enum_variants::new(node.clone()).map(#enum_name::#enum_variants))
@@ -254,23 +257,32 @@ pub fn codegen(
         }
         let node_name = format_ident!("{}", node.name);
         let node_builder_name = format_ident!("{}Builder", node.name);
+        let mut count: HashMap<Ident, usize> = HashMap::new();
         let fields = node
             .fields
             .iter()
             .map(|field| {
                 let name = field.method_name();
                 let ty = field.ty();
-
-                if field.is_many() {
+                (name, ty, field.is_many())
+            })
+            .map(|(name, ty, is_many)| {
+                if is_many {
                     quote!(
                         pub fn #name(&self) -> impl Iterator<Item = #ty> + '_ {
                             self.0.children().filter_map(#ty::new)
                         }
                     )
                 } else {
+                    let counter = count.entry(ty.clone())
+                         .or_default();
+
+                    let nth = *counter;
+                    *counter += 1;
+
                     quote!(
                         pub fn #name(&self) -> Option<#ty> {
-                            self.0.children().filter_map(#ty::new).next()
+                            self.0.children().filter_map(#ty::new).nth(#nth)
                         }
                     )
                 }
@@ -455,13 +467,13 @@ pub fn codegen(
             "{}\n",
             quote! {
                 #[derive(Clone, Debug, Eq, PartialEq)]
-                pub struct #node_name(Red);
+                pub struct #node_name(pub(crate) Red);
                 impl Ast for #node_name {
                     fn new(node: Red) -> Option<Self> {
                         if !node.is(Nodes::#node_name) {
                             return None;
                         }
-                        node.green().as_node()?;
+                        //node.green().as_node()?;
                         Some(Self(node))
                     }
 

@@ -1,7 +1,5 @@
-use crate::db::Analyzer;
 use neu_syntax::ast::{ArticleItem, ArticleRef, ArticleBodyItem, SubArticle, Markdown};
-use neu_syntax::Nodes;
-use neu_syntax::reexport::{Ast, Green};
+use neu_syntax::reexport::Ast;
 use regex::Regex;
 
 pub mod db;
@@ -33,12 +31,12 @@ pub(crate) fn find_mentions(
     article_item: ArticleItem,
     mentions: &mut Vec<Mention>,
 ) -> Option<()> {
-    dbg!(&article_item);
     let orig_kind = article_item.item_ident()?.red().to_string();
     let orig_id = article_item.item_id()?.red().to_string();
     let body = article_item.body()?;
     mentions.extend(body.items()
-        .flat_map(|body_item| match body_item {
+                    .flat_map(|body_item| {
+                        match body_item {
             ArticleBodyItem::SubArticle(sub) => {
                 sub_mention(sub, &orig_kind, &orig_id)
                     .into_iter()
@@ -53,7 +51,8 @@ pub(crate) fn find_mentions(
                 find_mentions_in_md(markdown, &orig_kind, &orig_id)
                     .collect::<Vec<_>>()
             }
-        })
+                        }
+                    })
     );
     Some(())
 }
@@ -77,13 +76,10 @@ fn find_mentions_in_md<'a>(
     orig_kind: &'a String,
     orig_id: &'a String,
 ) -> impl Iterator<Item = Mention> + 'a {
-    //TODO: Use parser insted of regex.
     lazy_static::lazy_static! {
         static ref LINK_REG: Regex = Regex::new(r"([a-z_A-Z0-9]+):([0-9A-Fa-f]{8})").expect("Regex");
     }
-    //TODO 2: I need traverse method and operate on red nodes
-    markdown.values()
-        .filter_map(|md_value| md_value.as_mdlink())
+    markdown.all_links()
         .filter_map(|mdlink| mdlink.md_link_url_token())
         .filter_map(move |url| {
             match LINK_REG.captures(&url.red().to_string()) {
@@ -106,6 +102,7 @@ mod tests {
     use neu_syntax::db::{FileKind, Parser};
     use std::fmt;
     use std::sync::Arc;
+    use crate::db::Analyzer;
 
     impl fmt::Display for Mention {
         fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

@@ -7,8 +7,8 @@
 Root, Value, String @ 0..20
     token @ 0..2 = `"` ; leading: ` `
     InnerString @ 2..19
-        token @ 2..7 = `10 = `
-        Interpolated @ 7..19
+        InnerStringPart, token @ 2..7 = `10 = `
+        InnerStringPart, Interpolated @ 7..19
             token @ 7..9 = `${`
             Value, Binary @ 9..18
                 Value, Binary @ 9..15

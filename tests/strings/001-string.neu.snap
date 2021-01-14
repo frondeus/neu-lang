@@ -7,7 +7,7 @@
 Root, Value, String @ 0..7
     token @ 0..2 = `"` ; leading: ` `
     InnerString @ 2..5
-        token @ 2..5 = `foo`
+        InnerStringPart, token @ 2..5 = `foo`
     token @ 5..7 = `"` ; trailing: ` `
 --- END ---
 

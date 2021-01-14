@@ -1,4 +1,5 @@
-Value = Literal
+Value = 'number'
+      | Boolean
       | Binary
       | IdentPath
       | Unary
@@ -7,11 +8,9 @@ Value = Literal
       | Strukt
       | Array
       | 'identifier'
-      | ( '(' Value ')' )
+      | Parens
 
-
-Literal = 'number'
-        | Boolean
+Parens = '(' Value ')'
 
 Unary = UnaryOp Value
 UnaryOp = '-' | '!' | '.'
@@ -19,7 +18,7 @@ UnaryOp = '-' | '!' | '.'
 IdentPath = left: Value '.' right: Value
 
 Binary = left: Value BinaryOp right: Value
-BinaryOp = '+' | '/' | '*' | '=='
+BinaryOp = '-' | '+' | '/' | '*' | '=='
 
 Boolean = 'true' | 'false'
 
@@ -28,7 +27,7 @@ MdString = 'md_quote' Markdown 'd_quote'
 
 String = left_quote: 'd_quote' InnerString right_quote: 'd_quote'
 
-InnerString = InnerStringPart*
+InnerString = parts: InnerStringPart*
 
 InnerStringPart = 'text' | Interpolated
 
@@ -62,6 +61,10 @@ ArticleRef = '[+' 'item_identifier' ':' 'item_id' '+]'
 
 Markdown = values: MdValue*
 
-MdValue = MdLink | 'text'
+MdValue = MdLink
+            | MdCodeBlock
+            | 'text'
 
 MdLink = values: MdValue* 'md_link_url' 'md_link_title'
+
+MdCodeBlock = start: '```' 'md_code_block_lang' end: '```'

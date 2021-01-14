@@ -6,6 +6,7 @@ use microtree::nodes;
 #[allow(dead_code)]
 impl Nodes {
     pub const Number: Name = Name::new("number");
+    pub const Text: Name = Name::new("token");
     pub const Identifier: Name = Name::new("identifier");
     pub const ArticleItemId: Name = Name::new("item_id");
 }
@@ -45,7 +46,6 @@ nodes! {
         MdReference,
         MdReferenceLabel,
 
-        MdCodeBlock,
         MdCodeBlockLang,
 
         MdH1,
@@ -61,9 +61,57 @@ nodes! {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Number(Red);
+impl Ast for Number {
+    fn new(node: Red) -> Option<Self> {
+        if !node.is(Nodes::Number) {
+            return None;
+        }
+        Some(Self(node))
+    }
+
+    fn red(&self) -> Red {
+        self.0.clone()
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Identifier(Red);
 impl Ast for Identifier {
     fn new(node: Red) -> Option<Self> {
+        if !node.is(Nodes::Identifier) {
+            return None;
+        }
+        Some(Self(node))
+    }
+
+    fn red(&self) -> Red {
+        self.0.clone()
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Text(Red);
+impl Ast for Text {
+    fn new(node: Red) -> Option<Self> {
+        if !node.is(Nodes::Text) {
+            return None;
+        }
+        Some(Self(node))
+    }
+
+    fn red(&self) -> Red {
+        self.0.clone()
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ItemIdent(Red);
+impl Ast for ItemIdent {
+    fn new(node: Red) -> Option<Self> {
+        if !node.is(Nodes::Identifier) {
+            return None;
+        }
         Some(Self(node))
     }
 
@@ -76,6 +124,9 @@ impl Ast for Identifier {
 pub struct ArticleItemId(Red);
 impl Ast for ArticleItemId {
     fn new(node: Red) -> Option<Self> {
+        if !node.is(Nodes::ArticleItemId) {
+            return None;
+        }
         Some(Self(node))
     }
 
@@ -88,6 +139,9 @@ impl Ast for ArticleItemId {
 pub struct MdLinkUrl(Red);
 impl Ast for MdLinkUrl {
     fn new(node: Red) -> Option<Self> {
+        if !node.is(Nodes::MdLinkUrl) {
+            return None;
+        }
         Some(Self(node))
     }
     fn red(&self) -> Red {
@@ -99,6 +153,23 @@ impl Ast for MdLinkUrl {
 pub struct MdLinkTitle(Red);
 impl Ast for MdLinkTitle {
     fn new(node: Red) -> Option<Self> {
+        if !node.is(Nodes::MdLinkTitle) {
+            return None;
+        }
+        Some(Self(node))
+    }
+    fn red(&self) -> Red {
+        self.0.clone()
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct MdCodeBlockLang(Red);
+impl Ast for MdCodeBlockLang {
+    fn new(node: Red) -> Option<Self> {
+        if !node.is(Nodes::MdCodeBlockLang) {
+            return None;
+        }
         Some(Self(node))
     }
     fn red(&self) -> Red {

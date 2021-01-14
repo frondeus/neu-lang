@@ -13,7 +13,11 @@ pub(crate) fn inner_md_string<S: Sink>() -> impl Parser<MdStrToken, S>
     parse(|s| {
         s.peek()
          .at(MdStrToken::Text)
-         .parse(markdown())
+         .parse(parse(|s| {
+            s.start(Nodes::Markdown)
+            .parse(markdown())
+            .end()
+         }))
          .ignore_unexpected()
     })
 }
@@ -279,7 +283,6 @@ impl<'a, 'c, 's, S: Sink> MdParser<'a, 'c, 's, S> {
 
         match next {
             Event::Start(tag) => {
-                self.s = self.s.alias(Nodes::MdValue);
                 self.translate_start(tag)
             }
             Event::End(tag) => {
@@ -323,6 +326,28 @@ impl<'a, 'c, 's, S: Sink> MdParser<'a, 'c, 's, S> {
     }
 
     fn translate_start(mut self, tag: Tag<'a>) -> Self {
+        if let Tag::CodeBlock(lang_kind) = tag {
+            return match lang_kind {
+                CodeBlockKind::Indented => {
+                    self.opts.code = true;
+                    self.opts.code_range = None;
+                    self
+                },
+                CodeBlockKind::Fenced(lang) => {
+                    if lang.as_ref() == "neu" || lang.as_ref() == "" {
+                        self.opts.code = true;
+                        self.opts.code_range = None;
+                        self
+                    }
+                    else {
+                        self.s = self.s.alias(Nodes::MdValue);
+                        self.s = self.s.start(Nodes::MdCodeBlock);
+                        self.token_cow(Nodes::MdCodeBlockLang, lang)
+                    }
+                }
+            }
+        }
+        self.s = self.s.alias(Nodes::MdValue);
         match tag {
             Tag::Paragraph => {
                 self.s = self.s.start(Nodes::MdParagraph);
@@ -391,26 +416,6 @@ impl<'a, 'c, 's, S: Sink> MdParser<'a, 'c, 's, S> {
                                    lt => todo!("LinkType: {:?}", lt)
                                });
                 self
-            }
-            Tag::CodeBlock(lang_kind) => {
-                match lang_kind {
-                    CodeBlockKind::Indented => {
-                        self.opts.code = true;
-                        self.opts.code_range = None;
-                        self
-                    },
-                    CodeBlockKind::Fenced(lang) => {
-                        if lang.as_ref() == "neu" || lang.as_ref() == "" {
-                            self.opts.code = true;
-                            self.opts.code_range = None;
-                            self
-                        }
-                        else {
-                            self.s = self.s.start(Nodes::MdCodeBlock);
-                            self.token_cow(Nodes::MdCodeBlockLang, lang)
-                        }
-                    }
-                }
             }
             _ => self
         }

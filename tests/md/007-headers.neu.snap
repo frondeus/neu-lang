@@ -9,23 +9,24 @@ defg
 
 [parser]
 --- GREEN TREE ---
-Root, Value, Markdown @ 0..28
+Root, Value, MdString @ 0..28
     token @ 0..3 = `md"`
-    token @ 3..4 = `\n`
-    MdValue, MdH1 @ 4..10
-        token @ 4..6 = `# `
-        MdValue, MdText @ 6..9 = `foo`
-        token @ 9..10 = `\n`
-    MdValue, MdParagraph @ 10..15
-        MdValue, MdText @ 10..14 = `abcd`
-        token @ 14..15 = `\n`
-    MdValue, MdH2 @ 15..22
-        token @ 15..18 = `## `
-        MdValue, MdText @ 18..21 = `bar`
-        token @ 21..22 = `\n`
-    MdValue, MdParagraph @ 22..27
-        MdValue, MdText @ 22..26 = `defg`
-        token @ 26..27 = `\n`
+    Markdown @ 3..27
+        token @ 3..4 = `\n`
+        MdValue, MdH1 @ 4..10
+            token @ 4..6 = `# `
+            MdValue, MdText @ 6..9 = `foo`
+            token @ 9..10 = `\n`
+        MdValue, MdParagraph @ 10..15
+            MdValue, MdText @ 10..14 = `abcd`
+            token @ 14..15 = `\n`
+        MdValue, MdH2 @ 15..22
+            token @ 15..18 = `## `
+            MdValue, MdText @ 18..21 = `bar`
+            token @ 21..22 = `\n`
+        MdValue, MdParagraph @ 22..27
+            MdValue, MdText @ 22..26 = `defg`
+            token @ 26..27 = `\n`
     token @ 27..28 = `"`
 --- END ---
 

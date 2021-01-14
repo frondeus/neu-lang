@@ -83,6 +83,10 @@ fn review() -> Result<()> {
         }
     }
     println!("All processed");
+    for file in glob::glob("./tests/**/*.orig")? {
+        let filename = file?;
+        cmd!("rm {filename}").read()?;
+    }
     Ok(())
 }
 

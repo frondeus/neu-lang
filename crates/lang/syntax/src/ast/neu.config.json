@@ -36,14 +36,20 @@
                 "PlusPlus": "++",
 
                 "MdLinkUrl": "md_link_url",
-                "MdLinkTitle": "md_link_title"
+                "MdLinkTitle": "md_link_title",
+                "MdCodeBlockLang": "md_code_block_lang",
+                "Fences": "```"
         },
         "handwritten": [
                 "Identifier",
+                "Number",
+                "Text",
 
+                "ItemIdent",
                 "ArticleItemId",
 
                 "MdLinkUrl",
-                "MdLinkTitle"
+                "MdLinkTitle",
+                "MdCodeBlockLang"
         ]
 }

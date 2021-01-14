@@ -108,7 +108,7 @@ fn strukt<S: Sink >() -> impl Parser<Token, S> {
 fn md_string<S: Sink >() -> impl Parser<Token, S> {
     parse(|s| {
         let trivia = leading_trivia();
-        s.start(Nodes::Markdown)
+        s.start(Nodes::MdString)
             .with_ctx(
                 Context {
                     leading: Some(&trivia),
@@ -156,6 +156,7 @@ fn inner_string<S: Sink >() -> impl Parser<StrToken, S> {
     parse(|s| {
         s.start(Nodes::InnerString)
          .parse(repeated(|p| p
+            .parse_else(parse(|s| s.alias(Nodes::InnerStringPart)))
             .at(StrToken::CloseI)
             .at(StrToken::Text)
             .parse(parse(|s| s.token()))

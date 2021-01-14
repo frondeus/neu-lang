@@ -14,7 +14,7 @@ use crate::parsers::markdown::markdown;
 
 pub fn parser<S: Sink>() -> impl Parser<FileToken, S> {
     parse(|s| {
-        dbg!(s.peek())
+        s.peek()
             .at(None)
             .at_unexpected(FileToken::Error)
             .parse(skip())
@@ -27,8 +27,9 @@ pub fn parser<S: Sink>() -> impl Parser<FileToken, S> {
 
 fn main_item<S: Sink>() -> impl Parser<FileToken, S> {
     parse(|s| {
-        s.start(Nodes::ArticleItem)
-            .expect(FileToken::ThreePlus)
+        s
+            .alias(Nodes::MainArticle)
+            .start(Nodes::ArticleItem)
             .with_mode(main_item_header())
             .with_mode(main_item_body())
         .end()
@@ -41,7 +42,8 @@ fn main_item_body<S: Sink>() -> impl Parser<BodyToken, S> {
 
 fn main_item_header<S: Sink>() -> impl Parser<HeaderToken, S> {
     parse(|s| {
-        s.unfinished()
+        s.start(Nodes::ArticleHeader)
+        .expect(HeaderToken::ThreePlus)
         .parse(req_trivia(HeaderToken::InlineWhitespace))
         .alias(Nodes::Identifier)
         .expect(HeaderToken::Identifier)
@@ -68,15 +70,14 @@ fn main_item_header<S: Sink>() -> impl Parser<HeaderToken, S> {
             ))
             .end()
         }))
-        .expect(HeaderToken::ThreePlus)
-        .abort()
+        .end()
     })
 }
 
 fn item<S: Sink>() -> impl Parser<BodyToken, S> {
     parse(|s| {
-        s.start(Nodes::ArticleItem)
-            .expect(BodyToken::PlusPlus)
+            s.alias(Nodes::SubArticle)
+            .start(Nodes::ArticleItem)
             .with_mode(item_header())
             .with_mode(item_body(true))
             .expect(BodyToken::PlusPlusEnd)
@@ -86,7 +87,8 @@ fn item<S: Sink>() -> impl Parser<BodyToken, S> {
 
 fn item_header<S: Sink>() -> impl Parser<HeaderToken, S> {
     parse(|s| {
-        s.unfinished()
+        s.start(Nodes::SubArticleHeader)
+        .expect(HeaderToken::PlusPlus)
         .parse(req_trivia(HeaderToken::InlineWhitespace))
         .alias(Nodes::Identifier)
         .expect(HeaderToken::Identifier)
@@ -113,8 +115,7 @@ fn item_header<S: Sink>() -> impl Parser<HeaderToken, S> {
              ))
              .end()
         }))
-        .expect(HeaderToken::ThreePlus)
-        .abort()
+        .end()
     })
 }
 
@@ -130,7 +131,7 @@ fn item_peek_end<'c, 's, S: Sink>(s: Builder<'c, 's, BodyToken ,S>, ends: bool) 
 fn item_body<S: Sink>(ends: bool) -> impl Parser<BodyToken, S> {
     parse(move |s| {
         // We are not using repeated because of this peek_end behavior
-        let p = item_peek_end(s.start(Nodes::ArticleBody), ends);
+        let p = item_peek_end(s.start(Nodes::ArticleBody).expect(BodyToken::ThreePlus), ends);
         match p {
             Peek::Found { s, .. } => s,
             Peek::None { mut s, .. } => loop {

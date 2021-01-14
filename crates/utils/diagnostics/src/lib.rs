@@ -1,9 +1,9 @@
-use std::collections::BTreeMap;
+use std::collections::HashMap;
 use std::fmt::Debug;
 use text_size::TextRange;
 
 pub trait ToReport: Send + Sync {
-    fn to_report(&self, str: &str) -> String;
+    fn to_report(&self) -> String;
     fn boxed(self) -> Box<Self>
     where
         Self: Sized,
@@ -18,7 +18,7 @@ pub type DiagnosticVec = Vec<Diagnostic>;
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub struct Diagnostics {
-    errors: BTreeMap<TextRange, Diagnostic>
+    errors: HashMap<TextRange, Diagnostic>
 }
 
 impl Default for Diagnostics {
@@ -33,7 +33,7 @@ impl Diagnostics {
     }
 
     pub fn get(&self, range: TextRange) -> Option<&Diagnostic> {
-        self.errors.get(&id)
+        self.errors.get(&range)
     }
 
     pub fn iter(&self) -> impl Iterator<Item = (TextRange, &Diagnostic)> {
@@ -48,7 +48,7 @@ impl Diagnostics {
 impl IntoIterator for Diagnostics
 {
     type Item = (TextRange, Diagnostic);
-    type IntoIter = std::collections::btree_map::IntoIter<TextRange, Diagnostic>;
+    type IntoIter = std::collections::hash_map::IntoIter<TextRange, Diagnostic>;
 
     fn into_iter(self) -> Self::IntoIter {
         self.errors.into_iter()

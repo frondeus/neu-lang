@@ -28,105 +28,106 @@ Some text to show that the reference links can follow later.
 
 [parser]
 --- GREEN TREE ---
-Root, Value, Markdown @ 0..864
+Root, Value, MdString @ 0..864
     token @ 0..4 = `md#"`
-    token @ 4..5 = `\n`
-    MdValue, MdParagraph @ 5..56
-        MdValue, MdLink, MdInlineLink @ 5..55
-            token @ 5..6 = `[`
-            MdValue, MdText @ 6..30 = `I'm an inline-style link`
-            token @ 30..32 = `](`
-            MdLinkUrl @ 32..54 = `https://www.google.com`
-            token @ 54..55 = `)`
-        token @ 55..56 = `\n`
-    token @ 56..57 = `\n`
-    MdValue, MdParagraph @ 57..156
-        MdValue, MdLink, MdInlineLink @ 57..155
-            token @ 57..58 = `[`
-            MdValue, MdText @ 58..93 = `I'm an inline-style link with title`
-            token @ 93..95 = `](`
-            MdLinkUrl @ 95..117 = `https://www.google.com`
-            MdLinkTitle @ 117..134 = `Google's Homepage`
-            token @ 134..155 = ` "Google's Homepage")`
-        token @ 155..156 = `\n`
-    token @ 156..157 = `\n`
-    MdValue, MdParagraph @ 157..229
-        MdValue, MdLink, MdReferenceLink @ 157..228
-            token @ 157..158 = `[`
-            MdValue, MdText @ 158..184 = `I'm a reference-style link`
-            token @ 184..186 = `][`
-            MdReferenceLabel @ 186..227 = `Arbitrary case-insensitive reference text`
-            token @ 227..228 = `]`
-        token @ 228..229 = `\n`
-    token @ 229..230 = `\n`
-    MdValue, MdParagraph @ 230..302
-        MdValue, MdLink, MdInlineLink @ 230..301
-            token @ 230..231 = `[`
-            MdValue, MdText @ 231..276 = `I'm a relative reference to a repository file`
-            token @ 276..278 = `](`
-            MdLinkUrl @ 278..300 = `../blob/master/LICENSE`
-            token @ 300..301 = `)`
-        token @ 301..302 = `\n`
-    token @ 302..303 = `\n`
-    MdValue, MdParagraph @ 303..365
-        MdValue, MdLink, MdReferenceLink @ 303..364
-            token @ 303..304 = `[`
-            MdValue, MdText @ 304..360 = `You can use numbers for reference-style link definitions`
-            token @ 360..362 = `][`
-            MdReferenceLabel @ 362..363 = `1`
-            token @ 363..364 = `]`
-        token @ 364..365 = `\n`
-    token @ 365..366 = `\n`
-    MdValue, MdParagraph @ 366..416
-        MdValue, MdText @ 366..396 = `Or leave it empty and use the `
-        MdValue, MdLink, MdShortcutLink @ 396..414
-            token @ 396..397 = `[`
-            MdValue, MdText @ 397..413 = `link text itself`
-            token @ 413..414 = `]`
-        MdValue, MdText @ 414..415 = `.`
-        token @ 415..416 = `\n`
-    token @ 416..417 = `\n`
-    MdValue, MdParagraph @ 417..624
-        MdValue, MdText @ 417..490 = `URLs and URLs in angle brackets will automatically get turned into links.`
-        MdValue, MdSoftBreak @ 490..491 = `\n`
-        MdValue, MdText @ 491..517 = `http://www.example.com or `
-        MdValue, MdLink, MdAutoLink @ 517..563
-            token @ 517..518 = `<`
-            MdValue, MdText @ 518..540 = `http://www.example.com`
-            MdLinkUrl @ 540..562 = `http://www.example.com`
-            token @ 562..563 = `>`
-        MdValue, MdText @ 563..577 = ` and sometimes`
-        MdValue, MdSoftBreak @ 577..578 = `\n`
-        MdValue, MdText @ 578..623 = `example.com (but not on Github, for example).`
-        token @ 623..624 = `\n`
-    token @ 624..625 = `\n`
-    MdValue, MdParagraph @ 625..664
-        MdValue, MdLink, MdEmailLink @ 625..663
-            token @ 625..626 = `<`
-            MdValue, MdText @ 626..644 = `frondeus@gmail.com`
-            MdLinkUrl @ 644..662 = `frondeus@gmail.com`
-            token @ 662..663 = `>`
-        token @ 663..664 = `\n`
-    token @ 664..665 = `\n`
-    MdValue, MdParagraph @ 665..726
-        MdValue, MdText @ 665..725 = `Some text to show that the reference links can follow later.`
-        token @ 725..726 = `\n`
-    token @ 726..728 = `\n[`
-    MdValue, MdReference @ 728..729 = `1`
-    token @ 729..732 = `]: `
-    MdValue, MdLinkUrl @ 732..751 = `http://slashdot.org`
-    token @ 751..753 = `\n[`
-    MdValue, MdReference @ 753..769 = `link text itself`
-    token @ 769..772 = `]: `
-    MdValue, MdLinkUrl @ 772..793 = `http://www.reddit.com`
-    token @ 793..795 = `\n[`
-    MdValue, MdReference @ 795..836 = `arbitrary case-insensitive reference text`
-    token @ 836..839 = `]: `
-    MdValue, MdLinkUrl @ 839..862 = `https://www.mozilla.org`
+    Markdown @ 4..862
+        token @ 4..5 = `\n`
+        MdValue, MdParagraph @ 5..56
+            MdValue, MdLink, MdInlineLink @ 5..55
+                token @ 5..6 = `[`
+                MdValue, MdText @ 6..30 = `I'm an inline-style link`
+                token @ 30..32 = `](`
+                MdLinkUrl @ 32..54 = `https://www.google.com`
+                token @ 54..55 = `)`
+            token @ 55..56 = `\n`
+        token @ 56..57 = `\n`
+        MdValue, MdParagraph @ 57..156
+            MdValue, MdLink, MdInlineLink @ 57..155
+                token @ 57..58 = `[`
+                MdValue, MdText @ 58..93 = `I'm an inline-style link with title`
+                token @ 93..95 = `](`
+                MdLinkUrl @ 95..117 = `https://www.google.com`
+                MdLinkTitle @ 117..134 = `Google's Homepage`
+                token @ 134..155 = ` "Google's Homepage")`
+            token @ 155..156 = `\n`
+        token @ 156..157 = `\n`
+        MdValue, MdParagraph @ 157..229
+            MdValue, MdLink, MdReferenceLink @ 157..228
+                token @ 157..158 = `[`
+                MdValue, MdText @ 158..184 = `I'm a reference-style link`
+                token @ 184..186 = `][`
+                MdReferenceLabel @ 186..227 = `Arbitrary case-insensitive reference text`
+                token @ 227..228 = `]`
+            token @ 228..229 = `\n`
+        token @ 229..230 = `\n`
+        MdValue, MdParagraph @ 230..302
+            MdValue, MdLink, MdInlineLink @ 230..301
+                token @ 230..231 = `[`
+                MdValue, MdText @ 231..276 = `I'm a relative reference to a repository file`
+                token @ 276..278 = `](`
+                MdLinkUrl @ 278..300 = `../blob/master/LICENSE`
+                token @ 300..301 = `)`
+            token @ 301..302 = `\n`
+        token @ 302..303 = `\n`
+        MdValue, MdParagraph @ 303..365
+            MdValue, MdLink, MdReferenceLink @ 303..364
+                token @ 303..304 = `[`
+                MdValue, MdText @ 304..360 = `You can use numbers for reference-style link definitions`
+                token @ 360..362 = `][`
+                MdReferenceLabel @ 362..363 = `1`
+                token @ 363..364 = `]`
+            token @ 364..365 = `\n`
+        token @ 365..366 = `\n`
+        MdValue, MdParagraph @ 366..416
+            MdValue, MdText @ 366..396 = `Or leave it empty and use the `
+            MdValue, MdLink, MdShortcutLink @ 396..414
+                token @ 396..397 = `[`
+                MdValue, MdText @ 397..413 = `link text itself`
+                token @ 413..414 = `]`
+            MdValue, MdText @ 414..415 = `.`
+            token @ 415..416 = `\n`
+        token @ 416..417 = `\n`
+        MdValue, MdParagraph @ 417..624
+            MdValue, MdText @ 417..490 = `URLs and URLs in angle brackets will automatically get turned into links.`
+            MdValue, MdSoftBreak @ 490..491 = `\n`
+            MdValue, MdText @ 491..517 = `http://www.example.com or `
+            MdValue, MdLink, MdAutoLink @ 517..563
+                token @ 517..518 = `<`
+                MdValue, MdText @ 518..540 = `http://www.example.com`
+                MdLinkUrl @ 540..562 = `http://www.example.com`
+                token @ 562..563 = `>`
+            MdValue, MdText @ 563..577 = ` and sometimes`
+            MdValue, MdSoftBreak @ 577..578 = `\n`
+            MdValue, MdText @ 578..623 = `example.com (but not on Github, for example).`
+            token @ 623..624 = `\n`
+        token @ 624..625 = `\n`
+        MdValue, MdParagraph @ 625..664
+            MdValue, MdLink, MdEmailLink @ 625..663
+                token @ 625..626 = `<`
+                MdValue, MdText @ 626..644 = `frondeus@gmail.com`
+                MdLinkUrl @ 644..662 = `frondeus@gmail.com`
+                token @ 662..663 = `>`
+            token @ 663..664 = `\n`
+        token @ 664..665 = `\n`
+        MdValue, MdParagraph @ 665..726
+            MdValue, MdText @ 665..725 = `Some text to show that the reference links can follow later.`
+            token @ 725..726 = `\n`
+        token @ 726..728 = `\n[`
+        MdValue, MdReference @ 728..729 = `1`
+        token @ 729..732 = `]: `
+        MdValue, MdLinkUrl @ 732..751 = `http://slashdot.org`
+        token @ 751..753 = `\n[`
+        MdValue, MdReference @ 753..769 = `link text itself`
+        token @ 769..772 = `]: `
+        MdValue, MdLinkUrl @ 772..793 = `http://www.reddit.com`
+        token @ 793..795 = `\n[`
+        MdValue, MdReference @ 795..836 = `arbitrary case-insensitive reference text`
+        token @ 836..839 = `]: `
+        MdValue, MdLinkUrl @ 839..862 = `https://www.mozilla.org`
     token @ 862..864 = `"#`
 --- END ---
 
 
 [eval]
-`"<p><a href=\"https://www.google.com\">I\'m an inline-style link</a></p><p><a href=\"https://www.google.com\">I\'m an inline-style link with title</a></p><p><a href=\"https://www.mozilla.org\">I\'m a reference-style link</a></p><p><a href=\"../blob/master/LICENSE\">I\'m a relative reference to a repository file</a></p><p><a href=\"http://slashdot.org\">You can use numbers for reference-style link definitions</a></p><p>Or leave it empty and use the <a href=\"http://www.reddit.com\">link text itself</a>.</p><p>URLs and URLs in angle brackets will automatically get turned into links.\nhttp://www.example.com or <a href=\"http://www.example.com\">http://www.example.com</a> and sometimes\nexample.com (but not on Github, for example).</p><p><a href=\"frondeus@gmail.com\">frondeus@gmail.com</a></p><p>Some text to show that the reference links can follow later.</p>"`
+`"<p><a href=\"https://www.google.com\">I\'m an inline-style link</a></p><p><a href=\"https://www.google.com\">I\'m an inline-style link with title</a></p><p><a>I\'m a reference-style link</a></p><p><a href=\"../blob/master/LICENSE\">I\'m a relative reference to a repository file</a></p><p><a>You can use numbers for reference-style link definitions</a></p><p>Or leave it empty and use the <a>link text itself</a>.</p><p>URLs and URLs in angle brackets will automatically get turned into links.\nhttp://www.example.com or <a href=\"http://www.example.com\">http://www.example.com</a> and sometimes\nexample.com (but not on Github, for example).</p><p><a href=\"frondeus@gmail.com\">frondeus@gmail.com</a></p><p>Some text to show that the reference links can follow later.</p>"`
 
