@@ -6,7 +6,7 @@ use crate::{
 use microtree_parser::parsers::*;
 use microtree_parser::*;
 
-pub fn parser<S: Sink>() -> impl Parser<Token, S> + Clone {
+pub fn parser<S: Sink>() -> impl Parser<Token, S> {
     parse(|s| {
         let leading = leading_trivia();
         let trailing = trailing_trivia();
@@ -21,8 +21,8 @@ pub fn parser<S: Sink>() -> impl Parser<Token, S> + Clone {
     })
 }
 
-pub(crate) fn value< S: Sink >() -> impl Parser< Token, S> + Clone {
-    pratt(
+pub(crate) fn value< S: Sink >() -> impl Parser< Token, S> {
+    infix(
         left_value(),
         |token| match token {
             Some(Token::OpDot) => Some((Assoc::Left, 100)),
@@ -36,19 +36,20 @@ pub(crate) fn value< S: Sink >() -> impl Parser< Token, S> + Clone {
             Some(Token::OpDEqual) => Some((Assoc::Left, 1)),
             _ => None,
         },
-        |s, op_token| {
+        |s, left, op_token| {
             s.alias(Nodes::Value)
                 .start(match op_token {
                     Some(Token::OpDot) => Nodes::IdentPath,
                     _ => Nodes::Binary,
                 })
+                .insert(left)
                 .alias(Nodes::BinaryOp)
                 .token()
         },
     )
 }
 
-fn left_value<S: Sink >() -> impl Parser<Token, S> + Clone {
+fn left_value<S: Sink >() -> impl Parser<Token, S> {
     use Token::*;
     parse(|s| {
         s.peek()
@@ -76,7 +77,7 @@ fn array<S: Sink >() -> impl Parser<Token, S> {
     })
 }
 
-fn identifier<S: Sink >() -> impl Parser<Token, S> + Clone {
+fn identifier<S: Sink >() -> impl Parser<Token, S> {
     parse(|s| s.alias(Nodes::Identifier).expect(Token::Identifier))
 }
 

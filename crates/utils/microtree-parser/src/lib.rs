@@ -36,14 +36,13 @@ mod event {
         Leading,
         Trailing,
     }
-    #[derive(Debug)]
+    #[derive(Debug, Clone)]
     pub enum Event {
         Start(Name),
         Alias(Name),
         Token(Name, SmolStr),
         Unfinished,
         Abort,
-        Preceeds,
         Finish(Name),
         End,
         Trivia(TriviaKind, SmolStr),
@@ -83,6 +82,10 @@ mod sink {
     pub trait Sink {
         fn event(&mut self, event: Event);
         fn error(&mut self, error: Error);
+    }
+
+    pub trait InsertableSink: Sink {
+        fn finish(&mut self, sink: &mut impl Sink);
     }
 }
 
@@ -138,7 +141,6 @@ mod sinks {
         pub struct GreenSink {
             cache: Cache,
             stack: Vec<UnsealedGreen>,
-            pre: Vec<Green>,
             roots: Vec<Green>,
             errors: Vec<Error>,
             leading: Option<SmolStr>,
@@ -163,31 +165,18 @@ mod sinks {
                 self.stack.last_mut()
             }
 
-            fn add(&mut self, green: Green, preceeds: bool) {
-                if !preceeds {
-                    match self.current() {
-                        Some(parent) => parent.children.push(green),
-                        None => self.roots.push(green),
-                    }
-                }
-                else {
-                    self.pre.push(green);
+            fn add(&mut self, green: Green) {
+                match self.current() {
+                    Some(parent) => parent.children.push(green),
+                    None => self.roots.push(green),
                 }
             }
 
-            fn add_many(&mut self, mut green: Vec<Green>, preceeds: bool) {
-                if !preceeds {
-                    match self.current() {
-                        Some(parent) => parent.children.append(&mut green),
-                        None => self.roots.append(&mut green),
-                    }
-                } else {
-                    self.pre.append(&mut green);
+            fn add_many(&mut self, mut green: Vec<Green>) {
+                match self.current() {
+                    Some(parent) => parent.children.append(&mut green),
+                    None => self.roots.append(&mut green),
                 }
-            }
-
-            fn pre(&mut self) -> Vec<Green> {
-                std::mem::take(&mut self.pre)
             }
         }
 
@@ -212,10 +201,8 @@ mod sinks {
                             prev.aliased = false;
                         }
                         _ => {
-                            let children = self.pre();
                             self.stack.push(UnsealedGreen {
                                 names: vec![name],
-                                children,
                                 ..Default::default()
                             });
                         }
@@ -226,10 +213,8 @@ mod sinks {
                             prev.unfinished = true;
                         }
                         _ => {
-                            let children = self.pre();
                             self.stack.push(UnsealedGreen {
                                 names: vec![],
-                                children,
                                 unfinished: true,
                                 ..Default::default()
                             });
@@ -240,11 +225,9 @@ mod sinks {
                             prev.names.push(name);
                         }
                         _ => {
-                            let children = self.pre();
                             self.stack.push(UnsealedGreen {
                                 names: vec![name],
                                 aliased: true,
-                                children,
                                 ..Default::default()
                             });
                         }
@@ -262,7 +245,7 @@ mod sinks {
                                 green
                             })
                             .collect();
-                        self.add_many(children, false);
+                        self.add_many(children);
                     }
                     Event::Finish(name) => {
                         let current = self.stack.pop().expect("Unmatched End");
@@ -273,35 +256,7 @@ mod sinks {
                             green = self.cache.alias(alias.into(), green);
                         }
 
-                        self.add(green, false);
-                    }
-                    Event::Preceeds => {
-                        let current = self.stack.pop().expect("Unmatched End");
-                        if current.unfinished {
-                            let aliases = current.names;
-                            let children = current
-                                .children
-                                .into_iter()
-                                .map(|mut green| {
-                                    for alias in aliases.iter().rev() {
-                                        green = self.cache.alias(alias.clone().into(), green);
-                                    }
-                                    green
-                                })
-                                .collect();
-                            self.add_many(children, true);
-                        } else {
-                            let mut names = current.names.into_iter().rev();
-                            let name = names.next().unwrap_or_default();
-                            let aliases = names;
-
-                            let mut green = self.cache.node(name.into(), current.children);
-                            for alias in aliases {
-                                green = self.cache.alias(alias.into(), green);
-                            }
-
-                            self.add(green, true);
-                        }
+                        self.add(green);
                     }
                     Event::End => {
                         let current = self.stack.pop().expect("Unmatched End");
@@ -314,7 +269,7 @@ mod sinks {
                             green = self.cache.alias(alias.into(), green);
                         }
 
-                        self.add(green, false);
+                        self.add(green);
                     }
                     Event::Token(name, value) => {
                         let aliases = match self.current() {
@@ -469,29 +424,7 @@ mod sinks {
                 );
             }
 
-            #[test]
-            fn precedence() {
-                let mut sink = GreenSink::default();
-                sink.event(Event::alias("Value"));
-                sink.event(Event::Unfinished);
-                sink.event(Event::token("number", "2"));
-                sink.event(Event::Preceeds);
-                sink.event(Event::start("binary"));
-                sink.event(Event::token("op", "+"));
-                sink.event(Event::alias("Value"));
-                sink.event(Event::token("number", "2"));
-                sink.event(Event::End);
-
-                test_event(
-                    sink,
-                    r#"--- GREEN TREE ---
-                                    Root, binary @ 0..3
-                                        Value, number @ 0..1 = `2`
-                                        op @ 1..2 = `+`
-                                        Value, number @ 2..3 = `2`
-                                    --- END ---"#,
-                );
-            }
+            // Precedence is now handled by TmpSink
 
             fn test_event(sink: GreenSink, expected: &'static str) {
                 use diff_assert::assert_diff;
@@ -656,11 +589,50 @@ mod sinks {
         }
     }
 
+    mod tmp_sink {
+        use crate::{Error, Event, InsertableSink, Sink};
+
+        #[derive(Debug, Default, Clone)]
+        pub struct TmpSink {
+            pub events: Vec<Event>,
+            pub errors: Vec<String>
+        }
+
+        impl TmpSink {
+            pub fn append(&mut self, mut other: Self) {
+                self.events.append(&mut other.events);
+                self.errors.append(&mut other.errors);
+            }
+        }
+
+        impl InsertableSink for TmpSink {
+            fn finish(&mut self, sink: &mut impl Sink) {
+                for event in std::mem::take(&mut self.events) {
+                    sink.event(event);
+                }
+                for error in std::mem::take(&mut self.errors) {
+                    sink.error(error);
+                }
+            }
+        }
+
+        impl Sink for TmpSink {
+            fn event(&mut self, event: Event) {
+                self.events.push(event);
+            }
+
+            fn error(&mut self, error: Error) {
+                self.errors.push(error);
+            }
+        }
+    }
+
     pub use wrapper_sink::*;
     pub use green_sink::*;
     pub use test_sink::*;
     pub use write_sink::*;
     pub use dbg_sink::*;
+    pub use tmp_sink::*;
 }
 
 mod spanned {
@@ -745,7 +717,7 @@ mod source {
 
         pub fn rewind(&mut self, len: usize) {
             let range = TextRange::new(
-                self.range.start() - TextSize::try_from(4 * len).unwrap(),
+                self.range.start().checked_sub(TextSize::try_from(4 * len).unwrap()).unwrap_or_default(),
                 self.range.start(),
             );
             let end = match self.source[range]
@@ -897,7 +869,6 @@ mod lexer {
         type Item = Spanned<Tok>;
 
         fn next(&mut self) -> Option<Self::Item> {
-            //dbg!("NEXT");
             let mut first = self.lex()?;
             loop {
                 match self.peek_one() {
@@ -918,18 +889,13 @@ mod lexer {
 
     impl<'s, Tok: TokenKind> Lexer<'s, Tok> {
         fn lex(&mut self) -> Option<Spanned<Tok>> {
-            // //dbg!("LEX");
             if let Some(peeked) = self.peeked.take() {
                 if let Some((original, peeked)) = peeked {
                     self.source = original;
-                    //dbg!(&peeked);
                     return Some(peeked);
                 }
                 return None;
             }
-            //dbg!(&self.inner.remainder());
-            //dbg!(self.inner.source());
-            //dbg!(self.inner.slice());
             if self.source.as_ref().is_empty() {
                 return None;
             }
@@ -939,9 +905,7 @@ mod lexer {
             let to = self.source.cursor();
 
             let range = TextRange::new(from, to);
-            //dbg!(&token);
             let value = self.source.range_span(range);
-            //dbg!(&value);
             Some(Spanned {
                 token,
                 range,
@@ -1001,6 +965,21 @@ mod parser {
             state: State<'s, Tok, S>,
             context: Context<'c, Tok>,
         ) -> State<'s, Tok, S>;
+    }
+
+    impl<Tok, S, P> Parser<Tok, S> for &mut P
+    where
+        Tok: TokenKind,
+        S: Sink,
+        P: Parser<Tok, S> + ?Sized
+    {
+        fn parse<'s, 'c>(
+            &mut self,
+            state: State<'s, Tok, S>,
+            context: Context<'c, Tok>,
+        ) -> State<'s, Tok, S> {
+            (*self).parse(state, context)
+        }
     }
 }
 
@@ -1108,6 +1087,15 @@ mod state {
                 lexer,
                 trivia: 0
             }
+        }
+
+        pub fn with_sink<S2: Sink>(self, new_sink: S2) -> (State<'s, Tok, S2>, S) {
+            let Self { lexer, sink, trivia } = self;
+            (State {
+                sink: new_sink,
+                lexer,
+                trivia
+            }, sink)
         }
 
         pub fn morph<Tok2>(self) -> State<'s, Tok2, S>
@@ -1271,12 +1259,7 @@ mod peek {
 }
 
 mod builder {
-    use crate::{
-        Context, Event, Lexer, Name, Parser, Sink, Spanned, State, TextRange, TokenKind, Trivia,
-        TriviaKind,
-        SmolStr,
-        Peek
-    };
+    use crate::{Context, Event, InsertableSink, Lexer, Name, Parser, Peek, Sink, SmolStr, Spanned, State, TextRange, TokenKind, Trivia, TriviaKind};
 
     pub struct Builder<'c, 's, Tok, S>
     where
@@ -1440,11 +1423,6 @@ mod builder {
             self
         }
 
-        pub fn preceeds(mut self) -> Self {
-            self.state.sink_mut().event(Event::Preceeds);
-            self
-        }
-
         pub fn with_ctx<'c2>(self, ctx2: Context<'c2, Tok>, mut parser: impl Parser<Tok, S>) -> Self {
             let Self { state, ctx } = self;
 
@@ -1474,6 +1452,25 @@ mod builder {
             Self { state: state.morph(), ctx }
         }
 
+        pub fn insert(self, tmp: &mut impl InsertableSink) -> Self {
+            let Self { mut state, ctx } = self;
+            tmp.finish(state.sink_mut());
+            Self { state, ctx }
+        }
+
+        pub fn with_sink<S2: Sink + Default>(self, mut parser: impl Parser<Tok, S2>) -> (Self, S2)
+        {
+            let Self { state, ctx } = self;
+
+            let (state, prev_sink) = state.with_sink(S2::default());
+
+            let state = parser.parse(state, ctx);
+
+            let (state, new_sink) = state.with_sink(prev_sink);
+
+            (Self { state, ctx }, new_sink)
+        }
+
         pub fn with_range(self, range: TextRange, mut parser: impl Parser<Tok, S>) -> Self {
             let Self { mut state, ctx } = self;
 
@@ -1482,8 +1479,6 @@ mod builder {
             //let sublexer = Lexer::new(subsource);
             let sublexer = state.lexer_mut().with_range(range);
 
-            //dbg!("WITH RANGE");
-            //dbg!(&subsource);
 
             let previous = std::mem::replace(state.lexer_mut(), sublexer);
 
@@ -1510,19 +1505,6 @@ mod trivia_fn {
         _phantom: PhantomData<Tok>,
     }
 
-    impl<F, Tok> Clone for TriviaFn<F, Tok>
-    where
-        F: Clone + for<'s> Fn(&mut Lexer<'s, Tok>),
-        Tok: TokenKind,
-    {
-        fn clone(&self) -> Self {
-            Self {
-                f: self.f.clone(),
-                _phantom: PhantomData,
-            }
-        }
-    }
-
     impl<F, Tok> Trivia<Tok> for TriviaFn<F, Tok>
     where
         F: for<'s> Fn(&mut Lexer<'s, Tok>),
@@ -1533,9 +1515,9 @@ mod trivia_fn {
         }
     }
 
-    pub fn trivia<F, Tok>(f: F) -> impl Trivia<Tok> + Clone
+    pub fn trivia<F, Tok>(f: F) -> impl Trivia<Tok>
     where
-        F: Clone + for<'s> Fn(&mut Lexer<'s, Tok>),
+        F: for<'s> Fn(&mut Lexer<'s, Tok>),
         Tok: TokenKind,
     {
         TriviaFn {
@@ -1560,20 +1542,6 @@ mod parse_fn {
         _phantom: PhantomData<(Tok, S)>,
     }
 
-    impl<F, Tok, S> Clone for ParseFn<F, Tok, S>
-    where
-        F: Clone + for<'c, 's> FnMut(Builder<'c, 's, Tok, S>) -> Builder<'c, 's, Tok, S>,
-        Tok: TokenKind,
-        S: Sink,
-    {
-        fn clone(&self) -> Self {
-            Self {
-                f: self.f.clone(),
-                _phantom: PhantomData,
-            }
-        }
-    }
-
     impl<F, Tok, S> Parser<Tok, S> for ParseFn<F, Tok, S>
     where
         F: for<'c, 's> FnMut(Builder<'c, 's, Tok, S>) -> Builder<'c, 's, Tok, S>,
@@ -1593,7 +1561,7 @@ mod parse_fn {
 
     pub fn parse<F, Tok, S>(f: F) -> ParseFn<F, Tok, S>
     where
-        F: Clone + for<'c, 's> FnMut(Builder<'c, 's, Tok, S>) -> Builder<'c, 's, Tok, S>,
+        F: for<'c, 's> FnMut(Builder<'c, 's, Tok, S>) -> Builder<'c, 's, Tok, S>,
         Tok: TokenKind,
         S: Sink,
     {
@@ -1624,7 +1592,7 @@ pub mod parsers {
             parse(|s| s)
         }
 
-        pub fn with_mode<Tok, Tok2, S>(parser: impl Parser<Tok2, S> + Clone) -> impl Parser<Tok, S> + Clone
+        pub fn with_mode<Tok, Tok2, S>(mut parser: impl Parser<Tok2, S>) -> impl Parser<Tok, S>
         where
             S: Sink,
             Tok: TokenKind,
@@ -1632,16 +1600,22 @@ pub mod parsers {
             Tok::Extras: Into<Tok2::Extras>,
             Tok2::Extras: Into<Tok::Extras>,
         {
-            parse(move |s| s.with_mode(parser.clone()))
+            parse(move |s| {
+                let parser: &mut dyn Parser<Tok2, S> = &mut parser;
+                s.with_mode(&mut *parser)
+            })
         }
 
-        pub fn with_ctx<'c, Tok, S>(ctx: Context<'c, Tok>, parser: impl Parser<Tok, S> + Clone + 'c) ->
-        impl Parser<Tok, S> + 'c + Clone
+        pub fn with_ctx<'c, Tok, S>(ctx: Context<'c, Tok>, mut parser: impl Parser<Tok, S> + 'c) ->
+        impl Parser<Tok, S> + 'c
         where
             S: Sink + 'c,
             Tok: TokenKind
         {
-            parse(move |s| s.with_ctx(ctx, parser.clone()))
+            parse(move |s| {
+                let parser: &mut dyn Parser<Tok, S> = &mut parser;
+                s.with_ctx(ctx, &mut *parser)
+            })
         }
     }
 
@@ -1649,11 +1623,11 @@ pub mod parsers {
         use crate::{Parser, Peek, Sink, TokenKind, parse};
 
         pub fn repeated<Tok, S, F>(
-            f: F,
+            mut f: F,
             close: Tok
         ) -> impl Parser<Tok, S>
         where
-            F: Clone + for<'c, 's> FnMut(Peek<'c, 's, Tok, S>) -> Peek<'c, 's, Tok, S>,
+            F: for<'c, 's> FnMut(Peek<'c, 's, Tok, S>) -> Peek<'c, 's, Tok, S>,
             Tok: TokenKind,
             S: Sink
         {
@@ -1665,7 +1639,7 @@ pub mod parsers {
                             .at_unexpected(None)
                             .at(close) {
                             Peek::Found { s, .. } => break s,
-                            p => (f.clone())(p).expect()
+                            p => (&mut f)(p).expect()
                         }
                     }
                 }
@@ -1673,20 +1647,20 @@ pub mod parsers {
         }
 
         pub fn separated<Tok, S, P>(
-            parser: P,
+            mut parser: P,
             separator: Tok,
             close: Tok,
             trailing: bool
         ) -> impl Parser<Tok, S>
         where
-            P: Parser<Tok, S> + Clone,
+            P: Parser<Tok, S>,
             Tok: TokenKind + std::fmt::Debug,
             S: Sink
         {
             parse(move |s| match s.peek().at(close) {
                 Peek::Found { s, .. } => s,
                 Peek::None { mut s, .. } => 'outer: loop {
-                    s = s.parse(parser.clone());
+                    s = s.parse(&mut parser);
                     s = 'inner: loop {
                         let p = match s.peek()
                             .at_unexpected(None)
@@ -1707,61 +1681,88 @@ pub mod parsers {
             })
         }
     }
-    mod pratt {
-        use crate::{Builder, Parser, Sink, TokenKind, parse};
+    mod infix {
+        use crate::{Builder, Parser, Sink, TmpSink, TokenKind, parse};
 
         pub enum Assoc {
             Right,
             Left,
         }
 
-        pub fn pratt<Tok, L, S, BP, F>(left: L, bp: BP, f: F) -> impl Parser<Tok, S> + Clone
+        pub fn infix<Tok, S, L, BP, F>(left: L, bp: BP, f: F) -> impl Parser<Tok, S>
         where
             Tok: TokenKind,
-            L: Clone + Parser<Tok, S>,
+            L: Parser<Tok, TmpSink>,
             S: Sink,
-            BP: Clone + FnMut(Option<Tok>) -> Option<(Assoc, i32)>,
-            F: Clone + for<'c, 's> FnMut(Builder<'c, 's, Tok, S>, Option<Tok>) -> Builder<'c, 's, Tok, S>,
+            BP: FnMut(Option<Tok>) -> Option<(Assoc, i32)>,
+            F: for<'c, 's> FnMut(Builder<'c, 's, Tok, TmpSink>, &mut TmpSink, Option<Tok>)
+                                 -> Builder<'c, 's, Tok, TmpSink>,
         {
-            pratt_inner(left, bp, f, 0)
+            infix_inner(left, bp, f, 0)
         }
 
-        fn pratt_inner<Tok, L, S, BP, F>(left: L, mut bp: BP, mut f: F, rbp: i32) -> impl Parser<Tok, S> + Clone
+        fn infix_inner<Tok, S, L, BP, F>(mut left: L, mut bp: BP, mut f: F, rbp: i32) -> impl Parser<Tok, S>
         where
             Tok: TokenKind,
-            L: Clone + Parser<Tok, S>,
+            L: Parser<Tok, TmpSink>,
             S: Sink,
-            BP: Clone + FnMut(Option<Tok>) -> Option<(Assoc, i32)>,
-            F: Clone + for<'c, 's> FnMut(Builder<'c, 's, Tok, S>, Option<Tok>,) -> Builder<'c, 's, Tok, S>,
+            BP: FnMut(Option<Tok>) -> Option<(Assoc, i32)>,
+            F: for<'c, 's> FnMut(Builder<'c, 's, Tok, TmpSink>,
+                                 &mut TmpSink,
+                                 Option<Tok>,) -> Builder<'c, 's, Tok, TmpSink>,
         {
             parse(move |mut s| {
-                s = s.unfinished().parse(left.clone());
+                // Type erasure. Not pleasant but necessary
+                let f: &mut dyn for<'c, 's>
+                    FnMut(Builder<'c, 's, Tok, TmpSink>,
+                          &mut TmpSink,
+                          Option<Tok>,) -> Builder<'c, 's, Tok, TmpSink>
+                    = &mut f;
 
-                let mut first = true;
+                let left: &mut dyn Parser<Tok, TmpSink> = &mut left;
+
+                let bp: &mut dyn
+                    FnMut(Option<Tok>) -> Option<(Assoc, i32)>
+                    = &mut bp;
+
+                // -------
+                let (s2, mut lhs) = s.with_sink(&mut *left);
+                s = s2;
+
                 loop {
-                    let op_token = s.peek_token();
+                    let mut op_token = None;
+
+                    let (s2, lhs_trivia): (_, TmpSink) = s.with_sink(parse(|mut s| {
+                        op_token = Some(s.peek_token());
+                        s
+                    }));
+                    s = s2;
+                    lhs.append(lhs_trivia);
+
+                    let op_token = op_token.unwrap(); // UGH
+
                     let (op_assoc, op_bp) = match (bp)(op_token.as_ref().copied()) {
                         Some(op) if op.1 > rbp => op,
-                        _ if first => {
-                            break s.abort();
-                        }
                         _ => {
-                            break s.end();
+                            break s.insert(&mut lhs);
                         }
                     };
 
-                    first = false;
+
                     let new_op_bp = match op_assoc {
                         Assoc::Left => op_bp + 1,
                         Assoc::Right => op_bp - 1,
                     };
 
-                    s = s.preceeds();
-
-                    s = (f)(s, op_token)
-                        .parse(
-                            pratt_inner(left.clone(), bp.clone(), f.clone(), new_op_bp - 1)
-                        );
+                    let (s2, new_lhs) : (_, TmpSink) = s.with_sink(parse(|s| {
+                        (f)(s, &mut lhs, op_token)
+                            .parse(
+                                infix_inner(&mut *left, &mut *bp, &mut *f, new_op_bp - 1)
+                            )
+                            .end()
+                    }));
+                    lhs = new_lhs;
+                    s = s2;
                 }
             })
         }
@@ -1769,7 +1770,7 @@ pub mod parsers {
 
     pub use basic::*;
     pub use flow::*;
-    pub use pratt::*;
+    pub use infix::*;
 }
 
 pub use smol_str::SmolStr;
@@ -1800,20 +1801,20 @@ pub use trivia_fn::*;
 
 #[cfg(test)]
 mod tests {
-    use crate::parsers::{Assoc, separated};
+    use crate::parsers::{Assoc, separated, with_ctx};
 
     use super::*;
-    use parsers::pratt;
+    use parsers::infix;
 
     fn mergeable(token: Token, other: Token) -> bool {
         token == Token::Error && other == token
     }
 
-    fn lex_number(bumped: TextSize, source: &mut Source<'_>, extras: &mut String) -> bool {
-        *extras = "foo".to_string();
-        eprintln!("foo: {}", extras);
+    fn lex_number(_bumped: TextSize, _source: &mut Source<'_>, _extras: &mut String) -> bool {
+        //*extras = "foo".to_string();
+        //eprintln!("foo: {}", extras);
         //Some(bumped)
-        false
+        true
     }
 
     #[derive(Debug, PartialEq, Clone, Copy, TokenKind)]
@@ -1833,6 +1834,12 @@ mod tests {
 
         #[token_kind(token = "]")]
         CloseB,
+
+        #[token_kind(token = "{", display = "`{{`")]
+        OpenC,
+
+        #[token_kind(token = "}", display = "`}}`")]
+        CloseC,
 
         #[token_kind(token = ",")]
         Comma,
@@ -1872,16 +1879,36 @@ mod tests {
 
     type Lexer<'s, T = Token> = crate::Lexer<'s, T>;
 
-    fn left_value<S: Sink>() -> impl Parser<Token, S> + Clone {
+    fn left_value<S: Sink>() -> impl Parser<Token, S> {
         parse(|s| {
             s.peek()
-             .at(Token::OpenP).parse(parse(|s| s.token().parse(value()).expect(Token::CloseP)))
+             .at(Token::OpenP).parse(parens())
+             .at(Token::OpenC).parse(mode_test())
              .parse_else(parse(|s| s.alias(Nodes::Value)))
              .at(Token::Number).parse(number())
              .at(Token::OpMinus).parse(unary())
              .at(Token::OpenB).parse(array())
              .expect()
         })
+    }
+
+    fn parens<S: Sink>() -> impl Parser<Token, S> {
+        parse(|s| s
+              .token()
+              .parse(value())
+              .expect(Token::CloseP))
+    }
+
+    fn mode_test<S: Sink>() -> impl Parser<Token, S> {
+        let leading = leading();
+        let trailing = trailing();
+        parse(move |s| s
+              .token()
+              .with_mode(with_ctx(Context {
+                    leading: Some(&leading),
+                    trailing: Some(&trailing),
+              }, value()))
+              .expect(Token::CloseC))
     }
 
     fn array<S: Sink>() -> impl Parser<Token, S> {
@@ -1907,8 +1934,8 @@ mod tests {
         })
     }
 
-    fn value<S: Sink>() -> impl Parser<Token, S> + Clone {
-        pratt(
+    fn value<S: Sink>() -> impl Parser<Token, S> {
+        infix(
             left_value(),
             |token| match token {
                 Some(Token::OpStar) => Some((Assoc::Left, 20)),
@@ -1919,9 +1946,10 @@ mod tests {
 
                 _ => None,
             },
-            |s, _op_token| {
+            |s, left, _op_token| {
                 s.alias(Nodes::Value)
                     .start(Nodes::Binary)
+                    .insert(left)
                     .alias(Nodes::Op)
                     .token()
             },
@@ -1958,6 +1986,7 @@ mod tests {
                 },
                 value()
             )
+            .expect(None)
         })
     }
 
@@ -1993,15 +2022,12 @@ mod tests {
         assert_ok(
             "2+3",
             r#"
-            Unfinished
-                Alias("Value"); Alias("number"); Token("token", "2")
-            Preceeds
             Alias("Value"); Start("Binary")
+                Alias("Value"); Alias("number"); Token("token", "2")
                 Alias("Op"); Token("token", "+")
-                Unfinished
-                    Alias("Value"); Alias("number"); Token("token", "3")
-                Abort
+                Alias("Value"); Alias("number"); Token("token", "3")
             End
+            Eof
             "#,
             r#"
             --- GREEN TREE ---
@@ -2019,22 +2045,17 @@ mod tests {
         assert_ok(
             "2+3*4",
             r#"
-            Unfinished
-                Alias("Value"); Alias("number"); Token("token", "2")
-            Preceeds
             Alias("Value"); Start("Binary")
+                Alias("Value"); Alias("number"); Token("token", "2")
                 Alias("Op"); Token("token", "+")
-                Unfinished
-                    Alias("Value"); Alias("number"); Token("token", "3")
-                Preceeds
                 Alias("Value")
                 Start("Binary")
+                    Alias("Value"); Alias("number"); Token("token", "3")
                     Alias("Op"); Token("token", "*")
-                    Unfinished
-                        Alias("Value"); Alias("number"); Token("token", "4")
-                    Abort
+                    Alias("Value"); Alias("number"); Token("token", "4")
                 End
             End
+            Eof
             "#,
             r#"
             --- GREEN TREE ---
@@ -2055,21 +2076,16 @@ mod tests {
         assert_ok(
             "2+3+4",
             r#"
-            Unfinished
-                Alias("Value"); Alias("number"); Token("token", "2")
-            Preceeds
             Alias("Value"); Start("Binary")
-                Alias("Op"); Token("token", "+")
-                Unfinished
+                Alias("Value"); Start("Binary")
+                    Alias("Value"); Alias("number"); Token("token", "2")
+                    Alias("Op"); Token("token", "+")
                     Alias("Value"); Alias("number"); Token("token", "3")
-                Abort
-            Preceeds
-            Alias("Value"); Start("Binary")
+                End
                 Alias("Op"); Token("token", "+")
-                Unfinished
-                    Alias("Value"); Alias("number"); Token("token", "4")
-                Abort
+                Alias("Value"); Alias("number"); Token("token", "4")
             End
+            Eof
             "#,
             r#"
             --- GREEN TREE ---
@@ -2086,29 +2102,22 @@ mod tests {
     }
 
     #[test]
-    fn parens() {
+    fn test_parens() {
         assert_ok(
             "(2+3)*4",
             r#"
-            Unfinished
+            Alias("Value"); Start("Binary")
                 Token("token", "(")
-                Unfinished
-                    Alias("Value"); Alias("number"); Token("token", "2")
-                Preceeds
                 Alias("Value"); Start("Binary")
+                    Alias("Value"); Alias("number"); Token("token", "2")
                     Alias("Op"); Token("token", "+")
-                    Unfinished
-                        Alias("Value"); Alias("number"); Token("token", "3")
-                    Abort
+                    Alias("Value"); Alias("number"); Token("token", "3")
                 End
                 Token("token", ")")
-            Preceeds
-            Alias("Value"); Start("Binary")
                 Alias("Op"); Token("token", "*")
-                Unfinished
-                    Alias("Value"); Alias("number"); Token("token", "4")
-                Abort
+                Alias("Value"); Alias("number"); Token("token", "4")
             End
+            Eof
             "#,
             r#"
             --- GREEN TREE ---
@@ -2131,16 +2140,13 @@ mod tests {
         assert_ok(
             "2+\n 3",
             r#"
-            Unfinished
-                Alias("Value"); Alias("number"); Token("token", "2")
-            Preceeds
             Alias("Value"); Start("Binary")
+                Alias("Value"); Alias("number"); Token("token", "2")
                 Alias("Op"); Token("token", "+")
-                Unfinished
-                    Trivia(Leading, "\n ")
-                    Alias("Value"); Alias("number"); Token("token", "3")
-                Abort
+                Trivia(Leading, "\n ")
+                Alias("Value"); Alias("number"); Token("token", "3")
             End
+            Eof
             "#,
             r#"
             --- GREEN TREE ---
@@ -2158,16 +2164,13 @@ mod tests {
         assert_ok(
             "2\n +3",
             r#"
-            Unfinished
+            Alias("Value"); Start("Binary")
                 Alias("Value"); Alias("number"); Token("token", "2")
                 Trivia(Leading, "\n ")
-            Preceeds
-            Alias("Value"); Start("Binary")
                 Alias("Op"); Token("token", "+")
-                Unfinished
-                    Alias("Value"); Alias("number"); Token("token", "3")
-                Abort
+                Alias("Value"); Alias("number"); Token("token", "3")
             End
+            Eof
             "#,
             r#"
             --- GREEN TREE ---
@@ -2185,15 +2188,12 @@ mod tests {
         assert_ok(
             "2+3 ",
             r#"
-            Unfinished
-                Alias("Value"); Alias("number"); Token("token", "2")
-                Preceeds
             Alias("Value"); Start("Binary")
+                Alias("Value"); Alias("number"); Token("token", "2")
                 Alias("Op"); Token("token", "+")
-                Unfinished
-                    Alias("Value"); Alias("number"); Trivia(Trailing, " "); Token("token", "3")
-                Abort
+                Alias("Value"); Alias("number"); Trivia(Trailing, " "); Token("token", "3")
             End
+            Eof
             "#,
             r#"
             --- GREEN TREE ---
@@ -2211,25 +2211,18 @@ mod tests {
         assert_ok(
             "[ 2+3, 4]",
             r#"
-            Unfinished
-                Alias("Value"); Start("Array")
-                    Trivia(Trailing, " "); Token("token", "[")
-                    Unfinished
-                        Alias("Value"); Alias("number"); Token("token", "2")
-                        Preceeds
-                    Alias("Value"); Start("Binary")
-                        Alias("Op"); Token("token", "+")
-                        Unfinished
-                            Alias("Value"); Alias("number"); Token("token", "3")
-                        Abort
-                    End
-                    Trivia(Trailing, " "); Token("token", ",")
-                    Unfinished
-                        Alias("Value"); Alias("number"); Token("token", "4")
-                    Abort
-                    Token("token", "]")
+            Alias("Value"); Start("Array")
+                Trivia(Trailing, " "); Token("token", "[")
+                Alias("Value"); Start("Binary")
+                    Alias("Value"); Alias("number"); Token("token", "2")
+                    Alias("Op"); Token("token", "+")
+                    Alias("Value"); Alias("number"); Token("token", "3")
                 End
-            Abort
+                Trivia(Trailing, " "); Token("token", ",")
+                Alias("Value"); Alias("number"); Token("token", "4")
+                Token("token", "]")
+            End
+            Eof
             "#,
             r#"
             --- GREEN TREE ---
@@ -2250,26 +2243,19 @@ mod tests {
             "[ 2+3, 4,]",
             // Expected events
             r#"
-            Unfinished
-                Alias("Value"); Start("Array")
-                    Trivia(Trailing, " "); Token("token", "[")
-                    Unfinished
-                        Alias("Value"); Alias("number"); Token("token", "2")
-                        Preceeds
-                    Alias("Value"); Start("Binary")
-                        Alias("Op"); Token("token", "+")
-                        Unfinished
-                            Alias("Value"); Alias("number"); Token("token", "3")
-                        Abort
-                    End
-                    Trivia(Trailing, " "); Token("token", ",")
-                    Unfinished
-                        Alias("Value"); Alias("number"); Token("token", "4")
-                    Abort
-                    Token("token", ",")
-                    Token("token", "]")
+            Alias("Value"); Start("Array")
+                Trivia(Trailing, " "); Token("token", "[")
+                Alias("Value"); Start("Binary")
+                    Alias("Value"); Alias("number"); Token("token", "2")
+                    Alias("Op"); Token("token", "+")
+                    Alias("Value"); Alias("number"); Token("token", "3")
                 End
-            Abort
+                Trivia(Trailing, " "); Token("token", ",")
+                Alias("Value"); Alias("number"); Token("token", "4")
+                Token("token", ",")
+                Token("token", "]")
+            End
+            Eof
             "#,
             // Expected tree
             r#"
@@ -2288,4 +2274,50 @@ mod tests {
             "#,
         );
     }
+
+    #[test]
+    fn not_infix_trailing() {
+        assert_ok(
+            "2\n",
+            r#"
+            Alias("Value"); Alias("number"); Token("token", "2")
+            Trivia(Leading, "\n")
+            Eof
+            "#,
+            r#"
+            --- GREEN TREE ---
+            Root @ 0..2
+                Value, number, token @ 0..1 = `2`
+                eof @ 1..2 = `` ; leading: `\n`
+            --- END ---
+            "#,
+        );
+    }
+
+
+    #[test]
+    fn mode_tests() {
+        assert_ok(
+            "{2\n}",
+            r#"
+            Token("token", "{")
+            Alias("Value"); Alias("number"); Token("token", "2")
+            Trivia(Leading, "\n")
+            IgnoreTrivia
+            Trivia(Leading, "\n")
+            Token("token", "}")
+            Eof
+            "#,
+            r#"
+            --- GREEN TREE ---
+            Root @ 0..4
+                token @ 0..1 = `{`
+                Value, number, token @ 1..2 = `2`
+                token @ 2..4 = `}` ; leading: `\n`
+            --- END ---
+            "#,
+        );
+    }
+
+
 }

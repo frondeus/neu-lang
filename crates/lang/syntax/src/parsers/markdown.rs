@@ -32,12 +32,12 @@ where
         let next = s.lexer_mut().next().unwrap();
         let value = next.value;
         let range = next.range;
-        s.with_mode(markdown_inner(value, range))
+        s.with_mode(markdown_inner(value, range, Default::default()))
     })
 }
 
-pub(crate) fn markdown_inner<S: Sink>(value: SmolStr, range: TextRange)
-                                -> impl Parser<MdStrToken, S> + Clone {
+pub(crate) fn markdown_inner<S: Sink>(value: SmolStr, range: TextRange, mut to_insert: BTreeMap<TextSize, TmpSink>)
+                                -> impl Parser<MdStrToken, S> {
     parse(move |s| {
         let from = range.start();
         let value_len: TextSize = (value.len() as u32).into();
@@ -58,6 +58,7 @@ pub(crate) fn markdown_inner<S: Sink>(value: SmolStr, range: TextRange)
             from,
             value: &value,
             s,
+            to_insert: &mut to_insert,
             opts: Options {
                 gaps: vec![TextRange::up_to(value_len)],
                 ..Default::default()
@@ -66,7 +67,9 @@ pub(crate) fn markdown_inner<S: Sink>(value: SmolStr, range: TextRange)
         while events.peek().is_some() {
             let (next, range) = events.next().unwrap();
 
-            parser = parser.translate(next, range);
+            parser = parser
+                .insert_before(range)
+                .translate(next, range);
         }
         let eof = TextRange::new(value_len, value_len);
         parser.insert_pre(eof).s
@@ -76,9 +79,27 @@ pub(crate) fn markdown_inner<S: Sink>(value: SmolStr, range: TextRange)
 
 struct MdParser<'a, 'c, 's, S: Sink> {
     s: Builder<'c, 's, MdStrToken, S>,
+    to_insert: &'a mut BTreeMap<TextSize, TmpSink>,
     from: TextSize,
     value: &'a str,
     opts: Options
+}
+
+impl<'a, 'c, 's, S: Sink> MdParser<'a, 'c, 's, S> {
+    fn insert_before(mut self, range: TextRange) -> Self {
+        let mut to_insert: Vec<TextSize> = vec![];
+        for at in self.to_insert.keys() {
+            if *at <= range.start() {
+                to_insert.push(*at);
+            }
+        }
+        for at in to_insert {
+            if let Some(mut sink) = self.to_insert.remove(&at) {
+                self.s = self.s.insert(&mut sink);
+            }
+        }
+        self
+    }
 }
 
 #[derive(Default)]

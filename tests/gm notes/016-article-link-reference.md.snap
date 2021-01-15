@@ -43,74 +43,88 @@ chrono:0123abcd in sesja:a88907fd
 
 [parser]
 --- GREEN TREE ---
-Root, ArticleItem @ 0..160
-    token @ 0..3 = `+++`
-    token @ 3..4 = ` `
-    identifier, token @ 4..9 = `sesja`
-    token @ 9..10 = `:`
-    item_id, token @ 10..18 = `a88907fd`
-    token @ 18..19 = ` `
-    token @ 19..22 = `+++`
-    token @ 22..23 = `\n`
-    Value, Strukt @ 23..59
-        Key, identifier, token @ 23..29 = `title` ; trailing: ` `
-        token @ 29..31 = `=` ; trailing: ` `
-        Value, String @ 31..58
-            token @ 31..32 = `"`
-            InnerString @ 32..57
-                token @ 32..57 = `Pośród Pradawnych Drzew`
-            token @ 57..58 = `"`
-        token @ 58..59 = `\n`
-    token @ 59..62 = `+++`
-    ArticleBody @ 62..160
-        Markdown @ 62..66
+Root, MainArticle, ArticleItem @ 0..218
+    ArticleHeader @ 0..59
+        token @ 0..3 = `+++`
+        token @ 3..4 = ` `
+        identifier, token @ 4..9 = `sesja`
+        token @ 9..10 = `:`
+        item_id, token @ 10..18 = `a88907fd`
+        token @ 18..19 = ` `
+        token @ 19..22 = `+++`
+        token @ 22..23 = `\n`
+        Value, Strukt @ 23..59
+            Key, identifier, token @ 23..29 = `title` ; trailing: ` `
+            token @ 29..31 = `=` ; trailing: ` `
+            Value, String @ 31..58
+                token @ 31..32 = `"`
+                InnerString @ 32..57
+                    InnerStringPart, token @ 32..57 = `Pośród Pradawnych Drzew`
+                token @ 57..58 = `"`
+            token @ 58..59 = `\n`
+    ArticleBody @ 59..218
+        token @ 59..62 = `+++`
+        Markdown @ 62..218
             token @ 62..64 = `\n\n`
-            MdValue, MdParagraph @ 64..66
-                MdValue, MdText @ 64..65 = `1`
-                token @ 65..66 = `\n`
-        ArticleRef @ 66..87
-            token @ 66..68 = `[+`
-            token @ 68..69 = ` `
-            identifier, token @ 69..75 = `chrono`
-            token @ 75..76 = `:`
-            item_id, token @ 76..84 = `0123abcd`
-            token @ 84..85 = ` `
-            token @ 85..87 = `+]`
-        Markdown @ 87..91
-            token @ 87..89 = `\n\n`
-            MdValue, MdParagraph @ 89..91
-                MdValue, MdText @ 89..90 = `2`
-                token @ 90..91 = `\n`
-        ArticleItem @ 91..157
-            token @ 91..93 = `++`
-            token @ 93..94 = ` `
-            identifier, token @ 94..100 = `chrono`
-            token @ 100..101 = `:`
-            item_id, token @ 101..109 = `0123abcd`
-            token @ 109..110 = ` `
-            token @ 110..112 = `++`
-            token @ 112..113 = `\n`
-            Value, Strukt @ 113..141
-                Key, identifier, token @ 113..119 = `title` ; trailing: ` `
-                token @ 119..121 = `=` ; trailing: ` `
-                Value, String @ 121..140
-                    token @ 121..122 = `"`
-                    InnerString @ 122..139
-                        token @ 122..139 = `Chronologia sesji`
-                    token @ 139..140 = `"`
-                token @ 140..141 = `\n`
-            token @ 141..144 = `+++`
-            ArticleBody @ 144..148
-                Markdown @ 144..148
-                    token @ 144..146 = `\n\n`
-                    MdValue, MdParagraph @ 146..148
-                        MdValue, MdText @ 146..147 = `3`
-                        token @ 147..148 = `\n`
-            token @ 148..157 = `++ end ++`
-        Markdown @ 157..160
-            token @ 157..159 = `\n\n`
-            MdValue, MdParagraph @ 159..160
-                MdValue, MdText @ 159..160 = `4`
+            MdValue, MdOrderedList @ 64..68
+                MdValue, MdListItem @ 64..67
+                    token @ 64..67 = `1.\n`
+                token @ 67..68 = `\n`
+            MdValue, MdParagraph @ 68..94
+                MdValue, MdLink, MdReferenceLink @ 68..93
+                    token @ 68..69 = `[`
+                    MdValue, MdText @ 69..89 = `Reference style link`
+                    token @ 89..91 = `][`
+                    MdReferenceLabel @ 91..92 = `1`
+                    token @ 92..93 = `]`
+                token @ 93..94 = `\n`
+            ArticleRef @ 94..115
+                token @ 94..96 = `[+`
+                token @ 96..97 = ` `
+                identifier, token @ 97..103 = `chrono`
+                token @ 103..104 = `:`
+                item_id, token @ 104..112 = `0123abcd`
+                token @ 112..113 = ` `
+                token @ 113..115 = `+]`
+            token @ 115..119 = `\n\n\n\n`
+            MdValue, MdParagraph @ 119..121
+                MdValue, MdText @ 119..120 = `2`
+                token @ 120..121 = `\n`
+            SubArticle, ArticleItem @ 121..187
+                SubArticleHeader @ 121..171
+                    token @ 121..123 = `++`
+                    token @ 123..124 = ` `
+                    identifier, token @ 124..130 = `chrono`
+                    token @ 130..131 = `:`
+                    item_id, token @ 131..139 = `0123abcd`
+                    token @ 139..140 = ` `
+                    token @ 140..142 = `++`
+                    token @ 142..143 = `\n`
+                    Value, Strukt @ 143..171
+                        Key, identifier, token @ 143..149 = `title` ; trailing: ` `
+                        token @ 149..151 = `=` ; trailing: ` `
+                        Value, String @ 151..170
+                            token @ 151..152 = `"`
+                            InnerString @ 152..169
+                                InnerStringPart, token @ 152..169 = `Chronologia sesji`
+                            token @ 169..170 = `"`
+                        token @ 170..171 = `\n`
+                ArticleBody @ 171..178
+                    token @ 171..174 = `+++`
+                    Markdown @ 174..178
+                        token @ 174..176 = `\n\n`
+                        MdValue, MdParagraph @ 176..178
+                            MdValue, MdText @ 176..177 = `3`
+                            token @ 177..178 = `\n`
+                token @ 178..187 = `++ end ++`
+            token @ 187..191 = `\n\n\n\n`
+            MdValue, MdParagraph @ 191..193
+                MdValue, MdText @ 191..192 = `4`
+                token @ 192..193 = `\n`
+            token @ 193..195 = `\n[`
+            MdValue, MdReference @ 195..196 = `1`
+            token @ 196..199 = `]: `
+            MdValue, MdLinkUrl @ 199..218 = `http://slashdot.org`
 --- END ---
 
 

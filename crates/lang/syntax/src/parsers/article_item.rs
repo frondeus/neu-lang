@@ -1,4 +1,5 @@
-//use crate::parsers::markdown::markdown;
+use std::collections::BTreeMap;
+
 use crate::parsers::neu::{leading_trivia, trailing_trivia};
 use crate::{
     lexers::{
@@ -10,7 +11,7 @@ use crate::{
 };
 use microtree_parser::*;
 use microtree_parser::parsers::*;
-use crate::parsers::markdown::markdown;
+use crate::parsers::markdown::markdown_inner;
 
 pub fn parser<S: Sink>() -> impl Parser<FileToken, S> {
     parse(|s| {
@@ -132,21 +133,50 @@ fn item_body<S: Sink>(ends: bool) -> impl Parser<BodyToken, S> {
     parse(move |s| {
         // We are not using repeated because of this peek_end behavior
         let p = item_peek_end(s.start(Nodes::ArticleBody).expect(BodyToken::ThreePlus), ends);
+        let mut body: BTreeMap<TextSize, TmpSink> = Default::default();
+        let mut markdown = String::default();
+        let mut from = None;
         match p {
             Peek::Found { s, .. } => s,
             Peek::None { mut s, .. } => loop {
                 let p = item_peek_end(s, ends);
                 s = match p {
-                    Peek::Found { s, .. } => break s,
+                    Peek::Found { s, .. } => {
+                        break match from {
+                            Some(from) => {
+                                let md_len = markdown.text_len();
+                                let md_range = TextRange::at(from, md_len);
+                                s.start(Nodes::Markdown)
+                                 .with_mode(markdown_inner(markdown.into(), md_range, body))
+                                 .end()
+                            },
+                            None => s,
+                        };
+                    },
                     p => p
-                        .at(BodyToken::Text).parse(
-                            parse(|s| s
-                                  .start(Nodes::Markdown)
-                                  .parse(markdown())
-                                  .end())
-                        )
-                        .at(BodyToken::PlusPlus).parse(item())
-                        .at(BodyToken::OpenBl).parse(item_bl())
+                        .at(BodyToken::Text).parse(parse(|mut s| {
+                            let next = s.lexer_mut().next().unwrap();
+                            let value = next.value;
+                            markdown += &value;
+                            from.get_or_insert(next.range.start());
+                            s
+                        }))
+                        .at(BodyToken::PlusPlus).parse(parse(|mut s| {
+                            from.get_or_insert(s.lexer_mut().source().cursor());
+                            let (s2, tmp) = s.with_sink(item());
+                            let at = markdown.text_len();
+                            body.insert(at,tmp);
+                            markdown += "\n";
+                            s2
+                        }))
+                        .at(BodyToken::OpenBl).parse(parse(|mut s|{
+                            from.get_or_insert(s.lexer_mut().source().cursor());
+                            let (s2, tmp) = s.with_sink(item_bl());
+                            let at = markdown.text_len();
+                            body.insert(at,tmp);
+                            markdown += "\n";
+                            s2
+                        }))
                         .expect()
                 }
             }
@@ -176,7 +206,7 @@ fn item_bl<S: Sink>() -> impl Parser<BodyToken, S> {
     })
 }
 
-fn struct_key_val<S: Sink>() -> impl Parser<NeuToken, S> + Clone {
+fn struct_key_val<S: Sink>() -> impl Parser<NeuToken, S> {
     parse(|s| {
         s.parse(neu::strukt_key())
         .expect(NeuToken::OpAssign)

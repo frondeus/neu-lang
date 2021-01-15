@@ -35,7 +35,7 @@ chrono:0123abcd in sesja:a88907fd
 
 [parser]
 --- GREEN TREE ---
-Root, MainArticle, ArticleItem @ 0..257
+Root, MainArticle, ArticleItem @ 0..259
     ArticleHeader @ 0..148
         token @ 0..3 = `+++`
         token @ 3..4 = ` `
@@ -78,44 +78,43 @@ Root, MainArticle, ArticleItem @ 0..257
                     InnerStringPart, token @ 136..146 = `20.06.1925`
                 token @ 146..147 = `"`
             token @ 147..148 = `\n`
-    ArticleBody @ 148..257
+    ArticleBody @ 148..259
         token @ 148..151 = `+++`
-        Markdown @ 151..165
+        Markdown @ 151..259
             token @ 151..153 = `\n\n`
             MdValue, MdParagraph @ 153..165
                 MdValue, MdText @ 153..164 = `Ala ma kota`
                 token @ 164..165 = `\n`
-        SubArticle, ArticleItem @ 165..240
-            SubArticleHeader @ 165..215
-                token @ 165..167 = `++`
-                token @ 167..168 = ` `
-                identifier, token @ 168..174 = `chrono`
-                token @ 174..175 = `:`
-                item_id, token @ 175..183 = `0123abcd`
-                token @ 183..184 = ` `
-                token @ 184..186 = `++`
-                token @ 186..187 = `\n`
-                Value, Strukt @ 187..215
-                    Key, identifier, token @ 187..193 = `title` ; trailing: ` `
-                    token @ 193..195 = `=` ; trailing: ` `
-                    Value, String @ 195..214
-                        token @ 195..196 = `"`
-                        InnerString @ 196..213
-                            InnerStringPart, token @ 196..213 = `Chronologia sesji`
-                        token @ 213..214 = `"`
-                    token @ 214..215 = `\n`
-            ArticleBody @ 215..231
-                token @ 215..218 = `+++`
-                Markdown @ 218..231
-                    token @ 218..220 = `\n\n`
-                    MdValue, MdParagraph @ 220..231
-                        MdValue, MdText @ 220..230 = `Kot ma ale`
-                        token @ 230..231 = `\n`
-            token @ 231..240 = `++ end ++`
-        Markdown @ 240..257
-            token @ 240..242 = `\n\n`
-            MdValue, MdParagraph @ 242..257
-                MdValue, MdText @ 242..257 = `Ale kota nie ma`
+            SubArticle, ArticleItem @ 165..240
+                SubArticleHeader @ 165..215
+                    token @ 165..167 = `++`
+                    token @ 167..168 = ` `
+                    identifier, token @ 168..174 = `chrono`
+                    token @ 174..175 = `:`
+                    item_id, token @ 175..183 = `0123abcd`
+                    token @ 183..184 = ` `
+                    token @ 184..186 = `++`
+                    token @ 186..187 = `\n`
+                    Value, Strukt @ 187..215
+                        Key, identifier, token @ 187..193 = `title` ; trailing: ` `
+                        token @ 193..195 = `=` ; trailing: ` `
+                        Value, String @ 195..214
+                            token @ 195..196 = `"`
+                            InnerString @ 196..213
+                                InnerStringPart, token @ 196..213 = `Chronologia sesji`
+                            token @ 213..214 = `"`
+                        token @ 214..215 = `\n`
+                ArticleBody @ 215..231
+                    token @ 215..218 = `+++`
+                    Markdown @ 218..231
+                        token @ 218..220 = `\n\n`
+                        MdValue, MdParagraph @ 220..231
+                            MdValue, MdText @ 220..230 = `Kot ma ale`
+                            token @ 230..231 = `\n`
+                token @ 231..240 = `++ end ++`
+            token @ 240..244 = `\n\n\n\n`
+            MdValue, MdParagraph @ 244..259
+                MdValue, MdText @ 244..259 = `Ale kota nie ma`
 --- END ---
 
 

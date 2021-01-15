@@ -53,7 +53,7 @@ test:0000aaaa in chrono:0123abcd
 
 [parser]
 --- GREEN TREE ---
-Root, MainArticle, ArticleItem @ 0..209
+Root, MainArticle, ArticleItem @ 0..195
     ArticleHeader @ 0..59
         token @ 0..3 = `+++`
         token @ 3..4 = ` `
@@ -72,9 +72,9 @@ Root, MainArticle, ArticleItem @ 0..209
                     InnerStringPart, token @ 32..57 = `Pośród Pradawnych Drzew`
                 token @ 57..58 = `"`
             token @ 58..59 = `\n`
-    ArticleBody @ 59..209
+    ArticleBody @ 59..195
         token @ 59..62 = `+++`
-        Markdown @ 62..70
+        Markdown @ 62..195
             token @ 62..64 = `\n\n`
             MdValue, MdParagraph @ 64..66
                 MdValue, MdText @ 64..65 = `1`
@@ -83,74 +83,63 @@ Root, MainArticle, ArticleItem @ 0..209
             MdValue, MdParagraph @ 68..70
                 MdValue, MdText @ 68..69 = `2`
                 token @ 69..70 = `\n`
-        SubArticle, ArticleItem @ 70..121
-            SubArticleHeader @ 70..105
-                token @ 70..72 = `++`
-                token @ 72..73 = ` `
-                identifier, token @ 73..77 = `test`
-                token @ 77..78 = `:`
-                item_id, token @ 78..86 = `0000aaaa`
-                token @ 86..87 = ` `
-                token @ 87..89 = `++`
-                token @ 89..90 = `\n`
-                Value, Strukt @ 90..105
-                    Key, identifier, token @ 90..96 = `title` ; trailing: ` `
-                    token @ 96..98 = `=` ; trailing: ` `
-                    Value, String @ 98..104
-                        token @ 98..99 = `"`
-                        InnerString @ 99..103
-                            InnerStringPart, token @ 99..103 = `Test`
-                        token @ 103..104 = `"`
-                    token @ 104..105 = `\n`
-            ArticleBody @ 105..112
-                token @ 105..108 = `+++`
-                Markdown @ 108..112
-                    token @ 108..110 = `\n\n`
-                    MdValue, MdParagraph @ 110..112
-                        MdValue, MdText @ 110..111 = `3`
-                        token @ 111..112 = `\n`
-            token @ 112..121 = `++ end ++`
-        Markdown @ 121..121
-        SubArticle, ArticleItem @ 121..206
-            SubArticleHeader @ 121..171
-                token @ 121..123 = `++`
-                token @ 123..124 = ` `
-                identifier, token @ 124..130 = `chrono`
-                token @ 130..131 = `:`
-                item_id, token @ 131..139 = `0123abcd`
-                token @ 139..140 = ` `
-                token @ 140..142 = `++`
-                token @ 142..143 = `\n`
-                Value, Strukt @ 143..171
-                    Key, identifier, token @ 143..149 = `title` ; trailing: ` `
-                    token @ 149..151 = `=` ; trailing: ` `
-                    Value, String @ 151..170
-                        token @ 151..152 = `"`
-                        InnerString @ 152..169
-                            InnerStringPart, token @ 152..169 = `Chronologia sesji`
-                        token @ 169..170 = `"`
-                    token @ 170..171 = `\n`
-            ArticleBody @ 171..197
-                token @ 171..174 = `+++`
-                Markdown @ 174..178
-                    token @ 174..176 = `\n\n`
-                    MdValue, MdParagraph @ 176..178
-                        MdValue, MdText @ 176..177 = `4`
-                        token @ 177..178 = `\n`
-                ArticleRef @ 178..197
-                    token @ 178..180 = `[+`
-                    token @ 180..181 = ` `
-                    identifier, token @ 181..185 = `test`
-                    token @ 185..186 = `:`
-                    item_id, token @ 186..194 = `0000aaaa`
-                    token @ 194..195 = ` `
-                    token @ 195..197 = `+]`
-                Markdown @ 197..197
-            token @ 197..206 = `++ end ++`
-        Markdown @ 206..209
-            token @ 206..208 = `\n\n`
-            MdValue, MdParagraph @ 208..209
-                MdValue, MdText @ 208..209 = `5`
+            SubArticle, ArticleItem @ 70..121
+                SubArticleHeader @ 70..105
+                    token @ 70..72 = `++`
+                    token @ 72..73 = ` `
+                    identifier, token @ 73..77 = `test`
+                    token @ 77..78 = `:`
+                    item_id, token @ 78..86 = `0000aaaa`
+                    token @ 86..87 = ` `
+                    token @ 87..89 = `++`
+                    token @ 89..90 = `\n`
+                    Value, Strukt @ 90..105
+                        Key, identifier, token @ 90..96 = `title` ; trailing: ` `
+                        token @ 96..98 = `=` ; trailing: ` `
+                        Value, String @ 98..104
+                            token @ 98..99 = `"`
+                            InnerString @ 99..103
+                                InnerStringPart, token @ 99..103 = `Test`
+                            token @ 103..104 = `"`
+                        token @ 104..105 = `\n`
+                ArticleBody @ 105..112
+                    token @ 105..108 = `+++`
+                    Markdown @ 108..112
+                        token @ 108..110 = `\n\n`
+                        MdValue, MdParagraph @ 110..112
+                            MdValue, MdText @ 110..111 = `3`
+                            token @ 111..112 = `\n`
+                token @ 112..121 = `++ end ++`
+            SubArticle, ArticleItem @ 121..187
+                SubArticleHeader @ 121..171
+                    token @ 121..123 = `++`
+                    token @ 123..124 = ` `
+                    identifier, token @ 124..130 = `chrono`
+                    token @ 130..131 = `:`
+                    item_id, token @ 131..139 = `0123abcd`
+                    token @ 139..140 = ` `
+                    token @ 140..142 = `++`
+                    token @ 142..143 = `\n`
+                    Value, Strukt @ 143..171
+                        Key, identifier, token @ 143..149 = `title` ; trailing: ` `
+                        token @ 149..151 = `=` ; trailing: ` `
+                        Value, String @ 151..170
+                            token @ 151..152 = `"`
+                            InnerString @ 152..169
+                                InnerStringPart, token @ 152..169 = `Chronologia sesji`
+                            token @ 169..170 = `"`
+                        token @ 170..171 = `\n`
+                ArticleBody @ 171..178
+                    token @ 171..174 = `+++`
+                    Markdown @ 174..178
+                        token @ 174..176 = `\n\n`
+                        MdValue, MdParagraph @ 176..178
+                            MdValue, MdText @ 176..177 = `4`
+                            token @ 177..178 = `\n`
+                token @ 178..187 = `++ end ++`
+            token @ 187..194 = `\n\n\n\n\n\n\n`
+            MdValue, MdParagraph @ 194..195
+                MdValue, MdText @ 194..195 = `5`
 --- END ---
 
 
