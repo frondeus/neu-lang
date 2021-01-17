@@ -58,7 +58,8 @@ fn main_item_header<S: Sink>() -> impl Parser<HeaderToken, S> {
         .parse(parse(|s| {
             let leading_trivia = leading_trivia();
             let trailing_trivia = trailing_trivia();
-            s.alias(Nodes::Value)
+            s.alias(Nodes::ArticleHeaderValues)
+            .alias(Nodes::Value)
             .start(Nodes::Strukt)
             .parse(separated(
                 with_mode(with_ctx(Context {
@@ -103,7 +104,8 @@ fn item_header<S: Sink>() -> impl Parser<HeaderToken, S> {
         .parse(parse(|s| {
             let leading_trivia = leading_trivia();
             let trailing_trivia = trailing_trivia();
-            s.alias(Nodes::Value)
+            s.alias(Nodes::ArticleHeaderValues)
+             .alias(Nodes::Value)
              .start(Nodes::Strukt)
              .parse(separated(
                  with_mode(with_ctx(Context {
@@ -208,9 +210,12 @@ fn item_bl<S: Sink>() -> impl Parser<BodyToken, S> {
 
 fn struct_key_val<S: Sink>() -> impl Parser<NeuToken, S> {
     parse(|s| {
-        s.parse(neu::strukt_key())
+        s
+        .start(Nodes::StruktPair)
+        .parse(neu::strukt_key())
         .expect(NeuToken::OpAssign)
         .parse(neu::value())
+        .end()
     })
 }
 

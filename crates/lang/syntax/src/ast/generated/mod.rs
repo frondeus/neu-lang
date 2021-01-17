@@ -45,7 +45,7 @@ impl Nodes {
     pub const MdCodeBlock: Name = Name::new("MdCodeBlock");
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
 pub struct OpBang(pub(crate) Red);
 impl Ast for OpBang {
     fn new(node: Red) -> Option<Self> {
@@ -74,7 +74,7 @@ impl IntoBuilder<UnaryOp> for TokenBuilder<OpBang> {
     }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
 pub struct OpenI(pub(crate) Red);
 impl Ast for OpenI {
     fn new(node: Red) -> Option<Self> {
@@ -98,7 +98,7 @@ impl OpenI {
     }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
 pub struct OpenP(pub(crate) Red);
 impl Ast for OpenP {
     fn new(node: Red) -> Option<Self> {
@@ -122,7 +122,7 @@ impl OpenP {
     }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
 pub struct CloseP(pub(crate) Red);
 impl Ast for CloseP {
     fn new(node: Red) -> Option<Self> {
@@ -146,7 +146,7 @@ impl CloseP {
     }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
 pub struct OpStar(pub(crate) Red);
 impl Ast for OpStar {
     fn new(node: Red) -> Option<Self> {
@@ -175,7 +175,7 @@ impl IntoBuilder<BinaryOp> for TokenBuilder<OpStar> {
     }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
 pub struct OpPlus(pub(crate) Red);
 impl Ast for OpPlus {
     fn new(node: Red) -> Option<Self> {
@@ -204,7 +204,7 @@ impl IntoBuilder<BinaryOp> for TokenBuilder<OpPlus> {
     }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
 pub struct PlusPlus(pub(crate) Red);
 impl Ast for PlusPlus {
     fn new(node: Red) -> Option<Self> {
@@ -228,7 +228,7 @@ impl PlusPlus {
     }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
 pub struct PlusPlusEnd(pub(crate) Red);
 impl Ast for PlusPlusEnd {
     fn new(node: Red) -> Option<Self> {
@@ -252,7 +252,7 @@ impl PlusPlusEnd {
     }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
 pub struct ThreePlus(pub(crate) Red);
 impl Ast for ThreePlus {
     fn new(node: Red) -> Option<Self> {
@@ -276,7 +276,7 @@ impl ThreePlus {
     }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
 pub struct CloseBl(pub(crate) Red);
 impl Ast for CloseBl {
     fn new(node: Red) -> Option<Self> {
@@ -300,7 +300,7 @@ impl CloseBl {
     }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
 pub struct Comma(pub(crate) Red);
 impl Ast for Comma {
     fn new(node: Red) -> Option<Self> {
@@ -324,7 +324,7 @@ impl Comma {
     }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
 pub struct OpMinus(pub(crate) Red);
 impl Ast for OpMinus {
     fn new(node: Red) -> Option<Self> {
@@ -353,7 +353,7 @@ impl IntoBuilder<UnaryOp> for TokenBuilder<OpMinus> {
     }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
 pub struct OpDot(pub(crate) Red);
 impl Ast for OpDot {
     fn new(node: Red) -> Option<Self> {
@@ -382,7 +382,7 @@ impl IntoBuilder<UnaryOp> for TokenBuilder<OpDot> {
     }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
 pub struct OpSlash(pub(crate) Red);
 impl Ast for OpSlash {
     fn new(node: Red) -> Option<Self> {
@@ -411,7 +411,7 @@ impl IntoBuilder<BinaryOp> for TokenBuilder<OpSlash> {
     }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
 pub struct OpColon(pub(crate) Red);
 impl Ast for OpColon {
     fn new(node: Red) -> Option<Self> {
@@ -435,7 +435,7 @@ impl OpColon {
     }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
 pub struct OpAssign(pub(crate) Red);
 impl Ast for OpAssign {
     fn new(node: Red) -> Option<Self> {
@@ -459,7 +459,7 @@ impl OpAssign {
     }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
 pub struct OpDEqual(pub(crate) Red);
 impl Ast for OpDEqual {
     fn new(node: Red) -> Option<Self> {
@@ -488,7 +488,7 @@ impl IntoBuilder<BinaryOp> for TokenBuilder<OpDEqual> {
     }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
 pub struct OpenB(pub(crate) Red);
 impl Ast for OpenB {
     fn new(node: Red) -> Option<Self> {
@@ -512,7 +512,7 @@ impl OpenB {
     }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
 pub struct OpenBl(pub(crate) Red);
 impl Ast for OpenBl {
     fn new(node: Red) -> Option<Self> {
@@ -536,7 +536,7 @@ impl OpenBl {
     }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
 pub struct CloseB(pub(crate) Red);
 impl Ast for CloseB {
     fn new(node: Red) -> Option<Self> {
@@ -560,7 +560,7 @@ impl CloseB {
     }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
 pub struct Fences(pub(crate) Red);
 impl Ast for Fences {
     fn new(node: Red) -> Option<Self> {
@@ -584,7 +584,7 @@ impl Fences {
     }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
 pub struct CloseI(pub(crate) Red);
 impl Ast for CloseI {
     fn new(node: Red) -> Option<Self> {
@@ -608,7 +608,7 @@ impl CloseI {
     }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
 pub struct DQuote(pub(crate) Red);
 impl Ast for DQuote {
     fn new(node: Red) -> Option<Self> {
@@ -632,7 +632,7 @@ impl DQuote {
     }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
 pub struct False(pub(crate) Red);
 impl Ast for False {
     fn new(node: Red) -> Option<Self> {
@@ -661,7 +661,7 @@ impl IntoBuilder<Boolean> for TokenBuilder<False> {
     }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
 pub struct LineEnding(pub(crate) Red);
 impl Ast for LineEnding {
     fn new(node: Red) -> Option<Self> {
@@ -685,7 +685,7 @@ impl LineEnding {
     }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
 pub struct MdQuote(pub(crate) Red);
 impl Ast for MdQuote {
     fn new(node: Red) -> Option<Self> {
@@ -709,7 +709,7 @@ impl MdQuote {
     }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
 pub struct True(pub(crate) Red);
 impl Ast for True {
     fn new(node: Red) -> Option<Self> {
@@ -738,7 +738,7 @@ impl IntoBuilder<Boolean> for TokenBuilder<True> {
     }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
 pub struct OpenC(pub(crate) Red);
 impl Ast for OpenC {
     fn new(node: Red) -> Option<Self> {
@@ -762,7 +762,7 @@ impl OpenC {
     }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
 pub struct CloseC(pub(crate) Red);
 impl Ast for CloseC {
     fn new(node: Red) -> Option<Self> {
@@ -786,7 +786,7 @@ impl CloseC {
     }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
 pub enum Value {
     Number(Number),
     Boolean(Boolean),
@@ -957,7 +957,7 @@ impl Value {
     }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
 pub enum Boolean {
     True(True),
     False(False),
@@ -1002,7 +1002,7 @@ impl Boolean {
     }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
 pub enum UnaryOp {
     OpMinus(OpMinus),
     OpBang(OpBang),
@@ -1061,7 +1061,7 @@ impl UnaryOp {
     }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
 pub enum BinaryOp {
     OpMinus(OpMinus),
     OpPlus(OpPlus),
@@ -1148,7 +1148,7 @@ impl BinaryOp {
     }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
 pub enum InnerStringPart {
     Text(Text),
     Interpolated(Interpolated),
@@ -1193,7 +1193,7 @@ impl InnerStringPart {
     }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
 pub enum ArticleItem {
     MainArticle(MainArticle),
     SubArticle(SubArticle),
@@ -1238,7 +1238,7 @@ impl ArticleItem {
     }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
 pub enum ArticleBodyItem {
     Markdown(Markdown),
     SubArticle(SubArticle),
@@ -1297,10 +1297,12 @@ impl ArticleBodyItem {
     }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
 pub enum MdValue {
     MdLink(MdLink),
     MdCodeBlock(MdCodeBlock),
+    SubArticle(SubArticle),
+    ArticleRef(ArticleRef),
     Text(Text),
 }
 impl From<MdLink> for MdValue {
@@ -1311,6 +1313,16 @@ impl From<MdLink> for MdValue {
 impl From<MdCodeBlock> for MdValue {
     fn from(val: MdCodeBlock) -> Self {
         Self::MdCodeBlock(val)
+    }
+}
+impl From<SubArticle> for MdValue {
+    fn from(val: SubArticle) -> Self {
+        Self::SubArticle(val)
+    }
+}
+impl From<ArticleRef> for MdValue {
+    fn from(val: ArticleRef) -> Self {
+        Self::ArticleRef(val)
     }
 }
 impl From<Text> for MdValue {
@@ -1325,12 +1337,16 @@ impl Ast for MdValue {
         }
         None.or_else(|| MdLink::new(node.clone()).map(MdValue::MdLink))
             .or_else(|| MdCodeBlock::new(node.clone()).map(MdValue::MdCodeBlock))
+            .or_else(|| SubArticle::new(node.clone()).map(MdValue::SubArticle))
+            .or_else(|| ArticleRef::new(node.clone()).map(MdValue::ArticleRef))
             .or_else(|| Text::new(node.clone()).map(MdValue::Text))
     }
     fn red(&self) -> Red {
         match &self {
             MdValue::MdLink(node) => node.red(),
             MdValue::MdCodeBlock(node) => node.red(),
+            MdValue::SubArticle(node) => node.red(),
+            MdValue::ArticleRef(node) => node.red(),
             MdValue::Text(node) => node.red(),
         }
     }
@@ -1348,6 +1364,18 @@ impl MdValue {
             _ => None,
         }
     }
+    pub fn as_subarticle(self) -> Option<SubArticle> {
+        match self {
+            Self::SubArticle(val) => Some(val),
+            _ => None,
+        }
+    }
+    pub fn as_articleref(self) -> Option<ArticleRef> {
+        match self {
+            Self::ArticleRef(val) => Some(val),
+            _ => None,
+        }
+    }
     pub fn as_text(self) -> Option<Text> {
         match self {
             Self::Text(val) => Some(val),
@@ -1356,7 +1384,7 @@ impl MdValue {
     }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
 pub struct Binary(pub(crate) Red);
 impl Ast for Binary {
     fn new(node: Red) -> Option<Self> {
@@ -1461,7 +1489,7 @@ where
     }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
 pub struct IdentPath(pub(crate) Red);
 impl Ast for IdentPath {
     fn new(node: Red) -> Option<Self> {
@@ -1566,7 +1594,7 @@ where
     }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
 pub struct Unary(pub(crate) Red);
 impl Ast for Unary {
     fn new(node: Red) -> Option<Self> {
@@ -1658,7 +1686,7 @@ where
     }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
 pub struct MdString(pub(crate) Red);
 impl Ast for MdString {
     fn new(node: Red) -> Option<Self> {
@@ -1763,7 +1791,7 @@ where
     }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
 pub struct String(pub(crate) Red);
 impl Ast for String {
     fn new(node: Red) -> Option<Self> {
@@ -1880,7 +1908,7 @@ where
     }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
 pub struct Strukt(pub(crate) Red);
 impl Ast for Strukt {
     fn new(node: Red) -> Option<Self> {
@@ -2005,7 +2033,7 @@ where
     }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
 pub struct Array(pub(crate) Red);
 impl Ast for Array {
     fn new(node: Red) -> Option<Self> {
@@ -2130,7 +2158,7 @@ where
     }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
 pub struct Parens(pub(crate) Red);
 impl Ast for Parens {
     fn new(node: Red) -> Option<Self> {
@@ -2235,7 +2263,7 @@ where
     }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
 pub struct Markdown(pub(crate) Red);
 impl Ast for Markdown {
     fn new(node: Red) -> Option<Self> {
@@ -2299,7 +2327,7 @@ impl IntoBuilder<ArticleBodyItem> for MarkdownBuilder {
     }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
 pub struct InnerString(pub(crate) Red);
 impl Ast for InnerString {
     fn new(node: Red) -> Option<Self> {
@@ -2358,7 +2386,7 @@ impl AstBuilder for InnerStringBuilder {
     }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
 pub struct Interpolated(pub(crate) Red);
 impl Ast for Interpolated {
     fn new(node: Red) -> Option<Self> {
@@ -2463,7 +2491,7 @@ where
     }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
 pub struct StruktPair(pub(crate) Red);
 impl Ast for StruktPair {
     fn new(node: Red) -> Option<Self> {
@@ -2558,7 +2586,7 @@ where
     }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
 pub struct Key(pub(crate) Red);
 impl Ast for Key {
     fn new(node: Red) -> Option<Self> {
@@ -2633,7 +2661,7 @@ where
     }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
 pub struct MainArticle(pub(crate) Red);
 impl Ast for MainArticle {
     fn new(node: Red) -> Option<Self> {
@@ -2733,7 +2761,7 @@ where
     }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
 pub struct SubArticle(pub(crate) Red);
 impl Ast for SubArticle {
     fn new(node: Red) -> Option<Self> {
@@ -2853,7 +2881,7 @@ where
     }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
 pub struct ArticleHeader(pub(crate) Red);
 impl Ast for ArticleHeader {
     fn new(node: Red) -> Option<Self> {
@@ -3024,7 +3052,7 @@ where
     }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
 pub struct ArticleBody(pub(crate) Red);
 impl Ast for ArticleBody {
     fn new(node: Red) -> Option<Self> {
@@ -3132,7 +3160,7 @@ where
     }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
 pub struct SubArticleHeader(pub(crate) Red);
 impl Ast for SubArticleHeader {
     fn new(node: Red) -> Option<Self> {
@@ -3307,7 +3335,7 @@ where
     }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
 pub struct ArticleHeaderValues(pub(crate) Red);
 impl Ast for ArticleHeaderValues {
     fn new(node: Red) -> Option<Self> {
@@ -3392,7 +3420,7 @@ where
     }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
 pub struct ArticleRef(pub(crate) Red);
 impl Ast for ArticleRef {
     fn new(node: Red) -> Option<Self> {
@@ -3538,7 +3566,7 @@ where
     }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
 pub struct MdLink(pub(crate) Red);
 impl Ast for MdLink {
     fn new(node: Red) -> Option<Self> {
@@ -3655,7 +3683,7 @@ where
     }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
 pub struct MdCodeBlock(pub(crate) Red);
 impl Ast for MdCodeBlock {
     fn new(node: Red) -> Option<Self> {

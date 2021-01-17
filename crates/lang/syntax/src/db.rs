@@ -111,7 +111,6 @@ fn parse_all_mds(db: &dyn Parser) -> Vec<(Kind, ArticleId, FileId, ArticleItem)>
         .flat_map(|(md, main_article)| {
             let items = main_article
                         .get_articles()
-                        .flat_map(|sub_article| sub_article.get_articles())
                         .map(|sub_article| ArticleItem::from(sub_article))
                         .map(move |item| (md, item));
 

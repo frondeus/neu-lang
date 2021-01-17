@@ -13,7 +13,8 @@ No errors
 [render]
 <h1>Pośród Pradawnych Drzew</h1>
 <div class="side-table"><table><tr><th class="align-right">a</th><td>3</td></tr></table>
-</div><p>Ala ma <strong>kota</strong></p>
+</div> 
+<p>Ala ma <strong>kota</strong></p>
 
 [parser]
 --- GREEN TREE ---

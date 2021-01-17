@@ -60,7 +60,7 @@ nodes! {
 }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Number(Red);
 impl Ast for Number {
     fn new(node: Red) -> Option<Self> {
@@ -75,7 +75,7 @@ impl Ast for Number {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Identifier(Red);
 impl Ast for Identifier {
     fn new(node: Red) -> Option<Self> {
@@ -90,7 +90,7 @@ impl Ast for Identifier {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Text(Red);
 impl Ast for Text {
     fn new(node: Red) -> Option<Self> {
@@ -105,7 +105,7 @@ impl Ast for Text {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct ItemIdent(Red);
 impl Ast for ItemIdent {
     fn new(node: Red) -> Option<Self> {
@@ -120,7 +120,7 @@ impl Ast for ItemIdent {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct ArticleItemId(Red);
 impl Ast for ArticleItemId {
     fn new(node: Red) -> Option<Self> {
@@ -135,7 +135,7 @@ impl Ast for ArticleItemId {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct MdLinkUrl(Red);
 impl Ast for MdLinkUrl {
     fn new(node: Red) -> Option<Self> {
@@ -149,7 +149,7 @@ impl Ast for MdLinkUrl {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct MdLinkTitle(Red);
 impl Ast for MdLinkTitle {
     fn new(node: Red) -> Option<Self> {
@@ -163,7 +163,7 @@ impl Ast for MdLinkTitle {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct MdCodeBlockLang(Red);
 impl Ast for MdCodeBlockLang {
     fn new(node: Red) -> Option<Self> {

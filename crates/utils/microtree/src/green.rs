@@ -44,6 +44,14 @@ impl Green {
         self.0.name
     }
 
+    pub fn names(&self) -> Vec<Name> {
+        let mut v = vec![self.0.name];
+        if let GreenKind::Alias(Some(green)) = &self.0.kind {
+            v.extend(green.names().into_iter());
+        }
+        v
+    }
+
     pub fn is(&self, name: Name) -> bool {
         if let GreenKind::Alias(Some(green)) = &self.0.kind {
             if green.is(name) {

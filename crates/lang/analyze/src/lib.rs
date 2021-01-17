@@ -1,4 +1,4 @@
-use neu_syntax::ast::{ArticleItem, ArticleRef, ArticleBodyItem, SubArticle, Markdown};
+use neu_syntax::ast::{ArticleItem, ArticleRef, SubArticle, Markdown};
 use neu_syntax::reexport::Ast;
 use regex::Regex;
 
@@ -34,26 +34,26 @@ pub(crate) fn find_mentions(
     let orig_kind = article_item.item_ident()?.red().to_string();
     let orig_id = article_item.item_id()?.red().to_string();
     let body = article_item.body()?;
-    mentions.extend(body.items()
-                    .flat_map(|body_item| {
-                        match body_item {
-            ArticleBodyItem::SubArticle(sub) => {
-                sub_mention(sub, &orig_kind, &orig_id)
-                    .into_iter()
-                    .collect::<Vec<_>>()
-            },
-            ArticleBodyItem::ArticleRef(re) => {
-                ref_mention(re, &orig_kind, &orig_id)
-                    .into_iter()
-                    .collect::<Vec<_>>()
-            },
-            ArticleBodyItem::Markdown(markdown) => {
-                find_mentions_in_md(markdown, &orig_kind, &orig_id)
+    let red = body.red();
+    let items = red
+        .pre_order()
+        .flat_map(|item| {
+            if let Some(sub) = SubArticle::new(item.clone()) {
+                sub_mention(sub, &orig_kind, &orig_id).into_iter()
                     .collect::<Vec<_>>()
             }
-                        }
-                    })
-    );
+            else if let Some(re) = ArticleRef::new(item.clone()) {
+                ref_mention(re, &orig_kind, &orig_id).into_iter()
+                    .collect::<Vec<_>>()
+            }
+            else if let Some(md) = Markdown::new(item) {
+                find_mentions_in_md(md, &orig_kind, &orig_id)
+            }
+            else { vec![] }
+        });
+
+    mentions.extend(items);
+
     Some(())
 }
 
@@ -75,7 +75,7 @@ fn find_mentions_in_md<'a>(
     markdown: Markdown,
     orig_kind: &'a String,
     orig_id: &'a String,
-) -> impl Iterator<Item = Mention> + 'a {
+) -> Vec<Mention> {
     lazy_static::lazy_static! {
         static ref LINK_REG: Regex = Regex::new(r"([a-z_A-Z0-9]+):([0-9A-Fa-f]{8})").expect("Regex");
     }
@@ -92,7 +92,6 @@ fn find_mentions_in_md<'a>(
             }
         })
         .collect::<Vec<_>>()
-        .into_iter()
 }
 
 #[cfg(test)]

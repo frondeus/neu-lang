@@ -40,7 +40,7 @@ impl Eval {
         }
 
         if node.is(Nodes::MdImage) {
-            dbg!(&node);
+            //dbg!(&node);
             str.push_str("<img");
             if let Some(node) = node.children().find(|n| n.is(Nodes::MdImageSrc)) {
                 let text = Self::str_non_trivia(node);
@@ -58,7 +58,7 @@ impl Eval {
         }
 
         if node.is(Nodes::MdLink) {
-            dbg!(&node);
+            //dbg!(&node);
             str.push_str("<a");
             if let Some(node) = node.children().find(|n| n.is(Nodes::MdLinkUrl)) {
                 let text = Self::str_non_trivia(node);

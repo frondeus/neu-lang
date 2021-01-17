@@ -9,7 +9,8 @@ No errors
 
 [render]
 <h1>Snake Man</h1>
-<div class="side-table"></div>
+<div class="side-table"></div> 
+
 
 [parser]
 --- GREEN TREE ---

@@ -23,7 +23,8 @@ No errors
 [render]
 <h1>Snake Man</h1>
 <div class="side-table"><table><tr><th class="align-right">Ataki</th><td>1</td></tr><tr><th class="align-right">BC</th><td>50 # 3k6 x 5</td></tr><tr><th class="align-right">INT</th><td>80 # (3k6+6) x 5</td></tr><tr><th class="align-right">KON</th><td>50 # 3k6 x 5</td></tr><tr><th class="align-right">Krzepa</th><td>0</td></tr><tr><th class="align-right">MO</th><td>0</td></tr><tr><th class="align-right">MOC</th><td>65 # (2k6+6) x 5</td></tr><tr><th class="align-right">PM</th><td>13</td></tr><tr><th class="align-right">PW</th><td>10</td></tr><tr><th class="align-right">Ruch</th><td>8</td></tr><tr><th class="align-right">S</th><td>50 # 3k6 x 5</td></tr><tr><th class="align-right">ZR</th><td>65 # (2k6 + 6) x 5</td></tr></table>
-</div><p>Ugryzienie: Jad bardzo trujący.</p>
+</div> 
+<p>Ugryzienie: Jad bardzo trujący.</p>
 
 [parser]
 --- GREEN TREE ---

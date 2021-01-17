@@ -63,6 +63,8 @@ Markdown = values: MdValue*
 
 MdValue = MdLink
             | MdCodeBlock
+            | SubArticle
+            | ArticleRef
             | 'text'
 
 MdLink = values: MdValue* 'md_link_url' 'md_link_title'

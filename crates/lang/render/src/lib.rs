@@ -1,11 +1,9 @@
 use crate::db::Renderer;
 use crate::result::RenderResult;
 use neu_eval::Value;
-use neu_parser::{NodeId, ParseResult};
-use neu_syntax::ast::{ArticleItem, ArticleRef, Ast};
-use neu_syntax::db::FileId;
-use neu_syntax::Nodes;
+use neu_syntax::{ast::{ArticleItem, ArticleRef, Markdown}, reexport::{Ast, Order, Red, SmolStr}};
 use std::collections::{BTreeMap, BTreeSet};
+use itertools::Itertools;
 
 mod result;
 
@@ -13,13 +11,13 @@ mod html;
 
 pub mod db;
 
-fn eval(db: &dyn Renderer, file: FileId, id: NodeId, result: &mut RenderResult) -> Option<Value> {
-    let evaled = db.eval(file, id);
+fn eval(db: &dyn Renderer, red: Red, result: &mut RenderResult) -> Option<Value> {
+    let evaled = db.eval(red);
     result.errors.merge(&evaled.errors);
     evaled.value.clone()
 }
 
-fn render_strukt(strukt: BTreeMap<String, Value>, result: &mut RenderResult) {
+fn render_strukt(strukt: BTreeMap<SmolStr, Value>, result: &mut RenderResult) {
     if !strukt.is_empty() {
         result.output.push_str(r#"<table>"#);
         for (key, value) in strukt {
@@ -32,6 +30,7 @@ fn render_strukt(strukt: BTreeMap<String, Value>, result: &mut RenderResult) {
     }
 }
 
+/*
 fn render_mentions(
     db: &dyn Renderer,
     kind: Option<&str>,
@@ -88,79 +87,32 @@ fn render_mentions(
         }
     }
 }
+*/
 
 fn render_body(
     db: &dyn Renderer,
-    file_id: FileId,
-    article_item: &ArticleItem,
-    parsed: &ParseResult,
+    article_item: ArticleItem,
     result: &mut RenderResult
 ) {
-    let arena = &parsed.arena;
-    if let Some(body) = article_item.body {
-        let body = arena
-            .get(body)
-            .children
-            .iter()
-            .copied()
-            .collect::<Vec<NodeId>>();
-        for body_id in body {
-            let body = arena.get(body_id);
-            if body.is(Nodes::Error) {
-                let err = parsed.errors.get(body_id).expect("Error");
-                let s = format!(r#"<div class="error">{}</div>"#, err);
-                result.output.push_str(&s);
-            } else if body.is(Nodes::Markdown) {
-                if let Some(markdown) = eval(db, file_id, body_id, result) {
-                    result.output.push_str(&format!("{}", html::render_value(&markdown)));
-                }
-            } else if body.is(Nodes::ArticleItem) {
-                let input = db.input(file_id);
-                let article_item =
-                    ArticleItem::from_syntax(body_id, arena).expect("body is ArticleItem");
-                let kind = article_item.identifier(arena, &input).unwrap_or("???");
-                let id = article_item.item_id(arena, &input).unwrap_or("???");
-                result.output.push_str(&format!(
-                    r#"<div class="article-item" id="{}_{}" >"#,
-                    kind, id
-                ));
-                _render(db, file_id, article_item, parsed, result);
-                result.output.push_str("</div>\n");
-            } else if body.is(Nodes::ArticleRef) {
-                let input = db.input(file_id);
-                let article_ref =
-                    ArticleRef::from_syntax(body_id, arena).expect("body is ArticleRef");
-                let kind = article_ref.identifier(arena, &input).unwrap_or("???");
-                let id = article_ref.item_id(arena, &input).unwrap_or("???");
-                result.output.push_str(&format!(
-                    r#"<div class="article-item" id="{}_{}" >"#,
-                    kind, id
-                ));
-                let rendered = db.render_item(kind.into(), id.into());
-                result.output.push_str(&rendered.output);
-                result.output.push_str("</div>\n");
-            } else {
-                let s = format!(r#"<div class="todo">{:?}</div>"#, body);
-                result.output.push_str(&s);
-            }
+    if let Some(body) = article_item.body() {
+        let red = body.red();
+        if let Some(markdown) = eval(db, red, result) {
+            result.output.push_str(&format!("{}", html::render_value(&markdown)));
         }
     }
 }
 
 fn _render(
     db: &dyn Renderer,
-    file_id: FileId,
     article_item: ArticleItem,
-    parsed: &ParseResult,
     result: &mut RenderResult,
 ) {
-    let input = db.input(file_id);
-    let kind = article_item.identifier(&parsed.arena, &input);
-    let id = article_item.item_id(&parsed.arena, &input);
+    let kind = article_item.item_ident().map(|i| i.red().to_string()).unwrap_or_else(|| "???".to_string());
+    let id = article_item.item_id().map(|i| i.red().to_string()).unwrap_or_else(|| "???".to_string());
 
     let mut strukt = article_item
-        .strukt
-        .and_then(|strukt| eval(db, file_id, strukt, result)?.into_struct())
+        .strukt()
+        .and_then(|strukt| eval(db, strukt.red(), result)?.into_struct())
         .unwrap_or_default();
 
     if let Some(title) = strukt.remove("title") {
@@ -172,11 +124,11 @@ fn _render(
     result.output.push_str(r#"<div class="side-table">"#);
 
     render_strukt(strukt, result);
-    render_mentions(db, kind, id, result);
+    //render_mentions(db, kind, id, result);
 
-    result.output.push_str("</div>");
+    result.output.push_str("</div> \n");
 
-    render_body(db, file_id, &article_item, parsed, result);
+    render_body(db, article_item, result);
 }
 
 #[cfg(test)]
@@ -207,7 +159,7 @@ mod tests {
             db.set_input(path.clone(), Arc::new(input.into()));
             let result = db.render_md(path);
 
-            result.display(input).to_string()
+            result.to_string()
         })
         .unwrap();
     }

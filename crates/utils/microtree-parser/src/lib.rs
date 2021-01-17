@@ -1732,12 +1732,12 @@ pub mod parsers {
                 loop {
                     let mut op_token = None;
 
-                    let (s2, lhs_trivia): (_, TmpSink) = s.with_sink(parse(|mut s| {
+                    let (s2, op_trivia): (_, TmpSink) = s.with_sink(parse(|mut s| {
                         op_token = Some(s.peek_token());
                         s
                     }));
                     s = s2;
-                    lhs.append(lhs_trivia);
+                    lhs.append(op_trivia);
 
                     let op_token = op_token.unwrap(); // UGH
 

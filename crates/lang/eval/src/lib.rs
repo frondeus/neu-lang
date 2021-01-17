@@ -6,7 +6,7 @@ mod value;
 pub mod db;
 
 use error::Error;
-use neu_syntax::{ast::{Binary, BinaryOp, IdentPath, Identifier, InnerStringPart, OpDot, Strukt, Unary, UnaryOp, Value as AstValue}, reexport::{Ast, Red, SmolStr}};
+use neu_syntax::{ast::{ArticleBody, ArticleBodyItem, ArticleRef, Binary, BinaryOp, IdentPath, Identifier, InnerStringPart, Markdown, OpDot, Strukt, SubArticle, Unary, UnaryOp, Value as AstValue}, reexport::{Ast, Red, SmolStr}};
 use neu_diagnostics::{Diagnostic, ToReport, Diagnostics};
 use std::collections::BTreeMap;
 pub use value::Value;
@@ -147,6 +147,22 @@ impl Eval {
                     None
                 }
             };
+        }
+        if let Some(body) = ArticleBody::new(red.clone()) {
+            let mut s = String::default();
+            let red = body.red();
+            for item in red.pre_order() {
+                if let Some(sub) = SubArticle::new(item.clone()) {
+                }
+                else if let Some(re) = ArticleRef::new(item.clone()) {
+                }
+                else if let Some(md) = Markdown::new(item) {
+                    for value in md.red().children() {
+                        self.eval_md(&mut s, value)?;
+                    }
+                }
+            }
+            return Some(Value::String(s.into()));
         }
         dbg!(&red);
         /*

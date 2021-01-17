@@ -34,7 +34,8 @@ No errors
 [render]
 <h1>Gla'aki, Mieszkaniec Jeziora</h1>
 <div class="side-table"><table><tr><th class="align-right">Ataki</th><td>1</td></tr><tr><th class="align-right">BC</th><td>450</td></tr><tr><th class="align-right">INT</th><td>150</td></tr><tr><th class="align-right">KON</th><td>300</td></tr><tr><th class="align-right">Krzepa</th><td>8</td></tr><tr><th class="align-right">MO</th><td>+7K6</td></tr><tr><th class="align-right">MOC</th><td>140</td></tr><tr><th class="align-right">PM</th><td>28</td></tr><tr><th class="align-right">PW</th><td>75</td></tr><tr><th class="align-right">Ruch</th><td>6</td></tr><tr><th class="align-right">S</th><td>200</td></tr></table>
-</div><p>Manifestacja Wielkiego Przedwiecznego Gla’akiego. Chce przemienić ludzi w swoje sługi, które odnajdą i zniszczą fragment jego kryształowego więzienia.</p><p>Walka: Gla’aki atakuje za pomocą kolców, uderzając nimi lub
+</div> 
+<p>Manifestacja Wielkiego Przedwiecznego Gla’akiego. Chce przemienić ludzi w swoje sługi, które odnajdą i zniszczą fragment jego kryształowego więzienia.</p><p>Walka: Gla’aki atakuje za pomocą kolców, uderzając nimi lub
 wystrzeliwując je w ofiarę.</p><p>Walka 100% (50/20) obrażenia 3K10</p><p>Pancerz: 40 punktów twardej skorupy; każdy kolec ma 4 punkty Pancerza i 6 PW.</p><p>Zaklęcia: Gla’aki zna większość zaklęć i przekazuje wiele z nich swoim niewolniczym wyznawcom.</p><p>Utrata Poczytalności: 1K3/1K20 PP za ujrzenie Gla’akiego.</p>
 
 [parser]

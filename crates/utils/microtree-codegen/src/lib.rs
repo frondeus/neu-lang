@@ -156,7 +156,7 @@ pub fn codegen(
             &mut file,
             "{}\n",
             quote! (
-                #[derive(Clone, Debug, Eq, PartialEq)]
+                #[derive(Clone, Debug, Eq, PartialEq, Hash)]
                 pub struct #token_name(pub(crate) Red);
                 impl Ast for #token_name {
                     fn new(node: Red) -> Option<Self> {
@@ -204,7 +204,7 @@ pub fn codegen(
             &mut file,
             "{}\n",
             quote!(
-                #[derive(Clone, Debug, Eq, PartialEq)]
+                #[derive(Clone, Debug, Eq, PartialEq, Hash)]
                 pub enum #enum_name {
                     #(#enum_variants(#enum_variants)),*
                 }
@@ -466,7 +466,7 @@ pub fn codegen(
             &mut file,
             "{}\n",
             quote! {
-                #[derive(Clone, Debug, Eq, PartialEq)]
+                #[derive(Clone, Debug, Eq, PartialEq, Hash)]
                 pub struct #node_name(pub(crate) Red);
                 impl Ast for #node_name {
                     fn new(node: Red) -> Option<Self> {

@@ -72,7 +72,8 @@ pub(crate) fn markdown_inner<S: Sink>(value: SmolStr, range: TextRange, mut to_i
                 .translate(next, range);
         }
         let eof = TextRange::new(value_len, value_len);
-        parser.insert_pre(eof).s
+        parser.insert_before(eof)
+              .insert_pre(eof).s
     })
 }
 

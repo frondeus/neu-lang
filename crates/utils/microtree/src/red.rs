@@ -82,6 +82,10 @@ impl Red {
         self.green().name()
     }
 
+    pub fn names(&self) -> Vec<Name> {
+        self.green().names()
+    }
+
     pub fn is(&self, name: Name) -> bool {
         self.green().is(name)
     }
@@ -126,6 +130,15 @@ impl Red {
             })
     }
 
+    pub fn pre_post_order(&self) -> impl Iterator<Item = (Order, Red)> + '_ {
+        Some((Order::Pre, self.clone())).into_iter()
+        .chain(
+            self.children()
+                .flat_map(|child| child.pre_post_order().collect::<Vec<_>>())
+        )
+        .chain(Some((Order::Post, self.clone())).into_iter())
+    }
+
     pub fn pre_order(&self) -> impl Iterator<Item = Red> + '_ {
         Some(self.clone()).into_iter()
         .chain(
@@ -145,4 +158,10 @@ impl PartialEq for Red {
     fn eq(&self, other: &Self) -> bool {
         self.offset() == other.offset() && self.0.green == other.0.green
     }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum Order {
+    Pre,
+    Post
 }
