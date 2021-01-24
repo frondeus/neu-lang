@@ -8,7 +8,7 @@ impl MainArticle {
             .into_iter()
             .flat_map(|a| {
                 a.red()
-                .pre_order()
+                .pre_order_iter()
                 .filter_map(SubArticle::new)
                 .collect::<Vec<_>>()
             })
@@ -37,6 +37,18 @@ impl ArticleItem {
                     .article_header_values()
             }
         }
+    }
+
+    pub fn item_ident_str(&self) -> std::string::String {
+        self.item_ident()
+            .map(|s| s.red().to_string())
+            .unwrap_or_else(|| "???".into())
+    }
+
+    pub fn item_id_str(&self) -> std::string::String {
+        self.item_id()
+            .map(|s| s.red().to_string())
+            .unwrap_or_else(|| "???".into())
     }
 
     pub fn item_ident(&self) -> Option<ItemIdent> {
@@ -75,7 +87,7 @@ impl ArticleItem {
 
 impl Markdown {
     pub fn all_links(&self) -> impl Iterator<Item = MdLink> + '_ {
-        self.0.pre_order()
+        self.0.pre_order_iter()
             .filter_map(|e| MdLink::new(e))
     }
 }

@@ -36,7 +36,7 @@ pub(crate) fn find_mentions(
     let body = article_item.body()?;
     let red = body.red();
     let items = red
-        .pre_order()
+        .pre_order_iter()
         .flat_map(|item| {
             if let Some(sub) = SubArticle::new(item.clone()) {
                 sub_mention(sub, &orig_kind, &orig_id).into_iter()

@@ -130,26 +130,32 @@ impl Red {
             })
     }
 
-    pub fn pre_post_order(&self) -> impl Iterator<Item = (Order, Red)> + '_ {
-        Some((Order::Pre, self.clone())).into_iter()
-        .chain(
-            self.children()
-                .flat_map(|child| child.pre_post_order().collect::<Vec<_>>())
-        )
-        .chain(Some((Order::Post, self.clone())).into_iter())
+    fn traverse_inner(&self, pre: &mut impl FnMut(Self) -> bool, post: &mut impl FnMut(Self)) {
+        if pre(self.clone()) {
+            for child in self.children() {
+                child.traverse_inner(pre, post);
+            }
+            post(self.clone());
+        }
+    }
+    pub fn traverse(&self,
+                    mut pre: impl FnMut(Self) -> bool,
+                    mut post: impl FnMut(Self)
+    ) {
+        self.traverse_inner(&mut pre, &mut post);
     }
 
-    pub fn pre_order(&self) -> impl Iterator<Item = Red> + '_ {
+    pub fn pre_order_iter(&self) -> impl Iterator<Item = Red> + '_ {
         Some(self.clone()).into_iter()
         .chain(
             self.children()
-                .flat_map(|child| child.pre_order().collect::<Vec<_>>())
+                .flat_map(|child| child.pre_order_iter().collect::<Vec<_>>())
         )
     }
 
-    pub fn post_order(&self) -> impl Iterator<Item = Red> + '_ {
+    pub fn post_order_iter(&self) -> impl Iterator<Item = Red> + '_ {
         self.children()
-            .flat_map(|child| child.post_order().collect::<Vec<_>>())
+            .flat_map(|child| child.post_order_iter().collect::<Vec<_>>())
             .chain(Some(self.clone()).into_iter())
     }
 }

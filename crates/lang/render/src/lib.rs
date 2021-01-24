@@ -1,7 +1,7 @@
 use crate::db::Renderer;
 use crate::result::RenderResult;
 use neu_eval::Value;
-use neu_syntax::{ast::{ArticleItem, ArticleRef, Markdown}, reexport::{Ast, Order, Red, SmolStr}};
+use neu_syntax::{Nodes, ast::{ArticleItem, ArticleRef, Markdown}, reexport::{Ast, Order, Red, SmolStr}};
 use std::collections::{BTreeMap, BTreeSet};
 use itertools::Itertools;
 
@@ -30,7 +30,6 @@ fn render_strukt(strukt: BTreeMap<SmolStr, Value>, result: &mut RenderResult) {
     }
 }
 
-/*
 fn render_mentions(
     db: &dyn Renderer,
     kind: Option<&str>,
@@ -38,6 +37,7 @@ fn render_mentions(
     result: &mut RenderResult
 ) {
     if let (Some(kind), Some(id)) = (kind, id) {
+
         let mentions = db
             .all_mentions()
             .into_iter()
@@ -57,9 +57,9 @@ fn render_mentions(
                 match orig_item {
                     Some((orig_path, orig_item)) => {
                         let title = orig_item
-                            .strukt
+                            .strukt()
                             .and_then(|strukt| {
-                                let title = eval(db, orig_path, strukt, result)?
+                                let title = eval(db, strukt.red(), result)?
                                     .into_struct()?
                                     .remove("title")?;
                                 Some(html::render_value(&title).to_string())
@@ -87,7 +87,6 @@ fn render_mentions(
         }
     }
 }
-*/
 
 fn render_body(
     db: &dyn Renderer,
@@ -96,9 +95,25 @@ fn render_body(
 ) {
     if let Some(body) = article_item.body() {
         let red = body.red();
-        if let Some(markdown) = eval(db, red, result) {
-            result.output.push_str(&format!("{}", html::render_value(&markdown)));
-        }
+        red.traverse(|red| {
+            if let Some(item) = ArticleItem::new(red.clone()) {
+                let kind = item.item_ident_str();
+                let id = item.item_id_str();
+                result.output.push_str(&format!("<article id=\"{}:{}\">\n", kind, id));
+                _render(db, item, result);
+                result.output.push_str(&format!("</article>"));
+                false
+            }
+            else if red.is(Nodes::MdValue) {
+                if let Some(markdown) = eval(db, red, result) {
+                    result.output.push_str(&format!("{}", html::render_value(&markdown)));
+                }
+                false
+            }
+            else {
+                true
+            }
+        }, |_| ())
     }
 }
 
@@ -107,8 +122,8 @@ fn _render(
     article_item: ArticleItem,
     result: &mut RenderResult,
 ) {
-    let kind = article_item.item_ident().map(|i| i.red().to_string()).unwrap_or_else(|| "???".to_string());
-    let id = article_item.item_id().map(|i| i.red().to_string()).unwrap_or_else(|| "???".to_string());
+    let kind = article_item.item_ident().map(|i| i.red().to_string());
+    let id = article_item.item_id().map(|i| i.red().to_string());
 
     let mut strukt = article_item
         .strukt()
@@ -124,7 +139,7 @@ fn _render(
     result.output.push_str(r#"<div class="side-table">"#);
 
     render_strukt(strukt, result);
-    //render_mentions(db, kind, id, result);
+    render_mentions(db, kind.as_deref(), id.as_deref(), result);
 
     result.output.push_str("</div> \n");
 

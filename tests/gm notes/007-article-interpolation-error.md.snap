@@ -22,7 +22,7 @@ test.md | 188..192 | Field not found
 <h1>Pośród Pradawnych Drzew</h1>
 <div class="side-table"><table><tr><th class="align-right">age</th><td>5</td></tr><tr><th class="align-right">chrono</th><td>20.06.1925</td></tr><tr><th class="align-right">desc</th><td>Sesja jednostrzałowa dla Macek II RP</td></tr><tr><th class="align-right">when</th><td>20.10.2019</td></tr></table>
 </div> 
-
+<p>Ala ma <strong>kota</strong>.</p>
 
 [parser]
 --- GREEN TREE ---

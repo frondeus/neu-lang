@@ -148,21 +148,10 @@ impl Eval {
                 }
             };
         }
-        if let Some(body) = ArticleBody::new(red.clone()) {
+        if red.is(Nodes::MdValue) {
             let mut s = String::default();
-            let red = body.red();
-            for item in red.pre_order() {
-                if let Some(sub) = SubArticle::new(item.clone()) {
-                }
-                else if let Some(re) = ArticleRef::new(item.clone()) {
-                }
-                else if let Some(md) = Markdown::new(item) {
-                    for value in md.red().children() {
-                        self.eval_md(&mut s, value)?;
-                    }
-                }
-            }
-            return Some(Value::String(s.into()));
+            self.eval_md(&mut s, red)?;
+            return Some(Value::String(s.into()))
         }
 
         if let Some(item) = ArticleItem::new(red.clone()) {
