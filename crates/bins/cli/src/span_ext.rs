@@ -1,4 +1,5 @@
-use neu_parser::TextRange;
+use neu_syntax::reexport::TextRange;
+
 
 #[derive(Clone, Copy)]
 pub struct LineCols {

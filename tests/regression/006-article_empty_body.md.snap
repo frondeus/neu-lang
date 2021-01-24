@@ -24,14 +24,15 @@ Root, MainArticle, ArticleItem @ 0..48
         token @ 20..21 = ` `
         token @ 21..24 = `+++`
         token @ 24..25 = `\n`
-        Value, Strukt @ 25..45
-            Key, identifier, token @ 25..31 = `title` ; trailing: ` `
-            token @ 31..33 = `=` ; trailing: ` `
-            Value, String @ 33..44
-                token @ 33..34 = `"`
-                InnerString @ 34..43
-                    InnerStringPart, token @ 34..43 = `Snake Man`
-                token @ 43..44 = `"`
+        ArticleHeaderValues, Value, Strukt @ 25..45
+            StruktPair @ 25..44
+                Key, identifier, token @ 25..31 = `title` ; trailing: ` `
+                token @ 31..33 = `=` ; trailing: ` `
+                Value, String @ 33..44
+                    token @ 33..34 = `"`
+                    InnerString @ 34..43
+                        InnerStringPart, token @ 34..43 = `Snake Man`
+                    token @ 43..44 = `"`
             token @ 44..45 = `\n`
     ArticleBody @ 45..48
         token @ 45..48 = `+++`

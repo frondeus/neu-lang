@@ -1,49 +1,100 @@
+use std::collections::BTreeMap;
+
 use neu_canceled::Canceled;
 use neu_diagnostics::Diagnostic;
-use neu_parser::NodeId;
 use neu_render::db::Renderer;
-use neu_syntax::db::{FileId, Parser};
+use neu_syntax::{
+    ast::{ArticleItem, MainArticle},
+    db::{FileId, Parser},
+    reexport::Ast,
+    reexport::{Red, TextRange, TextSize},
+};
 
 #[salsa::query_group(DiagnosticianDatabase)]
 pub trait Diagnostician: salsa::Database + Parser + Renderer {
-    fn all_diagnostics(&self) -> Vec<(FileId, NodeId, Diagnostic)>;
+    fn all_diagnostics(&self) -> Vec<(FileId, TextRange, Diagnostic)>;
+    fn all_diagnostics_sorted(&self) -> Vec<(FileId, TextRange, Diagnostic)>;
 }
 
-fn all_diagnostics(db: &dyn Diagnostician) -> Vec<(FileId, NodeId, Diagnostic)> {
+fn all_diagnostics(db: &dyn Diagnostician) -> Vec<(FileId, TextRange, Diagnostic)> {
     Canceled::cancel_if(db.salsa_runtime());
 
     let mut diagnostics: Vec<_> = db
-        .parse_all_neu()
-        .into_iter()
-        .flat_map(|(path, id)| {
-            // eva result contains ast from parser so it has both eval and syntax errors.
-            let parsed = db.parse_syntax(path);
-            let evaled = db.eval(path, id);
+        .all_neu()
+        .iter()
+        .flat_map(|path| {
+            let parsed = db.parse_syntax(*path);
+            let red = Red::root(parsed.root.clone());
+            let evaled = db.eval(red);
 
-            parsed.errors.iter()
+            parsed
+                .errors
+                .iter()
+                .map(|(range, error)| (*range, error))
                 .chain(evaled.errors.iter())
-                .map(|(node_id, diagnostic)| (path, node_id, diagnostic.clone()))
+                .map(|(range, diagnostic)| (*path, range, diagnostic.clone()))
                 .collect::<Vec<_>>()
         })
         .collect();
 
-    let md = db
-        .parse_all_mds()
-        .into_iter()
-        .flat_map(|(_kind, _id, path, ast)| {
-            let parsed = db.parse_syntax(path);
-            let evaled = db.eval(path, ast.id);
-            let rendered = db.render_ast(path, ast);
+    let md: Vec<_> = db
+        .all_mds()
+        .iter()
+        .flat_map(|path| {
+            let parsed = db.parse_syntax(*path);
+            let red = Red::root(parsed.root.clone());
+            let item = MainArticle::new(red.clone());
+            let evaled = db.eval(red);
+            let rendered = match item {
+                Some(item) => {
+                    let ast = ArticleItem::from(item);
+                    db.render_ast(ast)
+                }
+                None => Default::default(),
+            };
 
-            parsed.errors.iter()
+            parsed
+                .errors
+                .iter()
+                .map(|(range, error)| (*range, error))
                 .chain(evaled.errors.iter())
                 .chain(rendered.errors.iter())
-                .map(|(node_id, diagnostic)| (path, node_id, diagnostic.clone()))
+                .map(|(range, diagnostic)| (*path, range, diagnostic.clone()))
                 .collect::<Vec<_>>()
-        });
+        })
+        .collect();
 
     diagnostics.extend(md);
     diagnostics
+}
+
+fn all_diagnostics_sorted(db: &dyn Diagnostician) -> Vec<(FileId, TextRange, Diagnostic)> {
+    Canceled::cancel_if(db.salsa_runtime());
+
+    let diagnostics = db.all_diagnostics();
+    if diagnostics.is_empty() {
+        return Default::default();
+    }
+    let mut sorted: BTreeMap<FileId, BTreeMap<TextSize, (TextRange, Diagnostic)>> =
+        Default::default();
+
+    diagnostics
+        .into_iter()
+        .for_each(|(path, range, diagnostic)| {
+            sorted
+                .entry(path)
+                .or_default()
+                .insert(range.start(), (range, diagnostic));
+        });
+
+    sorted
+        .into_iter()
+        .flat_map(|(path, diagnostics)| {
+            diagnostics
+                .into_iter()
+                .map(move |(_, (range, diagnostic))| (path, range, diagnostic))
+        })
+        .collect()
 }
 
 #[cfg(test)]
@@ -77,15 +128,15 @@ mod tests {
             db.set_all_neu(Arc::new(Some(path.clone()).into_iter().collect()));
             db.set_input(path, Arc::new(input.into()));
 
-            let diagnostics = db.all_diagnostics();
+            let diagnostics = db.all_diagnostics_sorted();
             if diagnostics.is_empty() {
                 return "No errors".into();
             }
             diagnostics
                 .into_iter()
-                .map(|(path, id, diagnostic)| {
+                .map(|(path, range, diagnostic)| {
                     let path = db.lookup_file_id(path);
-                    format!("{} | {:?} | {}", path.0, id, diagnostic)
+                    format!("{} | {:?} | {}", path.0, range, diagnostic)
                 })
                 .join("\n")
         })
@@ -102,15 +153,16 @@ mod tests {
             db.set_all_mds(Arc::new(Some(path.clone()).into_iter().collect()));
             db.set_input(path, Arc::new(input.into()));
 
-            let diagnostics = db.all_diagnostics();
+            let diagnostics = db.all_diagnostics_sorted();
             if diagnostics.is_empty() {
                 return "No errors".into();
             }
+
             diagnostics
                 .into_iter()
-                .map(|(path, id, diagnostic)| {
+                .map(|(path, range, diagnostic)| {
                     let path = db.lookup_file_id(path);
-                    format!("{} | {:?} | {}", path.0, id, diagnostic)
+                    format!("{} | {:?} | {}", path.0, range, diagnostic)
                 })
                 .join("\n")
         })

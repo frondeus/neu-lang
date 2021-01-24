@@ -22,5 +22,5 @@ Root, Value, Binary @ 0..7
 None
 
 [errors]
-test.neu | N3 | Expected one of number, `true`, `false`, `-`, `!`, `"`, `(`, `{`, `[`, identifier but found EOF
+test.neu | 7..7 | Expected one of: `(`, number, `true`, `false`, `-`, `!`, `.`, `md`, `"`, `{`, `[`, identifier but found EOF
 

@@ -3,7 +3,7 @@
 ```
 
 [errors]
-test.neu | N13 | Expected one of number, `true`, `false`, `-`, `!`, `"`, `(`, `{`, `[`, identifier but found `+`
+test.neu | 17..18 | Expected one of: `(`, number, `true`, `false`, `-`, `!`, `.`, `md`, `"`, `{`, `[`, identifier but found `+`
 
 [parser]
 --- GREEN TREE ---

@@ -41,5 +41,5 @@ Root, Value, IdentPath @ 0..19
 None
 
 [errors]
-test.neu | N12 | Field not found
+test.neu | 18..19 | Field not found
 

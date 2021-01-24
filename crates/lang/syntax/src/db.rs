@@ -11,7 +11,7 @@ pub enum FileKind {
     Neu,
 }
 //pub type FileId = (String, FileKind);
-#[derive(Copy, Clone, Debug, Hash, PartialEq, Eq)]
+#[derive(Copy, Clone, Debug, Hash, PartialEq, Eq, PartialOrd, Ord)]
 pub struct FileId(salsa::InternId);
 impl salsa::InternKey for FileId {
     fn from_intern_id(id: salsa::InternId) -> Self {

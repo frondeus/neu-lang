@@ -7,10 +7,10 @@
 ```
 
 [errors]
-test.neu | N17 | Expected identifier but found `/*`
-test.neu | N19 | Expected `=` but found `baz`
-test.neu | N21 | Expected one of number, `true`, `false`, `-`, `!`, `"`, `(`, `{`, `[`, identifier but found `}`
-test.neu | N22 | Expected `}` but found EOF
+test.neu | 55..57 | Expected identifier but found error
+test.neu | 58..61 | Expected `=` but found identifier
+test.neu | 62..63 | Expected one of: `(`, number, `true`, `false`, `-`, `!`, `.`, `md`, `"`, `{`, `[`, identifier but found `}`
+test.neu | 63..63 | Expected `}` but found EOF
 
 [lexer]
 [

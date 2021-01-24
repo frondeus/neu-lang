@@ -51,5 +51,5 @@ Root, Value, Strukt @ 0..32
 None
 
 [errors]
-test.neu | N14 | Field not found
+test.neu | 27..30 | Field not found
 

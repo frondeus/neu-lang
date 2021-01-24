@@ -11,27 +11,6 @@ use std::sync::Arc;
 pub trait Evaluator: salsa::Database + Parser {
     fn eval(&self, red: Red) -> Arc<EvalResult>;
     fn eval_file(&self, file: FileId) -> Arc<EvalResult>;
-    fn anchored(&self, file: FileId) -> Arc<ParseResult>;
-}
-
-fn anchored(db: &dyn Evaluator, file: FileId) -> Arc<ParseResult> {
-    Canceled::cancel_if(db.salsa_runtime());
-    /*
-    let parsed = db.parse_syntax(file);
-    let mut parsed = (*parsed).clone();
-    let items = parsed
-        .arena
-        .enumerate()
-        .map(|(id, _)| id)
-        .filter_map(|id| ArticleItem::from_syntax(id, &parsed.arena))
-        .collect::<Vec<_>>();
-
-    items.into_iter().for_each(|ast| {
-        ast.anchor_body(&mut parsed.arena);
-    });
-    Arc::new(parsed)
-    */
-    todo!();
 }
 
 fn eval_file(db: &dyn Evaluator, file: FileId) -> Arc<EvalResult> {
@@ -52,14 +31,5 @@ fn eval(db: &dyn Evaluator, red: Red) -> Arc<EvalResult> {
 
     let errors = eval.errors;
 
-    Arc::new(EvalResult {
-        value, errors
-    })
-    /*
-    let input = db.input(file);
-    let parsed = db.anchored(file);
-    let mut eval = Eval::new(&parsed.arena, &input);
-    let value = eval.eval(id).and_then(|val| eval.into_eager(val, true));
-    let errors = eval.errors;
-    */
+    Arc::new(EvalResult { value, errors })
 }

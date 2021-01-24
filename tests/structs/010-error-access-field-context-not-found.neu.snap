@@ -34,5 +34,5 @@ Root, Value, Binary @ 0..17
 None
 
 [errors]
-test.neu | N0 | Couldn't find any structure for field access
+test.neu | 0..3 | Couldn't find any structure for field access
 

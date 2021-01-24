@@ -3,7 +3,7 @@
 ```
 
 [errors]
-test.neu | N0 | Expected one of number, `true`, `false`, `-`, `!`, `"`, `(`, `{`, `[`, identifier but found `???`
+test.neu | 0..3 | Expected one of: `(`, number, `true`, `false`, `-`, `!`, `.`, `md`, `"`, `{`, `[`, identifier but found error
 
 [lexer]
 [

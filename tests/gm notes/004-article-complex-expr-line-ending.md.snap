@@ -23,21 +23,23 @@ Root, MainArticle, ArticleItem @ 0..93
         token @ 18..19 = ` `
         token @ 19..22 = `+++`
         token @ 22..23 = `\n`
-        Value, Strukt @ 23..73
-            Key, identifier, token @ 23..29 = `title` ; trailing: ` `
-            token @ 29..31 = `=` ; trailing: ` `
-            Value, String @ 31..58
-                token @ 31..32 = `"`
-                InnerString @ 32..57
-                    InnerStringPart, token @ 32..57 = `Pośród Pradawnych Drzew`
-                token @ 57..58 = `"`
+        ArticleHeaderValues, Value, Strukt @ 23..73
+            StruktPair @ 23..58
+                Key, identifier, token @ 23..29 = `title` ; trailing: ` `
+                token @ 29..31 = `=` ; trailing: ` `
+                Value, String @ 31..58
+                    token @ 31..32 = `"`
+                    InnerString @ 32..57
+                        InnerStringPart, token @ 32..57 = `Pośród Pradawnych Drzew`
+                    token @ 57..58 = `"`
             token @ 58..59 = `\n`
-            Key, identifier, token @ 59..61 = `a` ; trailing: ` `
-            token @ 61..63 = `=` ; trailing: ` `
-            Value, Binary @ 63..72
-                Value, number, token @ 63..64 = `1`
-                BinaryOp, token @ 64..71 = `+` ; leading: `\n    ` ; trailing: ` `
-                Value, number, token @ 71..72 = `2`
+            StruktPair @ 59..72
+                Key, identifier, token @ 59..61 = `a` ; trailing: ` `
+                token @ 61..63 = `=` ; trailing: ` `
+                Value, Binary @ 63..72
+                    Value, number, token @ 63..64 = `1`
+                    BinaryOp, token @ 64..71 = `+` ; leading: `\n    ` ; trailing: ` `
+                    Value, number, token @ 71..72 = `2`
             token @ 72..73 = `\n`
     ArticleBody @ 73..93
         token @ 73..76 = `+++`

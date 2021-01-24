@@ -3,7 +3,7 @@
 ```
 
 [errors]
-test.neu | N2 | Expected EOF but found `5`
+test.neu | 2..3 | Expected EOF but found number
 
 [lexer]
 [

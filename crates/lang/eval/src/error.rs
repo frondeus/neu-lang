@@ -1,5 +1,6 @@
 use derive_more::Display;
 use neu_diagnostics::ToReport;
+use neu_syntax::reexport::Red;
 
 #[derive(Debug, Display)]
 pub enum Error {
@@ -11,6 +12,9 @@ pub enum Error {
 
     #[display(fmt = "Field not found")]
     FieldNotFound,
+
+    #[display(fmt  = "Unimplemented eval for AST: {:?}", _0)]
+    Unimplemented(Red)
 }
 
 impl ToReport for Error {

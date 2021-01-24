@@ -6,7 +6,7 @@ mod value;
 pub mod db;
 
 use error::Error;
-use neu_syntax::{ast::{ArticleBody, ArticleBodyItem, ArticleRef, Binary, BinaryOp, IdentPath, Identifier, InnerStringPart, Markdown, OpDot, Strukt, SubArticle, Unary, UnaryOp, Value as AstValue}, reexport::{Ast, Red, SmolStr}};
+use neu_syntax::{Nodes, ast::{ArticleBody, ArticleBodyItem, ArticleItem, ArticleRef, Binary, BinaryOp, IdentPath, Identifier, InnerStringPart, Markdown, OpDot, Strukt, SubArticle, Unary, UnaryOp, Value as AstValue}, reexport::{Ast, Red, SmolStr}};
 use neu_diagnostics::{Diagnostic, ToReport, Diagnostics};
 use std::collections::BTreeMap;
 pub use value::Value;
@@ -164,22 +164,31 @@ impl Eval {
             }
             return Some(Value::String(s.into()));
         }
-        dbg!(&red);
-        /*
-        if node.is(Nodes::Root) {
-            return node
-                .children
-                .iter()
-                .filter_map(|child| self.eval(*child))
+
+        if let Some(item) = ArticleItem::new(red.clone()) {
+            if let Some(strukt) =  item.strukt() {
+                let strukt = self.eval_red(strukt.red());
+
+                return strukt;
+            }
+            return None;
+        }
+
+        if red.is(Nodes::Error) {
+            return None;
+        }
+
+        if red.is(Nodes::Root) {
+            return red
+                .children()
+                .filter_map(|child| self.eval_red(child))
                 .next();
         }
 
-        if node.is(Nodes::Parens) {
-            let (value, _) = children.find_node(Nodes::Value)?;
-            return self.eval(value);
-        }
+        let error = Error::Unimplemented(red.clone());
+        let err: Diagnostic = error.to_report();
+        self.errors.add(red.range(), err);
 
-        */
         None
     }
 
@@ -198,22 +207,6 @@ impl Eval {
             (UnaryOp::OpBang(_), Value::Boolean(b)) => Some(Value::Boolean(!b)),
             _ => todo!(),
         }
-    }
-
-    fn eval_self_ident_path(
-        &mut self,
-        op: OpDot,
-        value: AstValue,
-    ) -> Option<Value> {
-        let current =
-            op.red()
-              .ancestors()
-            .filter_map(|ancestor| Strukt::new(ancestor)).next();
-        let current = self.expect_some(op.red(), current, Error::ContextNotFound)?;
-        let current = self.eval_red(current.red())?;
-        let mut map = self.expect_some(op.red(), current.into_struct(), Error::ValueNotStruct)?;
-        let key = Self::str_non_trivia(value.red());
-        self.expect_some(value.red(), map.remove(&key), Error::FieldNotFound)
     }
 
     fn eval_binary(&mut self, binary: Binary) -> Option<Value> {
@@ -248,13 +241,36 @@ impl Eval {
 
     fn eval_identifier(&mut self, ident: Identifier) -> Option<Value> {
         let key = Self::str_non_trivia(ident.red());
-        let top = ident.red().ancestors()
-                             .filter_map(|red| Strukt::new(red))
-            .last();
+        let top =
+            ident.red()
+                 .ancestors()
+                 .filter(|red| {
+                     Strukt::new(red.clone()).is_some()
+                         ||
+                         ArticleItem::new(red.clone()).is_some()
+                 })
+                 .last();
         let top = self.expect_some(ident.red(), top, Error::ContextNotFound)?;
-        let top = self.eval_red(top.red())?;
+        let top = self.eval_red(top)?;
         let mut map = self.expect_some(ident.red(), top.into_struct(), Error::ValueNotStruct)?;
         self.expect_some(ident.red(), map.remove(&key), Error::FieldNotFound)
+    }
+
+    fn eval_self_ident_path(&mut self, op: OpDot, value: AstValue) -> Option<Value> {
+        let current =
+            op.red()
+              .ancestors()
+              .filter(|red| {
+                  Strukt::new(red.clone()).is_some()
+                         ||
+                         ArticleItem::new(red.clone()).is_some()
+              })
+              .next();
+        let current = self.expect_some(op.red(), current, Error::ContextNotFound)?;
+        let current = self.eval_red(current)?;
+        let mut map = self.expect_some(op.red(), current.into_struct(), Error::ValueNotStruct)?;
+        let key = Self::str_non_trivia(value.red());
+        self.expect_some(value.red(), map.remove(&key), Error::FieldNotFound)
     }
 
     fn eval_ident_path(&mut self, ident_path: IdentPath) -> Option<Value> {

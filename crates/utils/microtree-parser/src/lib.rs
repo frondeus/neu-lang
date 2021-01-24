@@ -77,11 +77,13 @@ mod error {
 }
 
 mod sink {
+    use crate::TextRange;
+
     use crate::{Error, Event};
 
     pub trait Sink {
         fn event(&mut self, event: Event);
-        fn error(&mut self, error: Error);
+        fn error(&mut self, range: TextRange, error: Error);
     }
 
     pub trait InsertableSink: Sink {
@@ -91,6 +93,8 @@ mod sink {
 
 mod sinks {
     mod wrapper_sink {
+        use text_size::TextRange;
+
         use crate::Sink;
 
         pub struct WrapperSink<'s, S: Sink> {
@@ -108,14 +112,17 @@ mod sinks {
                 self.sink.event(event);
             }
 
-            fn error(&mut self, error: crate::Error) {
-                self.sink.error(error);
+            fn error(&mut self, range: TextRange, error: crate::Error) {
+                self.sink.error(range, error);
             }
         }
     }
 
     mod green_sink {
+        use std::collections::{BTreeMap, HashMap};
+
         use microtree::{Cache, Green, Name as GreenName};
+        use text_size::TextRange;
 
         use crate::{Error, Event, Name, Sink, SmolStr, TriviaKind};
 
@@ -134,7 +141,7 @@ mod sinks {
         #[derive(Debug, Eq, PartialEq)]
         pub struct ParseResult {
             pub root: Green,
-            pub errors: Vec<Error>
+            pub errors: HashMap<TextRange, Error>
         }
 
         #[derive(Default)]
@@ -142,7 +149,7 @@ mod sinks {
             cache: Cache,
             stack: Vec<UnsealedGreen>,
             roots: Vec<Green>,
-            errors: Vec<Error>,
+            errors: HashMap<TextRange, Error>,
             leading: Option<SmolStr>,
             trailing: Option<SmolStr>,
         }
@@ -189,8 +196,8 @@ mod sinks {
         }
 
         impl Sink for GreenSink {
-            fn error(&mut self, error: Error) {
-                self.errors.push(error);
+            fn error(&mut self, range: TextRange, error: Error) {
+                self.errors.insert(range, error);
             }
 
             fn event(&mut self, event: Event) {
@@ -452,13 +459,15 @@ mod sinks {
                 self.events.push(format!("{:?}", event));
             }
 
-            fn error(&mut self, error: crate::Error) {
-                self.errors.push(format!("{}", error));
+            fn error(&mut self, range: crate::TextRange, error: crate::Error) {
+                self.errors.push(format!("{:?}: {}", range, error));
             }
         }
 
         #[cfg(test)]
         mod tests {
+            use text_size::TextRange;
+
             use crate::Event;
 
             use super::*;
@@ -470,7 +479,7 @@ mod sinks {
                 sink.event(Event::start("SExp"));
                 sink.event(Event::token("token", "("));
                 sink.event(Event::alias("Value"));
-                sink.error("Foo".into());
+                sink.error(TextRange::up_to(123.into()), "Foo".into());
                 sink.event(Event::token("atom", "foo"));
                 sink.event(Event::alias("Value"));
                 sink.event(Event::token("atom", "bar"));
@@ -494,7 +503,7 @@ mod sinks {
                     ),
                     sink.events.join("\n")
                 );
-                assert_diff!("Foo", sink.errors.join("\n"));
+                assert_diff!("0..123: Foo", sink.errors.join("\n"));
             }
         }
     }
@@ -520,13 +529,15 @@ mod sinks {
                 writeln!(self.events, "{:?}", event).unwrap();
             }
 
-            fn error(&mut self, error: crate::Error) {
-                writeln!(self.errors, "{}", error).unwrap();
+            fn error(&mut self, range: crate::TextRange, error: crate::Error) {
+                writeln!(self.errors, "{:?}: {}", range, error).unwrap();
             }
         }
 
         #[cfg(test)]
         mod tests {
+            use text_size::TextRange;
+
             use crate::Event;
 
             use super::*;
@@ -540,7 +551,7 @@ mod sinks {
                 sink.event(Event::start("SExp"));
                 sink.event(Event::token("token", "("));
                 sink.event(Event::alias("Value"));
-                sink.error("Foo".into());
+                sink.error(TextRange::up_to(123.into()), "Foo".into());
                 sink.event(Event::token("atom", "foo"));
                 sink.event(Event::alias("Value"));
                 sink.event(Event::token("atom", "bar"));
@@ -567,7 +578,7 @@ mod sinks {
                     ),
                     events
                 );
-                assert_diff!("Foo", errors);
+                assert_diff!("0..123: Foo", errors);
             }
         }
     }
@@ -583,25 +594,29 @@ mod sinks {
                 println!("{:?}", event);
             }
 
-            fn error(&mut self, error: crate::Error) {
-                eprintln!("ERROR: {}", error);
+            fn error(&mut self, range: crate::TextRange, error: crate::Error) {
+                eprintln!("ERROR: {:?}: {}", range, error);
             }
         }
     }
 
     mod tmp_sink {
+        use std::collections::HashMap;
+
+        use text_size::TextRange;
+
         use crate::{Error, Event, InsertableSink, Sink};
 
         #[derive(Debug, Default, Clone)]
         pub struct TmpSink {
             pub events: Vec<Event>,
-            pub errors: Vec<String>
+            pub errors: HashMap<TextRange, String>
         }
 
         impl TmpSink {
             pub fn append(&mut self, mut other: Self) {
                 self.events.append(&mut other.events);
-                self.errors.append(&mut other.errors);
+                self.errors.extend(other.errors.into_iter());
             }
         }
 
@@ -610,8 +625,8 @@ mod sinks {
                 for event in std::mem::take(&mut self.events) {
                     sink.event(event);
                 }
-                for error in std::mem::take(&mut self.errors) {
-                    sink.error(error);
+                for (range, error) in std::mem::take(&mut self.errors) {
+                    sink.error(range, error);
                 }
             }
         }
@@ -621,8 +636,8 @@ mod sinks {
                 self.events.push(event);
             }
 
-            fn error(&mut self, error: Error) {
-                self.errors.push(error);
+            fn error(&mut self, range: TextRange, error: Error) {
+                self.errors.insert(range, error);
             }
         }
     }
@@ -1129,6 +1144,7 @@ mod state {
 
 mod peek {
     use itertools::Itertools;
+    use text_size::TextRange;
 
     use crate::{Name, Parser, Sink, TokenKind, Builder};
 
@@ -1236,7 +1252,9 @@ mod peek {
                         .map(|e| e.value.to_string())
                         .unwrap_or_else(|| "".to_string());
                     s = s.add_token(Name::new("error"), err_value);
-                    s.state.sink_mut().error(format!(
+                    let cursor = s.state.lexer.source().cursor();
+                    let range = next.as_ref().map(|t| t.range).unwrap_or_else(|| TextRange::empty(cursor));
+                    s.state.sink_mut().error(range, format!(
                         "Expected one of: {} but found {}",
                         expected
                             .into_iter()
@@ -1389,8 +1407,11 @@ mod builder {
                 .map(|e| e.value.to_string())
                 .unwrap_or_else(|| "".to_string());
             self = self.add_token(Name::new("error"), err_value);
-            self.state.sink_mut().error(format!(
-                "Expected {} but found {}",
+            let cursor = self.state.lexer.source().cursor();
+            let range = next.as_ref().map(|t| t.range).unwrap_or_else(|| TextRange::empty(cursor));
+            self.state.sink_mut().error(
+                range,
+                format!("Expected {} but found {}",
                 expected
                     .map(|e| e.to_string())
                     .unwrap_or_else(|| "EOF".to_string()),

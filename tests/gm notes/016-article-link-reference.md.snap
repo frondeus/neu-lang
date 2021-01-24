@@ -33,13 +33,8 @@ chrono:0123abcd in sesja:a88907fd
 
 [render]
 <h1>Pośród Pradawnych Drzew</h1>
-<div class="side-table"></div><p>1</p><div class="article-item" id="chrono_0123abcd" ><h1>Chronologia sesji</h1>
-<div class="side-table"><table><tr><th>Mentioned in</th></tr><tr><td><a href="/sesja/a88907fd">Pośród Pradawnych Drzew</a></td></tr></table>
-</div><p>3</p></div>
-<p>2</p><div class="article-item" id="chrono_0123abcd" ><h1>Chronologia sesji</h1>
-<div class="side-table"><table><tr><th>Mentioned in</th></tr><tr><td><a href="/sesja/a88907fd">Pośród Pradawnych Drzew</a></td></tr></table>
-</div><p>3</p></div>
-<p>4</p>
+<div class="side-table"></div> 
+<ol><li></li></ol><p><a>Reference style link</a></p><p>2</p><p>3</p><p>4</p><p>3</p>
 
 [parser]
 --- GREEN TREE ---
@@ -53,14 +48,15 @@ Root, MainArticle, ArticleItem @ 0..218
         token @ 18..19 = ` `
         token @ 19..22 = `+++`
         token @ 22..23 = `\n`
-        Value, Strukt @ 23..59
-            Key, identifier, token @ 23..29 = `title` ; trailing: ` `
-            token @ 29..31 = `=` ; trailing: ` `
-            Value, String @ 31..58
-                token @ 31..32 = `"`
-                InnerString @ 32..57
-                    InnerStringPart, token @ 32..57 = `Pośród Pradawnych Drzew`
-                token @ 57..58 = `"`
+        ArticleHeaderValues, Value, Strukt @ 23..59
+            StruktPair @ 23..58
+                Key, identifier, token @ 23..29 = `title` ; trailing: ` `
+                token @ 29..31 = `=` ; trailing: ` `
+                Value, String @ 31..58
+                    token @ 31..32 = `"`
+                    InnerString @ 32..57
+                        InnerStringPart, token @ 32..57 = `Pośród Pradawnych Drzew`
+                    token @ 57..58 = `"`
             token @ 58..59 = `\n`
     ArticleBody @ 59..218
         token @ 59..62 = `+++`
@@ -100,14 +96,15 @@ Root, MainArticle, ArticleItem @ 0..218
                     token @ 139..140 = ` `
                     token @ 140..142 = `++`
                     token @ 142..143 = `\n`
-                    Value, Strukt @ 143..171
-                        Key, identifier, token @ 143..149 = `title` ; trailing: ` `
-                        token @ 149..151 = `=` ; trailing: ` `
-                        Value, String @ 151..170
-                            token @ 151..152 = `"`
-                            InnerString @ 152..169
-                                InnerStringPart, token @ 152..169 = `Chronologia sesji`
-                            token @ 169..170 = `"`
+                    ArticleHeaderValues, Value, Strukt @ 143..171
+                        StruktPair @ 143..170
+                            Key, identifier, token @ 143..149 = `title` ; trailing: ` `
+                            token @ 149..151 = `=` ; trailing: ` `
+                            Value, String @ 151..170
+                                token @ 151..152 = `"`
+                                InnerString @ 152..169
+                                    InnerStringPart, token @ 152..169 = `Chronologia sesji`
+                                token @ 169..170 = `"`
                         token @ 170..171 = `\n`
                 ArticleBody @ 171..178
                     token @ 171..174 = `+++`

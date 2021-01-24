@@ -20,5 +20,5 @@ Root, Value, Unary @ 0..4
 None
 
 [errors]
-test.neu | N0 | Couldn't find any structure for field access
+test.neu | 0..1 | Couldn't find any structure for field access
 

@@ -7,7 +7,7 @@ members = [
     "crates/utils/microtree-parser",
     "crates/utils/canceled",
     "crates/lang/*",
-    "crates/ide/*",
-    "crates/bins/*",
+    #"crates/ide/*",
+    #"crates/bins/*",
     "xtask"
 ]
