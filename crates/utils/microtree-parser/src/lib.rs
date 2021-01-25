@@ -119,7 +119,7 @@ mod sinks {
     }
 
     mod green_sink {
-        use std::collections::{BTreeMap, HashMap};
+        use std::collections::HashMap;
 
         use microtree::{Cache, Green, Name as GreenName};
         use text_size::TextRange;

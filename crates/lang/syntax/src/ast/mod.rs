@@ -23,6 +23,18 @@ impl ArticleRef {
     pub fn item_id(&self) -> Option<ArticleItemId> {
         self.article_item_id_token()
     }
+
+    pub fn item_ident_str(&self) -> std::string::String {
+        self.item_ident()
+            .map(|s| s.red().to_string())
+            .unwrap_or_else(|| "???".into())
+    }
+
+    pub fn item_id_str(&self) -> std::string::String {
+        self.item_id()
+            .map(|s| s.red().to_string())
+            .unwrap_or_else(|| "???".into())
+    }
 }
 
 impl ArticleItem {

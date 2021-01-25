@@ -1,9 +1,8 @@
 use crate::db::Renderer;
 use crate::result::RenderResult;
 use neu_eval::Value;
-use neu_syntax::{Nodes, ast::{ArticleItem, ArticleRef, Markdown}, reexport::{Ast, Order, Red, SmolStr}};
+use neu_syntax::{Nodes, ast::{ArticleItem, ArticleRef}, reexport::{Ast, Red, SmolStr}};
 use std::collections::{BTreeMap, BTreeSet};
-use itertools::Itertools;
 
 mod result;
 
@@ -55,7 +54,7 @@ fn render_mentions(
                 let orig_item = db.find_md(mention.orig_kind.clone(), mention.orig_id.clone());
                 result.output.push_str("<tr><td>");
                 match orig_item {
-                    Some((orig_path, orig_item)) => {
+                    Some((_, orig_item)) => {
                         let title = orig_item
                             .strukt()
                             .and_then(|strukt| {
@@ -101,6 +100,16 @@ fn render_body(
                 let id = item.item_id_str();
                 result.output.push_str(&format!("<article id=\"{}:{}\">\n", kind, id));
                 _render(db, item, result);
+                result.output.push_str(&format!("</article>"));
+                false
+            }
+            else if let Some(re) = ArticleRef::new(red.clone()) {
+                let kind = re.item_ident_str();
+                let id = re.item_id_str();
+                result.output.push_str(&format!("<article id=\"{}:{}\">\n", kind, id));
+                let inner = db.render_item(kind, id);
+                result.output.push_str(&inner.output);
+                result.errors.merge(&inner.errors);
                 result.output.push_str(&format!("</article>"));
                 false
             }

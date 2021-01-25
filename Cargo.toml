@@ -1,13 +1,8 @@
 [workspace]
 members = [
-    #"crates/utils/*",
-    "crates/utils/test-runner",
-    "crates/utils/microtree",
-    "crates/utils/microtree-codegen",
-    "crates/utils/microtree-parser",
-    "crates/utils/canceled",
+    "crates/utils/*",
     "crates/lang/*",
+    "crates/bins/*",
     #"crates/ide/*",
-    #"crates/bins/*",
     "xtask"
 ]

@@ -2,8 +2,7 @@
 use crate::result::EvalResult;
 use crate::Eval;
 use neu_canceled::Canceled;
-use neu_syntax::ast::ArticleItem;
-use neu_syntax::reexport::{Red, Green, ParseResult};
+use neu_syntax::reexport::Red;
 use neu_syntax::db::{FileId, Parser};
 use std::sync::Arc;
 

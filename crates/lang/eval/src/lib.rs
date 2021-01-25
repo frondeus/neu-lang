@@ -6,7 +6,7 @@ mod value;
 pub mod db;
 
 use error::Error;
-use neu_syntax::{Nodes, ast::{ArticleBody, ArticleBodyItem, ArticleItem, ArticleRef, Binary, BinaryOp, IdentPath, Identifier, InnerStringPart, Markdown, OpDot, Strukt, SubArticle, Unary, UnaryOp, Value as AstValue}, reexport::{Ast, Red, SmolStr}};
+use neu_syntax::{Nodes, ast::{ArticleItem, Binary, BinaryOp, IdentPath, Identifier, InnerStringPart, OpDot, Strukt, Unary, UnaryOp, Value as AstValue}, reexport::{Ast, Red, SmolStr}};
 use neu_diagnostics::{Diagnostic, ToReport, Diagnostics};
 use std::collections::BTreeMap;
 pub use value::Value;

@@ -1,5 +1,5 @@
 use crate::Eval;
-use neu_syntax::{Nodes, ast::{Interpolated, MdValue}, reexport::{Ast, Name, Red}};
+use neu_syntax::{Nodes, ast::Interpolated, reexport::{Ast, Name, Red}};
 use regex::Regex;
 
 impl Eval {

@@ -49,7 +49,7 @@ fn render_item(db: &dyn Renderer, kind: String, id: String) -> Arc<RenderResult>
     Canceled::cancel_if(db.salsa_runtime());
     let article = db.find_md(kind.clone(), id.clone());
 
-    let (path, article_item) = match article {
+    let (_, article_item) = match article {
         Some(a) => a,
         None => {
             return Arc::new(RenderResult {

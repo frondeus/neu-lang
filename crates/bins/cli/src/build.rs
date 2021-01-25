@@ -4,6 +4,7 @@ use neu_db::Diagnostician;
 use neu_render::db::Renderer;
 use neu_syntax::ast::ArticleItem;
 use neu_syntax::db::{ArticleId, FileId, FileKind, Kind, Parser};
+use neu_syntax::reexport::Ast;
 use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
@@ -91,15 +92,13 @@ fn build_all_inner(db: &dyn Builder, root: &Path, dist: &Path) -> Result<()> {
     let diagnostics = db.all_diagnostics();
     let diagnostics = diagnostics
         .into_iter()
-        .filter_map(|(path, id, error)| {
+        .filter_map(|(path, range, error)| {
             let input = db.input(path);
             let lines = input.lines().map(ToString::to_string).collect::<Vec<_>>();
-            let parsed = db.parse_syntax(path);
-            let node = parsed.arena.get(id);
             let path = db.lookup_file_id(path);
             let path = PathBuf::from(path.0);
             let path = path.strip_prefix(root).expect("Strip prefix");
-            node.span.lines_cols(&lines).last().map(
+            range.lines_cols(&lines).last().map(
                 |LineCols {
                      line, col_start, ..
                  }| {
@@ -145,8 +144,8 @@ fn build_article_inner(
 ) -> Result<IndexEntry> {
     //log::info!("Building {}:{}, {:?}, {:?}. {:?}", kind, id, path, article_item, articles_path);
     let strukt = article_item
-        .strukt
-        .map(|strukt| db.eval(path, strukt))
+        .strukt()
+        .map(|strukt| db.eval(strukt.red()))
         .and_then(|strukt_eval| strukt_eval.value.clone())
         .and_then(|value| value.into_struct());
 
@@ -263,6 +262,8 @@ mod tests {
         let a_time = modified(&res_a)?;
         let b_time = modified(&res_b)?;
 
+        std::thread::sleep(std::time::Duration::from_millis(50));
+
         md_a.write_file(&md_file_a_modified)?;
         let file = std::fs::read_to_string(md_a.path())?;
         db.set_input(
@@ -272,8 +273,8 @@ mod tests {
 
         db.build_all(root.into(), dist.into())?;
 
-        assert_ne!(modified(&res_a)?, a_time);
         assert_eq!(modified(&res_b)?, b_time);
+        assert_ne!(modified(&res_a)?, a_time);
 
         temp.close()?;
         Ok(())
@@ -281,6 +282,7 @@ mod tests {
 
     fn modified(child: &ChildPath) -> Result<SystemTime> {
         let metadata = std::fs::metadata(child.path())?;
+        dbg!(&metadata);
         let time = metadata.modified()?;
         Ok(time)
     }
