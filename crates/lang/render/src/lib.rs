@@ -98,7 +98,7 @@ fn render_body(
             if let Some(item) = ArticleItem::new(red.clone()) {
                 let kind = item.item_ident_str();
                 let id = item.item_id_str();
-                result.output.push_str(&format!("<article id=\"{}:{}\">\n", kind, id));
+                result.output.push_str(&format!("<article id=\"{}_{}\">\n", kind, id));
                 _render(db, item, result);
                 result.output.push_str(&format!("</article>"));
                 false
@@ -106,7 +106,7 @@ fn render_body(
             else if let Some(re) = ArticleRef::new(red.clone()) {
                 let kind = re.item_ident_str();
                 let id = re.item_id_str();
-                result.output.push_str(&format!("<article id=\"{}:{}\">\n", kind, id));
+                result.output.push_str(&format!("<article id=\"{}_{}\">\n", kind, id));
                 let inner = db.render_item(kind, id);
                 result.output.push_str(&inner.output);
                 result.errors.merge(&inner.errors);

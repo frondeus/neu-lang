@@ -262,7 +262,7 @@ mod tests {
         let a_time = modified(&res_a)?;
         let b_time = modified(&res_b)?;
 
-        std::thread::sleep(std::time::Duration::from_millis(50));
+        std::thread::sleep(std::time::Duration::from_millis(100));
 
         md_a.write_file(&md_file_a_modified)?;
         let file = std::fs::read_to_string(md_a.path())?;
@@ -282,7 +282,6 @@ mod tests {
 
     fn modified(child: &ChildPath) -> Result<SystemTime> {
         let metadata = std::fs::metadata(child.path())?;
-        dbg!(&metadata);
         let time = metadata.modified()?;
         Ok(time)
     }
