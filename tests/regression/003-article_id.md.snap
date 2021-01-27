@@ -9,36 +9,39 @@ where = "NY, London, Cair, Kenya, Australia, Shanghai"
 No errors
 
 [parser]
-ROOT @ 0..114
-    ARTICLEITEM @ 0..114
-        TOKEN @ 0..3 = `+++`
-        TOKEN, TRIVIA @ 3..4 = ` `
-        IDENTIFIER, TOKEN @ 4..12 = `campaign`
-        TOKEN @ 12..13 = `:`
-        ARTICLEITEMID, TOKEN @ 13..21 = `a81c23d3`
-        TOKEN, TRIVIA @ 21..22 = ` `
-        TOKEN @ 22..25 = `+++`
-        TOKEN, TRIVIA @ 25..26 = `\n`
-        STRUCT, VALUE @ 26..111
-            IDENTIFIER, KEY, TOKEN @ 26..31 = `title`
-            TRIVIA @ 31..32 = ` `
-            TOKEN @ 32..33 = `=`
-            TRIVIA @ 33..34 = ` `
-            STRING, VALUE @ 34..55 = `\"Maski Nyarlathotepa\"`
-                TOKEN @ 34..35 = `\"`
-                STRVALUE, TOKEN @ 35..54 = `Maski Nyarlathotepa`
-                TOKEN @ 54..55 = `\"`
-            TOKEN @ 55..56 = `\n`
-            IDENTIFIER, KEY, TOKEN @ 56..61 = `where`
-            TRIVIA @ 61..62 = ` `
-            TOKEN @ 62..63 = `=`
-            TRIVIA @ 63..64 = ` `
-            STRING, VALUE @ 64..110 = `\"NY, London, Cair, Kenya, Australia, Shanghai\"`
-                TOKEN @ 64..65 = `\"`
-                STRVALUE, TOKEN @ 65..109 = `NY, London, Cair, Kenya, Australia, Shanghai`
-                TOKEN @ 109..110 = `\"`
-            TOKEN @ 110..111 = `\n`
-        TOKEN @ 111..114 = `+++`
+--- GREEN TREE ---
+Root, MainArticle, ArticleItem @ 0..114
+    ArticleHeader @ 0..111
+        token @ 0..3 = `+++`
+        token @ 3..4 = ` `
+        identifier, token @ 4..12 = `campaign`
+        token @ 12..13 = `:`
+        item_id, token @ 13..21 = `a81c23d3`
+        token @ 21..22 = ` `
+        token @ 22..25 = `+++`
+        token @ 25..26 = `\n`
+        ArticleHeaderValues, Value, Strukt @ 26..111
+            StruktPair @ 26..55
+                Key, identifier, token @ 26..32 = `title` ; trailing: ` `
+                token @ 32..34 = `=` ; trailing: ` `
+                Value, String @ 34..55
+                    token @ 34..35 = `"`
+                    InnerString @ 35..54
+                        InnerStringPart, token @ 35..54 = `Maski Nyarlathotepa`
+                    token @ 54..55 = `"`
+            token @ 55..56 = `\n`
+            StruktPair @ 56..110
+                Key, identifier, token @ 56..62 = `where` ; trailing: ` `
+                token @ 62..64 = `=` ; trailing: ` `
+                Value, String @ 64..110
+                    token @ 64..65 = `"`
+                    InnerString @ 65..109
+                        InnerStringPart, token @ 65..109 = `NY, London, Cair, Kenya, Australia, Shanghai`
+                    token @ 109..110 = `"`
+            token @ 110..111 = `\n`
+    ArticleBody @ 111..114
+        token @ 111..114 = `+++`
+--- END ---
 
 
 [.render]

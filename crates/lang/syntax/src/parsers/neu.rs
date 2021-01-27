@@ -1,29 +1,29 @@
-use crate::parsers::common::separated;
 use crate::parsers::markdown::inner_md_string;
 use crate::{
     lexers::{neu::Token, string::Token as StrToken},
     Nodes,
 };
-use neu_parser::*;
+use microtree_parser::parsers::*;
+use microtree_parser::*;
 
-pub fn parser() -> impl Parser<Token> {
-    node(|builder| {
-        builder.name(Nodes::Root);
-        let leading_trivia = leading_trivia();
-        let trailing_trivia = trailing_trivia();
-        let ctx = Context {
-            leading_trivia: Some(&leading_trivia),
-            trailing_trivia: Some(&trailing_trivia),
-        };
-        builder.parse_ctx(&ctx, value());
-        builder.parse_ctx(&ctx, token(None));
+pub fn parser<S: Sink>() -> impl Parser<Token, S> {
+    parse(|s| {
+        let leading = leading_trivia();
+        let trailing = trailing_trivia();
+        s.with_ctx(
+            Context {
+                leading: Some(&leading),
+                trailing: Some(&trailing),
+            },
+            value(),
+        )
+        .expect(None)
     })
 }
 
-pub(crate) fn value() -> impl Parser<Token> + Clone {
-    let next = |state: &mut State<_>, ctx: &Context<_>| left_value().parse(state, ctx);
-    Pratt::new(
-        next,
+pub(crate) fn value< S: Sink >() -> impl Parser< Token, S> {
+    infix(
+        left_value(),
         |token| match token {
             Some(Token::OpDot) => Some((Assoc::Left, 100)),
 
@@ -36,185 +36,176 @@ pub(crate) fn value() -> impl Parser<Token> + Clone {
             Some(Token::OpDEqual) => Some((Assoc::Left, 1)),
             _ => None,
         },
-        |builder, op_token| {
-            match op_token {
-                Some(Token::OpDot) => {
-                    builder.name(Nodes::IdentPath);
-                }
-                _ => {
-                    builder.name(Nodes::Binary);
-                }
-            }
-            builder.name(Nodes::Value);
-            builder.parse(named(token(op_token), Nodes::Op));
+        |s, left, op_token| {
+            s.alias(Nodes::Value)
+                .start(match op_token {
+                    Some(Token::OpDot) => Nodes::IdentPath,
+                    _ => Nodes::Binary,
+                })
+                .insert(left)
+                .alias(Nodes::BinaryOp)
+                .token()
         },
     )
-    .parser()
 }
 
-fn left_value() -> impl Parser<Token> {
-    const VALUE_TOKENS: &[Token] = &[
-        Token::Number,
-        Token::True,
-        Token::False,
-        Token::OpMinus,
-        Token::OpBang,
-        Token::DoubleQuote,
-        Token::OpenP,
-        Token::OpenC,
-        Token::OpenB,
-        Token::Identifier,
-    ];
-
-    node(|builder| {
-        builder.name(Nodes::Virtual);
-        builder.name(Nodes::Value);
-        match builder.peek_token() {
-            Some(Token::Number) => builder.parse(number()),
-            Some(Token::True) | Some(Token::False) => builder.parse(boolean()),
-            Some(Token::OpMinus) | Some(Token::OpBang) | Some(Token::OpDot) => {
-                builder.parse(unary())
-            }
-            Some(Token::MdQuote) => builder.parse(md_string()),
-            Some(Token::DoubleQuote) => builder.parse(string()),
-            Some(Token::OpenC) => builder.parse(strukt()),
-            Some(Token::OpenB) => builder.parse(array()),
-            Some(Token::Identifier) => builder.parse(identifier()),
-            Some(Token::OpenP) => builder.parse(node(|builder| {
-                builder.name(Nodes::Parens);
-                builder.parse(token(Token::OpenP));
-                builder.parse(value());
-                builder.parse(token(Token::CloseP));
-            })),
-            _ => builder.parse(expected(VALUE_TOKENS)),
-        };
+fn left_value<S: Sink >() -> impl Parser<Token, S> {
+    use Token::*;
+    parse(|s| {
+        s.peek()
+         .at(OpenP).parse(parse(|s| s.token().parse(value()).expect(CloseP) ))
+         .parse_else(parse(|s| s.alias(Nodes::Value)))
+         .at(Number).parse(number())
+         .at(True).at(False).parse(boolean())
+         .at(OpMinus).at(OpBang).at(OpDot).parse(unary())
+         .at(MdQuote).parse( md_string())
+         .at(DoubleQuote).parse(string())
+         .at(OpenC).parse(strukt())
+         .at(OpenB).parse(array())
+         .at(Identifier).parse(identifier())
+         .expect()
     })
 }
 
-fn array() -> impl Parser<Token> {
-    node(|builder| {
-        builder.name(Nodes::Array);
-        builder.parse(token(Token::OpenB));
-        builder.parse(separated(value(), Token::Comma, Token::CloseB, true));
-        builder.parse(token(Token::CloseB));
+fn array<S: Sink >() -> impl Parser<Token, S> {
+    parse(|s| {
+        s.start(Nodes::Array)
+            .token()
+            .parse(separated(value(), Token::Comma, Token::CloseB, true))
+            .expect(Token::CloseB)
+            .end()
     })
 }
 
-fn identifier() -> impl Parser<Token> {
-    named(token(Token::Identifier), Nodes::Identifier)
+fn identifier<S: Sink >() -> impl Parser<Token, S> {
+    parse(|s| s.alias(Nodes::Identifier).expect(Token::Identifier))
 }
 
-pub(crate) fn strukt_key() -> impl Parser<Token> {
-    named(identifier(), Nodes::Key)
+pub(crate) fn strukt_key<S: Sink >() -> impl Parser<Token, S> {
+    parse(|s| s.alias(Nodes::Key).parse(identifier()))
 }
 
-fn strukt() -> impl Parser<Token> {
-    node(|builder| {
-        builder.name(Nodes::Struct);
-        builder.parse(token(Token::OpenC));
-        builder.parse(separated(
-            node(|builder| {
-                builder.name(Nodes::Virtual);
-                builder.parse(strukt_key());
-                builder.parse(token(Token::OpAssign));
-                builder.parse(value());
-            }),
-            Token::Comma,
-            Token::CloseC,
-            true,
-        ));
-        builder.parse(token(Token::CloseC));
+fn strukt<S: Sink >() -> impl Parser<Token, S> {
+    parse(|s| {
+        s.start(Nodes::Strukt)
+            .token()
+            .parse(separated(
+                parse(|s| {
+                    s.start(Nodes::StruktPair)
+                        .parse(strukt_key())
+                        .expect(Token::OpAssign)
+                        .parse(value())
+                        .end()
+                }),
+                Token::Comma,
+                Token::CloseC,
+                true,
+            ))
+            .expect(Token::CloseC)
+            .end()
     })
 }
 
-fn md_string() -> impl Parser<Token> {
-    node(|builder| {
-        builder.name(Nodes::Markdown);
-        let ctx = Context::default();
-        builder.parse_ctx(&ctx, token(Token::MdQuote));
-        let ctx2 = Context::default();
-        builder.parse_mode(&ctx2, inner_md_string());
-        builder.parse_ctx(&ctx, token(Token::DoubleQuote));
+fn md_string<S: Sink >() -> impl Parser<Token, S> {
+    parse(|s| {
+        let trivia = leading_trivia();
+        s.start(Nodes::MdString)
+            .with_ctx(
+                Context {
+                    leading: Some(&trivia),
+                    ..Default::default()
+                },
+                parse(|s| s.token().with_mode(inner_md_string())),
+            )
+            .expect(Token::DoubleQuote)
+            .end()
     })
 }
 
-fn string() -> impl Parser<Token> {
-    node(|builder: &mut NodeBuilder<'_, Token>| {
-        builder.name(Nodes::String);
-        let ctx = Context::default();
-        builder.parse_ctx(&ctx, token(Token::DoubleQuote));
-        let ctx2 = Context::default();
-        builder.parse_mode(&ctx2, inner_string());
-        builder.parse_ctx(&ctx, token(Token::DoubleQuote));
+fn string<S: Sink >() -> impl Parser<Token, S> {
+    parse(|s| {
+        let trivia = leading_trivia();
+        s.start(Nodes::String)
+            .with_ctx(
+                Context {
+                    leading: Some(&trivia),
+                    ..Default::default()
+                },
+                parse(|s| s.token().with_mode(inner_string())),
+            )
+            .expect(Token::DoubleQuote)
+            .end()
     })
 }
 
-fn inner_string() -> impl Parser<StrToken> {
-    node(|builder| {
-        builder.name(Nodes::Virtual);
-        builder.name(Nodes::StrValue);
-        loop {
-            match builder.peek_token() {
-                Some(StrToken::CloseI) | Some(StrToken::Text) => {
-                    builder.parse(any_token());
-                    continue;
-                }
-                Some(StrToken::OpenI) => {
-                    builder.parse(node(|builder| {
-                        builder.name(Nodes::Interpolated);
-                        builder.parse(token(StrToken::OpenI));
-                        let leading_trivia = leading_trivia();
-                        let trailing_trivia = trailing_trivia();
-                        let ctx = Context {
-                            leading_trivia: Some(&leading_trivia),
-                            trailing_trivia: Some(&trailing_trivia),
-                        };
-                        builder.parse_mode(&ctx, value());
-                        builder.parse(token(StrToken::CloseI));
-                    }));
-                }
-                None | Some(StrToken::Close) => break,
-            }
+fn interpolated<S: Sink >() -> impl Parser<StrToken, S> {
+    parse(|s| {
+             let leading = leading_trivia();
+             let trailing = trailing_trivia();
+        s.start(Nodes::Interpolated)
+         .token()
+         .parse(with_mode(with_ctx(Context {
+             leading: Some(&leading),
+             trailing: Some(&trailing),
+         }, value())))
+         .expect(StrToken::CloseI)
+         .end()
+    })
+}
+
+fn inner_string<S: Sink >() -> impl Parser<StrToken, S> {
+    parse(|s| {
+        s.start(Nodes::InnerString)
+         .parse(repeated(|p| p
+            .parse_else(parse(|s| s.alias(Nodes::InnerStringPart)))
+            .at(StrToken::CloseI)
+            .at(StrToken::Text)
+            .parse(parse(|s| s.token()))
+            .at(StrToken::OpenI)
+            .parse(interpolated())
+         , StrToken::Close))
+        .end()
+    })
+}
+
+fn unary<S: Sink >() -> impl Parser<Token, S> {
+    parse(|s| {
+        s.start(Nodes::Unary)
+            .alias(Nodes::UnaryOp)
+            .token()
+            .parse(left_value())
+            .end()
+    })
+}
+
+fn boolean<S: Sink >() -> impl Parser<Token, S> {
+    parse(|s| s.alias(Nodes::Boolean).token())
+}
+
+fn number<S: Sink >() -> impl Parser<Token, S> {
+    parse(|s| s.alias(Nodes::Number).token())
+}
+
+
+pub(crate) fn leading_trivia<>() -> impl Trivia<Token> {
+    trivia(|lexer| {
+        while let Some(Token::LineEnd) = lexer.peek_token() {
+            lexer.next();
+        }
+        while let Some(Token::Whitespace) | Some(Token::InlineComment) | Some(Token::BlockComment) =
+            lexer.peek_token()
+        {
+            lexer.next();
         }
     })
 }
 
-fn unary() -> impl Parser<Token> {
-    node(|builder| {
-        builder.name(Nodes::Unary);
-        builder.parse(named(
-            tokens(vec![Token::OpMinus, Token::OpBang, Token::OpDot]),
-            Nodes::Op,
-        ));
-        builder.parse(value());
-    })
-}
-
-fn boolean() -> impl Parser<Token> {
-    named(tokens(vec![Token::True, Token::False]), Nodes::Boolean)
-}
-
-fn number() -> impl Parser<Token> {
-    named(token(Token::Number), Nodes::Number)
-}
-
-pub(crate) fn trailing_trivia() -> impl Parser<Token> {
-    node(|builder| {
-        builder.name(Nodes::Trivia);
-        while let Some(Token::Whitespace) | Some(Token::Comment) = builder.peek_token() {
-            builder.next_token();
-        }
-    })
-}
-
-pub(crate) fn leading_trivia() -> impl Parser<Token> {
-    node(|builder| {
-        builder.name(Nodes::Trivia);
-        while let Some(Token::LineEnd) = builder.peek_token() {
-            builder.next_token();
-        }
-        while let Some(Token::Whitespace) | Some(Token::Comment) = builder.peek_token() {
-            builder.next_token();
+pub(crate) fn trailing_trivia<>() -> impl Trivia<Token> {
+    trivia(|lexer| {
+        while let Some(Token::Whitespace) | Some(Token::InlineComment) | Some(Token::BlockComment) =
+            lexer.peek_token()
+        {
+            lexer.next();
         }
     })
 }
@@ -223,16 +214,14 @@ pub(crate) fn leading_trivia() -> impl Parser<Token> {
 mod tests {
     use super::parser;
     use crate::lexers::neu::{Lexer, Token};
-    use neu_parser::{ParseResult, Spanned, State};
+    use microtree_parser::{GreenSink, Spanned, State};
 
     #[test]
     fn lexer_tests() {
         test_runner::test_snapshots("neu", "lexer", |input| {
             let lexer = Lexer::new(input);
 
-            let res: Vec<_> = lexer
-                .map(|t: Spanned<Token>| t.display(input, true).to_string())
-                .collect();
+            let res: Vec<_> = lexer.map(|t: Spanned<Token>| format!("{:?}", t)).collect();
             format!("{:#?}", res)
         })
         .unwrap();
@@ -243,9 +232,17 @@ mod tests {
         test_runner::test_snapshots("neu", "parser", |input| {
             let lexer = Lexer::new(input);
 
-            let res: ParseResult = State::parse(lexer, parser());
+            if std::env::var("DEBUG").is_ok() {
+                let res: microtree_parser::TestSink = State::parse(lexer, parser());
+                let res = res.events.join("\n");
+                format!("{}", res)
+            }
+            else {
+                let res: GreenSink = State::parse(lexer, parser());
 
-            format!("{}", res.display(input))
+                let root = res.finish().root;
+                format!("{:?}", root)
+            }
         })
         .unwrap();
     }

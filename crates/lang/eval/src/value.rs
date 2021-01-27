@@ -1,4 +1,4 @@
-use neu_parser::NodeId;
+use neu_syntax::reexport::{Red, SmolStr};
 use std::collections::BTreeMap;
 use std::fmt;
 
@@ -6,11 +6,11 @@ use std::fmt;
 pub enum Value {
     Number(i64),
     Boolean(bool),
-    String(String),
+    String(SmolStr),
     Array(Vec<Value>),
-    Struct(BTreeMap<String, Value>),
+    Struct(BTreeMap<SmolStr, Value>),
 
-    Lazy { id: NodeId },
+    Lazy { red: Red },
 }
 
 impl Value {
@@ -21,7 +21,7 @@ impl Value {
         }
     }
 
-    pub fn into_struct(self) -> Option<BTreeMap<String, Value>> {
+    pub fn into_struct(self) -> Option<BTreeMap<SmolStr, Value>> {
         match self {
             Self::Struct(s) => Some(s),
             _ => None,
@@ -33,7 +33,7 @@ impl fmt::Display for Value {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let width = f.width().unwrap_or_default();
         match self {
-            Self::Lazy { id, .. } => write!(f, "{:?}", id),
+            Self::Lazy { red } => write!(f, "{:?}", red),
 
             Self::Number(n) => write!(f, "{}", n),
             Self::Boolean(b) => write!(f, "{}", b),

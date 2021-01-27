@@ -1,0 +1,55 @@
+{
+        "tokens": {
+                "OpenP": "(",
+                "CloseP": ")",
+                "OpenB": "[",
+                "CloseB": "]",
+                "OpenC": "{",
+                "CloseC": "}",
+                "OpenI": "${",
+                "CloseI": "close_i",
+                "OpenBl": "[+",
+                "CloseBl": "+]",
+                "Number": "number",
+                "True": "true",
+                "False": "false",
+                "OpMinus": "-",
+                "OpBang": "!",
+                "OpDot": ".",
+                "OpStar": "*",
+                "OpPlus": "+",
+                "OpSlash": "/",
+                "OpDEqual": "==",
+                "MdQuote": "md_quote",
+                "DQuote": "d_quote",
+                "Comma": ",",
+                "Identifier": "identifier",
+                "OpAssign": "=",
+                "Text": "text",
+
+                "ThreePlus": "+++",
+                "ItemIdent": "item_identifier",
+                "OpColon": ":",
+                "ArticleItemId": "item_id",
+                "LineEnding": "ln",
+                "PlusPlusEnd": "++ end ++",
+                "PlusPlus": "++",
+
+                "MdLinkUrl": "md_link_url",
+                "MdLinkTitle": "md_link_title",
+                "MdCodeBlockLang": "md_code_block_lang",
+                "Fences": "```"
+        },
+        "handwritten": [
+                "Identifier",
+                "Number",
+                "Text",
+
+                "ItemIdent",
+                "ArticleItemId",
+
+                "MdLinkUrl",
+                "MdLinkTitle",
+                "MdCodeBlockLang"
+        ]
+}

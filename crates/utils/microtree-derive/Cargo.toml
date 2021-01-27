@@ -1,0 +1,15 @@
+[package]
+name = "microtree-derive"
+version = "0.1.0"
+authors = ["Wojciech Polak <frondeus@gmail.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+proc-macro = true
+
+[dependencies]
+darling = "0.11.0"
+quote = "1.0.8"
+syn = "1.0.57"

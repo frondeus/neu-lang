@@ -1,7 +1,5 @@
-use crate::db::Analyzer;
-use neu_parser::{Arena, Children, Node, NodeId};
-use neu_syntax::ast::{ArticleItem, ArticleRef, Ast};
-use neu_syntax::Nodes;
+use neu_syntax::ast::{ArticleItem, ArticleRef, SubArticle, Markdown};
+use neu_syntax::reexport::Ast;
 use regex::Regex;
 
 pub mod db;
@@ -29,72 +27,71 @@ impl Mention {
     }
 }
 
-fn find_mentions_in_md(
-    _db: &dyn Analyzer,
-    node: &Node,
-    nodes: &Arena,
-    input: &str,
-    orig_kind: &str,
-    orig_id: &str,
-    mentions: &mut Vec<Mention>,
-) {
-    let children = node.children.iter().copied().collect::<Vec<NodeId>>();
-    for child_id in children {
-        let child = nodes.get(child_id);
-        if child.is(Nodes::Md_Link) {
-            let mut children = Children::new(child.children.iter().copied(), nodes);
-            if let Some((_, url)) = children.find_node(Nodes::Md_LinkUrl) {
-                let text = &input[url.span];
-                //TODO Parse :
-                let link_regex = Regex::new("([a-z_A-Z0-9]+):([0-9A-Fa-f]{8})").expect("Regex");
-                if let Some(cap) = link_regex.captures(text) {
-                    let kind = cap.get(1).expect("G1").as_str();
-                    let id = cap.get(2).expect("G2").as_str();
-                    mentions.push(Mention::new(orig_kind, orig_id, kind, id));
-                }
-            }
-        }
-        find_mentions_in_md(_db, child, nodes, input, orig_kind, orig_id, mentions);
-    }
-}
-
-fn find_mentions(
-    _db: &dyn Analyzer,
+pub(crate) fn find_mentions(
     article_item: ArticleItem,
-    nodes: &mut Arena,
-    input: &str,
     mentions: &mut Vec<Mention>,
 ) -> Option<()> {
-    let orig_kind = article_item.identifier(nodes, input).unwrap_or("???");
-    let orig_id = article_item.item_id(nodes, input).unwrap_or("???");
+    let orig_kind = article_item.item_ident()?.red().to_string();
+    let orig_id = article_item.item_id()?.red().to_string();
+    let body = article_item.body()?;
+    let red = body.red();
+    let items = red
+        .pre_order_iter()
+        .flat_map(|item| {
+            if let Some(sub) = SubArticle::new(item.clone()) {
+                sub_mention(sub, &orig_kind, &orig_id).into_iter()
+                    .collect::<Vec<_>>()
+            }
+            else if let Some(re) = ArticleRef::new(item.clone()) {
+                ref_mention(re, &orig_kind, &orig_id).into_iter()
+                    .collect::<Vec<_>>()
+            }
+            else if let Some(md) = Markdown::new(item) {
+                find_mentions_in_md(md, &orig_kind, &orig_id)
+            }
+            else { vec![] }
+        });
 
-    let body = article_item.body?;
-    let body = nodes
-        .get(body)
-        .children
-        .iter()
-        .copied()
-        .collect::<Vec<NodeId>>();
-
-    for body_id in body {
-        let body = nodes.get(body_id);
-        if body.is(Nodes::ArticleItem) {
-            let article_item =
-                ArticleItem::from_syntax(body_id, nodes).expect("body is ArticleItem");
-            let kind = article_item.identifier(nodes, input).unwrap_or("???");
-            let id = article_item.item_id(nodes, input).unwrap_or("???");
-            mentions.push(Mention::new(orig_kind, orig_id, kind, id));
-        } else if body.is(Nodes::ArticleRef) {
-            let article_item = ArticleRef::from_syntax(body_id, nodes).expect("body is ArticleRef");
-            let kind = article_item.identifier(nodes, input).unwrap_or("???");
-            let id = article_item.item_id(nodes, input).unwrap_or("???");
-            mentions.push(Mention::new(orig_kind, orig_id, kind, id));
-        } else if body.is(Nodes::Markdown) {
-            find_mentions_in_md(_db, body, nodes, input, orig_kind, orig_id, mentions);
-        }
-    }
+    mentions.extend(items);
 
     Some(())
+}
+
+fn sub_mention(sub: SubArticle, orig_kind: &String, orig_id: &String) -> Option<Mention> {
+    let header = sub.sub_article_header()?;
+    let kind = header.item_ident_token()?.red().to_string();
+    let id   = header.article_item_id_token()?.red().to_string();
+
+    Some(Mention::new(orig_kind.clone(), orig_id.clone(), kind, id))
+}
+
+fn ref_mention(re: ArticleRef, orig_kind: &String, orig_id: &String) -> Option<Mention> {
+    let kind = re.item_ident_token()?.red().to_string();
+    let id = re.article_item_id_token()?.red().to_string();
+    Some(Mention::new(orig_kind.clone(), orig_id.clone(), kind, id))
+}
+
+fn find_mentions_in_md<'a>(
+    markdown: Markdown,
+    orig_kind: &'a String,
+    orig_id: &'a String,
+) -> Vec<Mention> {
+    lazy_static::lazy_static! {
+        static ref LINK_REG: Regex = Regex::new(r"([a-z_A-Z0-9]+):([0-9A-Fa-f]{8})").expect("Regex");
+    }
+    markdown.all_links()
+        .filter_map(|mdlink| mdlink.md_link_url_token())
+        .filter_map(move |url| {
+            match LINK_REG.captures(&url.red().to_string()) {
+                Some(cap) => {
+                    let kind = cap.get(1).unwrap().as_str();
+                    let id = cap.get(2).unwrap().as_str();
+                    Some(Mention::new(orig_kind.clone(), orig_id.clone(), kind, id))
+                },
+                None => None
+            }
+        })
+        .collect::<Vec<_>>()
 }
 
 #[cfg(test)]
@@ -104,6 +101,7 @@ mod tests {
     use neu_syntax::db::{FileKind, Parser};
     use std::fmt;
     use std::sync::Arc;
+    use crate::db::Analyzer;
 
     impl fmt::Display for Mention {
         fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

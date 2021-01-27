@@ -9,15 +9,16 @@
 ]
 
 [parser]
-ROOT @ 0..4 = `.bar`
-    UNARY, VALUE @ 0..4 = `.bar`
-        OP, TOKEN @ 0..1 = `.`
-        IDENTIFIER, TOKEN, VALUE @ 1..4 = `bar`
+--- GREEN TREE ---
+Root, Value, Unary @ 0..4
+    UnaryOp, token @ 0..1 = `.`
+    Value, identifier, token @ 1..4 = `bar`
+--- END ---
 
 
 [eval]
 None
 
 [errors]
-test.neu | N0 | Couldn't find any structure for field access
+test.neu | 0..1 | Couldn't find any structure for field access
 

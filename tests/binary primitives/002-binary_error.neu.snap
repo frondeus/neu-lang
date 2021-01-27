@@ -10,17 +10,17 @@ true ==
 ]
 
 [parser]
-ROOT @ 0..7 = `true ==`
-    BINARY, VALUE @ 0..7 = `true ==`
-        BOOLEAN, TOKEN, VALUE @ 0..4 = `true`
-        TRIVIA @ 4..5 = ` `
-        OP, TOKEN @ 5..7 = `==`
-        ERROR, VALUE @ 7..7 = ``
+--- GREEN TREE ---
+Root, Value, Binary @ 0..7
+    Value, Boolean, token @ 0..5 = `true` ; trailing: ` `
+    BinaryOp, token @ 5..7 = `==`
+    Value, error @ 7..7 = ``
+--- END ---
 
 
 [eval]
 None
 
 [errors]
-test.neu | N3 | Expected one of number, `true`, `false`, `-`, `!`, `"`, `(`, `{`, `[`, identifier but found EOF
+test.neu | 7..7 | Expected one of: `(`, number, `true`, `false`, `-`, `!`, `.`, `md`, `"`, `{`, `[`, identifier but found EOF
 

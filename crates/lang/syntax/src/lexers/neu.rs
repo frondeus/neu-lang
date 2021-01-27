@@ -1,243 +1,139 @@
 use crate::HashCount;
-use derive_more::Display;
-use neu_parser::{TextRange, TokenKind};
+use microtree_parser::{TextSize, Source, TokenKind, CallbackResult};
 
-#[derive(Debug, PartialEq, Clone, Copy, Display)]
-pub enum Token {
-    #[display(fmt = "error")]
-    Error,
-
-    #[display(fmt = "` `, `\t`")]
-    Whitespace,
-
-    #[display(fmt = "`\n`, `\r\n`")]
-    LineEnd,
-
-    #[display(fmt = "comment")]
-    Comment,
-
-    #[display(fmt = "number")]
-    Number,
-
-    #[display(fmt = "`true`")]
-    True,
-
-    #[display(fmt = "`false`")]
-    False,
-
-    #[display(fmt = "`-`")]
-    OpMinus,
-
-    #[display(fmt = "`!`")]
-    OpBang,
-
-    #[display(fmt = "`+`")]
-    OpPlus,
-
-    #[display(fmt = "`*`")]
-    OpStar,
-
-    #[display(fmt = "`/`")]
-    OpSlash,
-
-    #[display(fmt = "`==`")]
-    OpDEqual,
-
-    #[display(fmt = "`=`")]
-    OpAssign,
-
-    #[display(fmt = "identifier")]
-    Identifier,
-
-    #[display(fmt = "`(`")]
-    OpenP,
-
-    #[display(fmt = "`)`")]
-    CloseP,
-
-    #[display(fmt = "`{{`")]
-    OpenC,
-
-    #[display(fmt = "`\"`")]
-    DoubleQuote,
-
-    #[display(fmt = "`md`")]
-    MdQuote,
-
-    #[display(fmt = "`}}`")]
-    CloseC,
-
-    #[display(fmt = "`[`")]
-    OpenB,
-
-    #[display(fmt = "`]`")]
-    CloseB,
-
-    #[display(fmt = "`,`")]
-    Comma,
-
-    #[display(fmt = "`.`")]
-    OpDot,
+fn lex_comment(_bumped: TextSize, source: &mut Source<'_>, _: &mut HashCount) -> bool {
+    source.as_ref()
+        .find("*/")
+        .map(|i| source.bump(i + 2))
+        .is_some()
 }
 
-pub type Lexer<T = Token> = neu_parser::Lexer<T>;
+fn lex_plus(_bumped: TextSize, source: &mut Source<'_>, _: &mut HashCount) -> bool {
+    !source.as_ref().starts_with("+")
+}
 
-impl TokenKind for Token {
-    type Extra = HashCount;
-
-    fn is_mergeable(self, other: Self) -> bool {
-        match (self, other) {
-            (Self::Error, Self::Error) => true,
-            (Self::LineEnd, Self::LineEnd) => true,
-            _ => false,
+fn lex_dquote(_bumped: TextSize, source: &mut Source<'_>, extras: &mut HashCount) -> bool {
+    if extras.count > 0 {
+        let hash_count =extras.count;
+        let hash = "#".repeat(hash_count);
+        if source.as_ref().starts_with(&hash) {
+            source.bump(hash_count);
+            extras.count = 0;
+            true
         }
+        else {
+            false
+        }
+    } else {
+        true
     }
+}
 
-    fn lex(lexer: &mut Lexer<Self>) -> Option<(Self, TextRange)> {
-        let hash = lexer.extra.count;
-        let input = lexer.input_mut();
-        let i = input.as_ref();
-        let peeked = i.chars().next()?;
+fn lex_mdquote(_bumped: TextSize, source: &mut Source<'_>, extras: &mut HashCount) -> bool {
+    let mut remainder = source.as_ref();
+    let mut hash = 0;
+    while remainder.starts_with("#") {
+        hash += 1;
+        source.bump(1);
+        remainder = source.as_ref();
+    }
+    extras.count = hash;
+    let quote = remainder.starts_with("\"");
+    if quote {
+        source.bump(1);
+    }
+    quote
+}
 
-        if i.starts_with("\r\n") {
-            return Some((Token::LineEnd, input.chomp(2)));
-        }
-        if i.starts_with('\n') {
-            return Some((Token::LineEnd, input.chomp(1)));
-        }
+#[derive(Debug, PartialEq, Clone, Copy, TokenKind)]
+#[token_kind(extras = "HashCount", mergeable = "mergeable")]
+pub enum Token {
+    #[token_kind(regex = r"[ \t]+", display = r"` `, `\t`")]
+    Whitespace,
 
-        let is_whitespace = |c: &char| *c == ' ' || *c == '\t';
+    #[token_kind(regex = r"(\r?\n)+", display = r"`\n`, `\r\n`")]
+    LineEnd,
 
-        if is_whitespace(&peeked) {
-            let rest = i.chars().take_while(is_whitespace).count();
+    #[token_kind(regex = r"//[^\n]*", display = "//")]
+    InlineComment,
 
-            return Some((Token::Whitespace, input.chomp(rest)));
-        }
-        if peeked.is_ascii_digit() {
-            let rest = i.chars().take_while(|c| c.is_ascii_digit()).count();
+    #[token_kind(token = "/*", callback = "lex_comment", display = "/*")]
+    BlockComment,
 
-            return Some((Token::Number, input.chomp(rest)));
-        }
+    #[token_kind(regex = r"[0-9]+")]
+    Number,
 
-        if i.starts_with("/*") {
-            let mut peeked = peeked;
-            let mut i = &i[2..];
-            let mut rest = 2;
-            while !i.starts_with("*/") {
-                i = &i[peeked.len_utf8()..];
-                rest += 1;
-                peeked = match i.chars().next() {
-                    Some(p) => p,
-                    None => return Some((Token::Error, input.chomp(2))),
-                }
-            }
-            rest += 2;
-            return Some((Token::Comment, input.chomp(rest)));
-        }
+    #[token_kind(token = "true")]
+    True,
 
-        if i.starts_with("//") {
-            let rest = i.chars().take_while(|c| *c != '\n').count();
-            return Some((Token::Comment, input.chomp(rest)));
-        }
+    #[token_kind(token = "false")]
+    False,
 
-        if i.starts_with("==") {
-            return Some((Token::OpDEqual, input.chomp(2)));
-        }
+    #[token_kind(token = "-")]
+    OpMinus,
 
-        if i.starts_with("true") {
-            return Some((Token::True, input.chomp(4)));
-        }
+    #[token_kind(token = "!")]
+    OpBang,
 
-        if i.starts_with("false") {
-            return Some((Token::False, input.chomp(5)));
-        }
+    #[token_kind(token = "+", callback = "lex_plus")]
+    OpPlus,
 
-        if i.starts_with("md") {
-            let mut rest = 2;
-            let mut hash = 0;
-            loop {
-                let i = &i[rest..];
-                if i.starts_with('"') {
-                    let range = input.chomp(rest + 1);
-                    lexer.extra.count = hash;
-                    return Some((Token::MdQuote, range));
-                }
-                if i.starts_with('#') {
-                    rest += 1;
-                    hash += 1;
-                    continue;
-                }
-                break;
-            }
-        }
+    #[token_kind(token = "*")]
+    OpStar,
 
-        if peeked == '-' {
-            return Some((Token::OpMinus, input.chomp(1)));
-        }
-        if peeked == '!' {
-            return Some((Token::OpBang, input.chomp(1)));
-        }
-        if peeked == '+' && !i.starts_with("+++") {
-            // TODO: Dirty hack
-            return Some((Token::OpPlus, input.chomp(1)));
-        }
-        if peeked == '*' {
-            return Some((Token::OpStar, input.chomp(1)));
-        }
-        if peeked == '/' {
-            return Some((Token::OpSlash, input.chomp(1)));
-        }
-        if peeked == '=' {
-            return Some((Token::OpAssign, input.chomp(1)));
-        }
-        if peeked == '.' {
-            return Some((Token::OpDot, input.chomp(1)));
-        }
+    #[token_kind(token = "/")]
+    OpSlash,
 
-        if peeked == ',' {
-            return Some((Token::Comma, input.chomp(1)));
-        }
+    #[token_kind(token = "==")]
+    OpDEqual,
 
-        if peeked == '(' {
-            return Some((Token::OpenP, input.chomp(1)));
-        }
-        if peeked == ')' {
-            return Some((Token::CloseP, input.chomp(1)));
-        }
-        if peeked == '{' {
-            return Some((Token::OpenC, input.chomp(1)));
-        }
-        if peeked == '}' {
-            return Some((Token::CloseC, input.chomp(1)));
-        }
-        if peeked == '[' {
-            return Some((Token::OpenB, input.chomp(1)));
-        }
-        if peeked == ']' {
-            return Some((Token::CloseB, input.chomp(1)));
-        }
+    #[token_kind(token = "=")]
+    OpAssign,
 
-        if hash > 0 {
-            let pat = format!("{:#<width$}", "\"", width = hash + 1);
-            if i.starts_with(&pat) {
-                let range = input.chomp(pat.len());
-                lexer.extra.count = 0;
-                return Some((Token::DoubleQuote, range));
-            }
-        }
+    #[token_kind(token = "(")]
+    OpenP,
 
-        if peeked == '"' {
-            return Some((Token::DoubleQuote, input.chomp(1)));
-        }
+    #[token_kind(token = ")")]
+    CloseP,
 
-        if peeked.is_ascii_alphabetic() {
-            let rest = i
-                .chars()
-                .take_while(|c| c.is_ascii_alphanumeric() || *c == '_')
-                .count();
-            return Some((Token::Identifier, input.chomp(rest)));
-        }
+    #[token_kind(token = "{", display = "`{{`")]
+    OpenC,
 
-        Some((Token::Error, input.chomp(1)))
+    #[token_kind(token = "\"", callback = "lex_dquote")]
+    DoubleQuote,
+
+    #[token_kind(token = "md", callback = "lex_mdquote")]
+    MdQuote,
+
+    #[token_kind(token = "}", display = "`}}`")]
+    CloseC,
+
+    #[token_kind(token = "[")]
+    OpenB,
+
+    #[token_kind(token = "]")]
+    CloseB,
+
+    #[token_kind(token = ",")]
+    Comma,
+
+    #[token_kind(token = ".")]
+    OpDot,
+
+    #[token_kind(regex = r"[a-zA-Z_]+[a-zA-Z_0-9]*", display = "identifier")]
+    Identifier,
+
+    #[token_kind(error)]
+    Error,
+
+}
+
+pub type Lexer<'s, T = Token> = microtree_parser::Lexer<'s, T>;
+
+fn mergeable(first: Token, other: Token) -> bool {
+    match (first, other) {
+        (Token::Error, Token::Error) => true,
+        (Token::LineEnd, Token::LineEnd) => true,
+        _ => false,
     }
 }

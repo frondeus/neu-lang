@@ -18,62 +18,70 @@ test:1234abcd in sesja:a88907fd
 [render]
 <h1>Pośród Pradawnych Drzew</h1>
 <div class="side-table"><table><tr><th class="align-right">chrono</th><td>20.06.1925</td></tr><tr><th class="align-right">desc</th><td>Sesja jednostrzałowa dla Macek II RP</td></tr><tr><th class="align-right">when</th><td>20.10.2019</td></tr></table>
-</div><p>Ala ma kota <a href="/test/1234abcd">Test</a></p>
+</div> 
+<p>Ala ma kota <a href="/test/1234abcd">Test</a></p>
 
 [parser]
-ROOT @ 0..186
-    ARTICLEITEM @ 0..186
-        TOKEN @ 0..3 = `+++`
-        TOKEN, TRIVIA @ 3..4 = ` `
-        IDENTIFIER, TOKEN @ 4..9 = `sesja`
-        TOKEN @ 9..10 = `:`
-        ARTICLEITEMID, TOKEN @ 10..18 = `a88907fd`
-        TOKEN, TRIVIA @ 18..19 = ` `
-        TOKEN @ 19..22 = `+++`
-        TOKEN, TRIVIA @ 22..23 = `\n`
-        STRUCT, VALUE @ 23..148
-            IDENTIFIER, KEY, TOKEN @ 23..28 = `title`
-            TRIVIA @ 28..29 = ` `
-            TOKEN @ 29..30 = `=`
-            TRIVIA @ 30..31 = ` `
-            STRING, VALUE @ 31..58 = `\"Po\u{15b}r\u{f3}d Pradawnych Drzew\"`
-                TOKEN @ 31..32 = `\"`
-                STRVALUE, TOKEN @ 32..57 = `Po\u{15b}r\u{f3}d Pradawnych Drzew`
-                TOKEN @ 57..58 = `\"`
-            TOKEN @ 58..59 = `\n`
-            IDENTIFIER, KEY, TOKEN @ 59..63 = `when`
-            TRIVIA @ 63..64 = ` `
-            TOKEN @ 64..65 = `=`
-            TRIVIA @ 65..66 = ` `
-            STRING, VALUE @ 66..78 = `\"20.10.2019\"`
-                TOKEN @ 66..67 = `\"`
-                STRVALUE, TOKEN @ 67..77 = `20.10.2019`
-                TOKEN @ 77..78 = `\"`
-            TOKEN @ 78..79 = `\n`
-            IDENTIFIER, KEY, TOKEN @ 79..83 = `desc`
-            TRIVIA @ 83..84 = ` `
-            TOKEN @ 84..85 = `=`
-            TRIVIA @ 85..86 = ` `
-            STRING, VALUE @ 86..125 = `\"Sesja jednostrza\u{142}owa dla Macek II RP\"`
-                TOKEN @ 86..87 = `\"`
-                STRVALUE, TOKEN @ 87..124 = `Sesja jednostrza\u{142}owa dla Macek II RP`
-                TOKEN @ 124..125 = `\"`
-            TOKEN @ 125..126 = `\n`
-            IDENTIFIER, KEY, TOKEN @ 126..132 = `chrono`
-            TRIVIA @ 132..133 = ` `
-            TOKEN @ 133..134 = `=`
-            TRIVIA @ 134..135 = ` `
-            STRING, VALUE @ 135..147 = `\"20.06.1925\"`
-                TOKEN @ 135..136 = `\"`
-                STRVALUE, TOKEN @ 136..146 = `20.06.1925`
-                TOKEN @ 146..147 = `\"`
-            TOKEN @ 147..148 = `\n`
-        TOKEN @ 148..151 = `+++`
-        ARTICLEBODY @ 151..186 = `\n\nAla ma kota [Test](test:1234abcd)`
-            MARKDOWN, MD_PARAGRAPH, MD_VALUE, VALUE @ 153..186 = `Ala ma kota [Test](test:1234abcd)`
-                MD_TEXT @ 153..165 = `Ala ma kota `
-                MD_INLINELINK, MD_LINK @ 165..186 = `[Test](test:1234abcd)`
-                    MD_LINKURL @ 172..185 = `test:1234abcd`
-                    MD_TEXT @ 166..170 = `Test`
+--- GREEN TREE ---
+Root, MainArticle, ArticleItem @ 0..186
+    ArticleHeader @ 0..148
+        token @ 0..3 = `+++`
+        token @ 3..4 = ` `
+        identifier, token @ 4..9 = `sesja`
+        token @ 9..10 = `:`
+        item_id, token @ 10..18 = `a88907fd`
+        token @ 18..19 = ` `
+        token @ 19..22 = `+++`
+        token @ 22..23 = `\n`
+        ArticleHeaderValues, Value, Strukt @ 23..148
+            StruktPair @ 23..58
+                Key, identifier, token @ 23..29 = `title` ; trailing: ` `
+                token @ 29..31 = `=` ; trailing: ` `
+                Value, String @ 31..58
+                    token @ 31..32 = `"`
+                    InnerString @ 32..57
+                        InnerStringPart, token @ 32..57 = `Pośród Pradawnych Drzew`
+                    token @ 57..58 = `"`
+            token @ 58..59 = `\n`
+            StruktPair @ 59..78
+                Key, identifier, token @ 59..64 = `when` ; trailing: ` `
+                token @ 64..66 = `=` ; trailing: ` `
+                Value, String @ 66..78
+                    token @ 66..67 = `"`
+                    InnerString @ 67..77
+                        InnerStringPart, token @ 67..77 = `20.10.2019`
+                    token @ 77..78 = `"`
+            token @ 78..79 = `\n`
+            StruktPair @ 79..125
+                Key, identifier, token @ 79..84 = `desc` ; trailing: ` `
+                token @ 84..86 = `=` ; trailing: ` `
+                Value, String @ 86..125
+                    token @ 86..87 = `"`
+                    InnerString @ 87..124
+                        InnerStringPart, token @ 87..124 = `Sesja jednostrzałowa dla Macek II RP`
+                    token @ 124..125 = `"`
+            token @ 125..126 = `\n`
+            StruktPair @ 126..147
+                Key, identifier, token @ 126..133 = `chrono` ; trailing: ` `
+                token @ 133..135 = `=` ; trailing: ` `
+                Value, String @ 135..147
+                    token @ 135..136 = `"`
+                    InnerString @ 136..146
+                        InnerStringPart, token @ 136..146 = `20.06.1925`
+                    token @ 146..147 = `"`
+            token @ 147..148 = `\n`
+    ArticleBody @ 148..186
+        token @ 148..151 = `+++`
+        Markdown @ 151..186
+            token @ 151..153 = `\n\n`
+            MdValue, MdParagraph @ 153..186
+                MdValue, MdText @ 153..165 = `Ala ma kota `
+                MdValue, MdLink, MdInlineLink @ 165..186
+                    token @ 165..166 = `[`
+                    MdValue, MdText @ 166..170 = `Test`
+                    token @ 170..172 = `](`
+                    MdLinkUrl @ 172..185 = `test:1234abcd`
+                    token @ 185..186 = `)`
+--- END ---
 
 

@@ -4,15 +4,19 @@ bar"
 ```
 
 [parser]
-ROOT @ 0..13 = `md\"*foo*\nbar\"`
-    MARKDOWN, VALUE @ 0..13 = `md\"*foo*\nbar\"`
-        TOKEN @ 0..3 = `md\"`
-        MD_PARAGRAPH, MD_VALUE @ 3..12 = `*foo*\nbar`
-            MD_EMPHASIS @ 3..8 = `*foo*`
-                MD_TEXT @ 4..7 = `foo`
-            MD_SOFTBREAK @ 8..9 = `\n`
-            MD_TEXT @ 9..12 = `bar`
-        TOKEN @ 12..13 = `\"`
+--- GREEN TREE ---
+Root, Value, MdString @ 0..13
+    token @ 0..3 = `md"`
+    Markdown @ 3..12
+        MdValue, MdParagraph @ 3..12
+            MdValue, MdEmphasis @ 3..8
+                token @ 3..4 = `*`
+                MdValue, MdText @ 4..7 = `foo`
+                token @ 7..8 = `*`
+            MdValue, MdSoftBreak @ 8..9 = `\n`
+            MdValue, MdText @ 9..12 = `bar`
+    token @ 12..13 = `"`
+--- END ---
 
 
 [eval]

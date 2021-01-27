@@ -2,6 +2,7 @@
 members = [
     "crates/utils/*",
     "crates/lang/*",
-    "crates/ide/*",
-    "crates/bins/*"
+    "crates/bins/*",
+    #"crates/ide/*",
+    "xtask"
 ]

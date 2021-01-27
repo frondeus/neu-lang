@@ -1,0 +1,24 @@
+[package]
+name = "microtree-parser"
+version = "0.1.0"
+authors = ["Wojciech Polak <frondeus@gmail.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+#[features]
+#green = ["microtree"]
+
+[dependencies]
+#logos = "0.11.4"
+smol_str = "0.1.17"
+text-size = "1.0.0"
+itertools = "0.10.0"
+
+microtree = { path = "../microtree" }
+microtree-derive = { path = "../microtree-derive" }
+
+[dev-dependencies]
+diff_assert = { git = "https://github.com/frondeus/diff-assert.git" }
+lazy_static = "1.4.0"
+regex = "1.4.2"
+unindent = "0.1.7"

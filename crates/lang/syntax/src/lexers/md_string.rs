@@ -1,40 +1,38 @@
 use crate::HashCount;
-use derive_more::Display;
-use neu_parser::{TextRange, TokenKind};
+use microtree_parser::{TextSize, Source, TokenKind, CallbackResult};
 
-#[derive(Debug, PartialEq, Clone, Copy, Display)]
-pub enum Token {
-    #[display(fmt = "text")]
-    Text,
-
-    #[display(fmt = "`\"`")]
-    Close,
+fn lex_dquote(_bumped: TextSize, source: &mut Source<'_>, extras: &mut HashCount) -> bool {
+    if extras.count > 0 {
+        let hash_count =extras.count;
+        let hash = "#".repeat(hash_count);
+        if source.as_ref().starts_with(&hash) {
+            source.bump(hash_count);
+            true
+        }
+        else {
+            false
+        }
+    } else {
+        true
+    }
 }
 
-pub type Lexer<T = Token> = neu_parser::Lexer<T>;
 
-impl TokenKind for Token {
-    type Extra = HashCount;
+#[derive(Debug, PartialEq, Clone, Copy, TokenKind)]
+#[token_kind(extras = "HashCount", mergeable = "mergeable")]
+pub enum Token {
+    #[token_kind(token = r#"""#, callback = "lex_dquote")]
+    Close,
 
-    fn is_mergeable(self, other: Self) -> bool {
-        match (self, other) {
-            (Self::Text, Self::Text) => true,
-            _ => false,
-        }
-    }
+    #[token_kind(error, display = "text")]
+    Text,
+}
 
-    fn lex(lexer: &mut Lexer<Self>) -> Option<(Self, TextRange)> {
-        let hash = lexer.extra.count;
-        let input = lexer.input_mut();
-        let i = input.as_ref();
-        if i.is_empty() {
-            return None;
-        }
-        let pat = format!("\"{}", "#".repeat(hash));
-        if i.starts_with(&pat) {
-            return Some((Token::Close, input.chomp(pat.len())));
-        }
+pub type Lexer<'s, T = Token> = microtree_parser::Lexer<'s, T>;
 
-        Some((Token::Text, input.chomp(1)))
+fn mergeable(first: Token, other: Token) -> bool {
+    match (first, other) {
+        (Token::Text, Token::Text) => true,
+        _ => false,
     }
 }

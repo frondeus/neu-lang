@@ -7,17 +7,26 @@ md"
 ```
 
 [parser]
-ROOT @ 0..30 = `md\"\n* Apple\n* Orange\n* Grape\n\"`
-    MARKDOWN, VALUE @ 0..30 = `md\"\n* Apple\n* Orange\n* Grape\n\"`
-        TOKEN @ 0..3 = `md\"`
-        MD_UNORDEREDLIST, MD_VALUE @ 4..29 = `* Apple\n* Orange\n* Grape\n`
-            MD_LISTITEM @ 4..12 = `* Apple\n`
-                MD_TEXT @ 6..11 = `Apple`
-            MD_LISTITEM @ 12..21 = `* Orange\n`
-                MD_TEXT @ 14..20 = `Orange`
-            MD_LISTITEM @ 21..29 = `* Grape\n`
-                MD_TEXT @ 23..28 = `Grape`
-        TOKEN @ 29..30 = `\"`
+--- GREEN TREE ---
+Root, Value, MdString @ 0..30
+    token @ 0..3 = `md"`
+    Markdown @ 3..29
+        token @ 3..4 = `\n`
+        MdValue, MdUnorderedList @ 4..29
+            MdValue, MdListItem @ 4..12
+                token @ 4..6 = `* `
+                MdValue, MdText @ 6..11 = `Apple`
+                token @ 11..12 = `\n`
+            MdValue, MdListItem @ 12..21
+                token @ 12..14 = `* `
+                MdValue, MdText @ 14..20 = `Orange`
+                token @ 20..21 = `\n`
+            MdValue, MdListItem @ 21..29
+                token @ 21..23 = `* `
+                MdValue, MdText @ 23..28 = `Grape`
+                token @ 28..29 = `\n`
+    token @ 29..30 = `"`
+--- END ---
 
 
 [eval]

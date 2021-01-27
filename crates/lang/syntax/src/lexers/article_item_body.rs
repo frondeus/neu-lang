@@ -1,60 +1,34 @@
-use derive_more::Display;
-use neu_parser::{TextRange, TokenKind};
+use microtree_parser::{TokenKind, Source};
 
-#[derive(Display, Debug, PartialEq, Clone, Copy)]
+#[derive(Debug, PartialEq, Clone, Copy, TokenKind)]
+#[token_kind(mergeable = "mergeable")]
 pub enum Token {
-    #[display(fmt = "text")]
-    Text,
+    #[token_kind(token = "+++")]
+    ThreePlus,
 
-    #[display(fmt = "`++ end ++`")]
+    #[token_kind(token = "++ end ++")]
     PlusPlusEnd,
 
-    #[display(fmt = "`++`")]
+    #[token_kind(token = "++")]
     PlusPlus,
 
-    #[display(fmt = "`[+`")]
+    #[token_kind(token = "[+")]
     OpenBl,
 
-    #[display(fmt = "`+]`")]
+    #[token_kind(token = "+]")]
     CloseBl,
+
+    #[token_kind(error, display = "text")]
+    Text,
 }
 
-pub type Lexer<T = Token> = neu_parser::Lexer<T>;
+pub type Lexer<'s, T = Token> = microtree_parser::Lexer<'s, T>;
 
-impl TokenKind for Token {
-    type Extra = ();
-
-    fn is_mergeable(self, other: Self) -> bool {
-        match (self, other) {
-            (Self::Text, Self::Text) => true,
-            _ => false,
-        }
-    }
-
-    fn lex(lexer: &mut Lexer<Self>) -> Option<(Self, TextRange)> {
-        let input = lexer.input_mut();
-
-        let i = input.as_ref();
-        if i.is_empty() {
-            return None;
-        }
-
-        if i.starts_with("++ end ++") {
-            return Some((Token::PlusPlusEnd, input.chomp(9)));
-        }
-
-        if i.starts_with("++") {
-            return Some((Token::PlusPlus, input.chomp(2)));
-        }
-
-        if i.starts_with("[+") {
-            return Some((Token::OpenBl, input.chomp(2)));
-        }
-
-        if i.starts_with("+]") {
-            return Some((Token::CloseBl, input.chomp(2)));
-        }
-
-        Some((Token::Text, input.chomp(1)))
+fn mergeable(first: Token, other: Token) -> bool {
+    match (first, other) {
+        (Token::Text, Token::Text) => true,
+        (Token::Text, Token::CloseBl) => true,
+        (Token::Text, Token::ThreePlus) => true,
+        _ => false,
     }
 }

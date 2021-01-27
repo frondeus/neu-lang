@@ -3,7 +3,7 @@
 ```
 
 [errors]
-test.neu | N0 | Expected one of number, `true`, `false`, `-`, `!`, `"`, `(`, `{`, `[`, identifier but found `???`
+test.neu | 0..3 | Expected one of: `(`, number, `true`, `false`, `-`, `!`, `.`, `md`, `"`, `{`, `[`, identifier but found error
 
 [lexer]
 [
@@ -11,8 +11,9 @@ test.neu | N0 | Expected one of number, `true`, `false`, `-`, `!`, `"`, `(`, `{`
 ]
 
 [parser]
-ROOT @ 0..3 = `???`
-    ERROR, VALUE @ 0..3 = `???`
+--- GREEN TREE ---
+Root, Value, error @ 0..3 = `???`
+--- END ---
 
 
 [eval]

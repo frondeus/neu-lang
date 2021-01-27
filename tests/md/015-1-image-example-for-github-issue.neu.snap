@@ -3,14 +3,20 @@ md#"![alt text](https://github.com/icon48.png "Logo Title Text 1")"#
 ```
 
 [parser]
-ROOT @ 0..68 = `md#\"![alt text](https://github.com/icon48.png \"Logo Title Text 1\")\"#`
-    MARKDOWN, VALUE @ 0..68 = `md#\"![alt text](https://github.com/icon48.png \"Logo Title Text 1\")\"#`
-        TOKEN @ 0..4 = `md#\"`
-        MD_IMAGE, MD_INLINEIMAGE, MD_PARAGRAPH, MD_VALUE @ 4..66 = `![alt text](https://github.com/icon48.png \"Logo Title Text 1\")`
-            MD_IMAGESRC @ 16..45 = `https://github.com/icon48.png`
-            MD_IMAGETITLE @ 4..66 = `![alt text](https://github.com/icon48.png \"Logo Title Text 1\")`
-            MD_TEXT @ 6..14 = `alt text`
-        TOKEN @ 66..68 = `\"#`
+--- GREEN TREE ---
+Root, Value, MdString @ 0..85
+    token @ 0..4 = `md#"`
+    Markdown @ 4..83
+        MdValue, MdParagraph @ 4..83
+            MdValue, MdImage, MdInlineImage @ 4..83
+                token @ 4..6 = `![`
+                MdValue, MdText @ 6..14 = `alt text`
+                token @ 14..16 = `](`
+                MdImageSrc @ 16..45 = `https://github.com/icon48.png`
+                MdImageTitle @ 45..62 = `Logo Title Text 1`
+                token @ 62..83 = ` "Logo Title Text 1")`
+    token @ 83..85 = `"#`
+--- END ---
 
 
 [eval]

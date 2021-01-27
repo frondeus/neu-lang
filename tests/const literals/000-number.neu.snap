@@ -8,8 +8,9 @@
 ]
 
 [parser]
-ROOT @ 0..1 = `4`
-    NUMBER, TOKEN, VALUE @ 0..1 = `4`
+--- GREEN TREE ---
+Root, Value, number, token @ 0..1 = `4`
+--- END ---
 
 
 [eval]

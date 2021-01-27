@@ -1,53 +1,45 @@
 use crate::HashCount;
-use derive_more::Display;
-use neu_parser::{Lexer, TextRange, TokenKind};
+use microtree_parser::{TokenKind, Source, TextSize, CallbackResult};
 
-#[derive(Debug, PartialEq, Clone, Copy, Display)]
+fn lex_dquote(_bumped: TextSize, source: &mut Source<'_>, extras: &mut HashCount) -> bool {
+    if extras.count > 0 {
+        let hash_count =extras.count;
+        let hash = "#".repeat(hash_count);
+        if source.as_ref().starts_with(&hash) {
+            source.bump(hash_count);
+            true
+        }
+        else {
+            false
+        }
+    } else {
+        true
+    }
+}
+
+
+#[derive(Debug, PartialEq, Clone, Copy, TokenKind)]
+#[token_kind(extras = "HashCount", mergeable = "mergeable")]
 pub enum Token {
-    #[display(fmt = "text")]
+    #[token_kind(error, display = "text")]
     Text,
 
-    #[display(fmt = "`${{`")]
+    #[token_kind(token = "${", display = "`${{`")]
     OpenI,
 
-    #[display(fmt = "`}}`")]
+    #[token_kind(token = "}", display = "`}}`")]
     CloseI,
 
-    #[display(fmt = "`\"`")]
+    #[token_kind(token = "\"", callback = "lex_dquote")]
     Close,
 }
 
-pub type StringLexer = Lexer<Token>;
+pub type Lexer<'s> = microtree_parser::Lexer<'s, Token>;
 
-impl TokenKind for Token {
-    type Extra = HashCount;
-
-    fn is_mergeable(self, other: Self) -> bool {
-        match (self, other) {
-            (Self::Text, Self::Text) => true,
-            (Self::Text, Self::CloseI) => true,
-            _ => false,
-        }
-    }
-
-    fn lex(lexer: &mut Lexer<Self>) -> Option<(Self, TextRange)> {
-        let input = lexer.input_mut();
-        let i = input.as_ref();
-        if i.is_empty() {
-            return None;
-        }
-        if i.starts_with('"') {
-            return Some((Token::Close, input.chomp(1)));
-        }
-
-        if i.starts_with("${") {
-            return Some((Token::OpenI, input.chomp(2)));
-        }
-
-        if i.starts_with('}') {
-            return Some((Token::CloseI, input.chomp(1)));
-        }
-
-        Some((Token::Text, input.chomp(1)))
+fn mergeable(first: Token, other: Token) -> bool {
+    match (first, other) {
+        (Token::Text, Token::Text) => true,
+        (Token::Text, Token::CloseI) => true,
+        _ => false,
     }
 }

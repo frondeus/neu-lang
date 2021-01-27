@@ -8,18 +8,27 @@ defg
 ```
 
 [parser]
-ROOT @ 0..28 = `md\"\n# foo\nabcd\n## bar\ndefg\n\"`
-    MARKDOWN, VALUE @ 0..28 = `md\"\n# foo\nabcd\n## bar\ndefg\n\"`
-        TOKEN @ 0..3 = `md\"`
-        MD_H1, MD_VALUE @ 4..10 = `# foo\n`
-            MD_TEXT @ 6..9 = `foo`
-        MD_PARAGRAPH, MD_VALUE @ 10..15 = `abcd\n`
-            MD_TEXT @ 10..14 = `abcd`
-        MD_H2, MD_VALUE @ 15..22 = `## bar\n`
-            MD_TEXT @ 18..21 = `bar`
-        MD_PARAGRAPH, MD_VALUE @ 22..27 = `defg\n`
-            MD_TEXT @ 22..26 = `defg`
-        TOKEN @ 27..28 = `\"`
+--- GREEN TREE ---
+Root, Value, MdString @ 0..28
+    token @ 0..3 = `md"`
+    Markdown @ 3..27
+        token @ 3..4 = `\n`
+        MdValue, MdH1 @ 4..10
+            token @ 4..6 = `# `
+            MdValue, MdText @ 6..9 = `foo`
+            token @ 9..10 = `\n`
+        MdValue, MdParagraph @ 10..15
+            MdValue, MdText @ 10..14 = `abcd`
+            token @ 14..15 = `\n`
+        MdValue, MdH2 @ 15..22
+            token @ 15..18 = `## `
+            MdValue, MdText @ 18..21 = `bar`
+            token @ 21..22 = `\n`
+        MdValue, MdParagraph @ 22..27
+            MdValue, MdText @ 22..26 = `defg`
+            token @ 26..27 = `\n`
+    token @ 27..28 = `"`
+--- END ---
 
 
 [eval]
