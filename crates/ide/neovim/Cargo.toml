@@ -16,7 +16,7 @@ neu-db = { path = "../../lang/db" }
 neu-canceled = { path = "../../utils/canceled" }
 
 nvim-rs = { git = "https://github.com/KillTheMule/nvim-rs.git", branch = "master", features = ["use_tokio"] }
-tokio = "0.2.17"
+tokio = "0.3.7"
 async-trait = "0.1.30"
 rmpv = "0.4.4"
 anyhow = "1.0.28"
