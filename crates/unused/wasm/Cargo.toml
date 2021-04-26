@@ -25,7 +25,7 @@ neu-parser = { path = "../../utils/parser" }
 neu-syntax = { path = "../../lang/syntax" }
 neu-eval = { path = "../../lang/eval" }
 
-derive_more = "0.99.5"
+derive_more = "0.99.13"
 # The `wasm-bindgen` crate provides the bare minimum functionality needed
 # to interact with JavaScript.
 wasm-bindgen = "0.2.45"
