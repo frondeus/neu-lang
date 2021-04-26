@@ -38,7 +38,7 @@ wee_alloc = { version = "0.4.2", optional = true }
 # The `web-sys` crate allows you to interact with the various browser APIs,
 # like the DOM.
 [dependencies.web-sys]
-version = "0.3.22"
+version = "0.3.50"
 features = ["console"]
 
 # The `console_error_panic_hook` crate provides better debugging of panics by
