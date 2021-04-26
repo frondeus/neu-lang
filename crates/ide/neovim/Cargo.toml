@@ -17,7 +17,7 @@ neu-canceled = { path = "../../utils/canceled" }
 
 nvim-rs = { git = "https://github.com/KillTheMule/nvim-rs.git", branch = "master", features = ["use_tokio"] }
 tokio = "0.2.17"
-async-trait = "0.1.30"
+async-trait = "0.1.50"
 rmpv = "0.4.4"
 anyhow = "1.0.28"
 itertools = "0.9.0"
