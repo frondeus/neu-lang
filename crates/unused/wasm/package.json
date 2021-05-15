@@ -16,7 +16,7 @@
     "rimraf": "3.0.2"
   },
   "dependencies": {
-    "css-loader": "3.5.3",
+    "css-loader": "5.0.0",
     "file-loader": "6.0.0",
     "monaco-editor": "0.20.0",
     "style-loader": "1.2.1"
