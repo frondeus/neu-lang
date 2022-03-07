@@ -14,7 +14,7 @@ neu-analyze = { path = "../analyze" }
 neu-canceled = { path = "../../utils/canceled" }
 
 itertools = "0.9.0"
-derive_more = "0.99.5"
+derive_more = "0.99.17"
 salsa = "0.15.0"
 log = "0.4.8"
 
