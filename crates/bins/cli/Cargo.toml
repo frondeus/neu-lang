@@ -27,7 +27,7 @@ thiserror = "1.0.20"
 
 warp = "0.2.3"
 futures = "0.3.5"
-tokio = { version = "0.2.21", features = ["full"] }
+tokio = { version = "1.18.5", features = ["full"] }
 
 [dev-dependencies]
 assert_fs = "1.0.0"
